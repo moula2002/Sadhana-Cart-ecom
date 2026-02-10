@@ -1,0 +1,465 @@
+/* CSS Variables for Theming */
+:root {
+  /* Light Theme (Default) */
+  --auth-bg: #f1f3f6;
+  --auth-box-bg: #ffffff;
+  --auth-text: #000000;
+  --auth-text-secondary: #878787;
+  --auth-text-muted: #666666;
+  --auth-border: #e0e0e0;
+  --auth-primary: #2874f0;
+  --auth-accent: #fb641b;
+  --auth-accent-hover: #f4511e;
+  --auth-success: #28a745;
+  --auth-danger: #dc3545;
+  --auth-input-bg: #ffffff;
+  --auth-input-text: #000000;
+  --auth-input-placeholder: #878787;
+  --auth-shadow: rgba(0, 0, 0, 0.1);
+  --auth-left-panel-bg: #2874f0;
+  --auth-left-panel-text: #ffffff;
+  --auth-otp-btn-bg: #ffffff;
+  --auth-otp-btn-text: #2874f0;
+  --auth-otp-btn-border: #e0e0e0;
+  --auth-google-btn-bg: #ffffff;
+  --auth-google-btn-text: #000000;
+  --auth-google-btn-border: #e0e0e0;
+  --auth-google-btn-hover-bg: #f8f8f8;
+  --auth-referral-bg: linear-gradient(45deg, #28a745, #20c997);
+  --auth-referral-text: #ffffff;
+  --auth-alert-bg: #dc3545;
+  --auth-alert-text: #ffffff;
+}
+
+/* Dark Theme */
+[data-theme="dark"] {
+  --auth-bg: #121212;
+  --auth-box-bg: #1e1e1e;
+  --auth-text: #ffffff;
+  --auth-text-secondary: #b0b0b0;
+  --auth-text-muted: #888888;
+  --auth-border: #333333;
+  --auth-primary: #4a90e2;
+  --auth-accent: #ff7b42;
+  --auth-accent-hover: #ff6b2e;
+  --auth-success: #4caf50;
+  --auth-danger: #f44336;
+  --auth-input-bg: #2d2d2d;
+  --auth-input-text: #ffffff;
+  --auth-input-placeholder: #999999;
+  --auth-shadow: rgba(0, 0, 0, 0.3);
+  --auth-left-panel-bg: #1a56db;
+  --auth-left-panel-text: #ffffff;
+  --auth-otp-btn-bg: #2d2d2d;
+  --auth-otp-btn-text: #4a90e2;
+  --auth-otp-btn-border: #333333;
+  --auth-google-btn-bg: #2d2d2d;
+  --auth-google-btn-text: #ffffff;
+  --auth-google-btn-border: #333333;
+  --auth-google-btn-hover-bg: #363636;
+  --auth-referral-bg: linear-gradient(45deg, #2e7d32, #1b5e20);
+  --auth-referral-text: #ffffff;
+  --auth-alert-bg: #f44336;
+  --auth-alert-text: #ffffff;
+}
+
+/* Container Wrapper */
+.flipkart-auth-wrapper {
+  min-height: 100vh;
+  background-color: var(--auth-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1050;
+}
+
+/* Main Box - REDUCED SIZE */
+.auth-box {
+  width: 750px;
+  max-width: 100%;
+  min-height: 480px;
+  background: var(--auth-box-bg);
+  display: flex;
+  box-shadow: 0 4px 20px var(--auth-shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Left Branding Panel */
+.auth-left {
+  background-color: var(--auth-left-panel-bg);
+  color: var(--auth-left-panel-text);
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 40%;
+}
+
+.auth-left h2 {
+  font-weight: 700;
+  margin-bottom: 15px;
+  font-size: 24px;
+  color: var(--auth-left-panel-text);
+}
+
+.auth-left p {
+  font-size: 1rem;
+  opacity: 0.9;
+  line-height: 1.4;
+  margin-bottom: 20px;
+  color: var(--auth-left-panel-text);
+}
+
+.auth-image {
+  width: 100%;
+  max-width: 250px;
+  margin: 0 auto;
+  display: block;
+  filter: brightness(1.1);
+}
+
+/* Right Form Panel */
+.auth-right {
+  padding: 30px;
+  background: var(--auth-box-bg);
+  position: relative;
+  width: 60%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Close Button */
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 22px;
+  color: var(--auth-text-secondary);
+  text-decoration: none;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 5px 10px;
+  z-index: 10;
+}
+
+.close-btn:hover {
+  color: var(--auth-primary);
+}
+
+/* Inputs */
+.custom-input {
+  background-color: var(--auth-input-bg) !important;
+  color: var(--auth-input-text) !important;
+  border: none !important;
+  border-bottom: 1px solid var(--auth-border) !important;
+  border-radius: 0 !important;
+  padding: 10px 0 !important;
+  font-size: 14px !important;
+  transition: border-color 0.3s !important;
+  box-shadow: none !important;
+}
+
+.custom-input:focus {
+  border-bottom: 1px solid var(--auth-primary) !important;
+  box-shadow: none !important;
+  background-color: var(--auth-input-bg) !important;
+  color: var(--auth-input-text) !important;
+}
+
+.custom-input::placeholder {
+  color: var(--auth-input-placeholder);
+  font-size: 14px;
+}
+
+/* Buttons */
+.auth-btn {
+  background-color: var(--auth-accent) !important;
+  border: none !important;
+  border-radius: 2px !important;
+  padding: 10px !important;
+  font-weight: bold !important;
+  font-size: 14px !important;
+  color: white !important;
+  box-shadow: 0 1px 2px 0 var(--auth-shadow);
+  transition: all 0.3s ease;
+}
+
+.auth-btn:hover {
+  background-color: var(--auth-accent-hover) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px 0 var(--auth-shadow);
+}
+
+.auth-btn:disabled {
+  background-color: #ff9f6d !important;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.otp-btn {
+  background: var(--auth-otp-btn-bg) !important;
+  color: var(--auth-otp-btn-text) !important;
+  border-radius: 2px !important;
+  padding: 10px !important;
+  font-weight: bold !important;
+  border: 1px solid var(--auth-otp-btn-border) !important;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.otp-btn:hover {
+  background-color: var(--auth-google-btn-hover-bg) !important;
+  box-shadow: 0 1px 2px 0 var(--auth-shadow);
+}
+
+.otp-btn:disabled {
+  background-color: var(--auth-google-btn-hover-bg) !important;
+  color: var(--auth-text-secondary) !important;
+  cursor: not-allowed;
+  border-color: var(--auth-border) !important;
+}
+
+.google-btn {
+  border-radius: 2px !important;
+  padding: 9px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  border: 1px solid var(--auth-google-btn-border) !important;
+  background-color: var(--auth-google-btn-bg) !important;
+  color: var(--auth-google-btn-text) !important;
+  transition: all 0.3s ease;
+}
+
+.google-btn:hover {
+  background-color: var(--auth-google-btn-hover-bg) !important;
+  border-color: var(--auth-primary) !important;
+}
+
+.google-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.change-number-btn {
+  color: var(--auth-text) !important;
+  border-color: var(--auth-border) !important;
+  background-color: var(--auth-input-bg) !important;
+}
+
+.change-number-btn:hover {
+  background-color: var(--auth-google-btn-hover-bg) !important;
+}
+
+/* Form spacing adjustments */
+.form-group {
+  margin-bottom: 15px !important;
+}
+
+/* Password Toggle Icon */
+.pass-toggle {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: var(--auth-text-secondary);
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+/* Error Alert */
+.alert-custom {
+  border-radius: 2px !important;
+  border: none !important;
+  font-size: 13px;
+  padding: 8px 12px;
+  margin-bottom: 15px;
+  background-color: var(--auth-alert-bg) !important;
+  color: var(--auth-alert-text) !important;
+}
+
+.alert-dismissible .btn-close {
+  padding: 0.75rem;
+  filter: invert(1);
+}
+
+/* "OR" separator */
+.separator-or {
+  font-size: 14px;
+  margin: 15px 0;
+  color: var(--auth-text-secondary) !important;
+  font-weight: bold;
+}
+
+/* Toggle link */
+.toggle-mode-btn {
+  color: var(--auth-primary) !important;
+  font-size: 14px;
+  font-weight: bold;
+  text-decoration: none !important;
+}
+
+.toggle-mode-btn:hover {
+  color: var(--auth-accent) !important;
+}
+
+/* Terms text */
+.terms-text {
+  font-size: 12px;
+  margin-top: 15px;
+  color: var(--auth-text-muted) !important;
+}
+
+/* Referral Benefit */
+.referral-benefit {
+  background: var(--auth-referral-bg);
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+  color: var(--auth-referral-text);
+  font-size: 14px;
+}
+
+.referral-benefit small {
+  color: var(--auth-referral-text) !important;
+}
+
+.referral-success {
+  color: var(--auth-success) !important;
+  font-size: 13px;
+  margin-top: 5px;
+  display: block;
+}
+
+/* All text elements */
+.auth-right h1,
+.auth-right h2,
+.auth-right h3,
+.auth-right h4,
+.auth-right h5,
+.auth-right h6,
+.auth-right p,
+.auth-right span,
+.auth-right div,
+.auth-right label {
+  color: var(--auth-text);
+}
+
+/* Text colors for specific elements */
+.text-muted {
+  color: var(--auth-text-muted) !important;
+}
+
+.text-success {
+  color: var(--auth-success) !important;
+}
+
+.fw-bold {
+  color: var(--auth-text);
+}
+
+/* Toast Styling */
+.toast {
+  background-color: rgba(0, 0, 0, 0.9) !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .flipkart-auth-wrapper {
+    padding: 10px;
+    align-items: flex-start;
+  }
+
+  .auth-left {
+    display: none;
+  }
+  
+  .auth-right {
+    width: 100%;
+    padding: 25px 20px;
+  }
+  
+  .auth-box {
+    width: 100%;
+    min-height: auto;
+    margin-top: 20px;
+    max-width: 420px;
+  }
+  
+  .close-btn {
+    top: 5px;
+    right: 5px;
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-right {
+    padding: 20px 15px;
+  }
+  
+  .auth-btn, .otp-btn {
+    padding: 9px !important;
+  }
+  
+  .auth-left h2 {
+    font-size: 22px;
+  }
+}
+
+/* Animation for form switching */
+.form-switch-enter {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+.form-switch-enter-active {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 300ms, transform 300ms;
+}
+
+.form-switch-exit {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.form-switch-exit-active {
+  opacity: 0;
+  transform: translateX(-20px);
+  transition: opacity 300ms, transform 300ms;
+}
+
+/* CSS Variables for Theming - Place at the TOP of LoginPage.css */
+:root {
+  /* Light Theme (Default) */
+  --auth-bg: #f1f3f6;
+  --auth-box-bg: #ffffff;
+  --auth-text: #000000;
+  --auth-text-secondary: #878787;
+  /* ... all other variables ... */
+}
+
+/* Dark Theme */
+[data-theme="dark"] {
+  --auth-bg: #121212;
+  --auth-box-bg: #1e1e1e;
+  --auth-text: #ffffff;
+  --auth-text-secondary: #b0b0b0;
+  /* ... all other variables ... */
+}
+
+/* Rest of your CSS... */

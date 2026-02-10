@@ -1,0 +1,270 @@
+/* HomeMensSection.css - Dark Mode Styles for Mens Section */
+
+/* Mens section specific dark mode styles */
+.dark-theme .mens-section-container,
+[data-bs-theme="dark"] .mens-section-container {
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.dark-theme .mens-section-title,
+[data-bs-theme="dark"] .mens-section-title {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .mens-section-title span,
+[data-bs-theme="dark"] .mens-section-title span {
+  color: var(--accent-color) !important;
+}
+
+.dark-theme .mens-card,
+[data-bs-theme="dark"] .mens-card {
+  background-color: var(--card-bg) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: 0 4px 12px var(--shadow-color) !important;
+}
+
+.dark-theme .mens-card:hover,
+[data-bs-theme="dark"] .mens-card:hover {
+  border-color: var(--accent-color) !important;
+  box-shadow: 0 8px 20px var(--shadow-color) !important;
+}
+
+.dark-theme .mens-card-title,
+[data-bs-theme="dark"] .mens-card-title {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .mens-card .card-text,
+[data-bs-theme="dark"] .mens-card .card-text {
+  color: var(--text-secondary) !important;
+}
+
+.dark-theme .mens-price,
+[data-bs-theme="dark"] .mens-price {
+  color: var(--accent-color) !important;
+}
+
+.dark-theme .mens-original-price,
+[data-bs-theme="dark"] .mens-original-price {
+  color: var(--text-secondary) !important;
+}
+
+.dark-theme .mens-brand-text,
+[data-bs-theme="dark"] .mens-brand-text {
+  color: var(--accent-color) !important;
+  opacity: 0.9;
+}
+
+/* Button styles for dark mode */
+.dark-theme .mens-view-deal-btn,
+[data-bs-theme="dark"] .mens-view-deal-btn {
+  background-color: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+  color: white !important;
+}
+
+.dark-theme .mens-view-deal-btn:hover,
+[data-bs-theme="dark"] .mens-view-deal-btn:hover {
+  background-color: var(--text-primary) !important;
+  border-color: var(--text-primary) !important;
+  color: var(--bg-primary) !important;
+}
+
+.dark-theme .mens-explore-btn,
+[data-bs-theme="dark"] .mens-explore-btn {
+  background-color: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+  color: white !important;
+}
+
+.dark-theme .mens-explore-btn:hover,
+[data-bs-theme="dark"] .mens-explore-btn:hover {
+  background-color: white !important;
+  border-color: white !important;
+  color: var(--accent-color) !important;
+}
+
+/* Image container in dark mode */
+.dark-theme .mens-card .image-container,
+[data-bs-theme="dark"] .mens-card .image-container {
+  background-color: var(--bg-tertiary) !important;
+}
+
+/* Discount badge in dark mode */
+.dark-theme .mens-discount-badge,
+[data-bs-theme="dark"] .mens-discount-badge {
+  background-color: var(--accent-color) !important;
+  color: white !important;
+}
+
+/* Peach glow animation */
+@keyframes peachGlow {
+  0%, 100% { box-shadow: 0 0 5px rgba(255, 140, 105, 0.5); }
+  50% { box-shadow: 0 0 20px rgba(255, 140, 105, 0.8); }
+}
+
+.mens-card {
+  animation: peachGlow 3s ease-in-out infinite;
+}
+
+/* Peach shimmer animation */
+@keyframes peachShimmer {
+  0% { background-position: -100px 0; }
+  100% { background-position: 100px 0; }
+}
+
+.mens-card:hover {
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 140, 105, 0.05) 50%,
+    transparent 100%
+  );
+  background-size: 200px 100%;
+  animation: peachShimmer 1.5s infinite linear;
+}
+
+/* Card hover effects */
+.mens-card {
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+              box-shadow 0.4s ease !important;
+}
+
+.mens-card:hover {
+  transform: translateY(-12px) !important;
+}
+
+.mens-card:hover img {
+  transform: scale(1.08) !important;
+}
+
+/* Button transitions */
+.mens-view-deal-btn {
+  transition: all 0.3s ease !important;
+}
+
+.mens-explore-btn {
+  transition: all 0.3s ease-in-out !important;
+}
+
+/* Watermark styling */
+.peach-watermark {
+  position: absolute;
+  bottom: -30px;
+  left: -20px;
+  font-size: 12rem;
+  font-weight: 900;
+  color: rgba(255, 140, 105, 0.03);
+  user-select: none;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.dark-theme .peach-watermark,
+[data-bs-theme="dark"] .peach-watermark {
+  color: rgba(255, 157, 128, 0.05);
+  opacity: 0.9;
+}
+
+/* Animation for section entrance */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mens-section-container {
+  animation: fadeInUp 0.8s ease-out;
+}
+
+/* Mobile optimizations */
+@media (max-width: 576px) {
+  .mens-card:hover {
+    transform: translateY(-8px) !important;
+  }
+  
+  .mens-card img {
+    max-height: 90% !important;
+  }
+  
+  .peach-watermark {
+    font-size: 8rem;
+    bottom: -20px;
+    left: -15px;
+  }
+}
+
+/* Tablet optimizations */
+@media (max-width: 768px) {
+  .mens-card {
+    margin-bottom: 1rem;
+  }
+  
+  .peach-watermark {
+    font-size: 10rem;
+  }
+}
+
+/* Smooth transitions */
+.mens-card,
+.mens-card *,
+.mens-section-container,
+.mens-section-container * {
+  transition: background-color 0.3s ease, 
+              color 0.3s ease, 
+              border-color 0.3s ease,
+              box-shadow 0.3s ease,
+              transform 0.3s ease !important;
+}
+
+/* Mens-specific color overrides */
+:root {
+  --mens-accent: #FF8C69;
+  --mens-peach: #FFDAB9;
+  --mens-light: #FFFAF5;
+}
+
+.dark-theme,
+[data-bs-theme="dark"] {
+  --mens-accent: #FF9D80;
+  --mens-peach: #FFE4CC;
+  --mens-light: #1a1a1a;
+}
+
+/* Ensure peach color is used for mens specific elements */
+.mens-price,
+.mens-brand-text,
+.mens-section-title span {
+  color: var(--mens-accent) !important;
+}
+
+.mens-view-deal-btn,
+.mens-explore-btn {
+  background-color: var(--mens-accent) !important;
+  border-color: var(--mens-accent) !important;
+}
+
+.mens-card .image-container {
+  background-color: var(--mens-light) !important;
+}
+
+/* Dark mode hover states */
+.dark-theme .mens-view-deal-btn:hover,
+[data-bs-theme="dark"] .mens-view-deal-btn:hover {
+  background-color: var(--mens-peach) !important;
+  border-color: var(--mens-peach) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .mens-explore-btn:hover,
+[data-bs-theme="dark"] .mens-explore-btn:hover {
+  background-color: var(--mens-peach) !important;
+  border-color: var(--mens-peach) !important;
+  color: var(--mens-accent) !important;
+}

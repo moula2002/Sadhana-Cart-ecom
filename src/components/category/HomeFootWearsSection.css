@@ -1,0 +1,120 @@
+/* HomeFootWearsSection.css - Dark Mode Styles for Footwear Section */
+
+/* Footwear section specific dark mode styles */
+.dark-theme .footwear-section-container,
+[data-bs-theme="dark"] .footwear-section-container {
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.dark-theme .footwear-section-title,
+[data-bs-theme="dark"] .footwear-section-title {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .footwear-section-title span,
+[data-bs-theme="dark"] .footwear-section-title span {
+  color: var(--accent-color) !important;
+}
+
+.dark-theme .footwear-card,
+[data-bs-theme="dark"] .footwear-card {
+  background-color: var(--card-bg) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: 0 4px 12px var(--shadow-color) !important;
+}
+
+.dark-theme .footwear-card:hover,
+[data-bs-theme="dark"] .footwear-card:hover {
+  border-color: var(--accent-color) !important;
+  box-shadow: 0 8px 20px var(--shadow-color) !important;
+}
+
+.dark-theme .footwear-card-title,
+[data-bs-theme="dark"] .footwear-card-title {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .footwear-card .card-text,
+[data-bs-theme="dark"] .footwear-card .card-text {
+  color: var(--text-secondary) !important;
+}
+
+.dark-theme .footwear-price,
+[data-bs-theme="dark"] .footwear-price {
+  color: var(--accent-color) !important;
+}
+
+.dark-theme .footwear-original-price,
+[data-bs-theme="dark"] .footwear-original-price {
+  color: var(--text-secondary) !important;
+}
+
+.dark-theme .footwear-brand-text,
+[data-bs-theme="dark"] .footwear-brand-text {
+  color: var(--accent-color) !important;
+  opacity: 0.9;
+}
+
+/* Button styles for dark mode */
+.dark-theme .footwear-view-deal-btn,
+[data-bs-theme="dark"] .footwear-view-deal-btn {
+  background-color: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+  color: white !important;
+}
+
+.dark-theme .footwear-view-deal-btn:hover,
+[data-bs-theme="dark"] .footwear-view-deal-btn:hover {
+  background-color: var(--text-primary) !important;
+  border-color: var(--text-primary) !important;
+  color: var(--bg-primary) !important;
+}
+
+.dark-theme .footwear-explore-btn,
+[data-bs-theme="dark"] .footwear-explore-btn {
+  border-color: var(--accent-color) !important;
+  color: var(--accent-color) !important;
+}
+
+.dark-theme .footwear-explore-btn:hover,
+[data-bs-theme="dark"] .footwear-explore-btn:hover {
+  background-color: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+  color: var(--bg-primary) !important;
+}
+
+/* Image container in dark mode */
+.dark-theme .footwear-card .image-container,
+[data-bs-theme="dark"] .footwear-card .image-container {
+  background-color: var(--bg-tertiary) !important;
+}
+
+/* Discount badge in dark mode */
+.dark-theme .footwear-discount-badge,
+[data-bs-theme="dark"] .footwear-discount-badge {
+  background-color: var(--accent-color) !important;
+  color: white !important;
+}
+
+/* Walking animation for footwear */
+@keyframes walkSteps {
+  0%, 100% { transform: translateY(0); }
+  25% { transform: translateY(-5px); }
+  75% { transform: translateY(5px); }
+}
+
+.footwear-glow-text {
+  animation: walkSteps 2s ease-in-out infinite;
+}
+
+/* Smooth transitions */
+.footwear-card,
+.footwear-card *,
+.footwear-section-container,
+.footwear-section-container * {
+  transition: background-color 0.3s ease, 
+              color 0.3s ease, 
+              border-color 0.3s ease,
+              box-shadow 0.3s ease;
+}

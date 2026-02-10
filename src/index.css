@@ -1,0 +1,419 @@
+/* index.css - Global Styles */
+
+/* Import fonts */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+
+/* Global CSS Variables */
+:root {
+  /* Light Theme Variables */
+  --primary-color: #0d6efd;
+  --secondary-color: #6c757d;
+  --success-color: #198754;
+  --danger-color: #dc3545;
+  --warning-color: #ffc107;
+  --info-color: #0dcaf0;
+  --light-color: #f8f9fa;
+  --dark-color: #212529;
+  
+  /* SadhanaCart Brand Colors */
+  --sadhana-orange: #f4a11a;
+  --cart-blue: #0b1e6d;
+  --shopclues-red-orange: #ff6e40;
+  
+  /* Teal Theme Colors */
+  --teal-primary: #00a8a0;
+  --teal-light: #33b8b0;
+  --teal-dark: #00827b;
+  
+  /* Typography */
+  --font-primary: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-xxl: 3rem;
+  
+  /* Borders */
+  --border-radius-sm: 0.25rem;
+  --border-radius-md: 0.5rem;
+  --border-radius-lg: 0.75rem;
+  --border-radius-xl: 1rem;
+  --border-radius-xxl: 1.5rem;
+  
+  /* Shadows */
+  --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  --shadow-md: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+  --shadow-inset: inset 0 1px 2px rgba(0, 0, 0, 0.075);
+  
+  /* Transitions */
+  --transition-fast: 150ms ease-in-out;
+  --transition-normal: 300ms ease-in-out;
+  --transition-slow: 500ms ease-in-out;
+  
+  /* Z-index layers */
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+}
+
+/* Dark Theme Variables */
+[data-bs-theme="dark"],
+.dark-theme {
+  --primary-color: #6ea8fe;
+  --secondary-color: #a7acb1;
+  --success-color: #75b798;
+  --danger-color: #ea868f;
+  --warning-color: #ffda6a;
+  --info-color: #6edff6;
+  --light-color: #2b3035;
+  --dark-color: #dee2e6;
+  
+  /* SadhanaCart Brand Colors in Dark Mode */
+  --sadhana-orange: #f8b24a;
+  --cart-blue: #2d3a8c;
+  --shopclues-red-orange: #ff8a65;
+  
+  /* Teal Theme Colors in Dark Mode */
+  --teal-primary: #00c9bf;
+  --teal-light: #33d4ca;
+  --teal-dark: #00a69a;
+  
+  /* Shadows for Dark Mode */
+  --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 0.5rem 1rem rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.5);
+}
+
+/* Reset and Base Styles */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+body {
+  font-family: var(--font-primary);
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--dark-color);
+  background-color: #ffffff;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color var(--transition-normal), color var(--transition-normal);
+}
+
+.dark-theme body {
+  background-color: #121212;
+  color: #e9ecef;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: inherit;
+}
+
+h1 { font-size: 2.5rem; }
+h2 { font-size: 2rem; }
+h3 { font-size: 1.75rem; }
+h4 { font-size: 1.5rem; }
+h5 { font-size: 1.25rem; }
+h6 { font-size: 1rem; }
+
+p {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+a {
+  color: var(--teal-primary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--teal-dark);
+  text-decoration: underline;
+}
+
+.dark-theme a {
+  color: var(--teal-light);
+}
+
+.dark-theme a:hover {
+  color: var(--teal-primary);
+}
+
+/* Lists */
+ul, ol {
+  padding-left: 2rem;
+  margin-bottom: 1rem;
+}
+
+/* Images */
+img {
+  max-width: 100%;
+  height: auto;
+  vertical-align: middle;
+}
+
+/* Buttons */
+button {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+button:focus {
+  outline: 2px solid var(--teal-primary);
+  outline-offset: 2px;
+}
+
+/* Forms */
+input,
+button,
+select,
+optgroup,
+textarea {
+  margin: 0;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+/* Utility Classes */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+.d-flex { display: flex; }
+.justify-content-center { justify-content: center; }
+.justify-content-between { justify-content: space-between; }
+.align-items-center { align-items: center; }
+.flex-column { flex-direction: column; }
+
+.m-0 { margin: 0; }
+.p-0 { padding: 0; }
+
+.w-100 { width: 100%; }
+.h-100 { height: 100%; }
+
+.position-relative { position: relative; }
+.position-absolute { position: absolute; }
+
+.overflow-hidden { overflow: hidden; }
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Focus styles for accessibility */
+:focus {
+  outline: 2px solid var(--teal-primary);
+  outline-offset: 2px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--teal-primary);
+  outline-offset: 2px;
+}
+
+/* Selection color */
+::selection {
+  background-color: var(--teal-primary);
+  color: white;
+}
+
+.dark-theme ::selection {
+  background-color: var(--teal-light);
+  color: #121212;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--light-color);
+}
+
+.dark-theme ::-webkit-scrollbar-track {
+  background: #2b3035;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--secondary-color);
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--teal-primary);
+}
+
+.dark-theme ::-webkit-scrollbar-thumb {
+  background: #495057;
+}
+
+.dark-theme ::-webkit-scrollbar-thumb:hover {
+  background: var(--teal-light);
+}
+
+/* Print styles */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* Responsive typography */
+@media (max-width: 768px) {
+  html {
+    font-size: 14px;
+  }
+  
+  h1 { font-size: 2rem; }
+  h2 { font-size: 1.75rem; }
+  h3 { font-size: 1.5rem; }
+  h4 { font-size: 1.25rem; }
+  h5 { font-size: 1.125rem; }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --primary-color: #004085;
+    --secondary-color: #383d41;
+  }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Bootstrap overrides for dark theme */
+.dark-theme .btn-outline-primary {
+  color: var(--teal-light);
+  border-color: var(--teal-light);
+}
+
+.dark-theme .btn-outline-primary:hover {
+  background-color: var(--teal-light);
+  border-color: var(--teal-light);
+  color: #121212;
+}
+
+.dark-theme .btn-primary {
+  background-color: var(--teal-primary);
+  border-color: var(--teal-primary);
+}
+
+.dark-theme .btn-primary:hover {
+  background-color: var(--teal-dark);
+  border-color: var(--teal-dark);
+}
+
+/* Card styles for dark theme */
+.dark-theme .card {
+  background-color: #1e1e1e;
+  border-color: #2d2d2d;
+  color: #e9ecef;
+}
+
+/* Form controls in dark theme */
+.dark-theme .form-control {
+  background-color: #2b3035;
+  border-color: #495057;
+  color: #e9ecef;
+}
+
+.dark-theme .form-control:focus {
+  background-color: #2b3035;
+  border-color: var(--teal-light);
+  color: #e9ecef;
+  box-shadow: 0 0 0 0.25rem rgba(0, 201, 191, 0.25);
+}
+
+/* Table styles for dark theme */
+.dark-theme .table {
+  color: #e9ecef;
+}
+
+.dark-theme .table-striped tbody tr:nth-of-type(odd) {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Modal styles for dark theme */
+.dark-theme .modal-content {
+  background-color: #1e1e1e;
+  border-color: #2d2d2d;
+}
+
+.dark-theme .modal-header,
+.dark-theme .modal-footer {
+  border-color: #2d2d2d;
+}
+
+/* Alert styles for dark theme */
+.dark-theme .alert {
+  background-color: #2b3035;
+  border-color: #495057;
+  color: #e9ecef;
+}
+
+/* Badge styles for dark theme */
+.dark-theme .badge {
+  color: #121212;
+}
+
+/* Progress bar styles for dark theme */
+.dark-theme .progress {
+  background-color: #2b3035;
+}
+
+/* Smooth transitions for all elements */
+* {
+  transition: background-color var(--transition-normal), 
+              color var(--transition-normal), 
+              border-color var(--transition-normal),
+              box-shadow var(--transition-normal);
+}

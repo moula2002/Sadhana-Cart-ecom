@@ -1,0 +1,110 @@
+/* HomeFashionSection.css - Dark Mode Styles for Fashion Section */
+
+/* Fashion section specific dark mode styles */
+.dark-theme .fashion-section-container,
+[data-bs-theme="dark"] .fashion-section-container {
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.dark-theme .fashion-section-title,
+[data-bs-theme="dark"] .fashion-section-title {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .fashion-section-title span,
+[data-bs-theme="dark"] .fashion-section-title span {
+  color: var(--accent-color) !important;
+}
+
+.dark-theme .fashion-card,
+[data-bs-theme="dark"] .fashion-card {
+  background-color: var(--card-bg) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: 0 4px 12px var(--shadow-color) !important;
+}
+
+.dark-theme .fashion-card:hover,
+[data-bs-theme="dark"] .fashion-card:hover {
+  border-color: var(--accent-color) !important;
+  box-shadow: 0 8px 20px var(--shadow-color) !important;
+}
+
+.dark-theme .fashion-card-title,
+[data-bs-theme="dark"] .fashion-card-title {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .fashion-card .card-text,
+[data-bs-theme="dark"] .fashion-card .card-text {
+  color: var(--text-secondary) !important;
+}
+
+.dark-theme .fashion-price,
+[data-bs-theme="dark"] .fashion-price {
+  color: var(--accent-color) !important;
+}
+
+.dark-theme .fashion-original-price,
+[data-bs-theme="dark"] .fashion-original-price {
+  color: var(--text-secondary) !important;
+}
+
+.dark-theme .fashion-brand-text,
+[data-bs-theme="dark"] .fashion-brand-text {
+  color: var(--text-secondary) !important;
+  opacity: 0.8;
+}
+
+/* Button styles for dark mode */
+.dark-theme .fashion-view-deal-btn,
+[data-bs-theme="dark"] .fashion-view-deal-btn {
+  background-color: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+  color: white !important;
+}
+
+.dark-theme .fashion-view-deal-btn:hover,
+[data-bs-theme="dark"] .fashion-view-deal-btn:hover {
+  background-color: var(--text-primary) !important;
+  border-color: var(--text-primary) !important;
+  color: var(--bg-primary) !important;
+}
+
+.dark-theme .fashion-explore-btn,
+[data-bs-theme="dark"] .fashion-explore-btn {
+  background-color: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+  color: white !important;
+}
+
+.dark-theme .fashion-explore-btn:hover,
+[data-bs-theme="dark"] .fashion-explore-btn:hover {
+  background-color: white !important;
+  border-color: white !important;
+  color: var(--accent-color) !important;
+}
+
+/* Image container in dark mode */
+.dark-theme .fashion-card .image-container,
+[data-bs-theme="dark"] .fashion-card .image-container {
+  background-color: var(--bg-tertiary) !important;
+}
+
+/* Discount badge in dark mode */
+.dark-theme .fashion-card .discount-badge,
+[data-bs-theme="dark"] .fashion-card .discount-badge {
+  background-color: var(--accent-color) !important;
+  color: white !important;
+}
+
+/* Smooth transitions */
+.fashion-card,
+.fashion-card *,
+.fashion-section-container,
+.fashion-section-container * {
+  transition: background-color 0.3s ease, 
+              color 0.3s ease, 
+              border-color 0.3s ease,
+              box-shadow 0.3s ease;
+}

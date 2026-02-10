@@ -1,0 +1,190 @@
+/* Books.css - Dark Mode Support for Books Page */
+
+/* Theme-aware utility classes */
+.theme-text {
+  color: var(--text-primary, #212529) !important;
+  transition: color 0.3s ease;
+}
+
+.theme-text-secondary {
+  color: var(--text-secondary, #6c757d) !important;
+  transition: color 0.3s ease;
+}
+
+.theme-success {
+  color: var(--text-success, #198754) !important;
+  transition: color 0.3s ease;
+}
+
+.theme-accent {
+  color: var(--accent-color, #0d6efd) !important;
+  transition: color 0.3s ease;
+}
+
+.theme-bg {
+  background-color: var(--bg-primary, #ffffff) !important;
+  transition: background-color 0.3s ease;
+}
+
+.theme-bg-secondary {
+  background-color: var(--bg-secondary, #f8f9fa) !important;
+  transition: background-color 0.3s ease;
+}
+
+.theme-card {
+  background-color: var(--card-bg, #ffffff) !important;
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.theme-alert {
+  background-color: var(--card-bg, #ffffff) !important;
+  border-color: var(--border-color, #dee2e6) !important;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* CSS Variables for light mode */
+:root {
+  --text-primary: #212529;
+  --text-secondary: #6c757d;
+  --text-success: #198754;
+  --accent-color: #0d6efd;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --card-bg: #ffffff;
+  --border-color: #dee2e6;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Dark mode overrides */
+.dark-theme,
+[data-bs-theme="dark"] {
+  --text-primary: #e9ecef;
+  --text-secondary: #adb5bd;
+  --text-success: #75b798;
+  --accent-color: #4dabf7;
+  --bg-primary: #121212;
+  --bg-secondary: #1e1e1e;
+  --card-bg: #2d2d2d;
+  --border-color: #444;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+}
+
+/* Body background for dark mode */
+body.dark-theme,
+body[data-bs-theme="dark"] {
+  background-color: var(--bg-primary) !important;
+}
+
+/* Books container */
+.books-container {
+  background-color: var(--bg-primary, #ffffff);
+  transition: background-color 0.3s ease;
+  border-radius: 8px;
+  padding: 2rem !important;
+}
+
+/* Book card specific dark mode styles */
+.dark-theme .book-card,
+[data-bs-theme="dark"] .book-card {
+  background-color: var(--card-bg) !important;
+}
+
+.dark-theme .book-card:hover,
+[data-bs-theme="dark"] .book-card:hover {
+  box-shadow: 0 12px 28px var(--shadow-color) !important;
+}
+
+.dark-theme .book-image-container,
+[data-bs-theme="dark"] .book-image-container {
+  background-color: var(--bg-secondary) !important;
+}
+
+/* Card title and text in dark mode */
+.dark-theme .book-card .card-title,
+.dark-theme .book-card .card-text,
+.dark-theme .book-card p,
+[data-bs-theme="dark"] .book-card .card-title,
+[data-bs-theme="dark"] .book-card .card-text,
+[data-bs-theme="dark"] .book-card p {
+  color: var(--text-primary) !important;
+}
+
+/* Price text in dark mode */
+.dark-theme .theme-success,
+[data-bs-theme="dark"] .theme-success {
+  color: var(--text-success) !important;
+}
+
+/* Author text in dark mode */
+.dark-theme .theme-accent,
+[data-bs-theme="dark"] .theme-accent {
+  color: var(--accent-color) !important;
+}
+
+/* Spinner color adjustments */
+.dark-theme .spinner-border,
+.dark-theme .spinner-grow,
+[data-bs-theme="dark"] .spinner-border,
+[data-bs-theme="dark"] .spinner-grow {
+  color: var(--accent-color) !important;
+}
+
+/* Link hover effects */
+.dark-theme a:hover .book-card,
+[data-bs-theme="dark"] a:hover .book-card {
+  transform: translateY(-8px) scale(1.03);
+}
+
+/* Alert styling for dark mode */
+.dark-theme .alert-warning,
+[data-bs-theme="dark"] .alert-warning {
+  background-color: rgba(255, 193, 7, 0.1) !important;
+  border-color: rgba(255, 193, 7, 0.3) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .alert-dark,
+[data-bs-theme="dark"] .alert-dark {
+  background-color: rgba(52, 58, 64, 0.2) !important;
+  border-color: rgba(52, 58, 64, 0.4) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Smooth transitions for all theme-aware elements */
+.books-container,
+.book-card,
+.book-image-container,
+.theme-text,
+.theme-text-secondary,
+.theme-success,
+.theme-accent,
+.theme-bg,
+.theme-bg-secondary,
+.theme-card {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Book-specific animations */
+@keyframes bookFlip {
+  0% { transform: rotateY(0); }
+  100% { transform: rotateY(360deg); }
+}
+
+.book-card:hover .book-image-container img {
+  animation: bookFlip 0.6s ease;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .books-container {
+    padding: 1rem !important;
+  }
+  
+  .theme-text {
+    font-size: 0.9rem !important;
+  }
+  
+  .book-card {
+    margin-bottom: 1rem;
+  }
+}

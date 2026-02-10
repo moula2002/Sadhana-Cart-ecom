@@ -1,0 +1,224 @@
+/* ===============================
+   Banner Wrapper – Apple Glass
+================================ */
+.banner-wrapper {
+  position: relative;
+  width: 100%;
+  height: 50vh;
+  min-height: 400px;
+  max-width: 1400px;
+  margin: 12px auto;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* ===============================
+   Soft Blurred Background
+================================ */
+.banner-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.banner-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(30px) brightness(1.1) saturate(1.05);
+  transform: scale(1.15);
+}
+
+/* White glass overlay */
+.banner-bg .overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.7),
+    rgba(255, 255, 255, 0.95)
+  );
+  backdrop-filter: blur(20px);
+}
+
+/* ===============================
+   Slides Container
+================================ */
+.slides-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+/* ===============================
+   Slides – BIGGER HEIGHT
+================================ */
+.banner-slide {
+  position: absolute;
+  width: 42%;
+  height: 92%;              /* ✅ increased from 85% */
+  opacity: 0;
+  pointer-events: none;
+  border-radius: 22px;
+  overflow: hidden;
+  background: #ffffff;
+  transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow:
+    0 30px 60px rgba(0, 0, 0, 0.18),
+    0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+
+.banner-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+/* ===============================
+   Slide Positions
+================================ */
+.banner-slide.center {
+  opacity: 1;
+  z-index: 10;
+  transform: translateX(0) scale(1.06);
+  pointer-events: auto;
+}
+
+.banner-slide.left {
+  opacity: 0.55;
+  z-index: 5;
+  transform: translateX(-55%) scale(0.82);
+}
+
+.banner-slide.right {
+  opacity: 0.55;
+  z-index: 5;
+  transform: translateX(55%) scale(0.82);
+}
+
+/* Subtle hover zoom */
+.banner-slide.center:hover img {
+  transform: scale(1.04);
+}
+
+/* ===============================
+   Progress Bar – Minimal
+================================ */
+.banner-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: rgba(0, 0, 0, 0.05);
+  z-index: 20;
+}
+
+
+
+/* ===============================
+   Navigation Buttons – Glass
+================================ */
+.banner-nav {
+  position: absolute;
+  width: 100%;
+  padding: 0 22px;
+  display: flex;
+  justify-content: space-between;
+  z-index: 30;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.nav-btn {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  color: #111;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(12px);
+  transition: all 0.3s ease;
+}
+
+.nav-btn:hover {
+  transform: scale(1.12);
+  background: #ffffff;
+}
+
+/* ===============================
+   Dots – Minimal Apple Style
+================================ */
+.banner-dots {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 30;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.3);
+  transition: 0.3s;
+}
+
+.dot.active {
+  width: 26px;
+  border-radius: 13px;
+  background: #ff0080;
+}
+
+/* ===============================
+   Responsive
+================================ */
+@media (max-width: 768px) {
+  .banner-wrapper {
+    height: 40vh;
+    min-height: 350px;
+  }
+
+  .banner-slide {
+    width: 75%;
+    height: 88%;           /* ✅ increased */
+  }
+
+  .banner-slide.left,
+  .banner-slide.right {
+    opacity: 0.3;
+    transform: scale(0.7);
+  }
+}
+
+@media (max-width: 480px) {
+  .banner-wrapper {
+    height: 320px;
+  }
+
+  .banner-slide {
+    width: 85%;
+    height: 85%;           /* ✅ increased */
+  }
+}

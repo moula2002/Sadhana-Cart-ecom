@@ -1,0 +1,170 @@
+/* Accessories.css - Dark Mode Support */
+
+/* Theme-aware utility classes */
+.theme-text {
+  color: var(--text-primary, #212529) !important;
+  transition: color 0.3s ease;
+}
+
+.theme-text-secondary {
+  color: var(--text-secondary, #6c757d) !important;
+  transition: color 0.3s ease;
+}
+
+.theme-accent {
+  color: var(--accent-color, #0d6efd) !important;
+  transition: color 0.3s ease;
+}
+
+.theme-bg {
+  background-color: var(--bg-primary, #ffffff) !important;
+  transition: background-color 0.3s ease;
+}
+
+.theme-bg-secondary {
+  background-color: var(--bg-secondary, #f8f9fa) !important;
+  transition: background-color 0.3s ease;
+}
+
+.theme-card {
+  background-color: var(--card-bg, #ffffff) !important;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.theme-border {
+  border-color: var(--border-color, #dee2e6) !important;
+  transition: border-color 0.3s ease;
+}
+
+.theme-alert {
+  background-color: var(--card-bg, #ffffff) !important;
+  border-color: var(--border-color, #dee2e6) !important;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* CSS Variables for light mode */
+:root {
+  --text-primary: #212529;
+  --text-secondary: #6c757d;
+  --accent-color: #0d6efd;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --card-bg: #ffffff;
+  --border-color: #dee2e6;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Dark mode overrides */
+.dark-theme,
+[data-bs-theme="dark"] {
+  --text-primary: #e9ecef;
+  --text-secondary: #adb5bd;
+  --accent-color: #4dabf7;
+  --bg-primary: #121212;
+  --bg-secondary: #1e1e1e;
+  --card-bg: #2d2d2d;
+  --border-color: #444;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+}
+
+/* Body background for dark mode */
+body.dark-theme,
+body[data-bs-theme="dark"] {
+  background-color: var(--bg-primary) !important;
+}
+
+/* Accessories container */
+.accessories-container {
+  background-color: var(--bg-primary, #ffffff);
+  transition: background-color 0.3s ease;
+  border-radius: 8px;
+  padding: 2rem !important;
+}
+
+/* Product card specific dark mode styles */
+.dark-theme .accessories-card,
+[data-bs-theme="dark"] .accessories-card {
+  background-color: var(--card-bg) !important;
+  box-shadow: 0 4px 12px var(--shadow-color) !important;
+}
+
+.dark-theme .accessories-card:hover,
+[data-bs-theme="dark"] .accessories-card:hover {
+  box-shadow: 0 10px 25px var(--shadow-color) !important;
+}
+
+.dark-theme .accessories-image-container,
+[data-bs-theme="dark"] .accessories-image-container {
+  background-color: var(--bg-secondary) !important;
+}
+
+/* Text colors for dark mode */
+.dark-theme h2,
+.dark-theme p,
+.dark-theme .card-title,
+.dark-theme .card-text,
+[data-bs-theme="dark"] h2,
+[data-bs-theme="dark"] p,
+[data-bs-theme="dark"] .card-title,
+[data-bs-theme="dark"] .card-text {
+  color: var(--text-primary) !important;
+}
+
+/* Price text in dark mode */
+.dark-theme .theme-accent,
+[data-bs-theme="dark"] .theme-accent {
+  color: var(--accent-color) !important;
+}
+
+/* Spinner color adjustments */
+.dark-theme .spinner-border,
+.dark-theme .spinner-grow,
+[data-bs-theme="dark"] .spinner-border,
+[data-bs-theme="dark"] .spinner-grow {
+  color: var(--accent-color) !important;
+}
+
+/* Link hover effects */
+.dark-theme a:hover .accessories-card,
+[data-bs-theme="dark"] a:hover .accessories-card {
+  transform: translateY(-8px) scale(1.03);
+}
+
+/* Alert styling for dark mode */
+.dark-theme .alert-warning,
+[data-bs-theme="dark"] .alert-warning {
+  background-color: rgba(255, 193, 7, 0.1) !important;
+  border-color: rgba(255, 193, 7, 0.3) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .alert-dark,
+[data-bs-theme="dark"] .alert-dark {
+  background-color: rgba(52, 58, 64, 0.2) !important;
+  border-color: rgba(52, 58, 64, 0.4) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Smooth transitions for all theme-aware elements */
+.accessories-container,
+.accessories-card,
+.accessories-image-container,
+.theme-text,
+.theme-text-secondary,
+.theme-accent,
+.theme-bg,
+.theme-bg-secondary,
+.theme-card {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .accessories-container {
+    padding: 1rem !important;
+  }
+  
+  .theme-text {
+    font-size: 0.9rem !important;
+  }
+}

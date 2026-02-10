@@ -1,0 +1,30 @@
+/* REMOVE image rotation animation COMPLETELY */
+
+/* ❌ REMOVED
+@keyframes toySpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.toy-card:hover .toy-image-container img {
+  animation: toySpin 1s linear infinite;
+}
+*/
+
+/* ✅ Keep bounce only */
+@keyframes toyBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.toy-card:hover {
+  animation: toyBounce 0.4s ease;
+}
+
+.toy-image-container {
+  height: 250px;
+  background: var(--bg-secondary, #f8f9fa);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

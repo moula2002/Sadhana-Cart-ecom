@@ -1,0 +1,120 @@
+/* HomeToysSection.css - Dark Mode Styles for Toys Section */
+
+/* Toys section specific dark mode styles */
+.dark-theme .toys-section-container,
+[data-bs-theme="dark"] .toys-section-container {
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.dark-theme .toys-section-title,
+[data-bs-theme="dark"] .toys-section-title {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .toys-section-title span,
+[data-bs-theme="dark"] .toys-section-title span {
+  color: var(--accent-color) !important;
+}
+
+.dark-theme .toys-card,
+[data-bs-theme="dark"] .toys-card {
+  background-color: var(--card-bg) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: 0 4px 12px var(--shadow-color) !important;
+}
+
+.dark-theme .toys-card:hover,
+[data-bs-theme="dark"] .toys-card:hover {
+  border-color: var(--accent-color) !important;
+  box-shadow: 0 8px 20px var(--shadow-color) !important;
+}
+
+.dark-theme .toys-card-title,
+[data-bs-theme="dark"] .toys-card-title {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .toys-card .card-text,
+[data-bs-theme="dark"] .toys-card .card-text {
+  color: var(--text-secondary) !important;
+}
+
+.dark-theme .toys-price,
+[data-bs-theme="dark"] .toys-price {
+  color: var(--accent-color) !important;
+}
+
+.dark-theme .toys-original-price,
+[data-bs-theme="dark"] .toys-original-price {
+  color: var(--text-secondary) !important;
+}
+
+.dark-theme .toys-brand-text,
+[data-bs-theme="dark"] .toys-brand-text {
+  color: var(--accent-color) !important;
+  opacity: 0.9;
+}
+
+/* Button styles for dark mode */
+.dark-theme .toys-view-deal-btn,
+[data-bs-theme="dark"] .toys-view-deal-btn {
+  background-color: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+  color: white !important;
+}
+
+.dark-theme .toys-view-deal-btn:hover,
+[data-bs-theme="dark"] .toys-view-deal-btn:hover {
+  background-color: var(--text-primary) !important;
+  border-color: var(--text-primary) !important;
+  color: var(--bg-primary) !important;
+}
+
+.dark-theme .toys-explore-btn,
+[data-bs-theme="dark"] .toys-explore-btn {
+  background-color: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+  color: white !important;
+}
+
+.dark-theme .toys-explore-btn:hover,
+[data-bs-theme="dark"] .toys-explore-btn:hover {
+  background-color: white !important;
+  border-color: white !important;
+  color: var(--accent-color) !important;
+}
+
+/* Image container in dark mode */
+.dark-theme .toys-card .image-container,
+[data-bs-theme="dark"] .toys-card .image-container {
+  background-color: var(--bg-tertiary) !important;
+}
+
+/* Discount badge in dark mode */
+.dark-theme .toys-discount-badge,
+[data-bs-theme="dark"] .toys-discount-badge {
+  background-color: var(--accent-color) !important;
+  color: white !important;
+}
+
+/* Animations for toys */
+@keyframes toysBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.toys-section-title {
+  animation: toysBounce 2s ease-in-out infinite;
+}
+
+/* Smooth transitions */
+.toys-card,
+.toys-card *,
+.toys-section-container,
+.toys-section-container * {
+  transition: background-color 0.3s ease, 
+              color 0.3s ease, 
+              border-color 0.3s ease,
+              box-shadow 0.3s ease;
+}

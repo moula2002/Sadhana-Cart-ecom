@@ -1,0 +1,354 @@
+/* --- Theme Variables --- */
+.shipping-policy-page {
+  --page-bg: #f8f8f8;
+  --header-bg: #ff6600;
+  --header-text: #ffffff;
+  --card-bg: #ffffff;
+  --text-primary: #333333;
+  --text-secondary: #555555;
+  --text-muted: #6c757d;
+  --primary-orange: #ff6600;
+  --secondary-orange: #f77f00;
+  --danger-red: #dc3545;
+  --help-card-bg: #fff0e6;
+  --help-card-border: #ffbb80;
+  --help-card-text: #c2410c;
+  --contact-btn-bg: #ff6600;
+  --contact-btn-text: #ffffff;
+  --contact-btn-hover: #e05c00;
+  --scroll-btn-bg: #ff6600;
+  --scroll-btn-hover: #f77f00;
+  --shadow-color: rgba(0, 0, 0, 0.08);
+  --shadow-hover: rgba(0, 0, 0, 0.15);
+}
+
+/* Dark theme variables */
+[data-theme="dark"] .shipping-policy-page {
+  --page-bg: #121212;
+  --header-bg: #ff6600;
+  --header-text: #ffffff;
+  --card-bg: #1e1e1e;
+  --text-primary: #ffffff;
+  --text-secondary: #e0e0e0;
+  --text-muted: #b0b0b0;
+  --primary-orange: #ff6600;
+  --secondary-orange: #f77f00;
+  --danger-red: #dc3545;
+  --help-card-bg: #2d1f15;
+  --help-card-border: #7a4a1f;
+  --help-card-text: #ffa94d;
+  --contact-btn-bg: #ff6600;
+  --contact-btn-text: #ffffff;
+  --contact-btn-hover: #ff8533;
+  --scroll-btn-bg: #ff6600;
+  --scroll-btn-hover: #ff8533;
+  --shadow-color: rgba(0, 0, 0, 0.2);
+  --shadow-hover: rgba(0, 0, 0, 0.3);
+}
+
+/* --- Base Styles --- */
+.shipping-policy-page {
+  background-color: var(--page-bg);
+  color: var(--text-primary);
+  font-family: Arial, sans-serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* --- Header Section --- */
+.shipping-header {
+  background: var(--header-bg);
+  color: var(--header-text);
+  text-align: center;
+  padding: 3rem 1rem;
+  margin-bottom: 2rem;
+  animation: fadeInDown 0.8s ease-out;
+}
+
+.shipping-header h1 {
+  font-size: 2.5rem;
+  font-weight: 300;
+  margin-bottom: 0.5rem;
+  color: var(--header-text);
+}
+
+.shipping-header p {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--header-text);
+}
+
+/* --- Container --- */
+.shipping-container {
+  max-width: 4xl;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  color: var(--text-primary);
+}
+
+.shipping-intro-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: var(--primary-orange);
+}
+
+.shipping-intro-text {
+  margin-bottom: 1.5rem;
+  color: var(--text-secondary);
+}
+
+.shipping-intro-text strong {
+  color: var(--text-primary);
+}
+
+/* --- Policy Section --- */
+.policy-card {
+  background: var(--card-bg);
+  color: var(--text-secondary);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px var(--shadow-color);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+.policy-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px var(--shadow-hover);
+}
+
+.policy-card .policy-title {
+  display: flex;
+  align-items: center;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: var(--text-primary);
+}
+
+.policy-card .policy-title svg {
+  color: var(--primary-orange);
+  margin-right: 8px;
+  font-size: 1.5rem;
+}
+
+.policy-card h3 {
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.policy-card ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.policy-card li {
+  position: relative;
+  padding-left: 20px;
+  margin-bottom: 8px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.policy-card li::before {
+  content: "●";
+  color: var(--primary-orange);
+  position: absolute;
+  left: 0;
+  top: 2px;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.policy-card li strong {
+  color: var(--text-primary);
+}
+
+.red-highlight {
+  background: var(--card-bg);
+  border-left: 4px solid var(--secondary-orange);
+}
+
+.red-highlight li::before {
+  color: var(--secondary-orange);
+}
+
+/* --- Help Section --- */
+.help-card {
+  background-color: var(--help-card-bg);
+  border: 1px solid var(--help-card-border);
+  border-radius: 12px;
+  text-align: center;
+  padding: 30px;
+  margin-top: 40px;
+  margin-bottom: 40px;
+  transition: all 0.3s ease;
+}
+
+.help-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(255, 102, 0, 0.3);
+}
+
+.help-card h4 {
+  color: var(--help-card-text);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.25rem;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+
+.help-card h4 svg {
+  margin-right: 8px;
+  font-size: 1.5rem;
+  color: var(--help-card-text);
+}
+
+.help-card p {
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.contact-btn {
+  background-color: var(--contact-btn-bg);
+  color: var(--contact-btn-text);
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  text-decoration: none;
+  display: inline-block;
+  margin-top: 10px;
+  transition: background-color 0.3s, box-shadow 0.3s;
+  cursor: pointer;
+}
+
+.contact-btn:hover {
+  background-color: var(--contact-btn-hover);
+  box-shadow: 0 4px 15px rgba(255, 102, 0, 0.5);
+  color: var(--contact-btn-text);
+}
+
+/* --- Scroll to Top Button --- */
+.scroll-to-top-btn {
+  background-color: var(--scroll-btn-bg);
+  color: white;
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.2rem;
+  cursor: pointer;
+  z-index: 1000;
+  box-shadow: 0 4px 10px var(--shadow-color);
+  transition: all 0.3s ease;
+  animation: fadeIn 1s;
+  text-decoration: none;
+}
+
+.scroll-to-top-btn:hover {
+  background-color: var(--scroll-btn-hover);
+  transform: translateY(-2px);
+}
+
+/* --- Animations --- */
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Staggered animations for cards */
+.policy-card:nth-child(1) { animation-delay: 0.1s; }
+.policy-card:nth-child(2) { animation-delay: 0.2s; }
+.policy-card:nth-child(3) { animation-delay: 0.3s; }
+.policy-card:nth-child(4) { animation-delay: 0.4s; }
+.policy-card:nth-child(5) { animation-delay: 0.5s; }
+.policy-card:nth-child(6) { animation-delay: 0.6s; }
+.policy-card:nth-child(7) { animation-delay: 0.7s; }
+
+/* --- Responsive Design --- */
+@media (max-width: 768px) {
+  .shipping-header h1 {
+    font-size: 2rem;
+  }
+  
+  .shipping-header p {
+    font-size: 1.1rem;
+  }
+  
+  .shipping-intro-title {
+    font-size: 1.25rem;
+  }
+  
+  .policy-card {
+    padding: 15px;
+  }
+  
+  .policy-card .policy-title {
+    font-size: 1.1rem;
+  }
+  
+  .policy-card li {
+    font-size: 0.95rem;
+  }
+  
+  .help-card {
+    padding: 20px;
+    margin-top: 30px;
+  }
+  
+  .help-card h4 {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .shipping-header {
+    padding: 2rem 1rem;
+  }
+  
+  .shipping-header h1 {
+    font-size: 1.75rem;
+  }
+  
+  .policy-card {
+    padding: 12px;
+  }
+  
+  .contact-btn {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+  }
+  
+  .scroll-to-top-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+    right: 15px;
+    bottom: 15px;
+  }
+}

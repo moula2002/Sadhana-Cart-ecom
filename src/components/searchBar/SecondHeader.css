@@ -1,0 +1,525 @@
+/* 🔥 SadhanaCart Brand Colors with Theme Support */
+:root {
+    /* Light mode colors (default) */
+    --sadhana-orange: #f4a11a;
+    --cart-blue: #0b1e6d;
+    --cart-blue-dark: #08154d;
+    --cart-blue-light: #1a2b8f;
+    --text-white: #ffffff;
+    --text-dark: #333333;
+    --text-secondary: #6c757d;
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8f9fa;
+    --border-color: #dee2e6;
+    --hover-bg: rgba(255, 255, 255, 0.1);
+    --active-bg: rgba(244, 161, 26, 0.2);
+    
+    --max-content-width: 1400px;
+    --padding-sides: 15px;
+}
+
+/* Dark mode colors */
+.dark-theme,
+[data-bs-theme="dark"] {
+    --sadhana-orange: #f4a11a;
+    --cart-blue: #1a1a2e;
+    --cart-blue-dark: #0f0f1a;
+    --cart-blue-light: #2a2a4a;
+    --text-white: #e9ecef;
+    --text-dark: #f8f9fa;
+    --text-secondary: #adb5bd;
+    --bg-primary: #121212;
+    --bg-secondary: #1e1e1e;
+    --border-color: #444;
+    --hover-bg: rgba(255, 255, 255, 0.05);
+    --active-bg: rgba(244, 161, 26, 0.3);
+}
+
+/* Theme-aware utility classes */
+.theme-text {
+    color: var(--text-white) !important;
+    transition: color 0.3s ease;
+}
+
+.theme-text-secondary {
+    color: var(--text-secondary) !important;
+    transition: color 0.3s ease;
+}
+
+.theme-bg {
+    background-color: var(--cart-blue) !important;
+    transition: background-color 0.3s ease;
+}
+
+.theme-bg-dark {
+    background-color: var(--cart-blue-dark) !important;
+    transition: background-color 0.3s ease;
+}
+
+.theme-bg-light {
+    background-color: var(--cart-blue-light) !important;
+    transition: background-color 0.3s ease;
+}
+
+.theme-border {
+    border-color: var(--border-color) !important;
+    transition: border-color 0.3s ease;
+}
+
+.theme-hover:hover {
+    background-color: var(--hover-bg) !important;
+}
+
+.theme-active {
+    background-color: var(--active-bg) !important;
+    border-left-color: var(--sadhana-orange) !important;
+}
+
+.theme-accent-bg {
+    background-color: var(--sadhana-orange) !important;
+}
+
+.second-header-wrapper {
+    width: 100%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    z-index: 999;
+    border-top: 3px solid var(--sadhana-orange);
+    position: sticky;
+    top: 0;
+}
+
+.second-header {
+    display: flex;
+    align-items: center;
+    height: 60px;
+    max-width: var(--max-content-width);
+    margin: 0 auto;
+    padding: 0 var(--padding-sides);
+}
+
+.menu-left {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    overflow: hidden;
+}
+
+.desktop-menu-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    overflow: hidden;
+}
+
+/* Theme Toggle */
+.theme-toggle-container {
+    margin-left: auto;
+    padding: 0 15px;
+}
+
+.theme-toggle-btn {
+    background: var(--cart-blue-dark);
+    border: 1px solid var(--border-color);
+    color: var(--text-white);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1.2rem;
+}
+
+.theme-toggle-btn:hover {
+    background: var(--sadhana-orange);
+    transform: rotate(15deg);
+}
+
+/* Scroll Arrows - Better visibility like the image */
+.scroll-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--cart-blue-dark);
+    border: 1px solid var(--sadhana-orange);
+    color: var(--text-white);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    z-index: 10;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.3s;
+}
+
+.left-arrow { left: 0; }
+.right-arrow { right: 0; }
+
+.scroll-arrow:hover {
+    background: var(--sadhana-orange);
+}
+
+/* Horizontal Scroll List */
+.menu-list {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0 35px; /* Space for arrows */
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    white-space: nowrap;
+    scrollbar-width: none; /* Firefox: hide scrollbar */
+    -ms-overflow-style: none; /* IE/Edge: hide scrollbar */
+}
+
+/* Hide scrollbar for Chrome/Safari */
+.menu-list::-webkit-scrollbar {
+    display: none;
+}
+
+.menu-item {
+    flex: 0 0 auto; /* Crucial for horizontal scroll */
+    padding: 0 15px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    transition: 0.3s;
+}
+
+.category-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.category-image {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--border-color);
+}
+
+.category-name {
+    color: var(--text-white);
+    transition: color 0.3s ease;
+}
+
+.menu-item:hover .category-name {
+    color: var(--sadhana-orange);
+}
+
+.menu-item.all {
+    display: none;
+    padding: 0 20px;
+    background-color: var(--cart-blue-dark);
+    border-right: 1px solid var(--border-color);
+}
+
+.menu-icon {
+    font-size: 1.2rem;
+    margin-right: 8px;
+    color: var(--text-white);
+}
+
+/* Mobile Menu Styles */
+.mobile-menu {
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 300px;
+    height: 100vh;
+    z-index: 1000;
+    transition: left 0.3s ease;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.mobile-menu.active {
+    left: 0;
+}
+
+.mobile-menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 2px solid var(--sadhana-orange);
+}
+
+.mobile-menu-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.close-menu-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 5px;
+    transition: color 0.3s ease;
+}
+
+.close-menu-btn:hover {
+    color: var(--sadhana-orange);
+}
+
+.mobile-menu-content {
+    height: calc(100vh - 70px);
+    overflow-y: auto;
+    padding: 15px 0;
+}
+
+.mobile-menu-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.mobile-menu-item {
+    padding: 15px 20px;
+    cursor: pointer;
+    transition: 0.3s;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.mobile-menu-item:last-child {
+    border-bottom: none;
+}
+
+.mobile-category-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.mobile-category-image {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--border-color);
+}
+
+.mobile-category-icon-placeholder {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-white);
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.mobile-category-name {
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.mobile-menu-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    display: none;
+}
+
+.mobile-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    gap: 10px;
+}
+
+.spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Tablet Responsive */
+@media (max-width: 1024px) {
+    .menu-list {
+        padding: 0 30px;
+    }
+    
+    .menu-item {
+        padding: 0 12px;
+        font-size: 0.8rem;
+    }
+    
+    .category-image {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .theme-toggle-container {
+        padding: 0 10px;
+    }
+    
+    .theme-toggle-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 1.1rem;
+    }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .second-header {
+        height: 55px;
+        padding: 0 10px;
+    }
+    
+    .desktop-menu-container {
+        display: none !important;
+    }
+    
+    .menu-item.all {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 55px;
+        padding: 0 15px;
+    }
+    
+    .all-text {
+        font-size: 0.9rem;
+    }
+    
+    .mobile-menu-backdrop {
+        display: block;
+    }
+    
+    .mobile-menu {
+        width: 280px;
+    }
+    
+    .theme-toggle-container {
+        padding: 0 8px;
+    }
+    
+    .theme-toggle-btn {
+        width: 34px;
+        height: 34px;
+        font-size: 1rem;
+    }
+}
+
+/* Small Mobile Devices */
+@media (max-width: 480px) {
+    .second-header {
+        height: 50px;
+    }
+    
+    .menu-item.all {
+        height: 50px;
+        padding: 0 12px;
+    }
+    
+    .all-text {
+        font-size: 0.85rem;
+    }
+    
+    .menu-icon {
+        font-size: 1rem;
+        margin-right: 6px;
+    }
+    
+    .mobile-menu {
+        width: 85%;
+        max-width: 280px;
+    }
+    
+    .mobile-menu-header {
+        padding: 15px;
+    }
+    
+    .mobile-menu-header h3 {
+        font-size: 1.1rem;
+    }
+    
+    .mobile-menu-item {
+        padding: 12px 15px;
+    }
+    
+    .mobile-category-box {
+        gap: 10px;
+    }
+    
+    .mobile-category-image,
+    .mobile-category-icon-placeholder {
+        width: 28px;
+        height: 28px;
+        font-size: 0.8rem;
+    }
+    
+    .mobile-category-name {
+        font-size: 0.9rem;
+    }
+    
+    .theme-toggle-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Very Small Mobile Devices */
+@media (max-width: 360px) {
+    .second-header {
+        height: 48px;
+    }
+    
+    .menu-item.all {
+        height: 48px;
+        padding: 0 10px;
+    }
+    
+    .all-text {
+        font-size: 0.8rem;
+    }
+    
+    .mobile-menu {
+        width: 90%;
+    }
+    
+    .theme-toggle-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 0.8rem;
+    }
+}
+
+/* Smooth transitions for theme changes */
+.second-header-wrapper,
+.second-header,
+.menu-item,
+.scroll-arrow,
+.theme-toggle-btn,
+.mobile-menu,
+.mobile-menu-item {
+    transition: background-color 0.3s ease, 
+                border-color 0.3s ease, 
+                color 0.3s ease,
+                box-shadow 0.3s ease;
+}

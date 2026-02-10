@@ -1,0 +1,263 @@
+/* HomeKidsSection.css - Dark Mode Styles for Kids Section */
+
+/* Kids section specific dark mode styles */
+.dark-theme .kids-section-container,
+[data-bs-theme="dark"] .kids-section-container {
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.dark-theme .kids-section-title,
+[data-bs-theme="dark"] .kids-section-title {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .kids-section-title span,
+[data-bs-theme="dark"] .kids-section-title span {
+  color: var(--accent-color) !important;
+}
+
+.dark-theme .kids-card,
+[data-bs-theme="dark"] .kids-card {
+  background-color: var(--card-bg) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: 0 4px 12px var(--shadow-color) !important;
+}
+
+.dark-theme .kids-card:hover,
+[data-bs-theme="dark"] .kids-card:hover {
+  border-color: var(--accent-color) !important;
+  box-shadow: 0 8px 20px var(--shadow-color) !important;
+}
+
+.dark-theme .kids-card-title,
+[data-bs-theme="dark"] .kids-card-title {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .kids-card .card-text,
+[data-bs-theme="dark"] .kids-card .card-text {
+  color: var(--text-secondary) !important;
+}
+
+.dark-theme .kids-price,
+[data-bs-theme="dark"] .kids-price {
+  color: var(--accent-color) !important;
+}
+
+.dark-theme .kids-original-price,
+[data-bs-theme="dark"] .kids-original-price {
+  color: var(--text-secondary) !important;
+}
+
+.dark-theme .kids-brand-text,
+[data-bs-theme="dark"] .kids-brand-text {
+  color: var(--accent-color) !important;
+  opacity: 0.9;
+}
+
+/* Button styles for dark mode */
+.dark-theme .kids-view-deal-btn,
+[data-bs-theme="dark"] .kids-view-deal-btn {
+  background-color: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+  color: white !important;
+}
+
+.dark-theme .kids-view-deal-btn:hover,
+[data-bs-theme="dark"] .kids-view-deal-btn:hover {
+  background-color: var(--text-primary) !important;
+  border-color: var(--text-primary) !important;
+  color: var(--bg-primary) !important;
+}
+
+.dark-theme .kids-explore-btn,
+[data-bs-theme="dark"] .kids-explore-btn {
+  background-color: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+  color: white !important;
+}
+
+.dark-theme .kids-explore-btn:hover,
+[data-bs-theme="dark"] .kids-explore-btn:hover {
+  background-color: white !important;
+  border-color: white !important;
+  color: var(--accent-color) !important;
+}
+
+/* Image container in dark mode */
+.dark-theme .kids-card .image-container,
+[data-bs-theme="dark"] .kids-card .image-container {
+  background-color: var(--bg-tertiary) !important;
+}
+
+/* Discount badge in dark mode */
+.dark-theme .kids-discount-badge,
+[data-bs-theme="dark"] .kids-discount-badge {
+  background-color: var(--accent-color) !important;
+  color: white !important;
+}
+
+/* Kids glow animation */
+@keyframes kidsGlow {
+  0%, 100% { box-shadow: 0 0 5px rgba(233, 30, 99, 0.5); }
+  50% { box-shadow: 0 0 20px rgba(233, 30, 99, 0.8); }
+}
+
+.kids-card {
+  animation: kidsGlow 3s ease-in-out infinite;
+}
+
+/* Kids bounce animation on hover */
+@keyframes kidsBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.kids-card:hover {
+  animation: kidsBounce 0.5s ease;
+}
+
+/* Card hover effects */
+.kids-card {
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+              box-shadow 0.4s ease !important;
+}
+
+.kids-card:hover {
+  transform: translateY(-12px) !important;
+}
+
+.kids-card:hover img {
+  transform: scale(1.08) !important;
+}
+
+/* Button transitions */
+.kids-view-deal-btn {
+  transition: all 0.3s ease !important;
+}
+
+.kids-explore-btn {
+  transition: all 0.3s ease-in-out !important;
+}
+
+/* Watermark styling */
+.purple-watermark {
+  position: absolute;
+  bottom: -30px;
+  right: -20px;
+  font-size: 12rem;
+  font-weight: 900;
+  color: rgba(156, 39, 176, 0.03);
+  user-select: none;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.dark-theme .purple-watermark,
+[data-bs-theme="dark"] .purple-watermark {
+  color: rgba(186, 104, 200, 0.05);
+  opacity: 0.9;
+}
+
+/* Animation for section entrance */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.kids-section-container {
+  animation: fadeInUp 0.8s ease-out;
+}
+
+/* Mobile optimizations */
+@media (max-width: 576px) {
+  .kids-card:hover {
+    transform: translateY(-8px) !important;
+  }
+  
+  .kids-card img {
+    max-height: 90% !important;
+  }
+  
+  .purple-watermark {
+    font-size: 8rem;
+    bottom: -20px;
+    right: -15px;
+  }
+}
+
+/* Tablet optimizations */
+@media (max-width: 768px) {
+  .kids-card {
+    margin-bottom: 1rem;
+  }
+  
+  .purple-watermark {
+    font-size: 10rem;
+  }
+}
+
+/* Smooth transitions */
+.kids-card,
+.kids-card *,
+.kids-section-container,
+.kids-section-container * {
+  transition: background-color 0.3s ease, 
+              color 0.3s ease, 
+              border-color 0.3s ease,
+              box-shadow 0.3s ease,
+              transform 0.3s ease !important;
+}
+
+/* Kids-specific color overrides */
+:root {
+  --kids-accent: #E91E63;
+  --kids-purple: #9C27B0;
+  --kids-light: #FDF7FF;
+}
+
+.dark-theme,
+[data-bs-theme="dark"] {
+  --kids-accent: #F06292;
+  --kids-purple: #BA68C8;
+  --kids-light: #1a1a1a;
+}
+
+/* Ensure kids colors are used for kids specific elements */
+.kids-price,
+.kids-brand-text,
+.kids-section-title span {
+  color: var(--kids-accent) !important;
+}
+
+.kids-view-deal-btn,
+.kids-explore-btn {
+  background-color: var(--kids-purple) !important;
+  border-color: var(--kids-purple) !important;
+}
+
+.kids-card .image-container {
+  background-color: var(--kids-light) !important;
+}
+
+/* Dark mode hover states */
+.dark-theme .kids-view-deal-btn:hover,
+[data-bs-theme="dark"] .kids-view-deal-btn:hover {
+  background-color: var(--kids-accent) !important;
+  border-color: var(--kids-accent) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .kids-explore-btn:hover,
+[data-bs-theme="dark"] .kids-explore-btn:hover {
+  background-color: var(--kids-accent) !important;
+  border-color: var(--kids-accent) !important;
+  color: var(--kids-purple) !important;
+}

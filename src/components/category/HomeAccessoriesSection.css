@@ -1,0 +1,110 @@
+/* HomeAccessoriesSection.css - Dark Mode Styles for Accessories Section */
+
+/* Accessories section specific dark mode styles */
+.dark-theme .accessories-section-container,
+[data-bs-theme="dark"] .accessories-section-container {
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.dark-theme .accessories-section-title,
+[data-bs-theme="dark"] .accessories-section-title {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .accessories-section-title span,
+[data-bs-theme="dark"] .accessories-section-title span {
+  color: var(--accent-color) !important;
+}
+
+.dark-theme .accessories-card,
+[data-bs-theme="dark"] .accessories-card {
+  background-color: var(--card-bg) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: 0 4px 12px var(--shadow-color) !important;
+}
+
+.dark-theme .accessories-card:hover,
+[data-bs-theme="dark"] .accessories-card:hover {
+  border-color: var(--accent-color) !important;
+  box-shadow: 0 8px 20px var(--shadow-color) !important;
+}
+
+.dark-theme .accessories-card-title,
+[data-bs-theme="dark"] .accessories-card-title {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .accessories-card .card-text,
+[data-bs-theme="dark"] .accessories-card .card-text {
+  color: var(--text-secondary) !important;
+}
+
+.dark-theme .accessories-price,
+[data-bs-theme="dark"] .accessories-price {
+  color: var(--accent-color) !important;
+}
+
+.dark-theme .accessories-original-price,
+[data-bs-theme="dark"] .accessories-original-price {
+  color: var(--text-secondary) !important;
+}
+
+.dark-theme .accessories-brand-text,
+[data-bs-theme="dark"] .accessories-brand-text {
+  color: var(--accent-color) !important;
+  opacity: 0.9;
+}
+
+/* Button styles for dark mode */
+.dark-theme .accessories-view-deal-btn,
+[data-bs-theme="dark"] .accessories-view-deal-btn {
+  background-color: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+  color: white !important;
+}
+
+.dark-theme .accessories-view-deal-btn:hover,
+[data-bs-theme="dark"] .accessories-view-deal-btn:hover {
+  background-color: var(--text-primary) !important;
+  border-color: var(--text-primary) !important;
+  color: var(--bg-primary) !important;
+}
+
+.dark-theme .accessories-explore-btn,
+[data-bs-theme="dark"] .accessories-explore-btn {
+  background-color: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+  color: white !important;
+}
+
+.dark-theme .accessories-explore-btn:hover,
+[data-bs-theme="dark"] .accessories-explore-btn:hover {
+  background-color: white !important;
+  border-color: white !important;
+  color: var(--accent-color) !important;
+}
+
+/* Image container in dark mode */
+.dark-theme .accessories-card .image-container,
+[data-bs-theme="dark"] .accessories-card .image-container {
+  background-color: var(--bg-tertiary) !important;
+}
+
+/* Discount badge in dark mode */
+.dark-theme .accessories-discount-badge,
+[data-bs-theme="dark"] .accessories-discount-badge {
+  background-color: var(--accent-color) !important;
+  color: white !important;
+}
+
+/* Smooth transitions */
+.accessories-card,
+.accessories-card *,
+.accessories-section-container,
+.accessories-section-container * {
+  transition: background-color 0.3s ease, 
+              color 0.3s ease, 
+              border-color 0.3s ease,
+              box-shadow 0.3s ease;
+}

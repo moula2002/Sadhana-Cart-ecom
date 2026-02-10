@@ -1,0 +1,119 @@
+/* HomeStationarySection.css - Dark Mode Styles for Stationary Section */
+
+/* Stationary section specific dark mode styles */
+.dark-theme .stationary-section-container,
+[data-bs-theme="dark"] .stationary-section-container {
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.dark-theme .stationary-section-title,
+[data-bs-theme="dark"] .stationary-section-title {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .stationary-section-title span,
+[data-bs-theme="dark"] .stationary-section-title span {
+  color: var(--accent-color) !important;
+}
+
+.dark-theme .stationary-card,
+[data-bs-theme="dark"] .stationary-card {
+  background-color: var(--card-bg) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: 0 4px 12px var(--shadow-color) !important;
+}
+
+.dark-theme .stationary-card:hover,
+[data-bs-theme="dark"] .stationary-card:hover {
+  border-color: var(--accent-color) !important;
+  box-shadow: 0 8px 20px var(--shadow-color) !important;
+}
+
+.dark-theme .stationary-card-title,
+[data-bs-theme="dark"] .stationary-card-title {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .stationary-card .card-text,
+[data-bs-theme="dark"] .stationary-card .card-text {
+  color: var(--text-secondary) !important;
+}
+
+.dark-theme .stationary-price,
+[data-bs-theme="dark"] .stationary-price {
+  color: var(--accent-color) !important;
+}
+
+.dark-theme .stationary-original-price,
+[data-bs-theme="dark"] .stationary-original-price {
+  color: var(--text-secondary) !important;
+}
+
+.dark-theme .stationary-brand-text,
+[data-bs-theme="dark"] .stationary-brand-text {
+  color: var(--accent-color) !important;
+  opacity: 0.9;
+}
+
+/* Button styles for dark mode */
+.dark-theme .stationary-view-deal-btn,
+[data-bs-theme="dark"] .stationary-view-deal-btn {
+  background-color: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+  color: white !important;
+}
+
+.dark-theme .stationary-view-deal-btn:hover,
+[data-bs-theme="dark"] .stationary-view-deal-btn:hover {
+  background-color: var(--text-primary) !important;
+  border-color: var(--text-primary) !important;
+  color: var(--bg-primary) !important;
+}
+
+.dark-theme .stationary-explore-btn,
+[data-bs-theme="dark"] .stationary-explore-btn {
+  border-color: var(--accent-color) !important;
+  color: var(--accent-color) !important;
+}
+
+.dark-theme .stationary-explore-btn:hover,
+[data-bs-theme="dark"] .stationary-explore-btn:hover {
+  background-color: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+  color: var(--bg-primary) !important;
+}
+
+/* Image container in dark mode */
+.dark-theme .stationary-card .image-container,
+[data-bs-theme="dark"] .stationary-card .image-container {
+  background-color: var(--bg-tertiary) !important;
+}
+
+/* Discount badge in dark mode */
+.dark-theme .stationary-discount-badge,
+[data-bs-theme="dark"] .stationary-discount-badge {
+  background-color: var(--accent-color) !important;
+  color: white !important;
+}
+
+/* Animations for stationary */
+@keyframes stationaryFloat {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  50% { transform: translateY(-5px) rotate(1deg); }
+}
+
+.stationary-section-title {
+  animation: stationaryFloat 3s ease-in-out infinite;
+}
+
+/* Smooth transitions */
+.stationary-card,
+.stationary-card *,
+.stationary-section-container,
+.stationary-section-container * {
+  transition: background-color 0.3s ease, 
+              color 0.3s ease, 
+              border-color 0.3s ease,
+              box-shadow 0.3s ease;
+}

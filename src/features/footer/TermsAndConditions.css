@@ -1,0 +1,354 @@
+/* --- Theme Variables --- */
+.terms-container {
+  --page-bg: #f7f7f7;
+  --header-bg: #ff6a00;
+  --header-text: #ffffff;
+  --card-bg: #ffffff;
+  --text-primary: #333333;
+  --text-secondary: #555555;
+  --text-muted: #666666;
+  --primary-orange: #ff6a00;
+  --secondary-orange: #cc5400;
+  --danger-red: #dc3545;
+  --success-green: #25D366;
+  --acceptance-box-bg: #ffe6e6;
+  --acceptance-box-border: #ff9999;
+  --scroll-btn-bg: #ff6a00;
+  --scroll-btn-hover: #cc5400;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --shadow-hover: rgba(0, 0, 0, 0.2);
+}
+
+/* Dark theme variables */
+[data-theme="dark"] .terms-container {
+  --page-bg: #121212;
+  --header-bg: #ff6a00;
+  --header-text: #ffffff;
+  --card-bg: #1e1e1e;
+  --text-primary: #ffffff;
+  --text-secondary: #e0e0e0;
+  --text-muted: #b0b0b0;
+  --primary-orange: #ff6a00;
+  --secondary-orange: #ff8533;
+  --danger-red: #dc3545;
+  --success-green: #25D366;
+  --acceptance-box-bg: #2d1a1a;
+  --acceptance-box-border: #993333;
+  --scroll-btn-bg: #ff6a00;
+  --scroll-btn-hover: #ff8533;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --shadow-hover: rgba(0, 0, 0, 0.5);
+}
+
+/* --- Base Layout and Colors --- */
+.terms-container {
+  background-color: var(--page-bg);
+  color: var(--text-primary);
+  font-family: Arial, sans-serif;
+  min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* --- Header Styling --- */
+.terms-header-bg {
+  background-color: var(--header-bg);
+  color: var(--header-text);
+  padding: 60px 0;
+  text-align: center;
+  box-shadow: 0 4px 6px var(--shadow-color);
+}
+
+.terms-header-content {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.terms-header-content h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--header-text);
+  margin: 0;
+}
+
+/* --- Container --- */
+.terms-page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 15px;
+}
+
+/* --- Main Content Styling --- */
+.terms-main-content {
+  max-width: 900px;
+  padding: 40px;
+  margin: -30px auto 40px;
+  position: relative;
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  box-shadow: 0 2px 10px var(--shadow-color);
+  text-align: left;
+}
+
+/* --- Intro Section --- */
+.terms-intro h2 {
+  color: var(--primary-orange);
+  font-size: 2rem;
+  font-weight: 600;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--shadow-color);
+  margin-bottom: 20px;
+}
+
+.terms-intro p {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 30px;
+}
+
+/* --- Section Styling --- */
+.terms-section {
+  padding: 20px 0;
+  border-bottom: 1px solid var(--shadow-color);
+}
+
+.terms-section:last-child {
+  border-bottom: none;
+}
+
+.section-title-highlight {
+  color: var(--primary-orange);
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-top: 0;
+  margin-bottom: 15px;
+  transition: color 0.3s ease;
+}
+
+.section-title-highlight:hover {
+  color: var(--secondary-orange);
+}
+
+.terms-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.terms-list li {
+  padding: 8px 0;
+  line-height: 1.6;
+  font-size: 1rem;
+  position: relative;
+  padding-left: 20px;
+  color: var(--text-secondary);
+}
+
+.terms-list li::before {
+  content: "•";
+  color: var(--primary-orange);
+  font-weight: bold;
+  display: inline-block;
+  width: 1em;
+  margin-left: -1em;
+  position: absolute;
+  left: 0;
+}
+
+/* --- Acceptance Box Styling --- */
+.acceptance-box {
+  background-color: var(--acceptance-box-bg);
+  border: 1px solid var(--acceptance-box-border);
+  border-radius: 8px;
+  padding: 30px;
+  text-align: center;
+  margin-top: 40px;
+  animation: fadeIn 2s ease-out;
+}
+
+.acceptance-box h3 {
+  color: var(--primary-orange);
+  font-weight: 700;
+  margin-bottom: 15px;
+  font-size: 1.5rem;
+}
+
+.acceptance-box p {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+/* --- Buttons Container --- */
+.terms-buttons-container {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+/* Primary Button */
+.terms-btn-primary {
+  background-color: var(--primary-orange);
+  border: 1px solid var(--primary-orange);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
+  font-size: 1rem;
+}
+
+.terms-btn-primary:hover {
+  background-color: var(--secondary-orange);
+  border-color: var(--secondary-orange);
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px var(--shadow-color);
+}
+
+/* WhatsApp Button */
+.whatsapp-contact-btn {
+  background-color: var(--success-green);
+  border: 1px solid var(--success-green);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
+  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.whatsapp-contact-btn:hover {
+  background-color: #1da851;
+  border-color: #1da851;
+  color: white;
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(37, 211, 102, 0.3);
+}
+
+/* --- Scroll-to-Top Button --- */
+.scroll-to-top-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: var(--scroll-btn-bg);
+  color: white;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
+  text-decoration: none;
+  box-shadow: 0 4px 8px var(--shadow-color);
+  transition: background-color 0.3s, transform 0.3s;
+  z-index: 1000;
+}
+
+.scroll-to-top-btn:hover {
+  background-color: var(--scroll-btn-hover);
+  transform: scale(1.1);
+}
+
+/* --- Animations --- */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes bounceIn {
+  0% { transform: scale(0.5); opacity: 0; }
+  50% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+/* Staggered animations for sections */
+.terms-section:nth-child(1) { animation-delay: 0.1s; }
+.terms-section:nth-child(2) { animation-delay: 0.2s; }
+.terms-section:nth-child(3) { animation-delay: 0.3s; }
+.terms-section:nth-child(4) { animation-delay: 0.4s; }
+.terms-section:nth-child(5) { animation-delay: 0.5s; }
+.terms-section:nth-child(6) { animation-delay: 0.6s; }
+.terms-section:nth-child(7) { animation-delay: 0.7s; }
+
+/* --- Responsive Design --- */
+@media (max-width: 768px) {
+  .terms-header-bg {
+    padding: 40px 0;
+  }
+  
+  .terms-header-content h1 {
+    font-size: 2rem;
+  }
+  
+  .terms-main-content {
+    padding: 25px;
+    margin: -20px auto 30px;
+  }
+  
+  .terms-intro h2 {
+    font-size: 1.75rem;
+  }
+  
+  .section-title-highlight {
+    font-size: 1.25rem;
+  }
+  
+  .acceptance-box {
+    padding: 20px;
+  }
+  
+  .terms-buttons-container {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .terms-btn-primary,
+  .whatsapp-contact-btn {
+    width: 100%;
+    text-align: center;
+  }
+  
+  .scroll-to-top-btn {
+    width: 45px;
+    height: 45px;
+    font-size: 1.25rem;
+    bottom: 15px;
+    right: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .terms-header-bg {
+    padding: 30px 0;
+  }
+  
+  .terms-header-content h1 {
+    font-size: 1.75rem;
+  }
+  
+  .terms-main-content {
+    padding: 20px 15px;
+    margin: -15px auto 25px;
+  }
+  
+  .terms-intro h2 {
+    font-size: 1.5rem;
+  }
+  
+  .terms-list li {
+    font-size: 0.95rem;
+  }
+  
+  .terms-btn-primary,
+  .whatsapp-contact-btn {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+  }
+}

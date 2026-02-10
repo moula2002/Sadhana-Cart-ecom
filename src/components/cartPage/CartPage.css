@@ -1,0 +1,409 @@
+/* General container */
+.cart-container {
+  padding: 20px;
+  max-width: 900px;
+  margin: 0 auto;
+  font-family: Arial, sans-serif;
+}
+
+/* Heading */
+.cart-container h2 {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+
+/* Cart items list */
+.cart-items {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Each cart item */
+.cart-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border: 1px solid #ddd;
+  padding: 12px;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.cart-item-image {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+}
+
+.cart-item-info h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.cart-item-info p {
+  margin: 4px 0;
+  color: #555;
+}
+
+.cart-item-quantity {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.cart-item-quantity button {
+  border: 1px solid #ccc;
+  background: #f9f9f9;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.cart-item-remove {
+  color: #e53935;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* Cart summary */
+.cart-summary {
+  margin-top: 20px;
+  border-top: 1px solid #ddd;
+  padding-top: 16px;
+}
+
+.cart-summary h3 {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.checkout-btn {
+  background-color: #28a745;
+  color: #fff;
+  font-weight: bold;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.checkout-btn:hover {
+  background-color: #218838;
+}
+
+/* back-button */
+.back-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #000;
+  margin-right: 10px;
+  display: flex;
+  align-items: center;
+}
+
+/* ---------------- Empty Cart ---------------- */
+.cart-empty-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  background-color: #f5f5f5;
+  text-align: center;
+  padding: 20px;
+}
+
+.cart-empty-image img {
+  width: 150px; /* slightly larger for better visibility */
+  height: 150px;
+  object-fit: contain;
+  opacity: 0.9;
+  margin-bottom: 16px;
+}
+
+.cart-empty-container h2 {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.shop-deals {
+  color: #007185;
+  cursor: pointer;
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+.shop-deals:hover {
+  text-decoration: underline;
+}
+
+/* Buttons inside empty cart */
+.cart-empty-buttons {
+  display: flex;
+  justify-content: center; /* center buttons */
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.cart-empty-buttons button {
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Yellow sign-in button */
+.cart-empty-buttons .signin-btn {
+  background-color: #ffd814;
+  border: none;
+  color: #111;
+}
+.cart-empty-buttons .signin-btn:hover {
+  background-color: #f7ca00;
+}
+
+/* White sign-up button */
+.cart-empty-buttons .signup-btn {
+  background: #fff;
+  border: 1px solid #ccc;
+  color: #111;
+}
+.cart-empty-buttons .signup-btn:hover {
+  background: #f2f2f2;
+}
+
+/* Footer note */
+.cart-empty-footer {
+  font-size: 13px;
+  color: #777;
+  max-width: 500px;
+  line-height: 1.4;
+}    
+
+
+/* checkout pay */
+.checkout-container {
+  background-color: #f8f9fc;
+  border-radius: 10px;
+}
+
+.checkout-container h3 {
+  color: #212529;
+}
+
+button.btn-primary {
+  background-color: #8b5cf6 !important;
+  border: none !important;
+  transition: 0.3s;
+}
+
+button.btn-primary:hover {
+  background-color: #7c3aed !important;
+  transform: translateY(-2px);
+}
+
+.card {
+  border-radius: 12px;
+}
+
+
+/* checkoutLoginpage.jsx */
+
+/* --- Base Layout & Container Styling --- */
+.checkout-container {
+    background-color: #f1f3f6; /* Flipkart's light gray background */
+    padding-top: 30px;
+    padding-bottom: 30px;
+}
+
+.checkout-flow-card {
+    position: relative;
+    overflow: hidden; 
+    border-radius: 4px; /* Slight border radius */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Subtle lift */
+}
+
+/* --- Step Headings and Numbers --- */
+.step-number {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+    text-align: center;
+    border-radius: 50%;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.3s ease; /* For animation */
+}
+
+.step-heading {
+    font-size: 18px;
+    font-weight: bold;
+    color: #212121;
+}
+
+/* 1. Active Login Section */
+.login-signup-section {
+    background-color: white; 
+    border-bottom: 2px solid #f0f0f0;
+    /* Initial animation state */
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.step-number.active-step {
+    background-color: #2874f0; /* Flipkart Blue */
+    color: white;
+}
+
+/* --- Input and Form Styling --- */
+.input-field {
+    border: none;
+    border-bottom: 1px solid #e0e0e0; /* Clean bottom border */
+    padding: 10px 0;
+    border-radius: 0; 
+    box-shadow: none !important;
+    transition: border-bottom-color 0.3s ease;
+}
+
+.input-field:focus {
+    border-bottom-color: #2874f0; /* Blue underline on focus */
+}
+
+.privacy-text a {
+    color: #2874f0; /* Link color */
+    font-weight: 500;
+}
+
+/* --- Continue Button Styling and Animation --- */
+.continue-btn {
+    background-color: #fb641b; /* Flipkart Orange for action */
+    border: none;
+    font-weight: 600;
+    padding: 12px 60px;
+    font-size: 15px;
+    border-radius: 2px; /* Slight roundness */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.2s, box-shadow 0.2s, transform 0.1s; /* Animation properties */
+}
+
+.continue-btn:hover {
+    background-color: #f95f00; /* Darker orange on hover */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.continue-btn:active {
+    transform: scale(0.99); /* Slight press animation */
+}
+
+/* --- Secure Login Advantages (Right Column) --- */
+.secure-login-advantages {
+    background-color: #fcfcfc;
+    padding-left: 20px;
+}
+
+.advantage-list {
+    margin-top: 10px;
+    color: #555;
+}
+
+.advantage-list li {
+    padding: 5px 0;
+    display: flex;
+    align-items: center;
+    line-height: 1.5;
+}
+
+.advantage-list i {
+    color: #008000; /* Green check/icon */
+    font-size: 1.1rem;
+    width: 20px; /* Aligns icons */
+}
+
+/* --- Inactive Step Styling (Steps 2, 3, 4) --- */
+.step-placeholder {
+    background-color: #f7f7f7; /* Lighter background for inactive steps */
+    border-bottom: 1px solid #e0e0e0;
+    cursor: default;
+    transition: background-color 0.3s ease;
+}
+
+.step-placeholder:hover {
+    background-color: #f0f0f0; /* Slight hover effect on inactive steps */
+}
+
+.step-placeholder h5 {
+    padding: 5px 0;
+    margin: 0;
+}
+
+.step-placeholder .step-number {
+    background-color: #e0e0e0; 
+    color: #878787;
+}
+
+/* --- Secure Payment Badge (Right side of the screen) --- */
+.secure-payment-badge {
+    position: absolute;
+    top: 50px;
+    right: -100px; /* Initially hidden slightly off-screen */
+    width: 200px; 
+    text-align: center;
+    padding: 15px;
+    color: #878787;
+    transition: right 1s cubic-bezier(0.25, 0.8, 0.25, 1); /* Slide-in animation */
+}
+
+/* Animation trigger (for demo, assume it appears on component load) */
+.checkout-flow-card:hover .secure-payment-badge {
+    right: 20px; /* Slide it into view on card hover */
+}
+
+.secure-payment-badge i {
+    font-size: 2.5rem;
+    color: #008000; /* Green for secure icon */
+    margin-bottom: 10px;
+    animation: bounce 2s infinite; /* Gentle bounce animation */
+}
+
+/* Keyframe Animation for the shield icon */
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-5px);
+    }
+    60% {
+        transform: translateY(-3px);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .checkout-flow-card {
+        margin: 0;
+    }
+    .login-signup-section .border-end {
+        border-right: none !important;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 15px;
+    }
+    .continue-btn {
+        width: 100%;
+        padding: 10px 0;
+    }
+    .secure-payment-badge {
+        display: none !important; /* Hide on small screens */
+    }
+}

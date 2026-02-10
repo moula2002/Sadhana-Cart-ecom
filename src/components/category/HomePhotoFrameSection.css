@@ -1,0 +1,120 @@
+/* HomePhotoFrameSection.css - Dark Mode Styles for Photo Frames Section */
+
+/* Photo frames section specific dark mode styles */
+.dark-theme .photo-frames-section-container,
+[data-bs-theme="dark"] .photo-frames-section-container {
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.dark-theme .photo-frames-section-title,
+[data-bs-theme="dark"] .photo-frames-section-title {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .photo-frames-section-title span,
+[data-bs-theme="dark"] .photo-frames-section-title span {
+  color: var(--accent-color) !important;
+}
+
+.dark-theme .photo-frames-card,
+[data-bs-theme="dark"] .photo-frames-card {
+  background-color: var(--card-bg) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: 0 4px 12px var(--shadow-color) !important;
+}
+
+.dark-theme .photo-frames-card:hover,
+[data-bs-theme="dark"] .photo-frames-card:hover {
+  border-color: var(--accent-color) !important;
+  box-shadow: 0 8px 20px var(--shadow-color) !important;
+}
+
+.dark-theme .photo-frames-card-title,
+[data-bs-theme="dark"] .photo-frames-card-title {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .photo-frames-card .card-text,
+[data-bs-theme="dark"] .photo-frames-card .card-text {
+  color: var(--text-secondary) !important;
+}
+
+.dark-theme .photo-frames-price,
+[data-bs-theme="dark"] .photo-frames-price {
+  color: var(--accent-color) !important;
+}
+
+.dark-theme .photo-frames-original-price,
+[data-bs-theme="dark"] .photo-frames-original-price {
+  color: var(--text-secondary) !important;
+}
+
+.dark-theme .photo-frames-brand-text,
+[data-bs-theme="dark"] .photo-frames-brand-text {
+  color: var(--accent-color) !important;
+  opacity: 0.9;
+}
+
+/* Button styles for dark mode */
+.dark-theme .photo-frames-view-deal-btn,
+[data-bs-theme="dark"] .photo-frames-view-deal-btn {
+  background-color: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+  color: white !important;
+}
+
+.dark-theme .photo-frames-view-deal-btn:hover,
+[data-bs-theme="dark"] .photo-frames-view-deal-btn:hover {
+  background-color: var(--text-primary) !important;
+  border-color: var(--text-primary) !important;
+  color: var(--bg-primary) !important;
+}
+
+.dark-theme .photo-frames-explore-btn,
+[data-bs-theme="dark"] .photo-frames-explore-btn {
+  background-color: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+  color: white !important;
+}
+
+.dark-theme .photo-frames-explore-btn:hover,
+[data-bs-theme="dark"] .photo-frames-explore-btn:hover {
+  background-color: white !important;
+  border-color: white !important;
+  color: var(--accent-color) !important;
+}
+
+/* Image container in dark mode */
+.dark-theme .photo-frames-card .image-container,
+[data-bs-theme="dark"] .photo-frames-card .image-container {
+  background-color: var(--bg-tertiary) !important;
+}
+
+/* Discount badge in dark mode */
+.dark-theme .photo-frames-discount-badge,
+[data-bs-theme="dark"] .photo-frames-discount-badge {
+  background-color: var(--accent-color) !important;
+  color: white !important;
+}
+
+/* Frame border animation */
+@keyframes frameBorderGlow {
+  0%, 100% { box-shadow: 0 0 5px rgba(123, 97, 255, 0.5); }
+  50% { box-shadow: 0 0 20px rgba(123, 97, 255, 0.8); }
+}
+
+.photo-frames-card {
+  animation: frameBorderGlow 3s ease-in-out infinite;
+}
+
+/* Smooth transitions */
+.photo-frames-card,
+.photo-frames-card *,
+.photo-frames-section-container,
+.photo-frames-section-container * {
+  transition: background-color 0.3s ease, 
+              color 0.3s ease, 
+              border-color 0.3s ease,
+              box-shadow 0.3s ease;
+}

@@ -1,0 +1,270 @@
+/* HomeJewellerySection.css - Dark Mode Styles for Jewellery Section */
+
+/* Jewellery section specific dark mode styles */
+.dark-theme .jewellery-section-container,
+[data-bs-theme="dark"] .jewellery-section-container {
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.dark-theme .jewellery-section-title,
+[data-bs-theme="dark"] .jewellery-section-title {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .jewellery-section-title span,
+[data-bs-theme="dark"] .jewellery-section-title span {
+  color: var(--accent-color) !important;
+}
+
+.dark-theme .jewellery-card,
+[data-bs-theme="dark"] .jewellery-card {
+  background-color: var(--card-bg) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: 0 4px 12px var(--shadow-color) !important;
+}
+
+.dark-theme .jewellery-card:hover,
+[data-bs-theme="dark"] .jewellery-card:hover {
+  border-color: var(--accent-color) !important;
+  box-shadow: 0 8px 20px var(--shadow-color) !important;
+}
+
+.dark-theme .jewellery-card-title,
+[data-bs-theme="dark"] .jewellery-card-title {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .jewellery-card .card-text,
+[data-bs-theme="dark"] .jewellery-card .card-text {
+  color: var(--text-secondary) !important;
+}
+
+.dark-theme .jewellery-price,
+[data-bs-theme="dark"] .jewellery-price {
+  color: var(--accent-color) !important;
+}
+
+.dark-theme .jewellery-original-price,
+[data-bs-theme="dark"] .jewellery-original-price {
+  color: var(--text-secondary) !important;
+}
+
+.dark-theme .jewellery-brand-text,
+[data-bs-theme="dark"] .jewellery-brand-text {
+  color: var(--accent-color) !important;
+  opacity: 0.9;
+}
+
+/* Button styles for dark mode */
+.dark-theme .jewellery-view-deal-btn,
+[data-bs-theme="dark"] .jewellery-view-deal-btn {
+  background-color: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+  color: white !important;
+}
+
+.dark-theme .jewellery-view-deal-btn:hover,
+[data-bs-theme="dark"] .jewellery-view-deal-btn:hover {
+  background-color: var(--text-primary) !important;
+  border-color: var(--text-primary) !important;
+  color: var(--bg-primary) !important;
+}
+
+.dark-theme .jewellery-explore-btn,
+[data-bs-theme="dark"] .jewellery-explore-btn {
+  background-color: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+  color: white !important;
+}
+
+.dark-theme .jewellery-explore-btn:hover,
+[data-bs-theme="dark"] .jewellery-explore-btn:hover {
+  background-color: white !important;
+  border-color: white !important;
+  color: var(--accent-color) !important;
+}
+
+/* Image container in dark mode */
+.dark-theme .jewellery-card .image-container,
+[data-bs-theme="dark"] .jewellery-card .image-container {
+  background-color: var(--bg-tertiary) !important;
+}
+
+/* Discount badge in dark mode */
+.dark-theme .jewellery-discount-badge,
+[data-bs-theme="dark"] .jewellery-discount-badge {
+  background-color: var(--accent-color) !important;
+  color: white !important;
+}
+
+/* Jewellery shine animation */
+@keyframes jewelleryShine {
+  0%, 100% { box-shadow: 0 0 5px rgba(212, 175, 55, 0.5); }
+  50% { box-shadow: 0 0 20px rgba(212, 175, 55, 0.8); }
+}
+
+.jewellery-card {
+  animation: jewelleryShine 3s ease-in-out infinite;
+}
+
+/* Gold shimmer animation for jewellery items */
+@keyframes goldShimmer {
+  0% { background-position: -100px 0; }
+  100% { background-position: 100px 0; }
+}
+
+.jewellery-card:hover {
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(212, 175, 55, 0.05) 50%,
+    transparent 100%
+  );
+  background-size: 200px 100%;
+  animation: goldShimmer 1.5s infinite linear;
+}
+
+/* Card hover effects */
+.jewellery-card {
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+              box-shadow 0.4s ease !important;
+}
+
+.jewellery-card:hover {
+  transform: translateY(-12px) !important;
+}
+
+.jewellery-card:hover img {
+  transform: scale(1.08) !important;
+}
+
+/* Button transitions */
+.jewellery-view-deal-btn {
+  transition: all 0.3s ease !important;
+}
+
+.jewellery-explore-btn {
+  transition: all 0.3s ease-in-out !important;
+}
+
+/* Watermark styling */
+.gold-watermark {
+  position: absolute;
+  bottom: -30px;
+  right: -20px;
+  font-size: 12rem;
+  font-weight: 900;
+  color: rgba(212, 175, 55, 0.03);
+  user-select: none;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.dark-theme .gold-watermark,
+[data-bs-theme="dark"] .gold-watermark {
+  color: rgba(212, 175, 55, 0.05);
+  opacity: 0.9;
+}
+
+/* Animation for section entrance */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.jewellery-section-container {
+  animation: fadeInUp 0.8s ease-out;
+}
+
+/* Mobile optimizations */
+@media (max-width: 576px) {
+  .jewellery-card:hover {
+    transform: translateY(-8px) !important;
+  }
+  
+  .jewellery-card img {
+    max-height: 90% !important;
+  }
+  
+  .gold-watermark {
+    font-size: 8rem;
+    bottom: -20px;
+    right: -15px;
+  }
+}
+
+/* Tablet optimizations */
+@media (max-width: 768px) {
+  .jewellery-card {
+    margin-bottom: 1rem;
+  }
+  
+  .gold-watermark {
+    font-size: 10rem;
+  }
+}
+
+/* Smooth transitions */
+.jewellery-card,
+.jewellery-card *,
+.jewellery-section-container,
+.jewellery-section-container * {
+  transition: background-color 0.3s ease, 
+              color 0.3s ease, 
+              border-color 0.3s ease,
+              box-shadow 0.3s ease,
+              transform 0.3s ease !important;
+}
+
+/* Jewellery-specific color overrides */
+:root {
+  --jewellery-accent: #D4AF37;
+  --jewellery-maroon: #800020;
+  --jewellery-light: #FDF6F6;
+}
+
+.dark-theme,
+[data-bs-theme="dark"] {
+  --jewellery-accent: #E6C158;
+  --jewellery-maroon: #9a2440;
+  --jewellery-light: #1a1a1a;
+}
+
+/* Ensure gold color is used for jewellery specific elements */
+.jewellery-price,
+.jewellery-brand-text,
+.jewellery-section-title span {
+  color: var(--jewellery-accent) !important;
+}
+
+.jewellery-view-deal-btn,
+.jewellery-explore-btn {
+  background-color: var(--jewellery-maroon) !important;
+  border-color: var(--jewellery-maroon) !important;
+}
+
+.jewellery-card .image-container {
+  background-color: var(--jewellery-light) !important;
+}
+
+/* Dark mode hover states */
+.dark-theme .jewellery-view-deal-btn:hover,
+[data-bs-theme="dark"] .jewellery-view-deal-btn:hover {
+  background-color: var(--jewellery-accent) !important;
+  border-color: var(--jewellery-accent) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .jewellery-explore-btn:hover,
+[data-bs-theme="dark"] .jewellery-explore-btn:hover {
+  background-color: var(--jewellery-accent) !important;
+  border-color: var(--jewellery-accent) !important;
+  color: var(--jewellery-maroon) !important;
+}

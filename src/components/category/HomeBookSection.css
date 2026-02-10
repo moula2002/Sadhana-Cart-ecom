@@ -1,0 +1,119 @@
+/* HomeBookSection.css - Dark Mode Styles for Books Section */
+
+/* Books section specific dark mode styles */
+.dark-theme .books-section-container,
+[data-bs-theme="dark"] .books-section-container {
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.dark-theme .books-section-title,
+[data-bs-theme="dark"] .books-section-title {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .books-section-title span,
+[data-bs-theme="dark"] .books-section-title span {
+  color: var(--accent-color) !important;
+}
+
+.dark-theme .books-card,
+[data-bs-theme="dark"] .books-card {
+  background-color: var(--card-bg) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: 0 4px 12px var(--shadow-color) !important;
+}
+
+.dark-theme .books-card:hover,
+[data-bs-theme="dark"] .books-card:hover {
+  border-color: var(--accent-color) !important;
+  box-shadow: 0 8px 20px var(--shadow-color) !important;
+}
+
+.dark-theme .books-card-title,
+[data-bs-theme="dark"] .books-card-title {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .books-card .card-text,
+[data-bs-theme="dark"] .books-card .card-text {
+  color: var(--text-secondary) !important;
+}
+
+.dark-theme .books-price,
+[data-bs-theme="dark"] .books-price {
+  color: var(--accent-color) !important;
+}
+
+.dark-theme .books-original-price,
+[data-bs-theme="dark"] .books-original-price {
+  color: var(--text-secondary) !important;
+}
+
+.dark-theme .books-brand-text,
+[data-bs-theme="dark"] .books-brand-text {
+  color: var(--accent-color) !important;
+  opacity: 0.9;
+}
+
+/* Button styles for dark mode */
+.dark-theme .books-shop-btn,
+[data-bs-theme="dark"] .books-shop-btn {
+  background: linear-gradient(135deg, var(--accent-color), #f59e0b) !important;
+  border: none !important;
+  color: white !important;
+}
+
+.dark-theme .books-shop-btn:hover,
+[data-bs-theme="dark"] .books-shop-btn:hover {
+  opacity: 0.9 !important;
+  box-shadow: 0 8px 20px rgba(var(--accent-rgb), 0.4) !important;
+}
+
+.dark-theme .books-explore-btn,
+[data-bs-theme="dark"] .books-explore-btn {
+  border-color: var(--accent-color) !important;
+  color: var(--accent-color) !important;
+}
+
+.dark-theme .books-explore-btn:hover,
+[data-bs-theme="dark"] .books-explore-btn:hover {
+  background-color: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+  color: var(--bg-primary) !important;
+}
+
+/* Image container in dark mode */
+.dark-theme .books-card .image-container,
+[data-bs-theme="dark"] .books-card .image-container {
+  background-color: var(--bg-tertiary) !important;
+}
+
+/* Discount badge in dark mode */
+.dark-theme .books-discount-badge,
+[data-bs-theme="dark"] .books-discount-badge {
+  background-color: var(--accent-color) !important;
+  color: white !important;
+}
+
+/* Page flip animation for books */
+@keyframes bookFlip {
+  0% { transform: perspective(400px) rotateY(0); }
+  100% { transform: perspective(400px) rotateY(-10deg); }
+}
+
+.books-card:hover {
+  animation: bookFlip 0.5s ease-out forwards;
+}
+
+/* Smooth transitions */
+.books-card,
+.books-card *,
+.books-section-container,
+.books-section-container * {
+  transition: background-color 0.3s ease, 
+              color 0.3s ease, 
+              border-color 0.3s ease,
+              box-shadow 0.3s ease,
+              transform 0.3s ease;
+}

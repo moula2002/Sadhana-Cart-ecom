@@ -1,0 +1,91 @@
+/* 🌑 More dark professional background */
+.footer {
+  background: linear-gradient(
+    180deg,
+    #1f2937 0%,   /* dark slate */
+    #111827 60%,  /* deep navy */
+    #020617 100%  /* near black */
+  );
+  border-top: 1px solid #1e293b;
+  color: #e5e7eb;
+}
+
+/* Logo Row */
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Logo size same as header image */
+.footer-logo-img {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+}
+
+/* Brand text */
+.footer-logo-text {
+  font-size: 22px;
+  font-weight: 700;
+  color: #fbbf24; /* richer golden yellow */
+}
+
+.cart-text {
+  color: #60a5fa; /* soft blue instead of harsh navy */
+  margin-left: 2px;
+}
+
+/* Headings */
+.footer-heading {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #f9fafb;
+}
+
+/* Paragraphs */
+.footer-text,
+.footer-address,
+.footer p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #cbd5f5;
+}
+
+/* Links */
+.footer a {
+  color: #dbeafe;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.footer a:hover {
+  color: #fbbf24;
+  padding-left: 6px;
+}
+
+/* Links list spacing */
+.footer-links li {
+  margin-bottom: 6px;
+}
+
+/* Office title */
+.office-title {
+  color: #fbbf24;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+/* Copyright */
+.footer-copyright {
+  font-size: 13px;
+  color: #9ca3af;
+  margin-top: 15px;
+}
+
+/* Developer */
+.developer-text {
+  color: #93c5fd;
+  font-weight: 500;
+}

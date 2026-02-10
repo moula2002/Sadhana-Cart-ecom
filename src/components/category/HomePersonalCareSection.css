@@ -1,0 +1,265 @@
+/* HomePersonalCareSection.css - Dark Mode Styles for Personal Care Section */
+
+/* Personal care section specific dark mode styles */
+.dark-theme .personal-care-section-container,
+[data-bs-theme="dark"] .personal-care-section-container {
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.dark-theme .personal-care-section-title,
+[data-bs-theme="dark"] .personal-care-section-title {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .personal-care-section-title span,
+[data-bs-theme="dark"] .personal-care-section-title span {
+  color: var(--accent-color) !important;
+}
+
+.dark-theme .personal-care-card,
+[data-bs-theme="dark"] .personal-care-card {
+  background-color: var(--card-bg) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: 0 4px 12px var(--shadow-color) !important;
+}
+
+.dark-theme .personal-care-card:hover,
+[data-bs-theme="dark"] .personal-care-card:hover {
+  border-color: var(--accent-color) !important;
+  box-shadow: 0 8px 20px var(--shadow-color) !important;
+}
+
+.dark-theme .personal-care-card-title,
+[data-bs-theme="dark"] .personal-care-card-title {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .personal-care-card .card-text,
+[data-bs-theme="dark"] .personal-care-card .card-text {
+  color: var(--text-secondary) !important;
+}
+
+.dark-theme .personal-care-price,
+[data-bs-theme="dark"] .personal-care-price {
+  color: var(--accent-color) !important;
+}
+
+.dark-theme .personal-care-original-price,
+[data-bs-theme="dark"] .personal-care-original-price {
+  color: var(--text-secondary) !important;
+}
+
+.dark-theme .personal-care-brand-text,
+[data-bs-theme="dark"] .personal-care-brand-text {
+  color: var(--accent-color) !important;
+  opacity: 0.9;
+}
+
+/* Button styles for dark mode */
+.dark-theme .personal-care-view-deal-btn,
+[data-bs-theme="dark"] .personal-care-view-deal-btn {
+  background-color: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+  color: white !important;
+}
+
+.dark-theme .personal-care-view-deal-btn:hover,
+[data-bs-theme="dark"] .personal-care-view-deal-btn:hover {
+  background-color: var(--text-primary) !important;
+  border-color: var(--text-primary) !important;
+  color: var(--bg-primary) !important;
+}
+
+.dark-theme .personal-care-explore-btn,
+[data-bs-theme="dark"] .personal-care-explore-btn {
+  background-color: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+  color: white !important;
+}
+
+.dark-theme .personal-care-explore-btn:hover,
+[data-bs-theme="dark"] .personal-care-explore-btn:hover {
+  background-color: white !important;
+  border-color: white !important;
+  color: var(--accent-color) !important;
+}
+
+/* Image container in dark mode */
+.dark-theme .personal-care-card .image-container,
+[data-bs-theme="dark"] .personal-care-card .image-container {
+  background-color: var(--bg-tertiary) !important;
+}
+
+/* Discount badge in dark mode */
+.dark-theme .personal-care-discount-badge,
+[data-bs-theme="dark"] .personal-care-discount-badge {
+  background-color: var(--accent-color) !important;
+  color: white !important;
+}
+
+/* Heartbeat animation for personal care */
+@keyframes heartbeat {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.1); }
+  50% { transform: scale(1); }
+  75% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+@keyframes careGlow {
+  0%, 100% { box-shadow: 0 0 5px rgba(230, 57, 70, 0.5); }
+  50% { box-shadow: 0 0 20px rgba(230, 57, 70, 0.8); }
+}
+
+.personal-care-card {
+  animation: careGlow 3s ease-in-out infinite;
+}
+
+.personal-care-card:hover {
+  animation: heartbeat 1s ease;
+}
+
+/* Card hover effects */
+.personal-care-card {
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+              box-shadow 0.4s ease !important;
+}
+
+.personal-care-card:hover {
+  transform: translateY(-12px) !important;
+}
+
+.personal-care-card:hover img {
+  transform: scale(1.08) !important;
+}
+
+/* Button transitions */
+.personal-care-view-deal-btn {
+  transition: all 0.3s ease !important;
+}
+
+.personal-care-explore-btn {
+  transition: all 0.3s ease-in-out !important;
+}
+
+/* Watermark styling */
+.red-watermark {
+  position: absolute;
+  bottom: -30px;
+  left: -20px;
+  font-size: 12rem;
+  font-weight: 900;
+  color: rgba(230, 57, 70, 0.03);
+  user-select: none;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.dark-theme .red-watermark,
+[data-bs-theme="dark"] .red-watermark {
+  color: rgba(255, 107, 107, 0.05);
+  opacity: 0.9;
+}
+
+/* Animation for section entrance */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.personal-care-section-container {
+  animation: fadeInUp 0.8s ease-out;
+}
+
+/* Mobile optimizations */
+@media (max-width: 576px) {
+  .personal-care-card:hover {
+    transform: translateY(-8px) !important;
+  }
+  
+  .personal-care-card img {
+    max-height: 90% !important;
+  }
+  
+  .red-watermark {
+    font-size: 8rem;
+    bottom: -20px;
+    left: -15px;
+  }
+}
+
+/* Tablet optimizations */
+@media (max-width: 768px) {
+  .personal-care-card {
+    margin-bottom: 1rem;
+  }
+  
+  .red-watermark {
+    font-size: 10rem;
+  }
+}
+
+/* Smooth transitions */
+.personal-care-card,
+.personal-care-card *,
+.personal-care-section-container,
+.personal-care-section-container * {
+  transition: background-color 0.3s ease, 
+              color 0.3s ease, 
+              border-color 0.3s ease,
+              box-shadow 0.3s ease,
+              transform 0.3s ease !important;
+}
+
+/* Personal care-specific color overrides */
+:root {
+  --care-accent: #ff4d4d;
+  --care-red: #e63946;
+  --care-light: #FFF5F5;
+}
+
+.dark-theme,
+[data-bs-theme="dark"] {
+  --care-accent: #ff8585;
+  --care-red: #ff6b6b;
+  --care-light: #1a1a1a;
+}
+
+/* Ensure care colors are used for personal care specific elements */
+.personal-care-price,
+.personal-care-brand-text,
+.personal-care-section-title span {
+  color: var(--care-accent) !important;
+}
+
+.personal-care-view-deal-btn,
+.personal-care-explore-btn {
+  background-color: var(--care-red) !important;
+  border-color: var(--care-red) !important;
+}
+
+.personal-care-card .image-container {
+  background-color: var(--care-light) !important;
+}
+
+/* Dark mode hover states */
+.dark-theme .personal-care-view-deal-btn:hover,
+[data-bs-theme="dark"] .personal-care-view-deal-btn:hover {
+  background-color: var(--care-accent) !important;
+  border-color: var(--care-accent) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .personal-care-explore-btn:hover,
+[data-bs-theme="dark"] .personal-care-explore-btn:hover {
+  background-color: var(--care-accent) !important;
+  border-color: var(--care-accent) !important;
+  color: var(--care-red) !important;
+}
