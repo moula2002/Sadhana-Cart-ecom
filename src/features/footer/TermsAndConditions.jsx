@@ -1,92 +1,88 @@
 import React from 'react';
 import './TermsAndConditions.css';
+import { useTranslation } from "react-i18next";
 
 function TermsAndConditions() {
+  const { t } = useTranslation();
+
   const sections = [
     {
-      title: "1. User Accounts",
+      title: t("terms.section1.title"),
       points: [
-        "You must register an account to make purchases or sell products",
-        "You are responsible for maintaining the confidentiality of your account",
-        "You must provide accurate and complete information"
+        t("terms.section1.point1"),
+        t("terms.section1.point2"),
+        t("terms.section1.point3")
       ]
     },
     {
-      title: "2. Vendor Responsibilities",
+      title: t("terms.section2.title"),
       points: [
-        "Vendors must ensure their products are legal, genuine, and as described",
-        "Vendors are responsible for order fulfillment, returns, and refunds",
-        "Vendors must comply with all applicable laws and regulations"
+        t("terms.section2.point1"),
+        t("terms.section2.point2"),
+        t("terms.section2.point3")
       ]
     },
     {
-      title: "3. Purchases and Payments",
+      title: t("terms.section3.title"),
       points: [
-        "All purchases made through the app are subject to availability",
-        "We use secure third-party payment gateways for processing",
-        "Prices are subject to change without notice"
+        t("terms.section3.point1"),
+        t("terms.section3.point2"),
+        t("terms.section3.point3")
       ]
     },
     {
-      title: "4. Prohibited Activities",
+      title: t("terms.section4.title"),
       points: [
-        "Posting or selling counterfeit or restricted items",
-        "Attempting to hack or disrupt the platform",
-        "Using automated tools to access data or manipulate listings"
+        t("terms.section4.point1"),
+        t("terms.section4.point2"),
+        t("terms.section4.point3")
       ]
     },
     {
-      title: "5. Intellectual Property",
+      title: t("terms.section5.title"),
       points: [
-        "All content, logos, and trademarks are owned by us or our partners",
-        "Users may not copy or reproduce app content without permission",
-        "Vendors retain ownership of their product listings and images"
+        t("terms.section5.point1"),
+        t("terms.section5.point2"),
+        t("terms.section5.point3")
       ]
     },
     {
-      title: "6. Termination",
+      title: t("terms.section6.title"),
       points: [
-        "We reserve the right to suspend or terminate accounts for violations",
-        "Terminated users may lose access to their data or listings",
-        "Users may appeal termination decisions through our support system"
+        t("terms.section6.point1"),
+        t("terms.section6.point2"),
+        t("terms.section6.point3")
       ]
     },
     {
-      title: "7. Limitation of Liability",
+      title: t("terms.section7.title"),
       points: [
-        "We are not liable for any damages arising from use of the app",
-        "All transactions are between vendors and customers directly",
-        "We provide the platform but do not guarantee product quality or delivery"
+        t("terms.section7.point1"),
+        t("terms.section7.point2"),
+        t("terms.section7.point3")
       ]
     }
   ];
 
-  // WhatsApp link
-  const whatsappLink = `https://wa.me/9448810877?text=Hello%20SadhanaCart%20Support,%0AI%20need%20help%20regarding%20the%20Terms%20and%20Conditions.`;
+  const whatsappLink = `https://wa.me/9448810877?text=Hello%20SadhanaCart%20Support`;
 
   return (
     <div className="terms-container" id="top">
-      {/* --- Orange Header Section --- */}
+
       <header className="terms-header-bg">
         <div className="terms-header-content">
-          <h1>Our Terms & Conditions</h1>
+          <h1>{t("terms.header")}</h1>
         </div>
       </header>
 
-      {/* --- Main Content Area --- */}
       <div className="terms-page-container">
         <main className="terms-main-content">
-          
-          {/* Intro */}
+
           <div className="terms-intro">
-            <h2>Terms & Conditions</h2>
-            <p>
-              Please read these terms and conditions carefully before using our e-commerce multi-vendor application. 
-              By accessing or using the app, you agree to be bound by these terms.
-            </p>
+            <h2>{t("terms.title")}</h2>
+            <p>{t("terms.intro")}</p>
           </div>
 
-          {/* Dynamic Sections */}
           {sections.map((section, index) => (
             <section key={index} className="terms-section">
               <h3 className="section-title-highlight">{section.title}</h3>
@@ -98,33 +94,30 @@ function TermsAndConditions() {
             </section>
           ))}
 
-          {/* --- Acceptance Box --- */}
           <div className="acceptance-box">
-            <h3>Acceptance of Terms</h3>
-            <p>
-              By using our app, you acknowledge that you have read, understood, and agree to be bound by these terms and conditions.
-            </p>
+            <h3>{t("terms.acceptanceTitle")}</h3>
+            <p>{t("terms.acceptanceText")}</p>
 
-            {/* Buttons */}
             <div className="terms-buttons-container">
-              <button className="terms-btn-primary">I Understand</button>
+              <button className="terms-btn-primary">
+                {t("terms.understandButton")}
+              </button>
 
-              {/* WhatsApp Contact Button */}
               <a
                 href={whatsappLink}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="whatsapp-contact-btn"
               >
-                <i className="fab fa-whatsapp me-2"></i> Contact Support
+                {t("terms.contactSupport")}
               </a>
             </div>
           </div>
-          
-          {/* Scroll to Top Button */}
+
           <a href="#" className="scroll-to-top-btn">
             <i className="fas fa-arrow-up"></i>
           </a>
+
         </main>
       </div>
     </div>

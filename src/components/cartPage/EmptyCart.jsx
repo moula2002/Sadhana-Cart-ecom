@@ -5,9 +5,10 @@ import "../cartPage/CartPage"; // Assuming CartPage.css is correctly referenced
 import { IoArrowBackOutline } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import cart from "../../Images/Sadhanacart1.png"
 
 
-const EMPTY_CART_IMAGE_URL = "https://rukminim2.flixcart.com/www/800/800/promos/16/05/2019/d438a32e-765a-4d8b-b4a6-520b560971e8.png";
+const EMPTY_CART_IMAGE_URL = {cart};
 
 const EmptyCart = () => {
   const navigate = useNavigate();
@@ -43,7 +44,7 @@ const EmptyCart = () => {
 
       <div className="cart-empty-container">
         <div className="cart-empty-image">
-          <img src={EMPTY_CART_IMAGE_URL} alt="Empty Cart" />
+          <img src={cart} alt="Empty Cart" />
         </div>
 
         <p className="cart-empty-footer">

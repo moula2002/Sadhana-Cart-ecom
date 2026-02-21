@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Container, Spinner, Row, Col, Card, Alert } from "react-bootstrap";
+import { useTranslation } from "react-i18next";
 import { db } from "../../firebase";
 import {
   collection,
@@ -165,6 +166,8 @@ const ProductCard = ({ product }) => {
 
 // -------------------------------------------------------------
 function Mens() {
+  const { t } = useTranslation();
+
   const categoryName = "Mens";
   const PAGE_SIZE = 8;
   const [products, setProducts] = useState([]);
@@ -338,20 +341,18 @@ function Mens() {
     <div style={containerStyle}>
       <Container className="my-5 text-center">
         <h2 className="fw-bold mb-3" style={titleStyle}>
-          👔 {categoryName} Collection
+          👔 {t("fashion.collectionTitle", { category: t("mens") })}
+
         </h2>
-        <p className="mb-5" style={textStyle}>
-          Discover premium{" "}
-          <strong className="text-capitalize" style={{ color: theme === 'dark' ? '#ffffff' : 'inherit' }}>
-            {categoryName}'s
-          </strong> fashion and accessories ✨
-        </p>
+       <p className="mb-5" style={textStyle}>
+  {t("mensSubtitle")}
+</p>
 
         {loading ? (
           <div className="text-center my-5">
             <Spinner animation="border" variant="warning" />
             <p className="mt-3" style={loadingTextStyle}>
-              Loading {categoryName.toLowerCase()} products...
+              {t("mensLoading")}
             </p>
           </div>
         ) : products.length > 0 ? (
@@ -372,13 +373,13 @@ function Mens() {
             {loadingMore && (
               <div className="text-center my-4">
                 <Spinner animation="grow" variant="secondary" />
-                <p className="mt-2" style={textStyle}>Loading more...</p>
+                <p className="mt-2" style={textStyle}>{t("common.loadingMore")}</p>
               </div>
             )}
 
             {!hasMore && (
               <p className="mt-4" style={textStyle}>
-                refresh the website
+                {t("common.refresh")}
               </p>
             )}
           </>
@@ -393,7 +394,7 @@ function Mens() {
             }}
           >
             <p className="fw-bold mb-0">
-              No products found in {categoryName}.
+              {t("category.noProducts", { category: t("mens") })}
             </p>
           </Alert>
         )}

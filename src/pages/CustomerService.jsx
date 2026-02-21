@@ -82,8 +82,6 @@ const CustomerSupportCenter = () => {
       cursor: 'pointer',
       borderRadius: '8px',
       height: '100%',
-      // Note: Hover effects must be handled via component state or pure CSS,
-      // which is why this approach is limited for attractive animations.
     },
     cardLinkIcon: {
       color: '#007185',

@@ -13,16 +13,16 @@ import { collection, query, where, getDocs } from "firebase/firestore";
 import { Link } from "react-router-dom";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import "react-lazy-load-image-component/src/effects/blur.css";
+import { useTranslation } from "react-i18next";
 import "./HomeFootWearsSection.css"
+
 
 // 🎨 UPDATED STYLE CONSTANTS (Warm Earthy Theme with Dark Mode)
 const PRIMARY_TEXT_COLOR = "#3E2723"; // Deep Coffee Brown
-const PRIMARY_TEXT_COLOR_DARK = "#fef3c7"; // Light yellow for dark mode
-const ACCENT_COLOR = "#A1887F";      // Warm Taupe
+const PRIMARY_TEXT_COLOR_DARK = "#fef3c7"; // Light yellow for dark mode   // Warm Taupe
 const ACCENT_COLOR_DARK = "#d6bca9"; // Brighter taupe for dark mode
 const EARTH_BROWN = "#8D6E63";       // Medium Terra
-const EARTH_BROWN_DARK = "#a78b7f";  // Brighter brown for dark mode
-const LIGHT_SAND = "#FDF5E6";        // Old Lace / Light Brown
+const EARTH_BROWN_DARK = "#a78b7f";  // Brighter brown for dark mode     // Old Lace / Light Brown
 const DARK_SAND = "#2c241c";         // Dark brown for dark mode
 const WHITE_COLOR = "#FFFFFF";
 const SALE_COLOR = "#D84315";        // Burnt Orange
@@ -40,11 +40,11 @@ const getCustomStyles = (isDarkMode) => ({
     backgroundColor: isDarkMode ? "rgba(30, 30, 30, 0.9)" : WHITE_COLOR,
     borderRadius: "30px",
     padding: "3.5rem 1.5rem",
-    boxShadow: isDarkMode ? 
-      "0 20px 40px rgba(62, 39, 35, 0.08)" : 
+    boxShadow: isDarkMode ?
+      "0 20px 40px rgba(62, 39, 35, 0.08)" :
       "0 20px 40px rgba(62, 39, 35, 0.08)",
-    border: isDarkMode ? 
-      "1px solid rgba(255, 255, 255, 0.1)" : 
+    border: isDarkMode ?
+      "1px solid rgba(255, 255, 255, 0.1)" :
       "1px solid #EFEBE9",
     position: "relative",
     overflow: "hidden",
@@ -59,8 +59,8 @@ const getCustomStyles = (isDarkMode) => ({
     cursor: "pointer",
     height: "100%",
     position: "relative",
-    boxShadow: isDarkMode ? 
-      "0 5px 15px rgba(0,0,0,0.2)" : 
+    boxShadow: isDarkMode ?
+      "0 5px 15px rgba(0,0,0,0.2)" :
       "0 5px 15px rgba(0,0,0,0.05)",
   },
   imageContainer: (isMobile) => ({
@@ -89,8 +89,8 @@ const getCustomStyles = (isDarkMode) => ({
     fontSize: "0.75rem",
     fontWeight: "800",
     zIndex: 10,
-    boxShadow: isDarkMode ? 
-      "0 4px 8px rgba(249, 115, 22, 0.3)" : 
+    boxShadow: isDarkMode ?
+      "0 4px 8px rgba(249, 115, 22, 0.3)" :
       "0 4px 8px rgba(216, 67, 21, 0.3)",
   },
   brandText: {
@@ -148,8 +148,8 @@ const getCustomStyles = (isDarkMode) => ({
     backgroundColor: isDarkMode ? "#fff" : EARTH_BROWN,
     color: isDarkMode ? EARTH_BROWN_DARK : WHITE_COLOR,
     transform: "scale(1.05)",
-    boxShadow: isDarkMode ? 
-      "0 4px 12px rgba(255, 255, 255, 0.2)" : 
+    boxShadow: isDarkMode ?
+      "0 4px 12px rgba(255, 255, 255, 0.2)" :
       "0 4px 12px rgba(141, 110, 99, 0.3)",
   }),
   exploreButton: {
@@ -166,8 +166,8 @@ const getCustomStyles = (isDarkMode) => ({
     backgroundColor: isDarkMode ? ACCENT_COLOR_DARK : PRIMARY_TEXT_COLOR,
     color: isDarkMode ? "#121212" : WHITE_COLOR,
     transform: "translateY(-2px)",
-    boxShadow: isDarkMode ? 
-      "0 10px 20px rgba(214, 188, 169, 0.3)" : 
+    boxShadow: isDarkMode ?
+      "0 10px 20px rgba(214, 188, 169, 0.3)" :
       "0 10px 20px rgba(62, 39, 35, 0.2)",
   }),
   footwearWatermark: {
@@ -189,8 +189,8 @@ const getCustomStyles = (isDarkMode) => ({
 // ✨ Hover Handlers
 const handleCardMouseEnter = (e, isDarkMode) => {
   e.currentTarget.style.transform = "translateY(-10px)";
-  e.currentTarget.style.boxShadow = isDarkMode ? 
-    "0 25px 50px rgba(214, 188, 169, 0.15)" : 
+  e.currentTarget.style.boxShadow = isDarkMode ?
+    "0 25px 50px rgba(214, 188, 169, 0.15)" :
     "0 25px 50px rgba(62, 39, 35, 0.15)";
   e.currentTarget.querySelector("img").style.transform = "scale(1.1) rotate(2deg)";
 };
@@ -251,6 +251,7 @@ const BrownAnimations = () => (
 const calculateDiscount = (p, op) => (op > p ? Math.round(((op - p) / op) * 100) : 0);
 
 function HomeFootWearsSection() {
+  const { t } = useTranslation();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 576);
@@ -259,8 +260,8 @@ function HomeFootWearsSection() {
   // Check for dark mode
   useEffect(() => {
     const checkDarkMode = () => {
-      const isDark = document.body.classList.contains('dark-theme') || 
-                    document.documentElement.getAttribute('data-bs-theme') === 'dark';
+      const isDark = document.body.classList.contains('dark-theme') ||
+        document.documentElement.getAttribute('data-bs-theme') === 'dark';
       setIsDarkMode(isDark);
     };
 
@@ -296,10 +297,10 @@ function HomeFootWearsSection() {
         setProducts(data.sort(() => 0.5 - Math.random()).slice(0, 4));
       } catch (err) {
         setProducts(Array.from({ length: 4 }, (_, i) => ({
-          id: `footwear-dummy-${i}`, 
-          name: "Classic Loafer", 
-          brand: "OAK & LEATHER", 
-          price: 1899, 
+          id: `footwear-dummy-${i}`,
+          name: "Classic Loafer",
+          brand: "OAK & LEATHER",
+          price: 1899,
           originalPrice: 2999,
           image: `https://picsum.photos/seed/footwear${i}/300/300`
         })));
@@ -315,32 +316,36 @@ function HomeFootWearsSection() {
   return (
     <>
       <BrownAnimations />
-      <Container 
-        fluid 
-        className="category-section footwear" 
-        style={{ 
-          background: isDarkMode ? DARK_BG_GRADIENT : FOOTWEAR_BG_GRADIENT, 
+      <Container
+        fluid
+        className="category-section footwear"
+        style={{
+          background: isDarkMode ? DARK_BG_GRADIENT : FOOTWEAR_BG_GRADIENT,
           padding: "60px 0",
           transition: "background 0.3s ease"
         }}
       >
-        <Container className="animate-in" style={customStyles.sectionContainer} className ="footwear-section-container">
+        <Container className="animate-in" style={customStyles.sectionContainer} className="footwear-section-container">
 
           {/* Header */}
           <div className="text-center mb-5">
             <h3 style={customStyles.header} className="footwear-section-title theme-text footwear-glow-text">
-              WALK WITH <span style={{ color: isDarkMode ? EARTH_BROWN_DARK : EARTH_BROWN }}>CONFIDENCE</span>
+              {t("footwearWalk")}{" "}
+              <span style={{ color: isDarkMode ? EARTH_BROWN_DARK : EARTH_BROWN }}>
+                {t("footwearConfidence")}
+              </span>
               <div style={customStyles.headerUnderline}></div>
             </h3>
+
             <p className="mt-2" style={customStyles.subtitle}>
-              Premium footwear crafted for comfort and lasting style.
+              {t("footwearSubtitle")}
             </p>
           </div>
 
           {loading ? (
             <div className="text-center py-5">
               <Spinner animation="border" style={{ color: isDarkMode ? EARTH_BROWN_DARK : PRIMARY_TEXT_COLOR }} />
-              <p className="mt-3 text-muted theme-text-secondary">Loading footwear...</p>
+              <p className="mt-3 text-muted theme-text-secondary">{t("footwearLoading")}</p>
             </div>
           ) : (
             <>
@@ -350,15 +355,15 @@ function HomeFootWearsSection() {
                   return (
                     <Col key={product.id}>
                       <Link to={`/product/${product.id}`} className="text-decoration-none d-block h-100">
-                        <Card 
-                          className="footwear-card theme-card" 
+                        <Card
+                          className="footwear-card theme-card"
                           style={customStyles.productCard}
                           onMouseEnter={(e) => handleCardMouseEnter(e, isDarkMode)}
                           onMouseLeave={(e) => handleCardMouseLeave(e, isDarkMode, customStyles)}
                         >
                           {discount > 0 && (
                             <Badge style={customStyles.discountBadge} className="footwear-discount-badge">
-                              {discount}% OFF
+                              {discount}% {t("off")}
                             </Badge>
                           )}
                           <div style={customStyles.imageContainer(isMobile)}>
@@ -373,8 +378,8 @@ function HomeFootWearsSection() {
                             <small style={customStyles.brandText} className="footwear-brand-text">
                               {product.brand || "HANDCRAFTED"}
                             </small>
-                            <Card.Title 
-                              style={customStyles.title} 
+                            <Card.Title
+                              style={customStyles.title}
                               className="text-truncate footwear-card-title theme-text"
                             >
                               {product.name}
@@ -390,13 +395,13 @@ function HomeFootWearsSection() {
                                   </small>
                                 )}
                               </div>
-                              <Button 
-                                style={customStyles.viewDealButton} 
+                              <Button
+                                style={customStyles.viewDealButton}
                                 className="w-100 footwear-view-deal-btn theme-button hover-btn-brown"
                                 onMouseEnter={(e) => handleViewDealMouseEnter(e, isDarkMode, customStyles)}
                                 onMouseLeave={(e) => handleViewDealMouseLeave(e, customStyles)}
                               >
-                                SHOP NOW
+                                {t("shopNow")}
                               </Button>
                             </div>
                           </Card.Body>
@@ -406,15 +411,15 @@ function HomeFootWearsSection() {
                   );
                 })}
               </Row>
-       <div className="text-center mt-5">
+              <div className="text-center mt-5">
                 <Link to="/footwears">
-                  <Button 
-                    style={customStyles.exploreButton} 
+                  <Button
+                    style={customStyles.exploreButton}
                     className="photo-frames-explore-btn theme-button btn-hover-effect"
                     onMouseEnter={(e) => handleExploreMouseEnter(e, isDarkMode, customStyles)}
                     onMouseLeave={(e) => handleExploreMouseLeave(e, customStyles)}
                   >
-                    Browse All Collections →
+                    {t("browseCollections")} →
                   </Button>
                 </Link>
               </div>

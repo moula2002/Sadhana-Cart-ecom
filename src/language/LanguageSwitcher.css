@@ -1,0 +1,40 @@
+/* 🌍 Language Switcher Container */
+.language-switcher {
+  margin-top: 6px;
+}
+
+/* 🌍 Dropdown select */
+.language-switcher select {
+  width: 100%;
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  background-color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Hover */
+.language-switcher select:hover {
+  border-color: #0d6efd;
+}
+
+/* Focus */
+.language-switcher select:focus {
+  outline: none;
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.2);
+}
+
+/* Dark theme support */
+body.dark-theme .language-switcher select {
+  background-color: #1f1f1f;
+  color: #fff;
+  border-color: #444;
+}
+
+body.dark-theme .language-switcher select:hover {
+  border-color: #ffc107;
+}

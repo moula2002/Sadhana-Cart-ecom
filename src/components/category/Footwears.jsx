@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Container, Spinner, Row, Col, Card, Alert } from "react-bootstrap";
+import { useTranslation } from "react-i18next";
+
 import { db } from "../../firebase";
 import {
   collection,
@@ -165,6 +167,7 @@ const ProductCard = ({ product }) => {
 
 // -------------------------------------------------------------
 function Footwears() {
+  const { t } = useTranslation(); 
   const categoryName = "Footwears";
   const PAGE_SIZE = 8;
   const [products, setProducts] = useState([]);
@@ -338,20 +341,19 @@ function Footwears() {
     <div style={containerStyle}>
       <Container className="my-5 text-center">
         <h2 className="fw-bold mb-3" style={titleStyle}>
-          👟 {categoryName} Collection
-        </h2>
-        <p className="mb-5" style={textStyle}>
-          Discover trendy and comfortable{" "}
-          <strong className="text-capitalize" style={{ color: theme === 'dark' ? '#ffffff' : 'inherit' }}>
-            {categoryName}
-          </strong> for every occasion ✨
-        </p>
+  👟 {t("footwear.collectionTitle", { category: categoryName })}
+</h2>
+       <p className="mb-5" style={textStyle}>
+  {t("footwear.description", { category: categoryName })}
+</p>
+
 
         {loading ? (
           <div className="text-center my-5">
             <Spinner animation="border" variant="warning" />
             <p className="mt-3" style={loadingTextStyle}>
-              Loading {categoryName.toLowerCase()} products...
+              {t("footwear.loading")}
+
             </p>
           </div>
         ) : products.length > 0 ? (
@@ -372,13 +374,13 @@ function Footwears() {
             {loadingMore && (
               <div className="text-center my-4">
                 <Spinner animation="grow" variant="secondary" />
-                <p className="mt-2" style={textStyle}>Loading more...</p>
+                <p className="mt-2" style={textStyle}>{t("common.loadingMore")}</p>
               </div>
             )}
 
             {!hasMore && (
               <p className="mt-4" style={textStyle}>
-                refresh the website
+                {t("common.refresh")}
               </p>
             )}
           </>
@@ -393,7 +395,7 @@ function Footwears() {
             }}
           >
             <p className="fw-bold mb-0">
-              No products found in {categoryName}.
+              {t("footwear.noProducts", { category: categoryName })}
             </p>
           </Alert>
         )}

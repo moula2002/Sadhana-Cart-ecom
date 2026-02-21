@@ -1,7 +1,10 @@
 import React from "react";
 import { Card, Row, Col, Button, ButtonGroup, Image } from "react-bootstrap";
+import { useTranslation } from "react-i18next";
+
 
 const CartItem = ({ item, onIncrease, onDecrease, onRemove }) => {
+  const { t } = useTranslation();
   const formatPrice = (value) =>
     new Intl.NumberFormat("en-IN", {
       style: "currency",
@@ -31,7 +34,7 @@ const CartItem = ({ item, onIncrease, onDecrease, onRemove }) => {
               {formatPrice(item.price)}
             </p>
             <p className="text-muted small mb-0">
-              Subtotal:{" "}
+             {t("cart.subtotal")}:{" "}
               <strong className="text-success">
                 {formatPrice(item.price * item.quantity)}
               </strong>
@@ -68,7 +71,7 @@ const CartItem = ({ item, onIncrease, onDecrease, onRemove }) => {
               className="rounded-pill px-3"
               onClick={() => onRemove(item)}
             >
-              🗑 Remove
+             🗑 {t("cart.remove")}
             </Button>
           </Col>
         </Row>

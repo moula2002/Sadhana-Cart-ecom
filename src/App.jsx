@@ -17,11 +17,13 @@ import Footer from "./features/footer/Footer";
 
 /* ===== Pages ===== */
 import HomePage from "./pages/Home";
-import ProductDetailPage from "./pages/ProductDetailPage"; // Fixed import
+import ProductDetailPage from "./pages/ProductDetailPage";
 import CustomerSupportCenter from "./pages/CustomerService";
 import AuthPage from "./pages/LoginPage";
 import CategoryPage from "./pages/CategoryPage";
 import CategoryProducts from "./components/searchBar/CategoryProducts";
+import AdvancedSearchPage from "./pages/AdvancedSearchPage";
+import SearchResultsPage from "./pages/SearchResultsPage"; // ✅ ADDED
 
 /* ===== Cart & Checkout ===== */
 import CartPage from "./components/cartPage/CartPage";
@@ -55,16 +57,18 @@ import ContactForm from "./features/footer/ContactSupport";
 
 /* ===== User Pages ===== */
 import ProfilePage from "./pages/Profile";
-import Wishlist from "./pages/Wishlist"; // Fixed import name
+import Wishlist from "./pages/Wishlist";
 import ReferCode from "./pages/ReferCode";
 import Wallet from "./pages/Wallet";
 import Theme from "./pages/Theme";
+import SaveAddress from "./pages/SaveAddress";
+import AddressList from "./pages/AddressList";
 
 /* ================= APP CONTENT ================= */
 const AppContent = () => {
   const location = useLocation();
 
-  // 🔹 Hide Header & Footer only on Login page
+  // Hide Header & Footer only on Login page
   const hideLayout = location.pathname === "/login";
 
   return (
@@ -73,6 +77,7 @@ const AppContent = () => {
 
       <main>
         <Routes>
+
           {/* 🔹 Main Routes */}
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<AuthPage />} />
@@ -85,12 +90,17 @@ const AppContent = () => {
 
           {/* 🔹 User Pages */}
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/address" element={<SaveAddress/>} />
+          <Route path="/save-address" element={<AddressList/>} />
+
           <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/refercode" element={<ReferCode />} />
           <Route path="/wallet" element={<Wallet />} />
           <Route path="/theme" element={<Theme />} />
-          
 
+          {/* 🔹 Search */}
+          <Route path="/advanced-search" element={<AdvancedSearchPage />} />
+          <Route path="/search-results" element={<SearchResultsPage />} /> {/* ✅ FIXED */}
 
           {/* 🔹 Product */}
           <Route path="/product/:id" element={<ProductDetailPage />} />

@@ -4,11 +4,13 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { FaCopy, FaWallet, FaRupeeSign, FaGift, FaShareAlt } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom"; // ✅ ADD
 
 function ReferCode() {
+  const { t } = useTranslation();
   const auth = getAuth();
   const navigate = useNavigate(); // ✅ ADD
 
@@ -110,9 +112,9 @@ function ReferCode() {
         walletCoins: newCoins,
       });
 
-      toast.success("✅ Wallet balance converted to Wallet Coins!");
+      toast.success(t("refer.convertSuccess"));
     } catch (err) {
-      toast.error("❌ Failed to convert balance");
+      toast.error(t("refer.convertError"));
     } finally {
       setConverting(false);
     }
@@ -121,7 +123,7 @@ function ReferCode() {
   const copyToClipboard = () => {
     navigator.clipboard.writeText(referralCode);
     setCopied(true);
-    toast.success("🎉 Referral code copied!", { autoClose: 2000 });
+    toast.success(t("refer.copySuccess")), { autoClose: 2000 };
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -132,7 +134,7 @@ function ReferCode() {
       : navigator.clipboard.writeText(text);
   };
 
-  if (loading) return <div className="text-center py-5">Loading...</div>;
+ if (loading) return <div className="text-center py-5">{t("refer.loading")}</div>;
 
   return (
     <div className="container py-5">
@@ -146,8 +148,8 @@ function ReferCode() {
               <div className="d-flex align-items-center">
                 <FaGift size={30} className="me-3" />
                 <div>
-                  <h3 className="fw-bold mb-0">Your Referral Code</h3>
-                  <small>Earn ₹50 per referral</small>
+                  <h3 className="fw-bold mb-0">{t("refer.codeTitle")}</h3>
+                 <small>{t("refer.earnPerReferral")}</small>
                 </div>
               </div>
             </div>
@@ -160,11 +162,11 @@ function ReferCode() {
               <div className="d-flex justify-content-center gap-3 mt-4">
                 <button className="btn btn-primary px-4" onClick={copyToClipboard}>
                   <FaCopy className="me-2" />
-                  {copied ? "Copied" : "Copy"}
+                  {copied ? t("refer.copied") : t("refer.copy")}
                 </button>
                 <button className="btn btn-outline-primary px-4" onClick={shareReferral}>
                   <FaShareAlt className="me-2" />
-                  Share
+                  {t("refer.share")}
                 </button>
               </div>
             </div>
@@ -179,7 +181,7 @@ function ReferCode() {
             <div className="card-header bg-gradient-primary text-white py-4">
               <div className="d-flex align-items-center">
                 <FaWallet size={30} className="me-3" />
-                <h3 className="fw-bold mb-0">Referral & Earnings</h3>
+                <h3 className="fw-bold mb-0">{t("refer.earningsTitle")}</h3>
               </div>
             </div>
 
@@ -190,7 +192,7 @@ function ReferCode() {
                     <FaRupeeSign size={22} />
                   </div>
                   <div>
-                    <h6 className="text-muted mb-1">Wallet Balance</h6>
+                    <h6 className="text-muted mb-1">{t("refer.walletBalance")}</h6>
                     <h2 className="fw-bold text-success mb-0">
                       ₹{walletData.walletBalance}
                     </h2>
@@ -202,13 +204,14 @@ function ReferCode() {
                   disabled={walletData.walletBalance === 0 || converting}
                   onClick={convertToWalletCoins}
                 >
-                  {converting ? "Converting..." : "Convert to Wallet Coins"}
+                  {converting ? t("refer.converting") : t("refer.convert")}
+
                 </button>
               </div>
 
               <hr />
               <div className="text-muted">
-                <strong>Wallet Coins:</strong> {walletData.walletCoins}
+                <strong>{t("refer.walletCoins")}:</strong>{walletData.walletCoins}
               </div>
             </div>
           </div>

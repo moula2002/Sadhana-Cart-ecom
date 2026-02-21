@@ -9,11 +9,14 @@ import {
   Badge,
 } from "react-bootstrap";
 import { db } from "../../firebase";
+import { useTranslation } from "react-i18next";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { Link } from "react-router-dom";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import "react-lazy-load-image-component/src/effects/blur.css";
 import "./HomeToysSection.css"
+
+
 
 // 🎨 UPDATED STYLE CONSTANTS (Playful Blue Theme with Dark Mode)
 const PRIMARY_TEXT_COLOR = "#0D3B66"; // Deep Navy Blue
@@ -265,6 +268,7 @@ const generateDummyProduct = (index) => ({
 });
 
 function HomeToysSection() {
+  const { t } = useTranslation();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 576);
@@ -334,19 +338,23 @@ function HomeToysSection() {
 
           {/* Playful Header */}
           <div className="text-center mb-5">
-            <h3 style={customStyles.header} className="toys-section-title theme-text toys-glow-text">
-              TOYS & <span style={{ color: isDarkMode ? ACCENT_COLOR_DARK : ACCENT_COLOR }}>GAMES</span>
-              <div style={customStyles.headerUnderline}></div>
-            </h3>
+           <h3 style={customStyles.header} className="toys-section-title theme-text toys-glow-text">
+  {t("toysTitle")} &{" "}
+  <span style={{ color: isDarkMode ? ACCENT_COLOR_DARK : ACCENT_COLOR }}>
+    {t("toysGames")}
+  </span>
+  <div style={customStyles.headerUnderline}></div>
+</h3>
+
             <p className="mt-2" style={customStyles.subtitle}>
-              Unlock a world of imagination and endless fun!
+              {t("toysSubtitle")}
             </p>
           </div>
 
           {loading ? (
             <div className="text-center py-5">
               <Spinner animation="border" style={{ color: isDarkMode ? ACCENT_COLOR_DARK : ACCENT_COLOR }} />
-              <p className="mt-3 text-muted theme-text-secondary">Loading fun toys...</p>
+              <p className="mt-3 text-muted theme-text-secondary">{t("toysLoading")}</p>
             </div>
           ) : (
             <>
@@ -364,7 +372,7 @@ function HomeToysSection() {
                         >
                           {discount > 0 && (
                             <Badge style={customStyles.discountBadge} className="toys-discount-badge">
-                              -{discount}%
+                              -{discount}% {t("off")}
                             </Badge>
                           )}
                           <div style={customStyles.imageContainer(isMobile)}>
@@ -401,7 +409,7 @@ function HomeToysSection() {
                               onMouseEnter={(e) => handleViewDealMouseEnter(e, isDarkMode, customStyles)}
                               onMouseLeave={(e) => handleViewDealMouseLeave(e, customStyles)}
                             >
-                              SHOP NOW
+                              {t("shopNow")}
                             </Button>
                           </Card.Body>
                         </Card>
@@ -419,7 +427,7 @@ function HomeToysSection() {
                     onMouseEnter={(e) => handleExploreMouseEnter(e, isDarkMode, customStyles)}
                     onMouseLeave={(e) => handleExploreMouseLeave(e, customStyles)}
                   >
-                    See All Adventures →
+                    {t("seeAllToys")} →
                   </Button>
                 </Link>
               </div>

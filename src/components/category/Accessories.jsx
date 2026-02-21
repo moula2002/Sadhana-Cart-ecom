@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Container, Spinner, Row, Col, Card, Alert } from "react-bootstrap";
 import { db } from "../../firebase";
+import { useTranslation } from "react-i18next";
+
 import {
   collection,
   getDocs,
@@ -163,7 +165,8 @@ const ProductCard = ({ product }) => {
           </div>
           <Card.Body className="p-3 text-center">
             <Card.Title className="fs-6 fw-semibold text-truncate theme-text">
-              {product.name || "Unnamed Product"}
+              {product.name || t("common.unnamedProduct")
+}
             </Card.Title>
             <Card.Text className="small mb-2 theme-text-secondary">
               Color:{" "}
@@ -172,7 +175,7 @@ const ProductCard = ({ product }) => {
               </strong>
             </Card.Text>
             <Card.Text className="fw-bold fs-5 theme-accent">
-              ₹{product.price || "N/A"}
+              ₹{product.price || t("common.notAvailable")}
             </Card.Text>
           </Card.Body>
         </Card>
@@ -183,6 +186,7 @@ const ProductCard = ({ product }) => {
 
 // -------------------------------------------------------------
 function Accessories() {
+  const { t } = useTranslation();
   const categoryName = "Accessories";
   const PAGE_SIZE = 8;
   const [products, setProducts] = useState([]);
@@ -345,17 +349,17 @@ function Accessories() {
           letterSpacing: "1px",
         }}
       >
-        👜 {categoryName} Collection
+        👜 {t("accessories.collectionTitle", { category: categoryName })}
       </h2>
       <p className="mb-5 theme-text-secondary">
-        Explore our latest <strong className="theme-accent">{categoryName.toLowerCase()}</strong> and add
-        a touch of elegance to your look ✨
-      </p>
+  {t("accessories.description", { category: categoryName })}
+</p>
+
 
       {loading ? (
         <div className="text-center my-5">
           <Spinner animation="border" variant={isDarkMode ? "light" : "warning"} />
-          <p className="mt-3 theme-text-secondary">Loading accessories...</p>
+          <p className="mt-3 theme-text-secondary">{t("accessories.loading")}</p>
         </div>
       ) : products.length > 0 ? (
         <>
@@ -375,18 +379,18 @@ function Accessories() {
           {loadingMore && (
             <div className="text-center my-4">
               <Spinner animation="grow" variant={isDarkMode ? "light" : "secondary"} />
-              <p className="theme-text-secondary">Loading more...</p>
+              <p className="theme-text-secondary">{t("common.loadingMore")}</p>
             </div>
           )}
 
           {!hasMore && (
-            <p className="mt-4 theme-text-secondary">refresh the website</p>
+            <p className="mt-4 theme-text-secondary">{t("common.refresh")}</p>
           )}
         </>
       ) : (
         <Alert variant={isDarkMode ? "dark" : "warning"} className="p-4 theme-alert">
           <p className="mb-0 theme-text">
-            No products found in {categoryName}.
+            {t("accessories.noProducts", { category: categoryName })}
           </p>
         </Alert>
       )}

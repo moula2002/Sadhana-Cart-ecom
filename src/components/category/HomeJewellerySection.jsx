@@ -13,6 +13,7 @@ import { db } from "../../firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { Link } from "react-router-dom";
 import { LazyLoadImage } from "react-lazy-load-image-component";
+import { useTranslation } from "react-i18next";
 import "react-lazy-load-image-component/src/effects/blur.css";
 import "./HomeJewellerySection.css";
 
@@ -280,6 +281,7 @@ const generateDummyProduct = (index) => {
 };
 
 function HomeJewellerySection() {
+    const { t } = useTranslation(); 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 576);
@@ -387,18 +389,22 @@ function HomeJewellerySection() {
 
         {/* Header */}
         <div className="text-center mb-5">
-          <h3
-            style={customStyles.header}
-            className="jewellery-section-title theme-text"
-          >
-            ROYAL <span style={{ color: isDarkMode ? GOLD_COLOR_DARK : GOLD_COLOR }}>JEWELLERY</span>
-            <div style={customStyles.headerUnderline}></div>
-          </h3>
+         <h3
+  style={customStyles.header}
+  className="jewellery-section-title theme-text"
+>
+  {t("royal")}{" "}
+  <span style={{ color: isDarkMode ? GOLD_COLOR_DARK : GOLD_COLOR }}>
+    {t("jewelleryTitle")}
+  </span>
+  <div style={customStyles.headerUnderline}></div>
+</h3>
+
           <p
             className="mt-3 fs-6 fw-light d-none d-sm-block"
             style={customStyles.subtitle}
           >
-            Timeless elegance crafted with precision and passion.
+            {t("jewellerySubtitle")}
           </p>
         </div>
 
@@ -409,7 +415,7 @@ function HomeJewellerySection() {
               style={{ color: isDarkMode ? GOLD_COLOR_DARK : GOLD_COLOR }}
             />
             <p className="mt-3 text-muted theme-text-secondary">
-              Polishing gems...
+              {t("jewelleryLoading")}
             </p>
           </div>
         ) : (
@@ -442,7 +448,7 @@ function HomeJewellerySection() {
                       >
                         {discountPercent > 0 && (
                           <Badge style={customStyles.discountBadge}>
-                            -{discountPercent}%
+                            -{discountPercent}% {t("off")}
                           </Badge>
                         )}
                         <div style={customStyles.imageContainer(isMobile)}>
@@ -497,7 +503,7 @@ function HomeJewellerySection() {
                               handleViewDealMouseLeave(e, customStyles)
                             }
                           >
-                            SHOP NOW
+                            {t("shopNow")}
                           </Button>
                         </Card.Body>
                       </Card>
@@ -519,7 +525,7 @@ function HomeJewellerySection() {
                     handleExploreMouseLeave(e, customStyles)
                   }
                 >
-                  Explore All Jewellery →
+                  {t("exploreJewellery")} →
                 </Button>
               </Link>
             </div>

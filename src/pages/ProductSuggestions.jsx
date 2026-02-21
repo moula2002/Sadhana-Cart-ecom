@@ -97,14 +97,6 @@ function ProductSuggestions({ currentProductId, category }) {
 
   return (
     <div className="mt-8 pt-8 bg-gradient-to-b from-gray-50 to-white px-4 py-8 rounded-2xl">
-      {/* Section Header */}
-      <div className="text-center mb-8 relative">
-        <h2 className="text-3xl font-bold text-gray-800 mb-2 inline-block relative">
-          People Also Viewed
-          <span className="absolute bottom-[-10px] left-1/2 transform -translate-x-1/2 w-16 h-1 bg-gradient-to-r from-blue-500 to-green-500 rounded"></span>
-        </h2>
-        <p className="text-gray-600 mt-4">Discover similar products you might love</p>
-      </div>
       
       {/* Products Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -118,7 +110,8 @@ function ProductSuggestions({ currentProductId, category }) {
             {/* Product Card */}
             <div className="h-full bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden group">
               {/* Image Container */}
-              <div className="relative h-52 bg-white overflow-hidden">
+              <div className="relative h-36 bg-white overflow-hidden">
+
                 <img 
                   src={item.image} 
                   alt={item.title}
@@ -204,15 +197,6 @@ function ProductSuggestions({ currentProductId, category }) {
         ))}
       </div>
       
-      {/* View All Button */}
-      <div className="text-center mt-10">
-        <Link 
-          to={`/category/${category}`}
-          className="inline-flex items-center justify-center px-6 py-3 border-2 border-blue-500 text-blue-600 font-medium rounded-full hover:bg-blue-50 hover:border-blue-600 transition-all duration-300 hover:shadow-md"
-        >
-          View All in {category}
-        </Link>
-      </div>
     </div>
   );
 }

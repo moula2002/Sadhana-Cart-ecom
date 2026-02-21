@@ -13,6 +13,7 @@ import { collection, query, where, getDocs } from "firebase/firestore";
 import { Link } from "react-router-dom";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import "react-lazy-load-image-component/src/effects/blur.css";
+import { useTranslation } from "react-i18next";
 import "./HomePhotoFrameSection.css"
 
 // 🎨 UPDATED STYLE CONSTANTS (Lavender Theme with Dark Mode)
@@ -253,6 +254,7 @@ const LavenderAnimations = () => (
 const calculateDiscount = (p, op) => (op > p ? Math.round(((op - p) / op) * 100) : 0);
 
 function HomePhotoFrameSection() {
+    const { t } = useTranslation(); 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 576);
@@ -329,18 +331,23 @@ function HomePhotoFrameSection() {
           {/* Elegant Header */}
           <div className="text-center mb-5">
             <h3 style={customStyles.header} className="photo-frames-section-title theme-text photo-frame-glow-text">
-              PRESERVE YOUR <span style={{ color: isDarkMode ? ACCENT_COLOR_DARK : ACCENT_COLOR }}>MEMORIES</span>
-              <div style={customStyles.headerUnderline}></div>
-            </h3>
+  {t("photoPreserve")}{" "}
+  <span style={{ color: isDarkMode ? ACCENT_COLOR_DARK : ACCENT_COLOR }}>
+    {t("photoMemories")}
+  </span>
+  <div style={customStyles.headerUnderline}></div>
+</h3>
+
             <p className="mt-2" style={customStyles.subtitle}>
-              Handcrafted frames designed to make every moment last forever.
+              {t("photoSubtitle")}
+
             </p>
           </div>
 
           {loading ? (
             <div className="text-center py-5">
               <Spinner animation="border" style={{ color: isDarkMode ? ACCENT_COLOR_DARK : ACCENT_COLOR }} />
-              <p className="mt-3 text-muted theme-text-secondary">Loading frames...</p>
+              <p className="mt-3 text-muted theme-text-secondary">{t("photoLoading")}</p>
             </div>
           ) : (
             <>
@@ -358,7 +365,7 @@ function HomePhotoFrameSection() {
                         >
                           {discount > 0 && (
                             <Badge style={customStyles.discountBadge} className="photo-frames-discount-badge">
-                              {discount}% OFF
+                              {discount}% {t("off")}
                             </Badge>
                           )}
                           <div style={customStyles.imageContainer(isMobile)}>
@@ -396,7 +403,7 @@ function HomePhotoFrameSection() {
                                 onMouseEnter={(e) => handleViewDealMouseEnter(e, isDarkMode, customStyles)}
                                 onMouseLeave={(e) => handleViewDealMouseLeave(e, customStyles)}
                               >
-                                SHOP NOW
+                                {t("shopNow")}
                               </Button>
                             </div>
                           </Card.Body>
@@ -415,7 +422,7 @@ function HomePhotoFrameSection() {
                     onMouseEnter={(e) => handleExploreMouseEnter(e, isDarkMode, customStyles)}
                     onMouseLeave={(e) => handleExploreMouseLeave(e, customStyles)}
                   >
-                    Browse All Collections →
+                    {t("browseCollections")} →
                   </Button>
                 </Link>
               </div>

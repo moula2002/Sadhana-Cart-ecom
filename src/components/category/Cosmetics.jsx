@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Container, Spinner, Row, Col, Card, Alert } from "react-bootstrap";
 import { db } from "../../firebase";
+import { useTranslation } from "react-i18next";
+
 import {
   collection,
   getDocs,
@@ -47,6 +49,7 @@ const getColorValue = (colorName) => {
 /* ------------------------------------------------ */
 /* 💄 Product Card */
 const ProductCard = ({ product }) => {
+   const { t } = useTranslation();
   const [hover, setHover] = useState(false);
 
   const productColor =
@@ -106,7 +109,7 @@ const ProductCard = ({ product }) => {
           {/* Content */}
           <Card.Body className="text-center p-3">
             <Card.Title className="fs-6 fw-semibold text-truncate">
-              {product.name || "Cosmetic Product"}
+              {product.name || t("common.cosmeticProduct")}
             </Card.Title>
 
             <p className="small text-secondary mb-1">
@@ -115,7 +118,7 @@ const ProductCard = ({ product }) => {
             </p>
 
             <div className="fw-bold fs-5 text-success">
-              ₹{product.price || "N/A"}
+              ₹{product.price || t("common.notAvailable")}
             </div>
           </Card.Body>
         </Card>
@@ -128,6 +131,8 @@ const ProductCard = ({ product }) => {
 /* 💄 Cosmetics Page */
 function Cosmetics() {
   const categoryName = "Cosmetics";
+  const { t } = useTranslation();
+
   const PAGE_SIZE = 8;
 
   const [products, setProducts] = useState([]);
@@ -237,15 +242,19 @@ function Cosmetics() {
 
   return (
     <Container className="my-5 text-center">
-      <h2 className="fw-bold mb-3">💄 Cosmetics Collection</h2>
+      <h2 className="fw-bold mb-3">
+  💄 {t("cosmetics.collectionTitle")}
+</h2>
+
       <p className="text-muted mb-5">
-        Enhance your beauty with premium cosmetic essentials ✨
-      </p>
+  {t("cosmetics.description")}
+</p>
+
 
       {loading ? (
         <div className="my-5">
           <Spinner animation="border" />
-          <p className="text-muted mt-3">Loading cosmetics...</p>
+          <p className="text-muted mt-3">{t("cosmetics.loading")}</p>
         </div>
       ) : products.length > 0 ? (
         <>
@@ -267,11 +276,14 @@ function Cosmetics() {
           )}
 
           {!hasMore && (
-            <p className="text-muted mt-4">Refresh the website</p>
+            <p className="text-muted mt-4">{t("common.refresh")}</p>
           )}
         </>
       ) : (
-        <Alert variant="warning">No cosmetics found</Alert>
+        <Alert variant="warning">
+  {t("cosmetics.noProducts")}
+</Alert>
+
       )}
     </Container>
   );

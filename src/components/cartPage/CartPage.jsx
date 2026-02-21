@@ -20,8 +20,11 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../firebase";
 import CartItems from "./CartItems";
+import { useTranslation } from "react-i18next";
 
 const CartPage = () => {
+  const { t } = useTranslation();
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const auth = getAuth();
@@ -155,18 +158,18 @@ const CartPage = () => {
   if (cartItems.length === 0)
     return (
       <Container className="text-center py-5">
-        <h2 className="text-muted mb-4">Your Cart is Empty 🛒</h2>
-        <p>Looks like you haven't added anything yet.</p>
-        <Link to="/" className="btn btn-primary mt-3">
-          Start Shopping
-        </Link>
+       <h2 className="text-muted mb-4">{t("cart.emptyTitle")} 🛒</h2>
+<p>{t("cart.emptySubtitle")}</p>
+<Link to="/" className="btn btn-primary mt-3">
+  {t("cart.startShopping")}
+</Link>
       </Container>
     );
 
   return (
     <Container className="cart-container py-4">
       <h2 className="cart-heading mb-4 text-center text-dark">
-        🛍️ Your Shopping Cart
+        🛍️ {t("cart.heading")}
       </h2>
 
       {/* 🧩 Cart Items */}
@@ -190,7 +193,7 @@ const CartPage = () => {
           <Card className="cart-summary-card shadow-lg border-0">
             <Card.Body className="text-center">
               <h3 className="fw-bold mb-3 text-dark">
-                Total:{" "}
+                {t("cart.total")}:{" "}
                 <span className="text-warning">{formatPrice(totalPrice)}</span>
               </h3>
               <div className="d-flex justify-content-center gap-3">
@@ -199,14 +202,14 @@ const CartPage = () => {
                   className="checkout-btn px-4 fw-semibold"
                   onClick={handleCheckout}
                 >
-                  Proceed to Buy
+                  {t("cart.proceed")}
                 </Button>
                 <Button
                   variant="outline-danger"
                   className="clear-btn px-4 fw-semibold"
                   onClick={handleClear}
                 >
-                  Clear Cart
+                  {t("cart.clear")}
                 </Button>
               </div>
             </Card.Body>
@@ -225,7 +228,7 @@ const CartPage = () => {
           className="text-white"
         >
           <Toast.Header closeButton={false} className="bg-danger text-white">
-            <strong className="me-auto">Stock Limit Reached</strong>
+            <strong className="me-auto">{t("cart.stockLimit")}</strong>
           </Toast.Header>
           <Toast.Body className="text-center fw-semibold">
             {toastMessage}

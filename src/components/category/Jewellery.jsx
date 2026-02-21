@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Container, Spinner, Row, Col, Card, Alert } from "react-bootstrap";
+import { useTranslation } from "react-i18next";
 import { db } from "../../firebase";
 import {
   collection,
@@ -165,6 +166,7 @@ const ProductCard = ({ product }) => {
 
 // -------------------------------------------------------------
 function Jewellery() {
+  const { t } = useTranslation();
   const categoryName = "Jewellery";
   const PAGE_SIZE = 8;
   const [products, setProducts] = useState([]);
@@ -338,21 +340,19 @@ function Jewellery() {
     <div style={containerStyle}>
       <Container className="my-5 text-center">
         <h2 className="fw-bold mb-3" style={titleStyle}>
-          💍 {categoryName} Collection
-        </h2>
+  💍 {t("jewellery.collectionTitle", { category: categoryName })}
+</h2>
         <p className="mb-5" style={textStyle}>
-          Discover exquisite{" "}
-          <strong className="text-capitalize" style={{ color: theme === 'dark' ? '#ffffff' : 'inherit' }}>
-            {categoryName}
-          </strong> pieces to enhance your elegance ✨
-        </p>
+  {t("jewellery.description", { category: categoryName })}
+</p>
+
 
         {loading ? (
           <div className="text-center my-5">
             <Spinner animation="border" variant="warning" />
             <p className="mt-3" style={loadingTextStyle}>
-              Loading {categoryName.toLowerCase()} products...
-            </p>
+  {t("jewellery.loading")}
+</p>
           </div>
         ) : products.length > 0 ? (
           <>
@@ -372,14 +372,15 @@ function Jewellery() {
             {loadingMore && (
               <div className="text-center my-4">
                 <Spinner animation="grow" variant="secondary" />
-                <p className="mt-2" style={textStyle}>Loading more...</p>
+                <p className="mt-2" style={textStyle}>{t("common.loadingMore")}</p>
               </div>
             )}
 
             {!hasMore && (
-              <p className="mt-4" style={textStyle}>
-                refresh the website
-              </p>
+             <p className="mt-4" style={textStyle}>
+  {t("common.refresh")}
+</p>
+
             )}
           </>
         ) : (
@@ -392,9 +393,10 @@ function Jewellery() {
               color: theme === 'dark' ? '#ffffff' : '#856404'
             }}
           >
-            <p className="fw-bold mb-0">
-              No products found in {categoryName}.
-            </p>
+           <p className="fw-bold mb-0">
+  {t("jewellery.noProducts", { category: categoryName })}
+</p>
+
           </Alert>
         )}
       </Container>

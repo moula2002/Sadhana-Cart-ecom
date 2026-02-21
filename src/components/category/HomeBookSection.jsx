@@ -18,6 +18,7 @@ import {
 } from "firebase/firestore";
 import { Link } from "react-router-dom";
 import { LazyLoadImage } from "react-lazy-load-image-component";
+import { useTranslation } from "react-i18next";
 import "react-lazy-load-image-component/src/effects/blur.css";
 import "./HomeBookSection.css"
 
@@ -40,7 +41,6 @@ const getCustomStyles = (isDarkMode) => ({
   mainWrapper: {
     background: isDarkMode ? "transparent" : BOOKS_BG_GRADIENT,
     padding: "60px 0",
-    transition: "background 0.3s ease"
   },
   sectionContainer: {
     backgroundColor: isDarkMode ? "rgba(30, 30, 30, 0.9)" : WHITE,
@@ -54,15 +54,12 @@ const getCustomStyles = (isDarkMode) => ({
       "1px solid #FEF3C7",
     position: "relative",
     overflow: "hidden",
-    transition: "all 0.3s ease"
   },
   productCard: {
     border: isDarkMode ? "1px solid #2d2d2d" : "none",
     borderRadius: "20px",
     overflow: "hidden",
     backgroundColor: isDarkMode ? PRODUCT_BG_COLOR_DARK : WHITE,
-    transition: "all 0.4s ease",
-    cursor: "pointer",
     height: "100%",
     position: "relative",
     boxShadow: isDarkMode ? 
@@ -81,7 +78,6 @@ const getCustomStyles = (isDarkMode) => ({
     maxWidth: "85%",
     maxHeight: "85%",
     objectFit: "contain",
-    transition: "transform 0.5s ease",
   },
   discountBadge: {
     position: "absolute",
@@ -149,15 +145,7 @@ const getCustomStyles = (isDarkMode) => ({
     border: "none",
     padding: "0.7rem",
     color: WHITE,
-    transition: "all 0.3s ease"
   },
-  shopButtonHover: (isDarkMode) => ({
-    opacity: "0.9",
-    transform: "scale(1.05)",
-    boxShadow: isDarkMode ? 
-      "0 8px 20px rgba(251, 191, 36, 0.4)" : 
-      "0 8px 20px rgba(245, 158, 11, 0.4)",
-  }),
   exploreButton: {
     backgroundColor: "transparent",
     color: isDarkMode ? ACCENT_COLOR_DARK : PRIMARY_TEXT_COLOR,
@@ -166,16 +154,7 @@ const getCustomStyles = (isDarkMode) => ({
     fontSize: "1.1rem",
     padding: "0.8rem 3rem",
     fontWeight: "700",
-    transition: "all 0.3s ease",
   },
-  exploreButtonHover: (isDarkMode) => ({
-    backgroundColor: isDarkMode ? ACCENT_COLOR_DARK : PRIMARY_TEXT_COLOR,
-    color: isDarkMode ? "#121212" : WHITE,
-    transform: "translateY(-2px)",
-    boxShadow: isDarkMode ? 
-      "0 10px 20px rgba(251, 191, 36, 0.3)" : 
-      "0 10px 20px rgba(30, 41, 59, 0.2)",
-  }),
   booksWatermark: {
     position: "absolute",
     bottom: "-40px",
@@ -192,42 +171,6 @@ const getCustomStyles = (isDarkMode) => ({
   }
 });
 
-/* ✨ Hover Handlers */
-const handleCardMouseEnter = (e, isDarkMode) => {
-  e.currentTarget.style.transform = "translateY(-10px)";
-  e.currentTarget.style.boxShadow = isDarkMode ? 
-    "0 20px 40px rgba(251, 191, 36, 0.2)" : 
-    "0 20px 40px rgba(245, 158, 11, 0.2)";
-  e.currentTarget.querySelector("img").style.transform = "scale(1.08)";
-};
-
-const handleCardMouseLeave = (e, isDarkMode, customStyles) => {
-  e.currentTarget.style.transform = "translateY(0)";
-  e.currentTarget.style.boxShadow = customStyles.productCard.boxShadow;
-  e.currentTarget.querySelector("img").style.transform = "scale(1)";
-};
-
-const handleShopButtonMouseEnter = (e, isDarkMode, customStyles) =>
-  Object.assign(e.currentTarget.style, customStyles.shopButtonHover(isDarkMode));
-
-const handleShopButtonMouseLeave = (e, customStyles) =>
-  Object.assign(e.currentTarget.style, {
-    ...customStyles.shopButton,
-    transform: "scale(1)",
-    opacity: "1",
-    boxShadow: "none",
-  });
-
-const handleExploreMouseEnter = (e, isDarkMode, customStyles) =>
-  Object.assign(e.currentTarget.style, customStyles.exploreButtonHover(isDarkMode));
-
-const handleExploreMouseLeave = (e, customStyles) =>
-  Object.assign(e.currentTarget.style, {
-    ...customStyles.exploreButton,
-    transform: "none",
-    boxShadow: "none",
-  });
-
 /* 🔢 Discount Calculator */
 const calculateDiscount = (price, originalPrice) =>
   originalPrice > price
@@ -236,6 +179,7 @@ const calculateDiscount = (price, originalPrice) =>
 
 /* 📚 HOME BOOK SECTION */
 function HomeBookSection() {
+  const { t } = useTranslation();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 576);
@@ -313,8 +257,7 @@ function HomeBookSection() {
       className="category-section books" 
       style={{ 
         background: isDarkMode ? DARK_BG_GRADIENT : BOOKS_BG_GRADIENT, 
-        padding: "60px 0",
-        transition: "background 0.3s ease"
+        padding: "60px 0"
       }}
     >
       <Container style={customStyles.sectionContainer} className="books-section-container">
@@ -322,18 +265,21 @@ function HomeBookSection() {
         {/* HEADER */}
         <div className="text-center mb-5">
           <h3 style={customStyles.header} className="books-section-title theme-text">
-            READ & <span style={{ color: isDarkMode ? ACCENT_COLOR_DARK : ACCENT_COLOR }}>GROW</span>
+            {t("booksRead")} &{" "}
+            <span style={{ color: isDarkMode ? ACCENT_COLOR_DARK : ACCENT_COLOR }}>
+              {t("booksGrow")}
+            </span>
             <div style={customStyles.headerUnderline}></div>
           </h3>
           <p className="mt-2" style={customStyles.subtitle}>
-            Discover books that inspire knowledge and imagination.
+            {t("booksSubtitle")}
           </p>
         </div>
 
         {loading ? (
           <div className="text-center py-5">
             <Spinner animation="border" style={{ color: isDarkMode ? ACCENT_COLOR_DARK : ACCENT_COLOR }} />
-            <p className="mt-3 text-muted theme-text-secondary">Loading books...</p>
+            <p className="mt-3 text-muted theme-text-secondary">{t("booksLoading")}</p>
           </div>
         ) : (
           <>
@@ -353,12 +299,10 @@ function HomeBookSection() {
                       <Card 
                         style={customStyles.productCard} 
                         className="books-card theme-card"
-                        onMouseEnter={(e) => handleCardMouseEnter(e, isDarkMode)}
-                        onMouseLeave={(e) => handleCardMouseLeave(e, isDarkMode, customStyles)}
                       >
                         {discount > 0 && (
                           <Badge style={customStyles.discountBadge} className="books-discount-badge">
-                            {discount}% OFF
+                            {discount}% {t("off")}
                           </Badge>
                         )}
 
@@ -397,10 +341,8 @@ function HomeBookSection() {
                           <Button
                             style={customStyles.shopButton}
                             className="w-100 mt-3 books-shop-btn theme-button"
-                            onMouseEnter={(e) => handleShopButtonMouseEnter(e, isDarkMode, customStyles)}
-                            onMouseLeave={(e) => handleShopButtonMouseLeave(e, customStyles)}
                           >
-                            SHOP NOW
+                            {t("shopNow")}
                           </Button>
                         </Card.Body>
                       </Card>
@@ -410,18 +352,16 @@ function HomeBookSection() {
               })}
             </Row>
 
-       <div className="text-center mt-5">
-                <Link to="/">
-                  <Button 
-                    style={customStyles.exploreButton} 
-                    className="photo-frames-explore-btn theme-button btn-hover-effect"
-                    onMouseEnter={(e) => handleExploreMouseEnter(e, isDarkMode, customStyles)}
-                    onMouseLeave={(e) => handleExploreMouseLeave(e, customStyles)}
-                  >
-                    Browse All Collections →
-                  </Button>
-                </Link>
-              </div>
+            <div className="text-center mt-5">
+              <Link to="/book">
+                <Button 
+                  style={customStyles.exploreButton} 
+                  className="photo-frames-explore-btn theme-button"
+                >
+                  {t("browseCollections")} →
+                </Button>
+              </Link>
+            </div>
           </>
         )}
       </Container>

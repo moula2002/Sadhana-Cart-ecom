@@ -13,6 +13,7 @@ import { collection, query, where, getDocs } from "firebase/firestore";
 import { Link } from "react-router-dom";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import "react-lazy-load-image-component/src/effects/blur.css";
+import { useTranslation } from "react-i18next";
 import "./HomeFashionSection.css"
 
 // 🎨 STYLE CONSTANTS (Updated for Pink Theme with Dark Mode)
@@ -259,6 +260,7 @@ const generateDummyProduct = (index) => {
 };
 
 function HomeFashionSection() {
+   const { t } = useTranslation(); 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 576);
@@ -352,18 +354,25 @@ function HomeFashionSection() {
         {/* Header */}
         <div className="text-center mb-5">
           <h3 style={customStyles.header} className="fashion-section-title theme-text">
-            FASHION <span style={{ color: isDarkMode ? ACCENT_COLOR_DARK : ACCENT_COLOR }}>COLLECTION</span>
-            <div style={customStyles.headerUnderline}></div>
-          </h3>
+  {t("fashionTitle")}{" "}
+  <span style={{ color: isDarkMode ? ACCENT_COLOR_DARK : ACCENT_COLOR }}>
+    {t("fashionCollection")}
+  </span>
+  <div style={customStyles.headerUnderline}></div>
+</h3>
+
           <p className="mt-3 fs-6 fw-light d-none d-sm-block" style={customStyles.subtitle}>
-            Elevate your wardrobe with our latest high-fashion arrivals.
-          </p>
+  {t("fashionSubtitle")}
+</p>
+
         </div>
 
         {loading ? (
           <div className="text-center py-5">
             <Spinner animation="border" style={{ color: isDarkMode ? ACCENT_COLOR_DARK : ACCENT_COLOR }} />
-            <p className="mt-3 text-muted theme-text-secondary">Styling your feed...</p>
+            <p className="mt-3 text-muted theme-text-secondary">
+  {t("fashionLoading")}
+</p>
           </div>
         ) : (
           <>
@@ -420,7 +429,7 @@ function HomeFashionSection() {
                             onMouseEnter={(e) => handleViewDealMouseEnter(e, isDarkMode, customStyles)}
                             onMouseLeave={(e) => handleViewDealMouseLeave(e, customStyles)}
                           >
-                            SHOP NOW
+                            {t("shopNow")}
                           </Button>
                         </Card.Body>
                       </Card>
@@ -438,7 +447,7 @@ function HomeFashionSection() {
                   onMouseEnter={(e) => handleExploreMouseEnter(e, isDarkMode, customStyles)}
                   onMouseLeave={(e) => handleExploreMouseLeave(e, customStyles)}
                 >
-                  Explore All Fashion →
+                 {t("exploreFashion")} →
                 </Button>
               </Link>
             </div>

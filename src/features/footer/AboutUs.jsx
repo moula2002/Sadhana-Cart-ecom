@@ -1,8 +1,11 @@
 import React from "react";
 import "./AboutUs.css";
 import aboutImg from "../../Images/aboutusimg1.jpg";
+import { useTranslation } from "react-i18next";
 
 function AboutUs() {
+  const { t } = useTranslation();
+
   const teamMembers = [
     { name: "Sadhaka Anand", title: "Founder & Spiritual Visionary" },
     { name: "Priya Sharma", title: "Ethical Product Curator" },
@@ -15,9 +18,11 @@ function AboutUs() {
       {/* ================= HEADER ================= */}
       <header className="about-header-bg">
         <div className="about-header-container text-center">
-          <h1 className="about-title">The Essence of Sadhana</h1>
+          <h1 className="about-title">
+            {t("about.header")}
+          </h1>
           <p className="about-subtitle">
-            Conscious Products. Trusted Shopping. Meaningful Living.
+            {t("about.subtitle")}
           </p>
         </div>
       </header>
@@ -34,31 +39,26 @@ function AboutUs() {
           </div>
 
           <div className="about-text-container">
-            <h2 className="section-title">About Sadhana Cart</h2>
+            <h2 className="section-title">
+              {t("about.title")}
+            </h2>
+
             <p className="lead-text">
-              A conscious e-commerce platform built on trust, quality, and
-              ethical sourcing.
+              {t("about.lead")}
             </p>
+
             <p className="paragraph">
-              Sadhana Cart curates spiritual essentials, wellness products, and
-              natural goods with a focus on authenticity and simplicity. Every
-              product is carefully selected to support mindful living.
+              {t("about.description")}
             </p>
 
             <div className="info-card">
-              <h4>Our Mission</h4>
-              <p>
-                To provide ethically sourced, high-quality products through a
-                reliable online marketplace.
-              </p>
+              <h4>{t("about.missionTitle")}</h4>
+              <p>{t("about.missionText")}</p>
             </div>
 
             <div className="info-card">
-              <h4>Our Vision</h4>
-              <p>
-                To become a trusted global ecommerce destination blending
-                tradition with modern technology.
-              </p>
+              <h4>{t("about.visionTitle")}</h4>
+              <p>{t("about.visionText")}</p>
             </div>
           </div>
         </div>
@@ -66,22 +66,33 @@ function AboutUs() {
         {/* ================= VALUE PROPOSITION ================= */}
         <div className="about-section">
           <h2 className="section-title text-center">
-            What Makes Us Different
+            {t("about.differentTitle")}
           </h2>
 
           <div className="features-grid">
-            <div className="feature-box">Verified Products</div>
-            <div className="feature-box">Secure Checkout</div>
-            <div className="feature-box">Ethical Sourcing</div>
-            <div className="feature-box">Fast Delivery</div>
+            <div className="feature-box">
+              {t("about.feature1")}
+            </div>
+            <div className="feature-box">
+              {t("about.feature2")}
+            </div>
+            <div className="feature-box">
+              {t("about.feature3")}
+            </div>
+            <div className="feature-box">
+              {t("about.feature4")}
+            </div>
           </div>
         </div>
 
         {/* ================= TEAM ================= */}
         <div className="about-section text-center">
-          <h2 className="section-title">Meet Our Team</h2>
+          <h2 className="section-title">
+            {t("about.teamTitle")}
+          </h2>
+
           <p className="paragraph">
-            Dedicated professionals working behind the scenes
+            {t("about.teamSubtitle")}
           </p>
 
           <div className="team-grid">
@@ -97,11 +108,11 @@ function AboutUs() {
 
         {/* ================= CTA ================= */}
         <div className="cta-box text-center">
-          <h3>Start Shopping with Purpose</h3>
-          <p>
-            Discover meaningful products that support a balanced lifestyle.
-          </p>
-          <button className="cta-btn">Shop Now</button>
+          <h3>{t("about.ctaTitle")}</h3>
+          <p>{t("about.ctaText")}</p>
+          <button className="cta-btn">
+            {t("about.shopNow")}
+          </button>
         </div>
 
         {/* Scroll to top */}

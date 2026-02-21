@@ -21,20 +21,17 @@ import {
   serverTimestamp,
   updateDoc,
   arrayUnion,
+  increment,
 } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db } from "../../firebase";
 import "./CartPage.css";
-import "./CheckoutPage.css"; // ✅ NEW CSS FILE FOR THEME
+import "./CheckoutPage.css";
 import { FaCoins } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 
-// 🛑 IMPORTANT: Use your actual Razorpay Key ID
 const RAZORPAY_KEY_ID = "rzp_live_RF5gE7NCdAsEIs";
-
-// 🌐 Alternative Geocoding Service: OpenStreetMap Nominatim
 const NOMINATIM_CONTACT_EMAIL = "your.app.contact@example.com";
-
-// ✅ COIN CONVERSION RATE (1 coin = 1 INR)
 const COIN_TO_RUPEE_RATE = 1;
 
 const debounce = (func, delay) => {
@@ -55,6 +52,7 @@ const loadRazorpayScript = (src) =>
   });
 
 const CheckoutPage = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -115,18 +113,14 @@ const CheckoutPage = () => {
   const [locationStatusMessage, setLocationStatusMessage] = useState(null);
   const [isLocating, setIsLocating] = useState(false);
   const [theme, setTheme] = useState("light");
-
-  // ✅ NEW STATE FOR WALLET COINS
   const [walletCoins, setWalletCoins] = useState(0);
   const [coinsToUse, setCoinsToUse] = useState(0);
 
   /* ---------------- THEME MANAGEMENT ---------------- */
   useEffect(() => {
-    // Check localStorage for saved theme
     const savedTheme = localStorage.getItem("theme") || "light";
     setTheme(savedTheme);
 
-    // Apply theme to body
     if (savedTheme === "dark") {
       document.body.classList.add("dark-theme");
       document.body.classList.remove("light-theme");
@@ -135,7 +129,6 @@ const CheckoutPage = () => {
       document.body.classList.remove("dark-theme");
     }
 
-    // Listen for theme changes from other components
     const handleThemeChange = () => {
       const currentTheme = localStorage.getItem("theme") || "light";
       setTheme(currentTheme);
@@ -175,7 +168,6 @@ const CheckoutPage = () => {
     }
   };
 
-  // Auth check & SKU Fetching with seller ID & Wallet Coins
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -204,7 +196,7 @@ const CheckoutPage = () => {
         fetchAllSkusAndSellers();
       } else {
         setLoading(false);
-        alert("Please log in to continue checkout.");
+        alert(t("checkout.loginRequired"));
         navigate("/login", { state: { from: location.pathname } });
       }
     });
@@ -225,7 +217,6 @@ const CheckoutPage = () => {
           setGeocodingError(null);
         }
 
-        // ✅ FETCH WALLET COINS FROM USER DOCUMENT
         setWalletCoins(data.walletCoins || 0);
         setBillingDetails((prev) => ({
           ...prev,
@@ -244,10 +235,9 @@ const CheckoutPage = () => {
     }
   };
 
-  // ✅ AUTO APPLY COINS (MAX 10% OF ORDER VALUE)
   useEffect(() => {
     if (walletCoins > 0 && totalPrice > 0) {
-      const maxAllowedCoins = Math.floor(totalPrice * 0.1); // 10%
+      const maxAllowedCoins = Math.floor(totalPrice * 0.1);
       const autoCoins = Math.min(walletCoins, maxAllowedCoins);
       setCoinsToUse(autoCoins);
     } else {
@@ -255,7 +245,6 @@ const CheckoutPage = () => {
     }
   }, [walletCoins, totalPrice]);
 
-  // ✅ CALCULATE FINAL AMOUNT AFTER COINS DISCOUNT
   const coinDiscount = coinsToUse * COIN_TO_RUPEE_RATE;
   const finalAmount = Math.max(0, totalPrice - coinDiscount);
 
@@ -263,13 +252,13 @@ const CheckoutPage = () => {
     const fullAddress = `${details.address}, ${details.city}, ${details.pincode}`;
 
     if (fullAddress.trim().length < 10) {
-      setGeocodingError("Address is incomplete.");
+      setGeocodingError(t("checkout.addressIncomplete"));
       setCoordinates({ lat: null, lng: null });
       setLocationStatusMessage(null);
       return;
     }
 
-    setGeocodingError("Locating address...");
+    setGeocodingError(t("checkout.locatingAddress"));
     setLocationStatusMessage(null);
 
     try {
@@ -309,7 +298,7 @@ const CheckoutPage = () => {
 
   const reverseGeocodeCoordinates = async (lat, lng) => {
     setIsLocating(true);
-    setGeocodingError("Reverse geocoding address...");
+    setGeocodingError(t("checkout.reverseGeocoding"));
     setLocationStatusMessage(null);
 
     try {
@@ -379,7 +368,7 @@ const CheckoutPage = () => {
     }
 
     setIsLocating(true);
-    setGeocodingError("Fetching current GPS coordinates...");
+    setGeocodingError(t("checkout.fetchingLocation"));
     setLocationStatusMessage(null);
     setCoordinates({ lat: null, lng: null });
 
@@ -446,182 +435,253 @@ const CheckoutPage = () => {
     return productSellers[item.id] || item.sellerId || item.sellerid || "default_seller";
   };
 
-  // ✅ UPDATE: Save order with coins deduction
+  const deductCoinsFromWallet = async (coinsToDeduct) => {
+    if (!userId || coinsToDeduct <= 0) return true;
+
+    try {
+      const userRef = doc(db, "users", userId);
+      const userSnap = await getDoc(userRef);
+
+      if (userSnap.exists()) {
+        const userData = userSnap.data();
+        const currentCoins = userData.walletCoins || 0;
+
+        if (currentCoins < coinsToDeduct) {
+          alert(`Insufficient Coins. You have only ${currentCoins} coins in your wallet.`);
+          return false;
+        }
+
+        await updateDoc(userRef, {
+          walletCoins: currentCoins - coinsToDeduct
+        });
+
+        console.log(`${coinsToDeduct} coins deducted from wallet`);
+        setWalletCoins(currentCoins - coinsToDeduct);
+        return true;
+      }
+    } catch (error) {
+      console.error("Error deducting coins:", error);
+      alert("Failed to deduct coins from wallet. Please try again.");
+      return false;
+    }
+    return true;
+  };
+
+  const saveOrderToSellerCollections = async (orderData, userOrderDocId) => {
+    try {
+      const productsBySeller = {};
+      (orderData.products || []).forEach((product) => {
+        const sellerId = product.sellerId || "default_seller";
+        if (!productsBySeller[sellerId]) productsBySeller[sellerId] = [];
+        productsBySeller[sellerId].push(product);
+      });
+
+      for (const [sellerId, sellerProducts] of Object.entries(productsBySeller)) {
+        const sellerOrdersRef = collection(db, "sellers", sellerId, "orders");
+        const sellerSubtotal = sellerProducts.reduce((t, p) => t + (p.totalAmount || 0), 0);
+
+        await addDoc(sellerOrdersRef, {
+          orderId: orderData.orderId,
+          userOrderDocId,
+          userId: orderData.userId,
+          products: sellerProducts,
+          totalAmount: sellerSubtotal,
+          discountedAmount: sellerSubtotal - (sellerSubtotal * coinsToUse / totalPrice),
+          coinsUsed: Math.round(sellerSubtotal * coinsToUse / totalPrice),
+          coinDiscount: Math.round(sellerSubtotal * coinDiscount / totalPrice),
+          paymentMethod: orderData.paymentMethod,
+          orderStatus: orderData.orderStatus,
+          createdAt: serverTimestamp(),
+          customerName: orderData.name,
+          customerPhone: orderData.phoneNumber,
+          address: orderData.address,
+          sellerId,
+        });
+      }
+    } catch (err) {
+      console.error("Error in saveOrderToSellerCollections:", err);
+    }
+  };
+
+  const updateSellerDocuments = async (sellerIds, userOrderDocId, orderData) => {
+    try {
+      for (const sellerId of sellerIds) {
+        if (!sellerId) continue;
+        const sellerRef = doc(db, "sellers", sellerId);
+
+        const sellerProducts = (orderData.products || []).filter((p) => p.sellerId === sellerId);
+        const sellerSubtotal = sellerProducts.reduce((t, p) => t + (p.totalAmount || 0), 0);
+
+        const orderSummary = {
+          orderId: orderData.orderId,
+          userOrderDocId,
+          customerName: orderData.name,
+          totalAmount: sellerSubtotal,
+          discountedAmount: sellerSubtotal - (sellerSubtotal * coinsToUse / totalPrice),
+          coinsUsed: Math.round(sellerSubtotal * coinsToUse / totalPrice),
+          orderDate: new Date(),
+          orderStatus: orderData.orderStatus,
+        };
+
+        const sellerSnap = await getDoc(sellerRef);
+        if (!sellerSnap.exists()) {
+          await updateDoc(sellerRef, {
+            sellerId,
+            orders: [],
+            totalSales: 0,
+            createdAt: serverTimestamp(),
+          }).catch(() => {}); 
+        }
+
+        await updateDoc(sellerRef, {
+          orders: arrayUnion(orderSummary),
+          lastOrderDate: serverTimestamp(),
+          totalSales: increment(sellerSubtotal - (sellerSubtotal * coinsToUse / totalPrice)),
+          updatedAt: serverTimestamp(),
+        });
+      }
+    } catch (err) {
+      console.error("Error in updateSellerDocuments:", err);
+    }
+  };
+
   const saveOrderToFirestore = async (
     paymentMethod,
     status = "Pending",
     paymentId = null
   ) => {
-    if (!userId) return;
+    if (!userId) return null;
+
+    if (coinsToUse > 0) {
+      const coinsDeducted = await deductCoinsFromWallet(coinsToUse);
+      if (!coinsDeducted) {
+        return null;
+      }
+    }
 
     try {
-      // ✅ DEDUCT COINS FROM USER WALLET FIRST
-      if (coinsToUse > 0) {
-        const userRef = doc(db, "users", userId);
-        const userSnap = await getDoc(userRef);
-
-        if (userSnap.exists()) {
-          const userData = userSnap.data();
-          const currentCoins = userData.walletCoins || 0;
-
-          if (currentCoins < coinsToUse) {
-            alert("Insufficient coins in wallet!");
-            return;
-          }
-
-          // Deduct coins
-          await updateDoc(userRef, {
-            walletCoins: currentCoins - coinsToUse
-          });
-
-          console.log(`${coinsToUse} coins deducted from wallet`);
-        }
-      }
-
-      const ordersRef = collection(db, "users", userId, "orders");
+      const sellerIdsInOrder = [...new Set(mergedCartItems.map((it) => getSellerIdForCartItem(it)))].filter(Boolean);
       const orderId = `ORD-${Date.now()}`;
+      const ordersRef = collection(db, "users", userId, "orders");
 
-      const sellerIdsInOrder = [...new Set(mergedCartItems.map(item =>
-        getSellerIdForCartItem(item)
-      ))];
+      const products = mergedCartItems.map((item) => {
+        const finalSku = productSkus[item.id] || (item.sku !== "N/A" ? item.sku : item.id);
+        const sellerId = getSellerIdForCartItem(item);
+        const itemTotal = (item.price || 0) * (item.quantity || 1);
+        const proportionalCoinsUsed = Math.round(itemTotal * coinsToUse / totalPrice);
+
+        return {
+          productId: item.id,
+          name: item.title || item.name || "Unnamed Product",
+          price: item.price || 0,
+          quantity: item.quantity || 1,
+          sku: finalSku,
+          images: item.images || [],
+          sellerId,
+          totalAmount: itemTotal,
+          coinsUsed: proportionalCoinsUsed,
+          coinDiscount: proportionalCoinsUsed * COIN_TO_RUPEE_RATE,
+        };
+      });
+
+      const selleridField = sellerIdsInOrder.length === 1 ? sellerIdsInOrder[0] : sellerIdsInOrder;
 
       const orderData = {
         userId,
         orderId,
         orderStatus: status,
-        totalAmount: totalPrice, // Original total
-        discountedAmount: finalAmount, // Amount after coins discount
+        totalAmount: totalPrice,
+        discountedAmount: finalAmount,
         coinsUsed: coinsToUse,
         coinDiscount: coinDiscount,
         paymentMethod,
-        phoneNumber: billingDetails.phone,
+        phoneNumber: billingDetails.phone || null,
         createdAt: serverTimestamp(),
         orderDate: serverTimestamp(),
-        address: `${billingDetails.address} ,${billingDetails.city} ,${billingDetails.pincode} ,${"Karnataka"}`,
-        latitude: coordinates.lat,
-        longitude: coordinates.lng,
-        name: billingDetails.fullName,
-        sellerIds: sellerIdsInOrder,
-        products: mergedCartItems.map((item) => {
-          const hasVariantData =
-            item.stock || item.weight || item.width || item.height;
-          const sizevariants =
-            hasVariantData || item.color || item.size
-              ? {
-                sku: item.sku !== "N/A" ? item.sku : null,
-                stock: item.stock || null,
-                weight: item.weight || null,
-                width: item.width || null,
-                height: item.height || null,
-              }
-              : undefined;
-          const finalSku =
-            productSkus[item.id] || (item.sku !== "N/A" ? item.sku : item.id);
-
-          const sellerId = getSellerIdForCartItem(item);
-
-          return {
-            productId: item.id,
-            name: item.title || item.name || "Unnamed Product",
-            price: item.price,
-            quantity: item.quantity,
-            sku: finalSku,
-            brandName: item.brandName || null,
-            category: item.category || null,
-            color: item.color || null,
-            size: item.size || null,
-            images: item.images || [],
-            sellerId: sellerId,
-            ...(sizevariants && { sizevariants: sizevariants }),
-            totalAmount: item.price * item.quantity,
-          };
-        }),
-        paymentId,
+        address: `${billingDetails.address || ""}, ${billingDetails.city || ""}, ${billingDetails.pincode || ""}, Karnataka`,
+        latitude: coordinates.lat || null,
+        longitude: coordinates.lng || null,
+        name: billingDetails.fullName || null,
+        sellerid: selleridField,
+        products,
         shippingCharges: 0,
+        paymentId,
       };
 
-      const orderDocRef = await addDoc(ordersRef, orderData);
-      const orderDocId = orderDocRef.id;
+      // Save to Firestore
+      const userOrderDocRef = await addDoc(ordersRef, orderData);
 
-      console.log("Main order saved with ID:", orderDocId);
+      // 🔥 SEND TO SHIPROCKET (Same as CashOnDelivery component)
+      try {
+        const shiprocketPaymentMethod = paymentMethod === "Razorpay" ? "Prepaid" : "COD";
+        
+        const response = await fetch(
+          "https://createshiprocketorder-cij4erke6a-uc.a.run.app",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              order_id: orderId,
+              order_date: new Date().toISOString().split("T")[0],
+              pickup_location: "Office",
+              billing_customer_name: billingDetails.fullName,
+              billing_last_name: "",
+              billing_address: billingDetails.address,
+              billing_city: billingDetails.city,
+              billing_pincode: billingDetails.pincode,
+              billing_state: "Karnataka",
+              billing_country: "India",
+              billing_email: billingDetails.email || "appasharan@gmail.com",
+              billing_phone: billingDetails.phone,
 
-      await saveOrderToSellerCollections(orderData, orderDocId);
-      await updateSellerDocuments(sellerIdsInOrder, orderDocId, orderData);
+              shipping_is_billing: true,
 
-      alert(`Order placed successfully! ${coinsToUse > 0 ? `₹${coinDiscount} saved using ${coinsToUse} coins.` : ''}`);
-      navigate("/orders");
-    } catch (error) {
-      console.error("Error saving order:", error);
-      alert("Error saving order details. Please try again.");
-    }
-  };
+              order_items: products.map((item) => ({
+                name: item.name,
+                sku: item.sku,
+                units: item.quantity,
+                selling_price: item.price,
+              })),
 
-  const saveOrderToSellerCollections = async (orderData, orderDocId) => {
-    try {
-      const productsBySeller = {};
-      orderData.products.forEach(product => {
-        const sellerId = product.sellerId;
-        if (!productsBySeller[sellerId]) {
-          productsBySeller[sellerId] = [];
-        }
-        productsBySeller[sellerId].push(product);
-      });
+              payment_method: shiprocketPaymentMethod,
+              sub_total: totalPrice,
+              length: 10,
+              breadth: 10,
+              height: 10,
+              weight: 0.5,
+            }),
+          }
+        );
 
-      for (const [sellerId, sellerProducts] of Object.entries(productsBySeller)) {
-        const sellerOrderRef = collection(db, "sellers", sellerId, "orders");
-        const sellerSubtotal = sellerProducts.reduce((total, product) => total + product.totalAmount, 0);
+        const shiprocketData = await response.json();
+        console.log("Shiprocket Response:", JSON.stringify(shiprocketData, null, 2));
 
-        const sellerOrderData = {
-          ...orderData,
-          orderDocId: orderDocId,
-          products: sellerProducts,
-          sellerSubtotal: sellerSubtotal,
-          sellerId: sellerId,
-          createdAt: serverTimestamp(),
-          orderDate: serverTimestamp(),
-        };
-
-        delete sellerOrderData.id;
-
-        const sellerOrderDocRef = await addDoc(sellerOrderRef, sellerOrderData);
-        console.log(`Order saved for seller ${sellerId} with ID: ${sellerOrderDocRef.id}`);
+      } catch (error) {
+        console.error("❌ Shiprocket Error:", error);
       }
+
+      // Sync with Seller data
+      await saveOrderToSellerCollections(orderData, userOrderDocRef.id);
+      await updateSellerDocuments(
+        Array.isArray(sellerIdsInOrder) ? sellerIdsInOrder : [sellerIdsInOrder], 
+        userOrderDocRef.id, 
+        orderData
+      );
+
+      return {
+        success: true,
+        docId: userOrderDocRef.id,
+        sellerid: selleridField,
+        coinsUsed: coinsToUse,
+        discount: coinDiscount
+      };
+
     } catch (error) {
-      console.error("Error saving order to seller collections:", error);
-    }
-  };
-
-  const updateSellerDocuments = async (sellerIds, orderDocId, orderData) => {
-    try {
-      for (const sellerId of sellerIds) {
-        const sellerRef = doc(db, "sellers", sellerId);
-
-        const sellerProducts = orderData.products.filter(product => product.sellerId === sellerId);
-        const sellerSubtotal = sellerProducts.reduce((total, product) => total + product.totalAmount, 0);
-
-        const orderSummary = {
-          orderId: orderData.orderId,
-          orderDocId: orderDocId,
-          customerName: orderData.name,
-          customerPhone: orderData.phoneNumber,
-          totalAmount: sellerSubtotal,
-          orderDate: serverTimestamp(),
-          orderStatus: orderData.orderStatus,
-          products: sellerProducts,
-          address: orderData.address,
-        };
-
-        await updateDoc(sellerRef, {
-          orders: arrayUnion(orderSummary),
-          lastOrderDate: serverTimestamp(),
-          totalSales: sellerSubtotal,
-          updatedAt: serverTimestamp(),
-        });
-
-        console.log(`Updated seller document for: ${sellerId}`);
-      }
-    } catch (error) {
-      console.error("Error updating seller documents:", error);
+      console.error("Order Error:", error);
+      alert("Failed to place order");
+      return null;
     }
   };
 
@@ -653,8 +713,74 @@ const CheckoutPage = () => {
       maximumFractionDigits: 2,
     }).format(value);
 
+  const handleRazorpayPayment = async () => {
+    const res = await loadRazorpayScript(
+      "https://checkout.razorpay.com/v1/checkout.js"
+    );
+    if (!res) return alert(t("checkout.razorpayFailed"));
+
+    const amountInPaise = Math.round(finalAmount * 100);
+
+    if (amountInPaise < 100 && finalAmount > 0) {
+      alert(t("checkout.minimumAmount"));
+      return;
+    }
+
+    const options = {
+      key: RAZORPAY_KEY_ID,
+      amount: amountInPaise,
+      currency: "INR",
+      name: "SadhanaCart",
+      description: "Purchase Checkout",
+      handler: async function (response) {
+        alert(
+          `Payment Successful! Payment ID: ${response.razorpay_payment_id}`
+        );
+        
+        const result = await saveOrderToFirestore(
+          "Razorpay",
+          "Paid",
+          response.razorpay_payment_id
+        );
+
+        if (result && result.success) {
+          navigate("/order-confirm", {
+            state: {
+              paymentMethod: "Razorpay",
+              total: formatPrice(finalAmount),
+              originalTotal: formatPrice(totalPrice),
+              itemsCount: mergedCartItems.length,
+              billingDetails,
+              cartItems: mergedCartItems,
+              sellerid: result.sellerid,
+              orderDocId: result.docId,
+              coinsUsed: result.coinsUsed,
+              discount: result.discount,
+            },
+          });
+        }
+      },
+      prefill: {
+        name: billingDetails.fullName,
+        email: billingDetails.email,
+        contact: billingDetails.phone,
+      },
+      notes: {
+        address: billingDetails.address,
+        pincode: billingDetails.pincode,
+        coins_used: coinsToUse,
+        coin_discount: coinDiscount,
+      },
+      theme: { color: "#FFA500" },
+    };
+    
+    const paymentObject = new window.Razorpay(options);
+    paymentObject.open();
+  };
+
   const handlePayment = async (e) => {
     e.preventDefault();
+    
     const requiredFields = [
       "fullName",
       "email",
@@ -663,6 +789,7 @@ const CheckoutPage = () => {
       "city",
       "pincode",
     ];
+    
     for (const field of requiredFields) {
       if (!billingDetails[field]) {
         alert(`Please fill in the required field: ${field}`);
@@ -698,51 +825,8 @@ const CheckoutPage = () => {
       return;
     }
 
-    const res = await loadRazorpayScript(
-      "https://checkout.razorpay.com/v1/checkout.js"
-    );
-    if (!res) return alert("Razorpay SDK failed to load.");
-
-    // ✅ Use finalAmount (after coins discount) for payment
-    const amountInPaise = Math.round(finalAmount * 100);
-
-    // Check if amount is valid (should be at least 1 INR for Razorpay)
-    if (amountInPaise < 100 && finalAmount > 0) {
-      alert("Minimum payment amount is ₹1.00");
-      return;
-    }
-
-    const options = {
-      key: RAZORPAY_KEY_ID,
-      amount: amountInPaise,
-      currency: "INR",
-      name: "SadhanaCart",
-      description: "Purchase Checkout",
-      handler: async function (response) {
-        alert(
-          `Payment Successful! Payment ID: ${response.razorpay_payment_id}`
-        );
-        await saveOrderToFirestore(
-          "Razorpay",
-          "Paid",
-          response.razorpay_payment_id
-        );
-      },
-      prefill: {
-        name: billingDetails.fullName,
-        email: billingDetails.email,
-        contact: billingDetails.phone,
-      },
-      notes: {
-        address: billingDetails.address,
-        pincode: billingDetails.pincode,
-        coins_used: coinsToUse,
-        coin_discount: coinDiscount,
-      },
-      theme: { color: "#FFA500" },
-    };
-    const paymentObject = new window.Razorpay(options);
-    paymentObject.open();
+    // Razorpay payment
+    await handleRazorpayPayment();
   };
 
   if (loading) {
@@ -750,7 +834,7 @@ const CheckoutPage = () => {
       <Container className="py-5 text-center theme-container">
         <Spinner animation="border" variant="warning" />
         <p className="mt-3 theme-text-primary">
-          Fetching billing details...
+          {t("checkout.fetching")}
         </p>
       </Container>
     );
@@ -760,13 +844,13 @@ const CheckoutPage = () => {
     return (
       <Container className="py-5 text-center theme-container">
         <Alert variant="info" className="theme-alert-info">
-          Your cart is empty.{" "}
-          <Button 
-            variant="link" 
+          {t("checkout.emptyCart")}.{" "}
+          <Button
+            variant="link"
             onClick={() => navigate("/")}
             className="theme-link"
           >
-            Go shopping
+            {t("checkout.shipping")}
           </Button>
         </Alert>
       </Container>
@@ -778,17 +862,17 @@ const CheckoutPage = () => {
       <Row>
         <Col md={7}>
           <h3 className="fw-bold mb-4 border-bottom pb-2 theme-title">
-            Billing Information
+            {t("checkout.billingInfo")}
           </h3>
           <Card className="shadow-lg border-0 p-4 theme-card">
             <Form onSubmit={handlePayment}>
               <Row>
                 <Col md={6} className="mb-3">
                   <Form.Group controlId="fullName">
-                    <Form.Label className="theme-form-label">Full Name *</Form.Label>
+                    <Form.Label className="theme-form-label">{t("checkout.fullName")} *</Form.Label>
                     <Form.Control
                       type="text"
-                      placeholder="Enter full name"
+                      placeholder={t("checkout.enterFullName")}
                       required
                       value={billingDetails.fullName}
                       onChange={handleInputChange}
@@ -798,7 +882,7 @@ const CheckoutPage = () => {
                 </Col>
                 <Col md={6} className="mb-3">
                   <Form.Group controlId="email">
-                    <Form.Label className="theme-form-label">Email Address *</Form.Label>
+                    <Form.Label className="theme-form-label">{t("checkout.email")} *</Form.Label>
                     <Form.Control
                       type="email"
                       placeholder="Enter email"
@@ -811,7 +895,7 @@ const CheckoutPage = () => {
                 </Col>
               </Row>
               <Form.Group className="mb-3" controlId="phone">
-                <Form.Label className="theme-form-label">Phone Number *</Form.Label>
+                <Form.Label className="theme-form-label">{t("checkout.phone")} *</Form.Label>
                 <Form.Control
                   type="tel"
                   placeholder="Enter phone number"
@@ -840,16 +924,20 @@ const CheckoutPage = () => {
                         aria-hidden="true"
                         className="me-2"
                       />
-                      Locating...
+                      {t("checkout.locating")}
                     </>
                   ) : (
-                    "📍 Use Current Location"
+                    <>
+                      <span className="me-1">📍</span>
+                      {t("checkout.useLocation")}
+                    </>
+
                   )}
                 </Button>
               </div>
 
               <Form.Group className="mb-3" controlId="address">
-                <Form.Label className="theme-form-label">Address *</Form.Label>
+                <Form.Label className="theme-form-label">{t("checkout.address")} *</Form.Label>
                 <Form.Control
                   as="textarea"
                   rows={2}
@@ -863,7 +951,7 @@ const CheckoutPage = () => {
               <Row>
                 <Col md={6} className="mb-3">
                   <Form.Group controlId="city">
-                    <Form.Label className="theme-form-label">City *</Form.Label>
+                    <Form.Label className="theme-form-label">{t("checkout.city")} *</Form.Label>
                     <Form.Control
                       type="text"
                       placeholder="City"
@@ -876,7 +964,7 @@ const CheckoutPage = () => {
                 </Col>
                 <Col md={6} className="mb-3">
                   <Form.Group controlId="pincode">
-                    <Form.Label className="theme-form-label">PIN Code *</Form.Label>
+                    <Form.Label className="theme-form-label">{t("checkout.pincode")} *</Form.Label>
                     <Form.Control
                       type="text"
                       placeholder="PIN code"
@@ -907,12 +995,12 @@ const CheckoutPage = () => {
               ) : null}
 
               <Form.Group className="mb-3">
-                <Form.Label className="theme-form-label">Payment Method *</Form.Label>
+                <Form.Label className="theme-form-label">{t("checkout.paymentMethod")} *</Form.Label>
                 <div>
                   <Form.Check
                     inline
                     type="radio"
-                    label="Razorpay (Online Payment)"
+                    label={t("checkout.razorpay")}
                     name="paymentMethod"
                     id="razorpay"
                     checked={paymentMethod === "razorpay"}
@@ -922,7 +1010,7 @@ const CheckoutPage = () => {
                   <Form.Check
                     inline
                     type="radio"
-                    label="Cash on Delivery (COD)"
+                    label={t("checkout.cod")}
                     name="paymentMethod"
                     id="cod"
                     checked={paymentMethod === "cod"}
@@ -937,7 +1025,7 @@ const CheckoutPage = () => {
                 type="submit"
                 disabled={!coordinates.lat || isLocating || finalAmount <= 0}
               >
-                🔒 Pay {formatPrice(finalAmount)}
+                🔒 {t("checkout.pay")} {formatPrice(finalAmount)}
               </Button>
             </Form>
           </Card>
@@ -945,37 +1033,33 @@ const CheckoutPage = () => {
 
         <Col md={5} className="mt-4 mt-md-0">
           <h3 className="fw-bold mb-4 border-bottom pb-2 theme-title">
-            Order Summary
+            {t("checkout.orderSummary")}
           </h3>
 
           <Card className="shadow-lg border-0 p-4 theme-card">
-            {/* ✅ WALLET COINS SECTION - AUTO UPDATE */}
             {walletCoins > 0 && (
-              <div
-                className="mb-4 p-4 rounded theme-wallet-section"
-              >
+              <div className="mb-4 p-4 rounded theme-wallet-section">
                 <div className="d-flex align-items-center mb-3">
                   <FaCoins size={22} className="me-2 theme-coin-icon" />
                   <h6 className="fw-bold mb-0 theme-text-primary">
-                    Use Wallet Coins
+                    {t("checkout.useCoins")}
                   </h6>
                 </div>
 
                 <p className="small mb-2 theme-text-secondary">
-                  Available Coins: <strong className="theme-text-primary">{walletCoins}</strong> (1 coin = ₹1)
+                  {t("checkout.availableCoins")}: <strong className="theme-text-primary">{walletCoins}</strong> (1 coin = ₹1)
                 </p>
                 <p className="small mb-3 theme-text-secondary">
-                  Order Amount: <strong className="theme-text-primary">₹{totalPrice}</strong>
+                  {t("checkout.orderAmount")}: <strong className="theme-text-primary">₹{totalPrice}</strong>
                 </p>
 
                 <Form.Group>
                   <Form.Label className="fw-semibold theme-form-label">
-                    Wallet Coins Applied
+                    {t("checkout.coinsApplied")}
                   </Form.Label>
 
                   <div className="d-flex align-items-center gap-2">
                     <FaCoins className="theme-coin-icon" />
-
                     <Form.Control
                       type="text"
                       value={`${coinsToUse} Coins  (₹${coinsToUse})`}
@@ -985,7 +1069,7 @@ const CheckoutPage = () => {
                   </div>
 
                   <Form.Text className="text-muted theme-text-muted">
-                    Automatically applied based on order amount
+                    {t("checkout.autoApplied")}
                   </Form.Text>
                 </Form.Group>
 
@@ -1065,18 +1149,17 @@ const CheckoutPage = () => {
               })
             ) : (
               <p className="text-center py-3 theme-text-secondary">
-                No items in your order.
+                {t("checkout.noItems")}
               </p>
             )}
 
             {mergedCartItems && mergedCartItems.length > 0 && (
               <div className="mt-3 border-top pt-3 theme-border">
                 <p className="d-flex justify-content-between mb-2 theme-text-primary">
-                  <span>Subtotal:</span>
+                  <span>{t("checkout.subtotal")}:</span>
                   <span>{formatPrice(totalPrice)}</span>
                 </p>
 
-                {/* ✅ COINS DISCOUNT ROW - AUTO UPDATES */}
                 {coinsToUse > 0 && (
                   <p className="d-flex justify-content-between mb-2 theme-text-success">
                     <span>
@@ -1088,12 +1171,12 @@ const CheckoutPage = () => {
                 )}
 
                 <p className="d-flex justify-content-between mb-2 theme-text-primary">
-                  <span>Shipping:</span>
-                  <span className="fw-semibold theme-text-success">Free</span>
+                  <span>{t("checkout.shipping")}</span>
+                  <span className="fw-semibold theme-text-success">{t("checkout.free")}</span>
                 </p>
                 <hr className="theme-border" />
                 <h5 className="d-flex justify-content-between fw-bold theme-text-primary">
-                  <span>Total:</span>
+                  <span>{t("checkout.total")}:</span>
                   <span className={coinsToUse > 0 ? "theme-text-success" : "theme-text-primary"}>
                     {formatPrice(finalAmount)}
                     {coinsToUse > 0 && (
@@ -1108,7 +1191,7 @@ const CheckoutPage = () => {
                   <div className="mt-2 py-2 theme-coins-saved">
                     <small>
                       <FaCoins className="me-1" />
-                      You saved ₹{coinDiscount} using {coinsToUse} coins from your wallet!
+                      {t("checkout.savedMessage", { amount: coinDiscount, coins: coinsToUse })}
                     </small>
                   </div>
                 )}

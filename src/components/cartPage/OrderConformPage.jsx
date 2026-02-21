@@ -12,9 +12,11 @@ import {
   Badge
 } from "react-bootstrap";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 
 function OrderConformPage() {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -123,9 +125,9 @@ function OrderConformPage() {
   if (!paymentMethod) {
     return (
       <Container className="py-5 text-center">
-        <Alert variant="danger">Order details not found.</Alert>
+        <Alert variant="danger">{t("orderConfirm.notFound")}</Alert>
         <Button variant="primary" onClick={() => navigate("/")}>
-          Go to Homepage
+          {t("orderConfirm.goHome")}
         </Button>
       </Container>
     );
@@ -140,7 +142,9 @@ function OrderConformPage() {
             <Modal.Body>
               <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.4 }}>
                 <i className="fas fa-check-circle mb-3" style={{ fontSize: "4rem", color: "#28a745" }} />
-                <h4 className="fw-bold text-success">Order Placed Successfully!</h4>
+                <h4 className="fw-bold text-success">
+  {t("orderConfirm.success")}
+</h4>
                 <p className="text-muted mb-3">
                   {coinEquivalent > 0 && (
                     <>
@@ -150,7 +154,7 @@ function OrderConformPage() {
                       <br />
                     </>
                   )}
-                  Thank you for shopping with us 🎁
+                  {t("orderConfirm.thankYou")}
                 </p>
                 <div className="d-flex justify-content-center">
                   <Button
@@ -161,7 +165,7 @@ function OrderConformPage() {
                       navigate("/orders");
                     }}
                   >
-                    View My Orders
+                    {t("orderConfirm.viewOrders")}
                   </Button>
                   <Button
                     variant="outline-dark"
@@ -170,7 +174,7 @@ function OrderConformPage() {
                       navigate("/");
                     }}
                   >
-                    Continue Shopping
+                    {t("orderConfirm.continueShopping")}
                   </Button>
                 </div>
               </motion.div>
@@ -184,23 +188,23 @@ function OrderConformPage() {
                 <div className="d-flex align-items-center">
                   <i className="fas fa-check-circle me-3" style={{ color: "#28a745", fontSize: "1.8rem" }} />
                   <div>
-                    <h4 className="mb-0 text-success fw-bold">ORDER CONFIRMATION</h4>
-                    <small className="text-muted">Your order has been successfully placed.</small>
+                    <h4 className="mb-0 text-success fw-bold">{t("orderConfirm.title")}</h4>
+                    <small className="text-muted">{t("orderConfirm.subtitle")}</small>
                   </div>
                 </div>
               </Card.Header>
               <Card.Body>
                 <Row className="text-center mb-3">
                   <Col md={4} className="border-end">
-                    <p className="mb-1 fw-semibold text-secondary">Order ID</p>
+                    <p className="mb-1 fw-semibold text-secondary">{t("orderConfirm.orderId")}</p>
                     <h5 className="fw-bold text-dark">{orderInfo.orderId}</h5>
                   </Col>
                   <Col md={4} className="border-end">
-                    <p className="mb-1 fw-semibold text-secondary">Total Amount</p>
+                    <p className="mb-1 fw-semibold text-secondary">{t("orderConfirm.totalAmount")}</p>
                     <h5 className="fw-bold text-danger">{formatCurrency(total)}</h5>
                   </Col>
                   <Col md={4}>
-                    <p className="mb-1 fw-semibold text-secondary">Payment Mode</p>
+                    <p className="mb-1 fw-semibold text-secondary">{t("orderConfirm.paymentMode")}</p>
                     <h5 className="fw-bold text-primary">{paymentMethod}</h5>
                   </Col>
                 </Row>
@@ -213,7 +217,7 @@ function OrderConformPage() {
                         <Col md={6}>
                           <p className="mb-0 fw-bold">
                             <i className="fas fa-coins me-2 text-warning" />
-                            Coin Equivalent:
+                            {t("orderConfirm.coinEquivalent")}
                           </p>
                         </Col>
                         <Col md={6} className="text-end">

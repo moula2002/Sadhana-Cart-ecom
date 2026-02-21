@@ -1,0 +1,716 @@
+{
+  "seller": "Seller",
+  "cartLabel": "Cart",
+  "login": "Login",
+  "myProfile": "My Profile",
+  "orders.title": "Orders",
+  "wishList": "Wishlist",
+  "walletRewards": "Wallet & Rewards",
+  "referEarn": "Refer & Earn",
+  "logout": "Logout",
+  "welcome": "Welcome",
+  "addToCart": "Add to Cart",
+  "theme" : "Theme",
+  "light": "Light",
+  "dark": "Dark",
+  "system": "System",
+  "language": "Language",
+   "searchPlaceholder": "What are you looking for?",
+  "searching": "Searching...",
+  "noProducts": "No products found for",
+  "recentSearches": "RECENT SEARCHES",
+  "clearAll": "Clear all",
+  "welcomeBack": "Welcome Back!",
+  "hello": "Hello",
+  "signedIn": "You are now signed in.",
+  "logoutSuccess": "Logout Successful!",
+  "loggedOut": "You've been securely logged out.",
+  "darkMode": "Switch to Dark Mode",
+  "lightMode": "Switch to Light Mode",
+  "brandName": "Sadhana",
+  "brandSuffix": "Cart",
+  "aboutUs": "About Us",
+  "aboutDesc": "SadhanaCart is a multipurpose Ecommerce Platform for Electronics, Fashion, Groceries, Gifts, Medical, and more.",
+  "allRights": "All Rights Reserved",
+  "developedBy": "Developed by Innomatrics Technologies",
+  "callUs": "Call Us",
+  "mailUs": "Mail Us",
+  "workingHours": "Working Hours",
+  "workingDays": "Monday to Saturday",
+  "usefulLinks": "Useful Links",
+  "return-Policy;": "Return Policy",
+  "shipping-Policy": "Shipping Policy",
+  "term's": "Terms & Conditions",
+  "chatWithUs": "Chat With Us",
+  "faq's": "FAQs",
+  "locatedAt": "Located At",
+  "registeredOffice": "Registered Office",
+  "addresspage": {
+    "line1": "Ground Floor, Ward No. 24, A No. 4-14-155/36A,",
+    "line2": "Teachers Colony, Near LIC Office,",
+    "line3": "Gangawati – 583222, Koppal District,",
+    "line4": "Karnataka."
+  },
+   "fashionTitle": "Fashion",
+  "fashionCollection": "Collection",
+  "fashionSubtitle": "Elevate your wardrobe with our latest high-fashion arrivals.",
+  "fashionLoading": "Styling your feed...",
+  "exploreFashion": "Explore All Fashion",
+  "accessoriesTitle": "Accessories",
+  "accessoriesCollection": "Collection",
+  "accessoriesSubtitle": "Eco-conscious luxury items to complete your signature look.",
+  "accessoriesLoading": "Loading accessories...",
+  "shopNow": "Shop Now",
+  "exploreAccessories": "Explore All Accessories",
+    "cosmeticsTitle": "Beauty That",
+  "cosmeticsGlow": "Glows",
+  "cosmeticsSubtitle": "Premium cosmetics crafted to enhance your natural beauty.",
+  "cosmeticsLoading": "Loading beauty products...",
+  "exploreCosmetics": "Explore Cosmetics",
+  "off": "OFF",
+   "toysTitle": "Toys",
+  "toysGames": "Games",
+  "toysSubtitle": "Unlock a world of imagination and endless fun!",
+  "toysLoading": "Loading fun toys...",
+  "seeAllToys": "See All Adventures",
+    "stationeryCreative": "Creative",
+  "stationeryTitle": "Stationery",
+  "stationerySubtitle": "Organize your thoughts with our curated premium collection.",
+  "stationeryLoading": "Loading stationery...",
+  "seeAllStationery": "See All Stationery",
+   "booksRead": "Read",
+  "booksGrow": "Grow",
+  "booksSubtitle": "Discover books that inspire knowledge and imagination.",
+  "booksLoading": "Loading books...",
+  "browseCollections": "Browse All Collections",
+  "photoPreserve": "Preserve Your",
+  "photoMemories": "Memories",
+  "photoSubtitle": "Handcrafted frames designed to make every moment last forever.",
+  "photoLoading": "Loading frames...",
+    "footwearWalk": "Walk With",
+  "footwearConfidence": "Confidence",
+  "footwearSubtitle": "Premium footwear crafted for comfort and lasting style.",
+  "footwearLoading": "Loading footwear...",
+  "royal": "Royal",
+  "jewelleryTitle": "Jewellery",
+  "jewellerySubtitle": "Timeless elegance crafted with precision and passion.",
+  "jewelleryLoading": "Polishing gems...",
+  "exploreJewellery": "Explore All Jewellery",
+   "mens": "Mens",
+  "essentials": "Essentials",
+  "mensSubtitle": "Modern cuts and premium fabrics for the contemporary man.",
+  "mensLoading": "Curating essentials...",
+  "exploreMens": "Explore All Menswear",
+   "playful": "Playful",
+  "kidsStyle": "Kids Style",
+  "kidsSubtitle": "Comfortable outfits for every little adventure!",
+  "kidsLoading": "Loading fun outfits...",
+  "exploreKids": "Explore All Kids Wear",
+    "personalCaretitle": "Personal Care",
+  "redefined": "Redefined",
+  "personalCareSubtitle": "Indulge in our curated selection of premium beauty essentials.",
+  "personalCareLoading": "Loading beauty essentials...",
+  "explorePersonalCare": "Explore All Personal Care",
+    "noProductFound": "No product found.",
+  "buyNow": "Buy Now",
+  "selectSize": "Select Size",
+  "quantity": "Quantity",
+  "productPolicies": "Product Information & Policies",
+  "deliveryInformation": "Delivery Information",
+  "termsConditions": "Terms & Conditions",
+  "writeReview": "Write a Review",
+  "submitReview": "Submit Review",
+  "cancel": "Cancel",
+  "ratings": "Ratings",
+  "reviews": "Reviews",
+  "reviewThisProduct": "Review this product",
+    "cart": {
+    "emptyTitle": "Your Cart is Empty",
+    "emptySubtitle": "Looks like you haven't added anything yet.",
+    "startShopping": "Start Shopping",
+    "heading": "Your Shopping Cart",
+    "total": "Total",
+    "proceed": "Proceed to Buy",
+    "clear": "Clear Cart",
+    "stockLimit": "Stock Limit Reached",
+    "size": "Size",
+  "subtotal": "Subtotal",
+  "remove": "Remove",
+  "stockLimitTitle": "Stock Limit Reached",
+  "stockLimitMessage": "⚠️ Maximum stock reached! Only {{stock}} unit(s) available for \"{{title}}\"."
+  } ,
+  "checkout": {
+   "loginRequired": "Please login to continue checkout",
+  "addressIncomplete": "Address is incomplete",
+  "locatingAddress": "Locating address...",
+  "reverseGeocoding": "Converting coordinates to address...",
+  "fetchingLocation": "Fetching current location...",
+  "insufficientCoins": "Insufficient coins in wallet",
+  "orderError": "Failed to save order. Please try again.",
+  "razorpayFailed": "Failed to load Razorpay",
+  "minimumAmount": "Minimum payment amount is ₹1.00",
+  "useLocation": "Use Current Location",
+  "locating": "Locating...",
+  "enterFullName": "Enter full name",
+  "enterEmail": "Enter email",
+  "enterPhone": "Enter phone number",
+  "enterAddress": "Enter full address",
+  "useCoins": "Use Wallet Coins",
+  "availableCoins": "Available Coins",
+  "orderAmount": "Order Amount",
+  "coinsApplied": "Coins Applied",
+  "autoApplied": "Automatically applied based on order value",
+  "total": "Total",
+  "noItems": "No items in your order",
+  "savedMessage": "You saved ₹{{amount}} using {{coins}} coins from your wallet!",
+    "billingInfo": "Billing Information",
+  "orderSummary": "Order Summary",
+  "fullName": "Full Name",
+  "email": "Email",
+  "phone": "Phone Number",
+  "address": "Address",
+  "city": "City",
+  "pincode": "PIN Code",
+  "paymentMethod": "Payment Method",
+  "razorpay": "Razorpay",
+  "cod": "Cash on Delivery",
+  "pay": "Pay",
+  "subtotal": "Subtotal",
+  "fetching": "Fetching data...",
+  "emptyCart": "Your cart is empty",
+  "shipping": "Shipping",
+  "free": "Free"
+},
+"cod": {
+  "title": "Cash on Delivery",
+  "deliveryDetails": "Delivery Details",
+  "orderItems": "Order Items",
+  "subtotal": "Subtotal",
+  "shipping": "Shipping",
+  "totalPayable": "Total Payable",
+  "processing": "Processing...",
+  "backToCheckout": "Back to Checkout",
+  "confirmOrder": "Confirm Order",
+  "confirmUseCoins": "Confirm & Use Coins",
+  "walletApplied": "Wallet Coins Applied",
+  "coins": "Coins",
+  "availableAfter": "Available coins after purchase:",
+  "youSave": "You save ₹{{amount}} using your wallet coins!",
+  "coinsDiscount": "Coins Discount",
+  "free": "Free",
+  "placeOrder": "Place Order",
+  "note": "Note",
+  "placeOrderFor": "Place order for",
+  "usingCOD": "using Cash on Delivery?",
+  "deliveryTo": "Delivery to",
+  "cancel": "Cancel"
+},
+"orders": {
+  "title": "Your Orders",
+  "orderId": "Order ID",
+  "orderDate": "Order Date",
+  "total": "Total",
+  "payment": "Payment",
+  "shippingTo": "Shipping To",
+  "phone": "Phone",
+  "items": "Items",
+  "viewMap": "View on Map",
+  "buyAgain": "Buy Again",
+  "loading": "Loading your orders...",
+  "noOrders": "You haven’t placed any orders yet.",
+  "startShopping": "Start Shopping"
+},
+"auth": {
+  "login": "Login",
+  "signup": "Signup",
+  "joinUs": "Join Us!",
+  "accessText": "Access Orders, Wishlist & Recommendations",
+  "signupText": "Create account to explore products",
+  "referralBonus": "Referral Bonus",
+  "referralText": "Get ₹50 on signup with referral code!",
+  "fullName": "Full Name",
+  "referralCode": "Referral Code (Optional)",
+  "email": "Email",
+  "password": "Password",
+  "processing": "Processing...",
+  "or": "OR",
+  "requestOtp": "Request OTP",
+  "verifyOtp": "Verify OTP",
+  "changeNumber": "Change Number",
+  "continueGoogle": "Continue with Google",
+  "newUser": "New user? Create account",
+  "alreadyUser": "Already have an account? Login",
+  "termsText": "By continuing, you agree to our Terms of Use and Privacy Policy"
+},
+"orderConfirm": {
+  "notFound": "Order details not found.",
+  "goHome": "Go to Homepage",
+  "success": "Order Placed Successfully!",
+  "thankYou": "Thank you for shopping with us 🎁",
+  "viewOrders": "View My Orders",
+  "continueShopping": "Continue Shopping",
+  "title": "ORDER CONFIRMATION",
+  "subtitle": "Your order has been successfully placed.",
+  "orderId": "Order ID",
+  "totalAmount": "Total Amount",
+  "paymentMode": "Payment Mode",
+  "coinEquivalent": "Coin Equivalent"
+},
+"category": {
+  "loading": "Loading {{category}} products...",
+  "noProducts": "No products found in {{category}}",
+  "itemsFound": "{{count}} items found (out of {{total}})",
+  "filters": "Filters",
+  "maxPrice": "Max Price",
+  "clearFilter": "Clear Filter",
+  "sortBy": "Sort By:",
+  "topRated": "Top Rated (Default)",
+  "priceLowHigh": "Price: Low to High",
+  "priceHighLow": "Price: High to Low",
+  "nameAZ": "Name (A-Z)",
+  "filterWarning": "The current filters hide all products. Try lowering the max price."
+},
+"fashion": {
+  "collectionTitle": "{{category}} Collection",
+  "description": "Discover the latest trends in {{category}} and elevate your style ✨",
+  "loading": "Loading {{category}} products...",
+  "loadingMore": "Loading more...",
+  "refresh": "Refresh the website",
+  "noProducts": "No products found in {{category}}."
+},
+"accessories": {
+  "collectionTitle": "{{category}} Collection",
+  "description": "Explore our latest {{category}} and add a touch of elegance to your look ✨",
+  "loading": "Loading accessories...",
+  "noProducts": "No products found in {{category}}."
+},
+"common": {
+  "loadingMore": "Loading more...",
+  "refresh": "Refresh the website",
+  "color": "Color",
+  "unnamedProduct": "Unnamed Product",
+  "notAvailable": "N/A",
+    "cosmeticProduct": "Cosmetic Product",
+    "cosmeticDescription": "Premium cosmetics crafted to enhance your natural beauty."
+
+   
+},
+  "cosmetics": {
+    "collectionTitle": "Cosmetics Collection",
+    "description": "Enhance your beauty with premium cosmetic essentials ✨",
+    "loading": "Loading cosmetics...",
+    "noProducts": "No cosmetics found"
+  },
+    "toys": {
+    "collectionTitle": "{{category}} Collection",
+    "description": "Discover amazing {{category}} for endless fun and creativity ✨",
+    "loading": "Loading toys products...",
+    "noProducts": "No products found in {{category}}"
+  },
+  "stationery": {
+  "collectionTitle": "{{category}} Collection",
+  "description": "Discover premium {{category}} for all your writing and creative needs ✨",
+  "loading": "Loading {{category}} products...",
+  "noProducts": "No products found in {{category}}."
+},
+"books": {
+  "collectionTitle": "Books Collection",
+  "description": "Discover knowledge, stories & inspiration 📖",
+  "loading": "Loading books...",
+  "loadingMore": "Loading more books...",
+  "noMore": "No more books available",
+  "noBooks": "No books found",
+  "author": "Author",
+  "defaultName": "Book"
+},
+"home": {
+  "collectionTitle": "{{category}} Collection",
+  "description": "Discover premium {{category}} decor and photo frames to showcase your memories ✨",
+  "loading": "Loading home products...",
+  "noProducts": "No products found in {{category}}."
+},
+  "footwear": {
+    "collectionTitle": "{{category}} Collection",
+    "description": "Discover trendy and comfortable {{category}} for every occasion ✨",
+    "loading": "Loading footwear products...",
+    "noProducts": "No products found in {{category}}."
+  },
+    "jewellery": {
+    "collectionTitle": "{{category}} Collection",
+    "description": "Discover exquisite {{category}} pieces to enhance your elegance ✨",
+    "loading": "Loading jewellery products...",
+    "noProducts": "No products found in {{category}}."
+  },
+  "kids": {
+  "collectionTitle": "{{category}} Collection",
+  "description": "Discover fun and safe {{category}} products for endless joy ✨",
+  "loading": "Loading kids products...",
+  "noProducts": "No products found in {{category}}."
+},
+"personalCare": {
+  "collectionTitle": "{{category}} Collection",
+  "description": "Discover premium {{category}} products for your daily hygiene and wellness ✨",
+  "loading": "Loading personal care products...",
+  "noProducts": "No products found in {{category}}."
+},
+  "returnPolicy": {
+    "title": "Return & Refund Policy",
+    "subtitle": "Hassle-Free Returns",
+    "intro": "We want you to be completely satisfied with your purchase. If you are not satisfied, our return and refund policy is designed to be simple and fair.",
+
+    "section1": {
+      "title": "1. Return Window",
+      "point1": "Products can be returned within 7 days of delivery",
+      "point2": "Items must be unused and in their original packaging",
+      "point3": "Return shipping label must be used if provided"
+    },
+
+    "section2": {
+      "title": "2. Items Not Eligible for Return",
+      "point1": "Perishable goods",
+      "point2": "Personalized or custom products",
+      "point3": "Items marked as \"Non-returnable\"",
+      "point4": "Products without original tags or packaging"
+    },
+
+    "section3": {
+      "title": "3. How to Initiate a Return",
+      "point1": "Go to \"My Orders\" in the app",
+      "point2": "Select the item and tap \"Request Return\"",
+      "point3": "Follow the instructions and choose pickup or drop-off option",
+      "point4": "Print return label if required"
+    },
+
+    "section4": {
+      "title": "4. Refund Process",
+      "point1": "Once the return is received and inspected, we will notify you",
+      "point2": "Refunds are typically processed within 5–7 business days",
+      "point3": "The refund will be credited back to your original payment method",
+      "point4": "Shipping charges (if any) are non-refundable"
+    },
+
+    "section5": {
+      "title": "5. Exchange Policy",
+      "point1": "Exchanges allowed for size or defective issues",
+      "point2": "Subject to stock availability",
+      "point3": "Customer responsible for return shipping (unless defective)",
+      "point4": "New item will be shipped after receiving the original"
+    },
+
+    "section6": {
+      "title": "6. Damaged or Incorrect Items",
+      "point1": "If you receive a damaged or incorrect item, contact support within 48 hours",
+      "point2": "Provide photo evidence of the issue",
+      "point3": "We will arrange a free return pickup",
+      "point4": "Replacement or full refund will be processed immediately"
+    },
+
+    "help": {
+      "title": "Need Help with a Return?",
+      "description": "For any return-related queries, contact our support team:",
+      "contactButton": "Contact via Gmail"
+    }
+  },
+
+  "shippingPolicy": {
+    "title": "Shipping Policy",
+    "subtitle": "Fast & Reliable Delivery",
+    "intro": "At SadhanaCart, we are committed to delivering your orders quickly and efficiently. This Shipping Policy outlines how and when your items will be shipped.",
+
+    "section1": {
+      "title": "Processing Time",
+      "point1": "Orders are typically processed within 1–3 business days.",
+      "point2": "Vendors may require extra time during high-demand periods."
+    },
+
+    "section2": {
+      "title": "Shipping Methods",
+      "point1": "We offer standard and express shipping options.",
+      "point2": "Shipping carriers may vary depending on location and vendor."
+    },
+
+    "section3": {
+      "title": "Estimated Delivery Times",
+      "point1": "Standard: 4–7 business days.",
+      "point2": "Express: 1–3 business days.",
+      "point3": "Delivery times may vary by vendor and region."
+    },
+
+    "section4": {
+      "title": "Shipping Charges",
+      "point1": "Shipping charges are calculated at checkout.",
+      "point2": "Free shipping may be available on select products or orders above ₹500."
+    },
+
+    "section5": {
+      "title": "International Shipping",
+      "point1": "Currently, we only ship within India.",
+      "point2": "International shipping options will be added in future updates."
+    },
+
+    "section6": {
+      "title": "Delays and Tracking",
+      "point1": "We will notify you via email in case of delays due to weather, holidays, or vendor issues.",
+      "point2": "A tracking number will be provided once your order ships."
+    },
+
+    "section7": {
+      "title": "Undeliverable Packages",
+      "point1": "If a package is returned due to an incorrect address or failed delivery, we will contact you to resolve it."
+    },
+
+    "help": {
+      "title": "Need Help With Shipping?",
+      "description": "Contact our customer support team for any shipping-related questions or issues.",
+      "button": "Contact Support"
+    }
+  },
+  "terms": {
+    "header": "Our Terms & Conditions",
+    "title": "Terms & Conditions",
+    "intro": "Please read these terms carefully before using our multi-vendor application. By using the app, you agree to these terms.",
+
+    "section1": {
+      "title": "1. User Accounts",
+      "point1": "You must register an account to make purchases or sell products.",
+      "point2": "You are responsible for maintaining account confidentiality.",
+      "point3": "You must provide accurate and complete information."
+    },
+
+    "section2": {
+      "title": "2. Vendor Responsibilities",
+      "point1": "Vendors must ensure products are legal and genuine.",
+      "point2": "Vendors are responsible for fulfillment and refunds.",
+      "point3": "Vendors must comply with applicable laws."
+    },
+
+    "section3": {
+      "title": "3. Purchases and Payments",
+      "point1": "Purchases are subject to availability.",
+      "point2": "We use secure third-party payment gateways.",
+      "point3": "Prices may change without notice."
+    },
+
+    "section4": {
+      "title": "4. Prohibited Activities",
+      "point1": "Selling counterfeit or restricted items is prohibited.",
+      "point2": "Attempting to hack or disrupt the platform is forbidden.",
+      "point3": "Automated tools to manipulate listings are not allowed."
+    },
+
+    "section5": {
+      "title": "5. Intellectual Property",
+      "point1": "All logos and trademarks belong to us or partners.",
+      "point2": "Users may not copy content without permission.",
+      "point3": "Vendors retain ownership of their listings."
+    },
+
+    "section6": {
+      "title": "6. Termination",
+      "point1": "We may suspend accounts for violations.",
+      "point2": "Terminated users may lose access to data.",
+      "point3": "Users may appeal decisions via support."
+    },
+
+    "section7": {
+      "title": "7. Limitation of Liability",
+      "point1": "We are not liable for damages from app usage.",
+      "point2": "Transactions are between vendors and customers.",
+      "point3": "We do not guarantee product quality or delivery."
+    },
+
+    "acceptanceTitle": "Acceptance of Terms",
+    "acceptanceText": "By using our app, you confirm that you agree to these terms.",
+    "understandButton": "I Understand",
+    "contactSupport": "Contact Support"
+  },
+  
+  "about": {
+    "header": "The Essence of Sadhana",
+    "subtitle": "Conscious Products. Trusted Shopping. Meaningful Living.",
+    "title": "About Sadhana Cart",
+    "lead": "A conscious e-commerce platform built on trust, quality, and ethical sourcing.",
+    "description": "Sadhana Cart curates spiritual essentials, wellness products, and natural goods with a focus on authenticity and simplicity.",
+    "missionTitle": "Our Mission",
+    "missionText": "To provide ethically sourced, high-quality products through a reliable online marketplace.",
+    "visionTitle": "Our Vision",
+    "visionText": "To become a trusted global ecommerce destination blending tradition with modern technology.",
+    "differentTitle": "What Makes Us Different",
+    "feature1": "Verified Products",
+    "feature2": "Secure Checkout",
+    "feature3": "Ethical Sourcing",
+    "feature4": "Fast Delivery",
+    "teamTitle": "Meet Our Team",
+    "teamSubtitle": "Dedicated professionals working behind the scenes",
+    "ctaTitle": "Start Shopping with Purpose",
+    "ctaText": "Discover meaningful products that support a balanced lifestyle.",
+    "shopNow": "Shop Now"
+  },
+
+  "faqs": {
+    "title": "Frequently Asked Questions",
+    "helpTopics": "Help Topics",
+
+    "delivery": {
+      "title": "Delivery Related FAQs",
+      "q1": "How quickly can I get my order delivered?",
+      "q2": "What do the different order statuses in 'My Orders' mean?",
+      "q3": "What are the standard shipping speeds and delivery charges?",
+      "q4": "My order has reached the nearest delivery hub, but why isn't it out for delivery yet?",
+      "q5": "Why can't I track my order even though it has been shipped?",
+      "q6": "What should I do if my order is approved but hasn't been shipped yet?",
+      "q7": "I have a complaint about the courier executive who came to deliver my order.",
+      "q8": "Can I take the shipment after opening and checking the contents inside?"
+    },
+
+    "login": {
+      "title": "Login Related FAQs",
+      "q1": "Why am I seeing a 'Google Sign-in Failed' error?",
+      "q2": "What should I do if I can't log in with my Google account?",
+      "q3": "Can I use a different Google account to log in?",
+      "q4": "Is my Google login information secure with Sadhana Cart?"
+    },
+
+    "refund": {
+      "title": "Refund Related FAQs",
+      "q1": "Can I get a refund if I received a damaged or incorrect item?",
+      "q2": "What should I do if my refund hasn't been received?",
+      "q3": "What items are eligible for a refund?",
+      "q4": "How long does it take to process a refund?",
+      "q5": "How do I request a refund for an order on Sadhana Cart?"
+    },
+
+    "payment": {
+      "title": "Payment Related FAQs",
+      "q1": "How do I know if my payment was successful?",
+      "q2": "Can I change the payment method after placing an order?",
+      "q3": "What payment methods does Sadhana Cart accept?",
+      "q4": "Is it safe to enter my payment details on Sadhana Cart?",
+      "q5": "Why was my payment declined during checkout?"
+    },
+
+    "return": {
+      "title": "Return Related FAQs",
+      "q1": "What is Sadhana Cart's return policy?",
+      "q2": "How do I initiate a return request?",
+      "q3": "What if the product I received is damaged or defective?",
+      "q4": "Can I return an item after the return window has closed?",
+      "q5": "Will I have to pay for the return shipping?",
+      "q6": "How long does it take for the pickup executive to collect the return?"
+    },
+
+    "pickup": {
+      "title": "Pickup Related FAQs",
+      "q1": "Does Sadhana Cart offer a pickup option for returns?",
+      "q2": "Is there a cost for the return pickup service?",
+      "q3": "How do I schedule a pickup for my return?",
+      "q4": "Do I need to package the item for pickup?",
+      "q5": "What should I do if the pickup courier doesn't arrive?"
+    },
+
+    "cancellation": {
+      "title": "Cancellation Related FAQs",
+      "q1": "Can I cancel an order after it has been placed?",
+      "q2": "How long does it take to process a cancellation refund?",
+      "q3": "How can I cancel an order on Sadhana Cart?",
+      "q4": "What should I do if my cancellation request is denied?",
+      "q5": "Will I be charged for cancelling an order?"
+    }
+  },
+
+  "profile": {
+    "syncing": "Synchronizing Profile...",
+    "accessRestricted": "Access Restricted",
+    "loginMessage": "Please log in to your account to view your profile, manage orders, and update your personal information.",
+    "goToLogin": "Go to Login",
+    "customer": "Customer",
+    "verifiedMember": "Verified Member",
+    "edit": "Edit",
+    "fullName": "Full Name",
+    "emailAddress": "Email Address",
+    "emailNote": "Email cannot be changed.",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving...",
+    "accountOverview": "Account Overview",
+    "memberSince": "Member Since",
+    "lastActivity": "Last Activity"
+  },
+    "wishlist": {
+    "loading": "Loading your wishlist...",
+    "title": "My Wishlist",
+    "itemsSaved": "{{count}} item saved",
+    "itemsSaved_plural": "{{count}} items saved",
+    "addAll": "Add All to Cart",
+    "clearAll": "Clear All",
+    "emptyTitle": "Your wishlist is empty",
+    "emptySubtitle": "Save your favorite products here to access them later.",
+    "startShopping": "Start Shopping",
+    "remove": "Remove from wishlist",
+    "size": "Size:",
+    "addToCart": "Add to Cart",
+    "viewDetails": "View Details"
+  },
+  "wallet": {
+    "loading": "Loading wallet...",
+    "title": "My Wallet",
+    "subtitle": "Coins & Balance",
+    "coins": "Wallet Coins",
+    "earnInfo": "Earn coins by referrals & offers"
+  },
+  "refer": {
+    "loading": "Loading...",
+    "codeTitle": "Your Referral Code",
+    "earnPerReferral": "Earn ₹50 per referral",
+    "copy": "Copy",
+    "copied": "Copied",
+    "share": "Share",
+    "earningsTitle": "Referral & Earnings",
+    "walletBalance": "Wallet Balance",
+    "walletCoins": "Wallet Coins",
+    "convert": "Convert to Wallet Coins",
+    "converting": "Converting...",
+    "convertSuccess": "Wallet balance converted to Wallet Coins!",
+    "convertError": "Failed to convert balance",
+    "copySuccess": "Referral code copied!"
+  },
+  "filter": "Filter",
+  "advancedFilter": "Advanced Filter",
+  "advancedSearch": "Advanced Search",
+  "filterProductsDescription": "Filter products by multiple criteria to find exactly what you're looking for",
+  "searchCriteria": "Search Criteria",
+  "allCategories": "All Categories",
+  "enterBrand": "Enter brand name",
+  "priceRange": "Price Range",
+  "minPrice": "Minimum Price",
+  "maxPrice": "Maximum Price",
+  "customerRating": "Customer Rating",
+  "anyRating": "Any Rating",
+  "sortBy": "Sort By",
+  "relevance": "Relevance",
+  "priceLowToHigh": "Price: Low to High",
+  "priceHighToLow": "Price: High to Low",
+  "newestArrivals": "Newest Arrivals",
+  "topRated": "Top Rated",
+  "activeFilters": "Active Filters",
+  "noFiltersSelected": "No filters selected",
+  "inStockOnly": "In Stock Only",
+  "applyFilters": "Apply Filters",
+  "resetAll": "Reset All",
+
+  "address": "My Addresses",
+  "saved_address": "saved address",
+  "saved_addresses": "saved addresses"
+
+
+}
+
+
+
+
+
+
+
+
+
+

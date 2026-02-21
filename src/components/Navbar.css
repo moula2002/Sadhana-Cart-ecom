@@ -621,75 +621,205 @@ body {
     transform: scale(1.05);
     color: var(--text-primary) !important;
 }
+.navbar-brand {
+    text-decoration: none !important;
+}
 
-/* ==================== SEARCH BAR STYLES ==================== */
+.navbar-brand:hover {
+    text-decoration: none !important;
+}
+
+/* ==================== UPDATED SEARCH BAR STYLES ==================== */
+.search-wrapper {
+    display: flex;
+    align-items: center;
+    background-color: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    height: 48px;
+    width: 100%;
+}
+
+.search-wrapper:focus-within {
+    border-color: var(--shopclues-red-orange);
+    box-shadow: 0 0 0 3px rgba(255, 110, 64, 0.2);
+}
+
+.search-icon-left {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-left: 15px;
+    color: var(--text-secondary);
+    font-size: 1rem;
+}
+
 .search-input-desktop {
+    flex: 1;
+    height: 100%;
+    border: none !important;
+    background: transparent !important;
+    padding: 0 10px !important;
+    font-size: 0.95rem !important;
+    color: var(--text-primary) !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.search-input-desktop::placeholder {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    font-weight: 400;
+    opacity: 0.8;
+}
+
+.dark-theme .search-input-desktop::placeholder {
+    color: #9ca3af;
+}
+
+.search-clear-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    padding: 0 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.search-clear-btn:hover {
+    color: var(--shopclues-red-orange);
+    transform: scale(1.1);
+}
+
+/* Filter Button */
+.filter-button {
+    background-color: transparent !important;
+    border: none !important;
+    border-left: 2px solid var(--border-color) !important;
+    color: var(--shopclues-red-orange) !important;
+    padding: 0 20px !important;
+    height: 100%;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    font-weight: 600 !important;
+    font-size: 0.9rem !important;
     transition: all 0.3s ease !important;
-    background-color: var(--bg-secondary);
-    color: var(--text-primary);
-    border-color: var(--border-color) !important;
+    border-radius: 0 50px 50px 0 !important;
+    cursor: pointer;
+    white-space: nowrap;
 }
 
-.search-input-desktop:focus {
-    border-color: var(--shopclues-red-orange) !important;
-    box-shadow: 0 0 0 2px rgba(255, 110, 64, 0.2) !important;
-    transform: scale(1.02);
-    background-color: var(--bg-secondary);
-    color: var(--text-primary);
+.filter-button:hover {
+    background-color: var(--shopclues-red-orange) !important;
+    color: white !important;
+    border-left-color: var(--shopclues-red-orange) !important;
 }
 
+.filter-button i {
+    font-size: 1rem;
+}
+
+/* Dark theme filter button */
+.dark-theme .filter-button {
+    border-left-color: var(--border-color) !important;
+    color: #ff8a5c !important;
+}
+
+.dark-theme .filter-button:hover {
+    background-color: #ff8a5c !important;
+    color: #121212 !important;
+    border-left-color: #ff8a5c !important;
+}
+
+/* Suggestions Dropdown */
 .suggestions-dropdown {
     position: absolute;
     width: 100%;
     z-index: 99999;
-    top: 40px;
+    top: 50px;
     max-height: 350px;
     overflow-y: auto;
     background-color: var(--card-bg);
     border: 1px solid var(--shopclues-red-orange);
-    border-top: none;
-    border-radius: 0 0 4px 4px;
-    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    box-shadow: 0 10px 25px var(--shadow-color);
+    animation: slideDownCompact 0.25s ease-out forwards;
 }
 
 .suggestion-item {
     cursor: pointer;
     color: var(--text-primary);
-    padding: 10px 15px;
+    padding: 12px 15px;
     border-bottom: 1px solid var(--border-color);
     transition: all 0.2s ease;
     font-size: 0.95rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    position: relative;
-    background-color: var(--card-bg);
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
-.suggestion-item:hover,
-.suggestion-item:focus {
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.suggestion-item:hover {
     background-color: var(--bg-secondary);
-    font-weight: 500;
-    padding-left: 20px;
+}
+
+.suggestion-item i {
+    color: var(--shopclues-red-orange);
+    font-size: 0.9rem;
+    width: 20px;
+}
+
+.suggestion-icon {
+    color: var(--shopclues-red-orange);
+}
+
+.trending-icon {
+    color: var(--primary);
 }
 
 .search-suggestion-img {
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height: 40px;
     object-fit: cover;
     border-radius: 6px;
     border: 1px solid var(--border-color);
-    margin-right: 12px;
 }
 
-/* ==================== RECENT SEARCH STYLES ==================== */
+.suggestion-title {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+}
+
+.suggestion-category {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.suggestion-badge {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+}
+
+/* Recent Searches */
 .recent-searches-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 15px;
+    padding: 12px 15px;
     border-bottom: 1px solid var(--border-color);
     background-color: var(--bg-secondary);
+    border-radius: 12px 12px 0 0;
 }
 
 .recent-searches-title {
@@ -697,6 +827,13 @@ body {
     font-weight: 600;
     color: var(--text-primary);
     margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.recent-searches-title i {
+    color: var(--shopclues-red-orange);
 }
 
 .clear-all-btn {
@@ -708,6 +845,9 @@ body {
     border-radius: 4px;
     cursor: pointer;
     transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
 .clear-all-btn:hover {
@@ -719,11 +859,10 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 15px;
+    padding: 12px 15px;
     cursor: pointer;
     border-bottom: 1px solid var(--border-color);
     transition: all 0.2s ease;
-    position: relative;
     background-color: var(--card-bg);
 }
 
@@ -735,14 +874,69 @@ body {
     background-color: var(--bg-secondary);
 }
 
+.recent-search-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.recent-search-content i {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    width: 20px;
+}
+
 .recent-search-text {
-    flex-grow: 1;
     color: var(--text-primary);
     font-size: 0.9rem;
-    padding-right: 8px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+}
+
+.recent-search-delete-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    font-size: 0.8rem;
+}
+
+.recent-search-delete-btn:hover {
+    color: var(--danger);
+    background-color: var(--bg-secondary);
+}
+
+/* No results */
+.no-results-item {
+    padding: 20px;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.no-results-item i {
+    font-size: 2rem;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    display: block;
+}
+
+/* Trending items */
+.trending-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Search highlight */
+.search-highlight {
+    background-color: rgba(255, 110, 64, 0.2);
+    color: var(--shopclues-red-orange);
+    font-weight: 600;
+    padding: 0 2px;
+    border-radius: 2px;
 }
 
 /* ==================== CART STYLES ==================== */
@@ -943,7 +1137,7 @@ body {
 
 .category-section .original-price {
     color: var(--text-secondary);
-    text-decoration: line-through;
+
 }
 
 .category-section .discount-badge {
@@ -1204,6 +1398,37 @@ body {
     .user-email {
         font-size: 0.7rem !important;
     }
+
+    /* Mobile search styles */
+    .search-wrapper {
+        height: 44px;
+    }
+    
+    .filter-button span {
+        display: none;
+    }
+    
+    .filter-button {
+        padding: 0 15px !important;
+    }
+    
+    .filter-button i {
+        font-size: 1.1rem;
+        margin: 0;
+    }
+    
+    .search-icon-left {
+        padding-left: 12px;
+    }
+    
+    .search-input-desktop {
+        font-size: 0.9rem !important;
+    }
+    
+    .suggestions-dropdown {
+        top: 45px;
+        max-height: 300px;
+    }
 }
 
 /* Small Mobile Devices */
@@ -1264,6 +1489,33 @@ body {
         top: 60px !important;
         max-height: 320px !important;
     }
+
+    /* Mobile search */
+    .search-wrapper {
+        height: 40px;
+    }
+    
+    .filter-button {
+        padding: 0 12px !important;
+    }
+    
+    .search-icon-left {
+        padding-left: 10px;
+    }
+    
+    .search-input-desktop {
+        font-size: 0.85rem !important;
+    }
+    
+    .suggestions-dropdown {
+        max-height: 280px;
+    }
+    
+    .suggestion-item,
+    .recent-search-item {
+        padding: 10px 12px;
+        font-size: 0.85rem;
+    }
 }
 
 /* Very Small Mobile Devices */
@@ -1292,4 +1544,73 @@ body {
                 color 0.3s ease, 
                 border-color 0.3s ease,
                 box-shadow 0.3s ease;
+}
+
+/* ==================== ADVANCED SEARCH FILTER BUTTON ==================== */
+.filter-button {
+    position: relative;
+    overflow: hidden;
+}
+
+.filter-button::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.5);
+    opacity: 0;
+    border-radius: 100%;
+    transform: scale(1, 1) translate(-50%);
+    transform-origin: 50% 50%;
+}
+
+@keyframes ripple {
+    0% {
+        transform: scale(0, 0);
+        opacity: 0.5;
+    }
+    100% {
+        transform: scale(20, 20);
+        opacity: 0;
+    }
+}
+
+.filter-button:focus:not(:active)::after {
+    animation: ripple 1s ease-out;
+}
+
+/* Dark theme adjustments for new search bar */
+.dark-theme .search-wrapper {
+    background-color: var(--bg-secondary);
+    border-color: var(--border-color);
+}
+
+.dark-theme .suggestions-dropdown {
+    border-color: #ff8a5c;
+}
+
+.dark-theme .suggestion-item i {
+    color: #ff8a5c;
+}
+
+.dark-theme .recent-searches-title i {
+    color: #ff8a5c;
+}
+
+.dark-theme .search-highlight {
+    background-color: rgba(255, 138, 92, 0.3);
+    color: #ff8a5c;
+}
+.flipkart-login-dropdown .dropdown-item {
+    text-decoration: none !important;
+}
+
+.flipkart-login-dropdown .dropdown-item:hover {
+    text-decoration: none !important;
+}
+
+.flipkart-login-dropdown .dropdown-item:focus {
+    text-decoration: none !important;
 }

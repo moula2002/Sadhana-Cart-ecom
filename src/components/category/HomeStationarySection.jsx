@@ -11,6 +11,7 @@ import {
 import { db } from "../../firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import "react-lazy-load-image-component/src/effects/blur.css";
 import "./HomeStationarySection.css"
@@ -42,11 +43,11 @@ const getCustomStyles = (isDarkMode) => ({
     backdropFilter: "blur(10px)",
     borderRadius: "30px",
     padding: "3rem 1.5rem",
-    boxShadow: isDarkMode ? 
-      "0 15px 40px rgba(245, 158, 11, 0.2)" : 
+    boxShadow: isDarkMode ?
+      "0 15px 40px rgba(245, 158, 11, 0.2)" :
       "0 15px 40px rgba(233, 196, 106, 0.2)",
-    border: isDarkMode ? 
-      `1px solid rgba(255, 255, 255, 0.1)` : 
+    border: isDarkMode ?
+      `1px solid rgba(255, 255, 255, 0.1)` :
       `1px solid ${WHITE_COLOR}`,
     position: "relative",
     overflow: "hidden",
@@ -56,8 +57,8 @@ const getCustomStyles = (isDarkMode) => ({
     border: isDarkMode ? `2px solid ${BORDER_COLOR_DARK}` : `2px solid ${BANANA_YELLOW}`,
     borderRadius: "20px",
     overflow: "hidden",
-    boxShadow: isDarkMode ? 
-      "0 8px 15px rgba(0, 0, 0, 0.2)" : 
+    boxShadow: isDarkMode ?
+      "0 8px 15px rgba(0, 0, 0, 0.2)" :
       "0 8px 15px rgba(0, 0, 0, 0.04)",
     transition: "all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1)",
     backgroundColor: isDarkMode ? "#1a1a1a" : WHITE_COLOR,
@@ -92,8 +93,8 @@ const getCustomStyles = (isDarkMode) => ({
     fontSize: "0.75rem",
     fontWeight: "800",
     zIndex: 10,
-    boxShadow: isDarkMode ? 
-      "0 4px 8px rgba(239, 68, 68, 0.3)" : 
+    boxShadow: isDarkMode ?
+      "0 4px 8px rgba(239, 68, 68, 0.3)" :
       "0 4px 8px rgba(231, 111, 81, 0.3)",
   },
   brandText: {
@@ -151,8 +152,8 @@ const getCustomStyles = (isDarkMode) => ({
     backgroundColor: isDarkMode ? "#fff" : BORDER_COLOR,
     color: isDarkMode ? ACCENT_COLOR_DARK : PRIMARY_TEXT_COLOR,
     transform: "scale(1.05)",
-    boxShadow: isDarkMode ? 
-      "0 4px 12px rgba(255, 255, 255, 0.2)" : 
+    boxShadow: isDarkMode ?
+      "0 4px 12px rgba(255, 255, 255, 0.2)" :
       "0 4px 12px rgba(233, 196, 106, 0.3)",
   }),
   exploreButton: {
@@ -169,8 +170,8 @@ const getCustomStyles = (isDarkMode) => ({
     backgroundColor: isDarkMode ? ACCENT_COLOR_DARK : BORDER_COLOR,
     color: isDarkMode ? "#121212" : PRIMARY_TEXT_COLOR,
     transform: "translateY(-2px)",
-    boxShadow: isDarkMode ? 
-      "0 10px 20px rgba(245, 158, 11, 0.3)" : 
+    boxShadow: isDarkMode ?
+      "0 10px 20px rgba(245, 158, 11, 0.3)" :
       "0 10px 20px rgba(233, 196, 106, 0.3)",
   }),
   stationaryWatermark: {
@@ -192,8 +193,8 @@ const getCustomStyles = (isDarkMode) => ({
 // ✨ Hover Handlers
 const handleCardMouseEnter = (e, isDarkMode) => {
   e.currentTarget.style.transform = "translateY(-10px)";
-  e.currentTarget.style.boxShadow = isDarkMode ? 
-    "0 20px 40px rgba(245, 158, 11, 0.4)" : 
+  e.currentTarget.style.boxShadow = isDarkMode ?
+    "0 20px 40px rgba(245, 158, 11, 0.4)" :
     "0 20px 40px rgba(233, 196, 106, 0.4)";
   e.currentTarget.style.borderColor = isDarkMode ? BORDER_COLOR_DARK : BORDER_COLOR;
   e.currentTarget.querySelector("img").style.transform = "scale(1.08) rotate(2deg)";
@@ -254,6 +255,7 @@ const AnimationStyles = () => (
 const calculateDiscount = (p, op) => (op > p ? Math.round(((op - p) / op) * 100) : 0);
 
 function HomeStationarySection() {
+    const { t } = useTranslation();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 576);
@@ -262,8 +264,8 @@ function HomeStationarySection() {
   // Check for dark mode
   useEffect(() => {
     const checkDarkMode = () => {
-      const isDark = document.body.classList.contains('dark-theme') || 
-                    document.documentElement.getAttribute('data-bs-theme') === 'dark';
+      const isDark = document.body.classList.contains('dark-theme') ||
+        document.documentElement.getAttribute('data-bs-theme') === 'dark';
       setIsDarkMode(isDark);
     };
 
@@ -283,25 +285,25 @@ function HomeStationarySection() {
       try {
         const q = query(collection(db, "products"), where("category", "==", "Stationery"));
         const snapshot = await getDocs(q);
-        let data = snapshot.docs.map(doc => ({ 
-            id: doc.id, 
-            ...doc.data(),
-            price: Number(doc.data().price) || 299,
-            originalPrice: Number(doc.data().originalPrice) || 599,
-            image: doc.data().image || doc.data().images?.[0] || `https://picsum.photos/seed/stationery${doc.id}/300/300`
+        let data = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          price: Number(doc.data().price) || 299,
+          originalPrice: Number(doc.data().originalPrice) || 599,
+          image: doc.data().image || doc.data().images?.[0] || `https://picsum.photos/seed/stationery${doc.id}/300/300`
         }));
-        
+
         // Use local shuffle for variety
         data = data.sort(() => 0.5 - Math.random()).slice(0, 4);
         setProducts(data);
       } catch (err) {
         setProducts(Array.from({ length: 4 }, (_, i) => ({
-            id: `stationery-dummy-${i}`,
-            name: "Premium Notebook",
-            brand: "STUDIO", 
-            price: 499, 
-            originalPrice: 899,
-            image: `https://picsum.photos/seed/stationery${i}/300/300`
+          id: `stationery-dummy-${i}`,
+          name: "Premium Notebook",
+          brand: "STUDIO",
+          price: 499,
+          originalPrice: 899,
+          image: `https://picsum.photos/seed/stationery${i}/300/300`
         })));
       } finally {
         setLoading(false);
@@ -315,11 +317,11 @@ function HomeStationarySection() {
   return (
     <>
       <AnimationStyles />
-      <Container 
-        fluid 
-        className="category-section stationary" 
-        style={{ 
-          background: isDarkMode ? DARK_BG_GRADIENT : STATIONERY_BG_GRADIENT, 
+      <Container
+        fluid
+        className="category-section stationary"
+        style={{
+          background: isDarkMode ? DARK_BG_GRADIENT : STATIONERY_BG_GRADIENT,
           padding: "50px 0",
           transition: "background 0.3s ease"
         }}
@@ -329,18 +331,21 @@ function HomeStationarySection() {
           {/* Creative Header */}
           <div className="text-center mb-5">
             <h3 style={customStyles.header} className="stationary-section-title theme-text stationery-glow-text">
-              CREATIVE <span style={{ color: isDarkMode ? ACCENT_COLOR_DARK : BORDER_COLOR }}>STATIONERY</span>
-              <div style={customStyles.headerUnderline}></div>
-            </h3>
+  {t("stationeryCreative")}{" "}
+  <span style={{ color: isDarkMode ? ACCENT_COLOR_DARK : BORDER_COLOR }}>
+    {t("stationeryTitle")}
+  </span>
+  <div style={customStyles.headerUnderline}></div>
+</h3>
             <p className="mt-2 fw-light" style={customStyles.subtitle}>
-              Organize your thoughts with our curated premium collection.
+              {t("stationerySubtitle")}
             </p>
           </div>
 
           {loading ? (
             <div className="text-center py-5">
               <Spinner animation="grow" variant="warning" style={{ color: isDarkMode ? ACCENT_COLOR_DARK : ACCENT_COLOR }} />
-              <p className="mt-3 text-muted theme-text-secondary">Loading stationery...</p>
+              <p className="mt-3 text-muted theme-text-secondary">{t("stationeryLoading")}</p>
             </div>
           ) : (
             <>
@@ -350,18 +355,19 @@ function HomeStationarySection() {
                   return (
                     <Col key={product.id}>
                       <Link to={`/product/${product.id}`} className="text-decoration-none d-block h-100">
-                        <Card 
-                          className="stationary-card stationary-card theme-card" 
+                        <Card
+                          className="stationary-card stationary-card theme-card"
                           style={customStyles.productCard}
                           onMouseEnter={(e) => handleCardMouseEnter(e, isDarkMode)}
                           onMouseLeave={(e) => handleCardMouseLeave(e, isDarkMode, customStyles)}
                         >
                           {discount > 0 && (
                             <Badge style={customStyles.discountBadge} className="stationary-discount-badge">
-                              {discount}% OFF
+                              {discount}% {t("off")}
+
                             </Badge>
                           )}
-                          
+
                           <div style={customStyles.imageContainer(isMobile)}>
                             <LazyLoadImage
                               src={product.image}
@@ -375,8 +381,8 @@ function HomeStationarySection() {
                             <small style={customStyles.brandText} className="text-uppercase mb-1 stationary-brand-text">
                               {product.brand || "ESSENTIALS"}
                             </small>
-                            <Card.Title 
-                              style={customStyles.title} 
+                            <Card.Title
+                              style={customStyles.title}
                               className="text-truncate mb-2 stationary-card-title theme-text"
                             >
                               {product.name}
@@ -392,13 +398,13 @@ function HomeStationarySection() {
                                   </small>
                                 )}
                               </div>
-                              <Button 
-                                style={customStyles.viewDealButton} 
+                              <Button
+                                style={customStyles.viewDealButton}
                                 className="w-100 stationary-view-deal-btn theme-button btn-hover-grow"
                                 onMouseEnter={(e) => handleViewDealMouseEnter(e, isDarkMode, customStyles)}
                                 onMouseLeave={(e) => handleViewDealMouseLeave(e, customStyles)}
                               >
-                                SHOP NOW
+                                {t("shopNow")}
                               </Button>
                             </div>
                           </Card.Body>
@@ -409,18 +415,18 @@ function HomeStationarySection() {
                 })}
               </Row>
 
-            <div className="text-center mt-5">
-                       <Link to="/stationary">
-                         <Button 
-                           style={customStyles.exploreButton} 
-                           className="toys-explore-btn theme-button btn-bounce"
-                           onMouseEnter={(e) => handleExploreMouseEnter(e, isDarkMode, customStyles)}
-                           onMouseLeave={(e) => handleExploreMouseLeave(e, customStyles)}
-                         >
-                           See All Adventures →
-                         </Button>
-                       </Link>
-                     </div>
+              <div className="text-center mt-5">
+                <Link to="/stationary">
+                  <Button
+                    style={customStyles.exploreButton}
+                    className="toys-explore-btn theme-button btn-bounce"
+                    onMouseEnter={(e) => handleExploreMouseEnter(e, isDarkMode, customStyles)}
+                    onMouseLeave={(e) => handleExploreMouseLeave(e, customStyles)}
+                  >
+                    {t("seeAllStationery")} →
+                  </Button>
+                </Link>
+              </div>
             </>
           )}
         </Container>

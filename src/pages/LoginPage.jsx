@@ -10,6 +10,7 @@ import { BsEye, BsEyeSlash } from "react-icons/bs";
 import { FcGoogle } from "react-icons/fc";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import logo from "../Images/Sadhanacart1.png"
 
 /* CSS */
@@ -39,9 +40,9 @@ import {
 import { auth, db, googleProvider } from "../firebase";
 
 export default function LoginPage({ onClose }) {
+  const { t } = useTranslation(); 
   const navigate = useNavigate();
   const recaptchaRef = useRef(null);
-
   const [isLogin, setIsLogin] = useState(true);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -466,16 +467,17 @@ export default function LoginPage({ onClose }) {
           {/* LEFT PANEL */}
           <div className="auth-left">
             <div>
-              <h2>{isLogin ? "Login" : "Join Us!"}</h2>
+              <h2>{isLogin ? t("auth.login") : t("auth.joinUs")}</h2>
               <p>
                 {isLogin
-                  ? "Access Orders, Wishlist & Recommendations"
-                  : "Create account to explore products"}
+                 ? t("auth.accessText")
+: t("auth.signupText")
+}
               </p>
               {!isLogin && (
                 <div className="referral-benefit">
                   <small>
-                    <strong>🎁 Referral Bonus:</strong> Get ₹50 on signup with referral code!
+                    <strong>🎁 {t("auth.referralBonus")}:</strong> {t("auth.referralText")}
                   </small>
                 </div>
               )}
@@ -509,7 +511,7 @@ export default function LoginPage({ onClose }) {
                 <>
                   <Form.Group className="mb-3">
                     <Form.Control
-                      placeholder="Full Name"
+                      placeholder={t("auth.fullName")}
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       required
@@ -519,7 +521,7 @@ export default function LoginPage({ onClose }) {
 
                   <Form.Group className="mb-3">
                     <Form.Control
-                      placeholder="Referral Code (Optional)"
+                     placeholder={t("auth.referralCode")}
                       value={referralCode}
                       onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
                       className="custom-input"
@@ -536,7 +538,7 @@ export default function LoginPage({ onClose }) {
               <Form.Group className="mb-3">
                 <Form.Control
                   type="email"
-                  placeholder="Email"
+                  placeholder={t("auth.email")}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -547,7 +549,7 @@ export default function LoginPage({ onClose }) {
               <Form.Group className="mb-3 position-relative">
                 <Form.Control
                   type={showPassword ? "text" : "password"}
-                  placeholder="Password"
+                  placeholder={t("auth.password")}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -568,11 +570,14 @@ export default function LoginPage({ onClose }) {
                 className="w-100 mb-3 auth-btn"
                 disabled={isLoading}
               >
-                {isLoading ? "Processing..." : (isLogin ? "Login" : "Signup")}
+                {isLoading
+  ? t("auth.processing")
+  : (isLogin ? t("auth.login") : t("auth.signup"))}
+
               </Button>
             </Form>
 
-            <div className="text-center separator-or">OR</div>
+            <div className="text-center separator-or">{t("auth.or")}</div>
 
             {/* PHONE OTP */}
             <div className="mb-3">
@@ -599,7 +604,7 @@ export default function LoginPage({ onClose }) {
                   onClick={sendOtp}
                   disabled={!phone || phone.length !== 10}
                 >
-                  Request OTP
+                 {t("auth.requestOtp")}
                 </Button>
               ) : (
                 <>
@@ -619,14 +624,14 @@ export default function LoginPage({ onClose }) {
                         setOtp("");
                       }}
                     >
-                      Change Number
+                      {t("auth.changeNumber")}
                     </Button>
                     <Button 
                       className="flex-grow-1 auth-btn"
                       onClick={verifyOtp}
                       disabled={!otp || otp.length !== 6}
                     >
-                      Verify OTP
+                      {t("auth.verifyOtp")}
                     </Button>
                   </div>
                 </>
@@ -641,7 +646,7 @@ export default function LoginPage({ onClose }) {
               disabled={googleLoading}
             >
               <FcGoogle size={20} /> 
-              {googleLoading ? "Signing in..." : "Continue with Google"}
+              {googleLoading ? "Signing in..." : t("auth.continueGoogle")}
             </Button>
 
             <div className="text-center">
@@ -651,14 +656,15 @@ export default function LoginPage({ onClose }) {
                 onClick={toggleLoginMode}
               >
                 {isLogin
-                  ? "New user? Create account"
-                  : "Already have an account? Login"}
+                  ? t("auth.newUser")
+: t("auth.alreadyUser")
+}
               </Button>
             </div>
 
             <div className="mt-3 text-center">
               <small className="terms-text">
-                By continuing, you agree to our Terms of Use and Privacy Policy
+                {t("auth.termsText")}
               </small>
             </div>
           </div>

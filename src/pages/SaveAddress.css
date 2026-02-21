@@ -1,0 +1,695 @@
+/* SaveAddress.css - Enhanced UI Styles with Dark/White Theme */
+
+/* ================= THEME VARIABLES ================= */
+:root {
+  /* Light Theme (Default) */
+  --primary: #1e5fbf;
+  --primary-light: #3b7bdb;
+  --primary-dark: #0d47a1;
+  --primary-gradient: linear-gradient(135deg, #1e5fbf 0%, #007bff 100%);
+  --primary-rgb: 30, 95, 191;
+  
+  --success: #28a745;
+  --success-gradient: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  --success-rgb: 40, 167, 69;
+  
+  --danger: #dc3545;
+  --warning: #ffc107;
+  
+  /* Background Colors */
+  --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-tertiary: #e9ecef;
+  --bg-card: rgba(255, 255, 255, 0.95);
+  --bg-card-solid: #ffffff;
+  
+  /* Text Colors */
+  --text-primary: #212529;
+  --text-secondary: #6c757d;
+  --text-muted: #adb5bd;
+  --text-light: #f8f9fa;
+  
+  /* Border Colors */
+  --border-color: #e9ecef;
+  --border-focus: #007bff;
+  
+  /* Shadow Colors */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 5px 15px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.15);
+  --shadow-primary: 0 10px 20px rgba(30, 95, 191, 0.3);
+  --shadow-success: 0 5px 15px rgba(40, 167, 69, 0.3);
+  
+  /* Icon Colors */
+  --icon-color: #adb5bd;
+  --icon-hover: #007bff;
+  
+  /* Circle Background */
+  --circle-bg: rgba(30, 95, 191, 0.1);
+}
+
+/* Dark Theme */
+.dark-theme {
+  --primary: #3b7bdb;
+  --primary-light: #5f9eff;
+  --primary-dark: #1e5fbf;
+  --primary-gradient: linear-gradient(135deg, #3b7bdb 0%, #5f9eff 100%);
+  --primary-rgb: 59, 123, 219;
+  
+  --success: #34d399;
+  --success-gradient: linear-gradient(135deg, #34d399 0%, #20c997 100%);
+  --success-rgb: 52, 211, 153;
+  
+  /* Background Colors */
+  --bg-gradient: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  --bg-primary: #1a1a2e;
+  --bg-secondary: #16213e;
+  --bg-tertiary: #0f3460;
+  --bg-card: rgba(30, 30, 46, 0.95);
+  --bg-card-solid: #1e1e2e;
+  
+  /* Text Colors */
+  --text-primary: #e9ecef;
+  --text-secondary: #adb5bd;
+  --text-muted: #6c757d;
+  --text-light: #f8f9fa;
+  
+  /* Border Colors */
+  --border-color: #2d2d44;
+  --border-focus: #3b7bdb;
+  
+  /* Shadow Colors */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 5px 15px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5);
+  --shadow-primary: 0 10px 20px rgba(59, 123, 219, 0.4);
+  --shadow-success: 0 5px 15px rgba(52, 211, 153, 0.4);
+  
+  /* Icon Colors */
+  --icon-color: #6c757d;
+  --icon-hover: #3b7bdb;
+  
+  /* Circle Background */
+  --circle-bg: rgba(59, 123, 219, 0.15);
+}
+
+/* ================= BASE STYLES ================= */
+.save-address-page {
+  min-height: 100vh;
+  position: relative;
+  background: var(--bg-gradient);
+  padding: 20px 0;
+  overflow: hidden;
+  transition: background 0.3s ease;
+}
+
+/* Background Decorations */
+.address-bg-decoration {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.circle {
+  position: absolute;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--circle-bg) 0%, rgba(var(--primary-rgb), 0.15) 100%);
+  backdrop-filter: blur(5px);
+}
+
+.circle-1 {
+  width: 300px;
+  height: 300px;
+  top: -150px;
+  right: -150px;
+  animation: float 6s ease-in-out infinite;
+}
+
+.circle-2 {
+  width: 200px;
+  height: 200px;
+  bottom: -100px;
+  left: -100px;
+  animation: float 8s ease-in-out infinite reverse;
+}
+
+.circle-3 {
+  width: 150px;
+  height: 150px;
+  bottom: 50%;
+  right: 10%;
+  animation: float 10s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(5deg); }
+}
+
+/* Header Card */
+.address-header-card {
+  background: var(--bg-card-solid) !important;
+  border-radius: 20px !important;
+  position: relative;
+  z-index: 1;
+  animation: slideDown 0.5s ease-out;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.address-icon-wrapper {
+  width: 80px;
+  height: 80px;
+  background: var(--primary-gradient);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  box-shadow: var(--shadow-primary);
+}
+
+.address-main-icon {
+  font-size: 2rem;
+  color: white;
+}
+
+.gradient-text {
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Address Type Cards */
+.address-type-card {
+  border-radius: 15px !important;
+  background: var(--bg-card) !important;
+  backdrop-filter: blur(10px);
+  animation: fadeIn 0.6s ease-out 0.1s both;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.address-type-option {
+  border: 2px solid var(--border-color);
+  border-radius: 12px !important;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: var(--bg-card-solid);
+  overflow: hidden;
+}
+
+.address-type-option:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary);
+  box-shadow: var(--shadow-primary);
+}
+
+.address-type-option.active {
+  background: var(--primary-gradient);
+  border-color: transparent;
+  box-shadow: var(--shadow-primary);
+}
+
+.address-type-option .type-icon {
+  transition: transform 0.3s ease;
+}
+
+.address-type-option:hover .type-icon {
+  transform: scale(1.1);
+}
+
+/* Form Card */
+.address-form-card {
+  border-radius: 20px !important;
+  background: var(--bg-card) !important;
+  backdrop-filter: blur(10px);
+  animation: slideUp 0.7s ease-out 0.2s both;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Progress Steps */
+.form-progress {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+}
+
+.progress-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.step-number {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  margin-bottom: 5px;
+  transition: all 0.3s ease;
+}
+
+.progress-step.active .step-number {
+  background: var(--primary-gradient);
+  color: white;
+  box-shadow: var(--shadow-primary);
+}
+
+.step-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: color 0.3s ease;
+}
+
+.progress-step.active .step-label {
+  color: var(--primary);
+}
+
+.progress-line {
+  flex: 1;
+  height: 2px;
+  background: var(--border-color);
+  margin: 0 10px;
+  transition: background 0.3s ease;
+}
+
+.progress-line.active {
+  background: var(--primary-gradient);
+}
+
+/* Form Steps */
+.form-step {
+  display: none;
+  animation: fadeInStep 0.5s ease-out;
+}
+
+.form-step.active {
+  display: block;
+}
+
+@keyframes fadeInStep {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Floating Input Groups */
+.floating-label-group {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.floating-input-wrapper {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.floating-input-wrapper.focused {
+  transform: translateY(-2px);
+}
+
+.input-icon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--icon-color);
+  z-index: 10;
+  transition: color 0.3s ease;
+  pointer-events: none;
+}
+
+.floating-input-wrapper.focused .input-icon {
+  color: var(--primary);
+}
+
+.floating-input {
+  height: 56px;
+  padding-left: 45px;
+  border: 2px solid var(--border-color);
+  border-radius: 12px !important;
+  background: var(--bg-card-solid);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+}
+
+.floating-input:focus {
+  border-color: var(--primary);
+  box-shadow: var(--shadow-primary);
+  outline: none;
+  background: var(--bg-card-solid);
+  color: var(--text-primary);
+}
+
+.floating-input::placeholder {
+  color: transparent;
+}
+
+.floating-label {
+  position: absolute;
+  left: 45px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  transition: all 0.3s ease;
+  pointer-events: none;
+  background: var(--bg-card-solid);
+  padding: 0 5px;
+  font-size: 0.95rem;
+}
+
+.floating-label.filled,
+.floating-input:focus + .floating-label {
+  top: 0;
+  transform: translateY(-50%) scale(0.9);
+  color: var(--primary);
+}
+
+/* Location Icon */
+.location-icon {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--primary);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 10;
+  background: var(--bg-card-solid);
+  padding: 5px;
+  border-radius: 50%;
+}
+
+.location-icon:hover {
+  transform: translateY(-50%) scale(1.1);
+  color: var(--primary-light);
+  background: var(--bg-tertiary);
+}
+
+/* Country Select */
+.country-select-wrapper {
+  position: relative;
+}
+
+.select-icon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--icon-color);
+  z-index: 10;
+  transition: color 0.3s ease;
+}
+
+.styled-select {
+  height: 56px;
+  padding-left: 45px;
+  border: 2px solid var(--border-color);
+  border-radius: 12px !important;
+  background: var(--bg-card-solid);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  appearance: none;
+}
+
+.styled-select:focus {
+  border-color: var(--primary);
+  box-shadow: var(--shadow-primary);
+  outline: none;
+}
+
+.styled-select option {
+  background: var(--bg-card-solid);
+  color: var(--text-primary);
+}
+
+/* Navigation Buttons */
+.step-navigation {
+  margin-top: 2rem;
+}
+
+.btn-outline-secondary {
+  border: 2px solid var(--border-color) !important;
+  color: var(--text-secondary) !important;
+  background: transparent !important;
+  border-radius: 12px !important;
+  padding: 12px 30px !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+}
+
+.btn-outline-secondary:hover {
+  border-color: var(--primary) !important;
+  color: var(--primary) !important;
+  background: var(--bg-tertiary) !important;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-primary);
+}
+
+.next-step-btn {
+  background: var(--primary-gradient) !important;
+  border: none !important;
+  border-radius: 12px !important;
+  padding: 12px 30px !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+  box-shadow: var(--shadow-primary);
+  color: white !important;
+}
+
+.next-step-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-primary), var(--shadow-lg);
+}
+
+.next-step-btn:active {
+  transform: translateY(0);
+}
+
+/* Save Button */
+.save-address-btn {
+  background: var(--success-gradient) !important;
+  border: none !important;
+  border-radius: 12px !important;
+  padding: 12px 30px !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+  box-shadow: var(--shadow-success);
+  color: white !important;
+}
+
+.save-address-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-success), var(--shadow-lg);
+}
+
+.save-address-btn:disabled {
+  opacity: 0.7;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Text Colors */
+.text-muted {
+  color: var(--text-secondary) !important;
+}
+
+.text-primary {
+  color: var(--primary) !important;
+}
+
+.text-dark {
+  color: var(--text-primary) !important;
+}
+
+h2, h6, p {
+  color: var(--text-primary);
+}
+
+/* Card Body Text */
+.card-body {
+  color: var(--text-primary);
+}
+
+/* Bootstrap Overrides */
+.form-control, .form-select {
+  background-color: var(--bg-card-solid);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+.form-control:focus, .form-select:focus {
+  background-color: var(--bg-card-solid);
+  color: var(--text-primary);
+}
+
+/* Security Note */
+.security-note {
+  animation: fadeIn 0.8s ease-out 0.4s both;
+  position: relative;
+  z-index: 1;
+}
+
+.security-note small {
+  background: var(--bg-card);
+  padding: 8px 20px;
+  border-radius: 50px;
+  backdrop-filter: blur(5px);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .address-type-option {
+    font-size: 0.9rem;
+  }
+  
+  .step-label {
+    display: none;
+  }
+  
+  .progress-step {
+    width: auto;
+  }
+  
+  .floating-input {
+    font-size: 0.95rem;
+  }
+  
+  .save-address-btn,
+  .next-step-btn,
+  .btn-outline-secondary {
+    padding: 10px 20px !important;
+    font-size: 0.9rem !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .address-header-card .p-4 {
+    padding: 1.5rem !important;
+  }
+  
+  .address-type-option .p-3 {
+    padding: 0.75rem !important;
+  }
+  
+  .address-type-option .type-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .circle-1,
+  .circle-2,
+  .circle-3 {
+    opacity: 0.3;
+  }
+  
+  .floating-input {
+    height: 50px;
+    font-size: 0.9rem;
+  }
+  
+  .step-number {
+    width: 30px;
+    height: 30px;
+    font-size: 0.9rem;
+  }
+}
+
+/* Dark Theme Specific Adjustments */
+.dark-theme .address-type-option {
+  background: var(--bg-tertiary);
+}
+
+.dark-theme .address-type-option.active {
+  background: var(--primary-gradient);
+}
+
+.dark-theme .floating-input,
+.dark-theme .styled-select {
+  background: var(--bg-tertiary);
+}
+
+.dark-theme .floating-label {
+  background: var(--bg-tertiary);
+}
+
+.dark-theme .location-icon {
+  background: var(--bg-tertiary);
+}
+
+.dark-theme .btn-outline-secondary {
+  background: var(--bg-tertiary) !important;
+}
+
+/* Loading Spinner */
+.spinner-border {
+  color: white !important;
+}
+
+/* Animation for theme transition */
+.save-address-page,
+.address-header-card,
+.address-type-card,
+.address-form-card,
+.floating-input,
+.styled-select,
+.btn {
+  transition: all 0.3s ease;
+}

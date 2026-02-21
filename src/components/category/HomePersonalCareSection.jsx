@@ -14,6 +14,7 @@ import { collection, query, where, getDocs } from "firebase/firestore";
 import { Link } from "react-router-dom";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import "react-lazy-load-image-component/src/effects/blur.css";
+import { useTranslation } from "react-i18next";
 import "./HomePersonalCareSection.css";
 
 // 🎨 STYLE CONSTANTS (Red Theme with Dark Mode)
@@ -270,6 +271,7 @@ const generateDummyProduct = (index) => {
 };
 
 function HomePersonalCareSection() {
+    const { t } = useTranslation();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 576);
@@ -364,19 +366,23 @@ function HomePersonalCareSection() {
 
         {/* Header */}
         <div className="text-center mb-5">
-          <h3 style={customStyles.header} className="personal-care-section-title theme-text">
-            PERSONAL CARE <span style={{ color: isDarkMode ? CARE_COLOR_DARK : CARE_COLOR }}>REDEFINED</span>
-            <div style={customStyles.headerUnderline}></div>
-          </h3>
+        <h3 style={customStyles.header} className="personal-care-section-title theme-text">
+  {t("personalCaretitle")}{" "}
+  <span style={{ color: isDarkMode ? CARE_COLOR_DARK : CARE_COLOR }}>
+    {t("redefined")}
+  </span>
+  <div style={customStyles.headerUnderline}></div>
+</h3>
+
           <p className="mt-3 fs-6 fw-light d-none d-sm-block" style={customStyles.subtitle}>
-            Indulge in our curated selection of premium beauty essentials.
+            {t("personalCareSubtitle")}
           </p>
         </div>
 
         {loading ? (
           <div className="text-center py-5">
             <Spinner animation="border" style={{ color: isDarkMode ? CARE_COLOR_DARK : CARE_COLOR }} />
-            <p className="mt-3 text-muted theme-text-secondary">Loading beauty essentials...</p>
+            <p className="mt-3 text-muted theme-text-secondary">{t("personalCareLoading")}</p>
           </div>
         ) : (
           <>
@@ -394,7 +400,7 @@ function HomePersonalCareSection() {
                       >
                         {discountPercent > 0 && (
                           <Badge style={customStyles.discountBadge}>
-                            -{discountPercent}%
+                            -{discountPercent}% {t("off")}
                           </Badge>
                         )}
                         <div style={customStyles.imageContainer(isMobile)}>
@@ -433,7 +439,7 @@ function HomePersonalCareSection() {
                             onMouseEnter={(e) => handleViewDealMouseEnter(e, isDarkMode, customStyles)}
                             onMouseLeave={(e) => handleViewDealMouseLeave(e, customStyles)}
                           >
-                            SHOP NOW
+                            {t("shopNow")}
                           </Button>
                         </Card.Body>
                       </Card>
@@ -451,7 +457,7 @@ function HomePersonalCareSection() {
                   onMouseEnter={(e) => handleExploreMouseEnter(e, isDarkMode, customStyles)}
                   onMouseLeave={(e) => handleExploreMouseLeave(e, customStyles)}
                 >
-                  Explore All Personal Care →
+                 {t("explorePersonalCare")} →
                 </Button>
               </Link>
             </div>

@@ -8,9 +8,15 @@ import {
   Spinner,
   Alert,
   Badge,
+  Modal,
+  ListGroup,
+  Image
 } from "react-bootstrap";
-import { FaCoins } from "react-icons/fa";
-
+import {
+  FaMapMarkerAlt,
+  FaTruck,
+  FaCreditCard
+} from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db } from "../../firebase";
@@ -23,27 +29,38 @@ const formatCurrency = (val) =>
     currency: "INR",
   }).format(Number(val || 0));
 
-const formatCoins = (val) =>
-  `${Number(val || 0).toFixed(4)} COINS`;
-
+/* ================= MAP FIRESTORE DATA ================= */
 const mapFirestoreOrderToLocal = (docData, docId) => {
   const status = docData.orderStatus || "Processing";
 
   let orderDate = "N/A";
   if (docData.orderDate?.toDate) {
-    orderDate = docData.orderDate.toDate().toLocaleDateString("en-IN", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
+    orderDate = docData.orderDate.toDate().toLocaleString("en-IN");
   }
+
+  // ✅ TOTAL FIX HERE
+  const calculatedItemsTotal = (docData.products || []).reduce(
+    (sum, p) => sum + (p.price || 0) * (p.quantity || 1),
+    0
+  );
+
+  const finalTotal =
+    docData.productsTotal ??
+    docData.totalAmount ??
+    calculatedItemsTotal;
 
   return {
     id: docId,
+    orderId: docData.orderId || "N/A",
     status,
     date: orderDate,
-    total: docData.discountedAmount ?? docData.totalAmount ?? 0,
+    total: finalTotal, // ✅ updated total
     paymentMethod: docData.paymentMethod || "N/A",
+    paymentId: docData.paymentId || null,
+    shipmentId: docData.shipmentId || null,
+    shiprocketOrderId: docData.shiprocketOrderId || null,
+    shiprocketStatus: docData.shiprocketStatus || "N/A",
+
     shippingAddress: {
       name: docData.name || "N/A",
       address: docData.address || "N/A",
@@ -51,141 +68,29 @@ const mapFirestoreOrderToLocal = (docData, docId) => {
       longitude: docData.longitude || null,
       phone: docData.phoneNumber || "N/A",
     },
+
     items: (docData.products || []).map((p) => ({
       name: p.name,
       quantity: p.quantity || 1,
       price: p.price || 0,
-      coinsUsed: p.coinsUsed || 0,          // ✅ ADD
-      coinDiscount: p.coinDiscount || 0,    // ✅ ADD
+      image: p.images?.[0] || null,
+      sku: p.sizevariants?.sku || "N/A",
+      stock: p.sizevariants?.stock || 0,
+      selectedSize: p.selectedSize || "N/A",
     })),
   };
 };
 
-
-/* ================= ORDER CARD ================= */
-const OrderCard = ({ order, navigate }) => (
-  <Card className="mb-4 shadow-sm border-0 rounded-3">
-    <Card.Header className="bg-light d-flex justify-content-between align-items-center">
-      <h5 className="mb-0 text-primary fw-bold">
-        Order ID: <span className="text-dark">{order.id}</span>
-      </h5>
-      <span
-        className={`fw-bold ${
-          order.status === "Delivered" ? "text-success" : "text-warning"
-        }`}
-      >
-        {order.status}
-      </span>
-    </Card.Header>
-
-    <Card.Body>
-      <Row>
-        <Col md={6}>
-          <p className="mb-1">
-            <strong>Order Date:</strong> {order.date}
-          </p>
-          <p className="mb-1">
-            <strong>Total:</strong>{" "}
-            <span className="text-danger fw-bold">
-              {formatCurrency(order.total)}
-            </span>
-          </p>
-          <p className="mb-0">
-            <strong>Payment:</strong> {order.paymentMethod}
-          </p>
-        </Col>
-
-        <Col md={6} className="mt-3 mt-md-0">
-          <h6 className="fw-bold mb-2">Shipping To:</h6>
-          <p className="mb-1">{order.shippingAddress?.name}</p>
-          <p className="mb-1 small text-muted">
-            {order.shippingAddress?.address}
-          </p>
-          <p className="mb-0 small text-muted">
-            Ph: {order.shippingAddress?.phone}
-          </p>
-        </Col>
-      </Row>
-
-      {/* ================= ITEMS ================= */}
-      {order.items?.length > 0 && (
-        <div className="mt-3 border-top pt-3">
-          <h6 className="fw-bold mb-2">Items:</h6>
-
-          {order.items.map((item, idx) => {
-           const showCoinPrice = item.coinsUsed && item.coinsUsed > 0;
-
-const discountedPrice =
-  (item.price * item.quantity) - (item.coinDiscount || 0);
-
-
-            return (
-              <div
-                key={idx}
-                className="d-flex justify-content-between align-items-center small mb-2"
-              >
-                <span>
-                  {item.name} × {item.quantity}
-                </span>
-
-               <span className="fw-bold">
-  {showCoinPrice ? (
-    <>
-      <Badge bg="warning" className="me-2">
-        <FaCoins className="me-1" />
-        {item.coinsUsed} Coins
-      </Badge>
-
-      <div className="text-end">
-        <span className="text-success fw-bold">
-          {formatCurrency(discountedPrice)}
-        </span>
-        <small className="text-muted d-block">
-          <s>{formatCurrency(item.price * item.quantity)}</s>
-        </small>
-      </div>
-    </>
-  ) : (
-    formatCurrency(item.price * item.quantity)
-  )}
-</span>
-
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </Card.Body>
-
-    <Card.Footer className="bg-light text-center">
-      <Button
-        variant="info"
-        size="sm"
-        className="me-2"
-        onClick={() =>
-          window.open(
-            `https://www.google.com/maps?q=${order.shippingAddress.latitude},${order.shippingAddress.longitude}`,
-            "_blank"
-          )
-        }
-      >
-        View on Map
-      </Button>
-      <Button variant="outline-dark" size="sm" onClick={() => navigate("/")}>
-        Buy Again
-      </Button>
-    </Card.Footer>
-  </Card>
-);
-
-/* ================= MAIN PAGE ================= */
+/* ================= MAIN COMPONENT ================= */
 function ViewOrderDetails() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+
   const navigate = useNavigate();
 
-  /* ===== AUTH CHECK ===== */
   useEffect(() => {
     const auth = getAuth();
     const unsub = onAuthStateChanged(auth, (user) => {
@@ -196,25 +101,17 @@ function ViewOrderDetails() {
     return () => unsub();
   }, [navigate]);
 
-  /* ===== FETCH ORDERS ===== */
   useEffect(() => {
     if (!userId) return;
 
     const fetchOrders = async () => {
-      setLoading(true);
       try {
         const ref = collection(db, "users", userId, "orders");
         const q = query(ref, orderBy("orderDate", "desc"));
         const snap = await getDocs(q);
-
-        setOrders(
-          snap.docs.map((d) =>
-            mapFirestoreOrderToLocal(d.data(), d.id)
-          )
-        );
+        setOrders(snap.docs.map((d) => mapFirestoreOrderToLocal(d.data(), d.id)));
       } catch (err) {
-        console.error("❌ Fetch Orders Error:", err);
-        setOrders([]);
+        console.error(err);
       } finally {
         setLoading(false);
       }
@@ -227,40 +124,142 @@ function ViewOrderDetails() {
     return (
       <Container className="py-5 text-center">
         <Spinner animation="border" />
-        <p className="mt-3">Loading your orders...</p>
       </Container>
     );
   }
 
   return (
     <Container className="py-5">
-      <Row className="justify-content-center">
-        <Col lg={9}>
-          <h2 className="mb-4 fw-bold">
-            Your Orders{" "}
-            <span className="text-muted fs-6">({orders.length})</span>
-          </h2>
-
-          {orders.length === 0 ? (
-            <Alert variant="warning" className="text-center">
-              You haven’t placed any orders yet.
-              <div className="mt-2">
-                <Button onClick={() => navigate("/")}>
-                  Start Shopping
+      {orders.length === 0 ? (
+        <Alert variant="warning">No Orders Found</Alert>
+      ) : (
+        orders.map((order) => (
+          <Card key={order.id} className="mb-3 shadow-sm">
+            <Card.Body className="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 className="fw-bold mb-1">{order.shippingAddress.name}</h6>
+                <small>{order.date}</small>
+                <div>
+                  <Badge bg="warning">{order.status}</Badge>
+                </div>
+              </div>
+              <div className="text-end">
+                {/* ✅ CARD TOTAL FIXED */}
+                <h5 className="text-primary">
+                  {formatCurrency(order.total)}
+                </h5>
+                <Button
+                  size="sm"
+                  variant="outline-primary"
+                  onClick={() => {
+                    setSelectedOrder(order);
+                    setShowModal(true);
+                  }}
+                >
+                  Details
                 </Button>
               </div>
-            </Alert>
-          ) : (
-            orders.map((order) => (
-              <OrderCard
-                key={order.id}
-                order={order}
-                navigate={navigate}
-              />
-            ))
-          )}
-        </Col>
-      </Row>
+            </Card.Body>
+          </Card>
+        ))
+      )}
+
+      {/* ================= MODAL ================= */}
+      <Modal show={showModal} onHide={() => setShowModal(false)} size="lg">
+        {selectedOrder && (
+          <>
+            <Modal.Header closeButton>
+              <Modal.Title>Order Details</Modal.Title>
+            </Modal.Header>
+
+            <Modal.Body>
+
+              <Alert variant="secondary">
+                <strong>Order ID:</strong> {selectedOrder.orderId}
+                <br />
+                <strong>Transaction ID:</strong> {selectedOrder.id}
+              </Alert>
+
+              <h6 className="fw-bold">Shipping Address</h6>
+              <p>
+                {selectedOrder.shippingAddress.name} <br />
+                {selectedOrder.shippingAddress.address} <br />
+                📞 {selectedOrder.shippingAddress.phone}
+              </p>
+
+              <h6 className="fw-bold mt-3">
+                <FaCreditCard className="me-2" />
+                Payment
+              </h6>
+              <p>
+                Method: {selectedOrder.paymentMethod} <br />
+                Payment ID: {selectedOrder.paymentId || "N/A"}
+              </p>
+
+              <h6 className="fw-bold mt-3">
+                <FaTruck className="me-2" />
+                Shipment Details
+              </h6>
+              <p>
+                Shipment ID: {selectedOrder.shipmentId || "N/A"} <br />
+                Shiprocket Order ID: {selectedOrder.shiprocketOrderId || "N/A"} <br />
+                Status: <Badge bg="info">{selectedOrder.shiprocketStatus}</Badge>
+              </p>
+
+              <h6 className="fw-bold mt-4">Products</h6>
+              <ListGroup variant="flush">
+                {selectedOrder.items.map((item, i) => (
+                  <ListGroup.Item key={i}>
+                    <Row>
+                      <Col md={3}>
+                        {item.image && (
+                          <Image src={item.image} fluid rounded />
+                        )}
+                      </Col>
+                      <Col md={9}>
+                        <h6>{item.name}</h6>
+                        Qty: {item.quantity} <br />
+                        Price: {formatCurrency(item.price)} <br />
+                        SKU: {item.sku} <br />
+                        Size: {item.selectedSize}
+                      </Col>
+                    </Row>
+                  </ListGroup.Item>
+                ))}
+              </ListGroup>
+
+              <hr />
+
+              {/* ✅ MODAL TOTAL FIXED */}
+              <div className="text-end fw-bold fs-4">
+                Total: {formatCurrency(selectedOrder.total)}
+              </div>
+
+            </Modal.Body>
+
+            <Modal.Footer>
+              {selectedOrder.shippingAddress.latitude &&
+                selectedOrder.shippingAddress.longitude && (
+                  <Button
+                    variant="outline-success"
+                    onClick={() =>
+                      window.open(
+                        `https://www.google.com/maps?q=${selectedOrder.shippingAddress.latitude},${selectedOrder.shippingAddress.longitude}`,
+                        "_blank"
+                      )
+                    }
+                  >
+                    <FaMapMarkerAlt className="me-1" />
+                    View Location
+                  </Button>
+                )}
+              <Button variant="dark" onClick={() => setShowModal(false)}>
+                Close
+              </Button>
+            </Modal.Footer>
+          </>
+        )}
+      </Modal>
     </Container>
   );
 }

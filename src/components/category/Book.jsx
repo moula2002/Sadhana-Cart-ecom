@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Container, Spinner, Row, Col, Card, Alert } from "react-bootstrap";
+import { useTranslation } from "react-i18next";
+
 import { db } from "../../firebase";
 import {
   collection,
@@ -62,6 +64,7 @@ const getThemeAwareColors = () => {
 /* ------------------------------------------------ */
 /* 📚 Product Card */
 const ProductCard = ({ product }) => {
+    const { t } = useTranslation(); 
   const [hover, setHover] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   
@@ -105,7 +108,6 @@ const ProductCard = ({ product }) => {
             boxShadow: hover
               ? `0 12px 28px ${borderColor}${isDarkMode ? '33' : '40'}`
               : `0 6px 14px ${borderColor}${isDarkMode ? '20' : '20'}`,
-            transition: "all 0.3s ease",
           }}
         >
           {/* Image */}
@@ -117,7 +119,6 @@ const ProductCard = ({ product }) => {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              transition: "background-color 0.3s ease",
             }}
           >
             <img
@@ -131,8 +132,6 @@ const ProductCard = ({ product }) => {
                 height: "100%",
                 width: "100%",
                 objectFit: "contain",
-                transform: hover ? "scale(1.1)" : "scale(1)",
-                transition: "transform 0.4s ease",
               }}
             />
           </div>
@@ -140,18 +139,20 @@ const ProductCard = ({ product }) => {
           {/* Content */}
           <Card.Body className="text-center p-3">
             <Card.Title className="fs-6 fw-semibold text-truncate theme-text">
-              {product.name || "Book"}
+              {product.name || t("books.defaultName")}
+
             </Card.Title>
 
             <p className="small mb-1 theme-text-secondary">
-              Author:{" "}
+              {t("books.author")}:{" "}
               <strong style={{ color: borderColor }} className="theme-accent">
-                {product.author || product.brand || "Unknown"}
+                {product.author || product.brand || t("common.unknown")}
               </strong>
             </p>
 
             <div className="fw-bold fs-5 theme-success">
-              ₹{product.price || "N/A"}
+              ₹{product.price || t("common.notAvailable")}
+
             </div>
           </Card.Body>
         </Card>
@@ -163,6 +164,7 @@ const ProductCard = ({ product }) => {
 /* ------------------------------------------------ */
 /* 📚 Book Page */
 function Book() {
+   const { t } = useTranslation();
   const categoryName = "Books";
   const PAGE_SIZE = 8;
 
@@ -287,15 +289,15 @@ function Book() {
 
   return (
     <Container className="my-5 text-center books-container">
-      <h2 className="fw-bold mb-3 theme-text">📚 Books Collection</h2>
+      <h2 className="fw-bold mb-3 theme-text">📚 {t("books.collectionTitle")}</h2>
       <p className="mb-5 theme-text-secondary">
-        Discover knowledge, stories & inspiration 📖
+        {t("books.description")}
       </p>
 
       {loading ? (
         <div className="my-5">
           <Spinner animation="border" variant={isDarkMode ? "light" : "primary"} />
-          <p className="mt-3 theme-text-secondary">Loading books...</p>
+          <p className="mt-3 theme-text-secondary">{t("books.loading")}</p>
         </div>
       ) : products.length > 0 ? (
         <>
@@ -313,17 +315,17 @@ function Book() {
           {loadingMore && (
             <div className="text-center my-4">
               <Spinner animation="grow" variant={isDarkMode ? "light" : "secondary"} />
-              <p className="theme-text-secondary">Loading more books...</p>
+              <p className="theme-text-secondary">{t("books.loadingMore")}</p>
             </div>
           )}
 
           {!hasMore && (
-            <p className="mt-4 theme-text-secondary">No more books available</p>
+            <p className="mt-4 theme-text-secondary">{t("books.noMore")}</p>
           )}
         </>
       ) : (
         <Alert variant={isDarkMode ? "dark" : "warning"} className="theme-alert">
-          <p className="mb-0 theme-text">No books found</p>
+          <p className="mb-0 theme-text">{t("books.noBooks")}</p>
         </Alert>
       )}
     </Container>

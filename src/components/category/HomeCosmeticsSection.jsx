@@ -13,6 +13,7 @@ import { collection, query, where, getDocs } from "firebase/firestore";
 import { Link } from "react-router-dom";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import "react-lazy-load-image-component/src/effects/blur.css";
+import { useTranslation } from "react-i18next";
 import "./HomeCosmeticsSection.css"
 
 /* 🎨 COSMETICS THEME COLORS WITH DARK MODE */
@@ -255,6 +256,7 @@ const CosmeticAnimations = () => (
 
 /* 💄 HOME COSMETICS SECTION */
 function HomeCosmeticsSection() {
+  const { t } = useTranslation(); 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 576);
@@ -337,18 +339,22 @@ function HomeCosmeticsSection() {
           {/* Header */}
           <div className="text-center mb-5">
             <h3 style={customStyles.header} className="cosmetics-section-title theme-text cosmetics-glow-text">
-              BEAUTY THAT <span style={{ color: isDarkMode ? ACCENT_COLOR_DARK : ACCENT_COLOR }}>GLOWS</span>
-              <div style={customStyles.headerUnderline}></div>
-            </h3>
+  {t("cosmeticsTitle")}{" "}
+  <span style={{ color: isDarkMode ? ACCENT_COLOR_DARK : ACCENT_COLOR }}>
+    {t("cosmeticsGlow")}
+  </span>
+  <div style={customStyles.headerUnderline}></div>
+</h3>
+
             <p className="mt-2" style={customStyles.subtitle}>
-              Premium cosmetics crafted to enhance your natural beauty.
+              {t("cosmeticsSubtitle")}
             </p>
           </div>
 
           {loading ? (
             <div className="text-center py-5">
               <Spinner animation="border" style={{ color: isDarkMode ? ACCENT_COLOR_DARK : PRIMARY_TEXT_COLOR }} />
-              <p className="mt-3 text-muted theme-text-secondary">Loading beauty products...</p>
+              <p className="mt-3 text-muted theme-text-secondary">{t("cosmeticsLoading")}</p>
             </div>
           ) : (
             <>
@@ -372,7 +378,7 @@ function HomeCosmeticsSection() {
                         >
                           {discount > 0 && (
                             <Badge style={customStyles.discountBadge} className="cosmetics-discount-badge">
-                              {discount}% OFF
+                              {discount}% {t("off")}
                             </Badge>
                           )}
 
@@ -414,7 +420,7 @@ function HomeCosmeticsSection() {
                                 onMouseEnter={(e) => handleShopButtonMouseEnter(e, isDarkMode, customStyles)}
                                 onMouseLeave={(e) => handleShopButtonMouseLeave(e, customStyles)}
                               >
-                                SHOP NOW
+                                {t("shopNow")}
                               </Button>
                             </div>
                           </Card.Body>
@@ -434,7 +440,7 @@ function HomeCosmeticsSection() {
                     onMouseEnter={(e) => handleExploreMouseEnter(e, isDarkMode, customStyles)}
                     onMouseLeave={(e) => handleExploreMouseLeave(e, customStyles)}
                   >
-                    Explore Cosmetics →
+                    {t("exploreCosmetics")} →
                   </Button>
                 </Link>
               </div>

@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Container, Spinner, Row, Col, Card, Alert } from "react-bootstrap";
+import { useTranslation } from "react-i18next";
+
 import { db } from "../../firebase";
 import {
   collection,
@@ -165,6 +167,7 @@ const ProductCard = ({ product }) => {
 
 // -------------------------------------------------------------
 function PersonalCare() {
+  const { t } = useTranslation();
   const categoryName = "Personal Care";
   const PAGE_SIZE = 8;
   const [products, setProducts] = useState([]);
@@ -337,21 +340,20 @@ function PersonalCare() {
   return (
     <div style={containerStyle}>
       <Container className="my-5 text-center">
-        <h2 className="fw-bold mb-3" style={titleStyle}>
-          🧴 {categoryName} Collection
-        </h2>
-        <p className="mb-5" style={textStyle}>
-          Discover premium{" "}
-          <strong className="text-capitalize" style={{ color: theme === 'dark' ? '#ffffff' : 'inherit' }}>
-            {categoryName}
-          </strong> products for your daily hygiene and wellness ✨
-        </p>
+       <h2 className="fw-bold mb-3" style={titleStyle}>
+  🧴 {t("personalCare.collectionTitle", { category: categoryName })}
+</h2>
+
+       <p className="mb-5" style={textStyle}>
+  {t("personalCare.description", { category: categoryName })}
+</p>
+
 
         {loading ? (
           <div className="text-center my-5">
             <Spinner animation="border" variant="warning" />
             <p className="mt-3" style={loadingTextStyle}>
-              Loading {categoryName.toLowerCase()} products...
+              {t("personalCare.loading")}
             </p>
           </div>
         ) : products.length > 0 ? (
@@ -393,7 +395,7 @@ function PersonalCare() {
             }}
           >
             <p className="fw-bold mb-0">
-              No products found in {categoryName}.
+              {t("personalCare.noProducts", { category: categoryName })}
             </p>
           </Alert>
         )}

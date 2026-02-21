@@ -3,9 +3,13 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { FaCoins, FaWallet } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
+
 import { useNavigate } from "react-router-dom"; // ✅ ADD
 
 function Wallet() {
+  const { t } = useTranslation();
+
   const auth = getAuth();
   const navigate = useNavigate(); // ✅ ADD
 
@@ -48,7 +52,7 @@ function Wallet() {
     return (
       <div style={{ padding: "40px", textAlign: "center" }}>
         <div className="spinner-border text-primary"></div>
-        <p className="mt-3 text-muted">Loading wallet...</p>
+        <p className="mt-3 text-muted">{t("wallet.loading")}</p>
       </div>
     );
 
@@ -73,8 +77,8 @@ function Wallet() {
         <div className="d-flex align-items-center">
           <FaWallet size={32} className="me-3" />
           <div>
-            <h3 className="fw-bold mb-0">My Wallet</h3>
-            <small>Coins & Balance</small>
+            <h3 className="fw-bold mb-0">{t("wallet.title")}</h3>
+            <small>{t("wallet.subtitle")}</small> 
           </div>
         </div>
       </div>
@@ -103,11 +107,11 @@ function Wallet() {
           </div>
 
           <div>
-            <h6 className="text-muted mb-1">Wallet Coins</h6>
+            <h6 className="text-muted mb-1">{t("wallet.coins")}</h6>
             <h2 className="fw-bold mb-0">{walletCoins}</h2>
-            <small className="text-muted">
-              Earn coins by referrals & offers
-            </small>
+           <small className="text-muted">
+  {t("wallet.earnInfo")}
+</small>
           </div>
         </div>
       </div>

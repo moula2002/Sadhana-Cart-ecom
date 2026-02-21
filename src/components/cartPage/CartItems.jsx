@@ -10,8 +10,11 @@ import {
   ToastContainer,
 } from "react-bootstrap";
 import "./CartPage.css";
+import { useTranslation } from "react-i18next";
+
 
 const CartItems = ({ items, onIncrease, onDecrease, onRemove }) => {
+  const { t } = useTranslation();
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
 
@@ -27,11 +30,13 @@ const CartItems = ({ items, onIncrease, onDecrease, onRemove }) => {
       item.stock !== undefined && item.quantity >= item.stock;
 
     if (isMaxQuantity) {
-      setToastMessage(
-        `⚠️ Maximum stock reached! Only ${item.stock} unit${
-          item.stock > 1 ? "s" : ""
-        } available for "${item.title}".`
-      );
+     setToastMessage(
+  t("cart.stockLimitMessage", {
+    stock: item.stock,
+    title: item.title,
+  })
+);
+
       setShowToast(true);
       return;
     }
@@ -71,18 +76,18 @@ const CartItems = ({ items, onIncrease, onDecrease, onRemove }) => {
                   {/* Product Info */}
                   <Col xs={12} md={4}>
                     <h5 className="fw-bold text-dark mb-1">{item.title}</h5>
-                    <p className="text-secondary small mb-1">
-                      Size: {item.size}
-                    </p>
+                   <p className="text-secondary small mb-1">
+  {t("cart.size")}: {item.size}
+</p>
                     <p className="text-warning fw-semibold mb-1 fs-5">
                       {formatPrice(item.price)}
                     </p>
-                    <p className="text-muted small mb-0">
-                      Subtotal:{" "}
-                      <strong className="text-success">
-                        {formatPrice(item.price * item.quantity)}
-                      </strong>
-                    </p>
+                   <p className="text-muted small mb-0">
+  {t("cart.subtotal")}:{" "}
+  <strong className="text-success">
+    {formatPrice(item.price * item.quantity)}
+  </strong>
+</p>
                   </Col>
 
                   {/* Quantity Controls */}
@@ -120,7 +125,7 @@ const CartItems = ({ items, onIncrease, onDecrease, onRemove }) => {
                       className="remove-btn px-4 fw-semibold"
                       onClick={() => onRemove(item)}
                     >
-                      🗑 Remove
+                      🗑 {t("cart.remove")}
                     </Button>
                   </Col>
                 </Row>
@@ -141,7 +146,9 @@ const CartItems = ({ items, onIncrease, onDecrease, onRemove }) => {
           className="text-white border border-danger shadow"
         >
           <Toast.Header closeButton={false} className="bg-danger text-white">
-            <strong className="me-auto">Stock Limit Reached</strong>
+            <strong className="me-auto">
+  {t("cart.stockLimitTitle")}
+</strong>
           </Toast.Header>
           <Toast.Body className="text-center fw-semibold">
             {toastMessage}

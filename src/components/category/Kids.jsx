@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Container, Spinner, Row, Col, Card, Alert } from "react-bootstrap";
+import { useTranslation } from "react-i18next";
+
 import { db } from "../../firebase";
 import {
   collection,
@@ -165,6 +167,8 @@ const ProductCard = ({ product }) => {
 
 // -------------------------------------------------------------
 function Kids() {
+  const { t } = useTranslation();
+
   const categoryName = "Kids";
   const PAGE_SIZE = 8;
   const [products, setProducts] = useState([]);
@@ -338,20 +342,20 @@ function Kids() {
     <div style={containerStyle}>
       <Container className="my-5 text-center">
         <h2 className="fw-bold mb-3" style={titleStyle}>
-          👧👦 {categoryName} Collection
+          👧👦 {t("kids.collectionTitle", { category: categoryName })}
         </h2>
-        <p className="mb-5" style={textStyle}>
-          Discover fun and safe{" "}
-          <strong className="text-capitalize" style={{ color: theme === 'dark' ? '#ffffff' : 'inherit' }}>
-            {categoryName}
-          </strong> products for endless joy ✨
-        </p>
+      <p className="mb-5" style={textStyle}>
+  {t("kids.description", {
+    category: categoryName
+  })}
+</p>
+
 
         {loading ? (
           <div className="text-center my-5">
             <Spinner animation="border" variant="warning" />
             <p className="mt-3" style={loadingTextStyle}>
-              Loading {categoryName.toLowerCase()} products...
+              {t("kids.loading")}
             </p>
           </div>
         ) : products.length > 0 ? (
@@ -372,13 +376,13 @@ function Kids() {
             {loadingMore && (
               <div className="text-center my-4">
                 <Spinner animation="grow" variant="secondary" />
-                <p className="mt-2" style={textStyle}>Loading more...</p>
+                <p className="mt-2" style={textStyle}>{t("common.loadingMore")}</p>
               </div>
             )}
 
             {!hasMore && (
               <p className="mt-4" style={textStyle}>
-                refresh the website
+                {t("common.refresh")}
               </p>
             )}
           </>

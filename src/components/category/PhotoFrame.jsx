@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Container, Spinner, Row, Col, Card, Alert } from "react-bootstrap";
+import { useTranslation } from "react-i18next";
+
 import { db } from "../../firebase";
 import {
   collection,
@@ -20,6 +22,7 @@ const extractColorFromDescription = (description) => {
 
 // 💎 Product Card with Theme Support
 const ProductCard = ({ product }) => {
+    const { t } = useTranslation();
   const [isHovered, setIsHovered] = useState(false);
   const [theme, setTheme] = useState('light');
   
@@ -148,7 +151,7 @@ const ProductCard = ({ product }) => {
               className="fs-6 fw-semibold text-truncate" 
               style={{ color: theme === 'dark' ? '#ffffff' : '#212529' }}
             >
-              {product.name || "Unnamed Product"}
+              {product.name || t("common.unnamedProduct")}
             </Card.Title>
             <Card.Text className="small mb-2" style={{ color: theme === 'dark' ? '#cccccc' : '#6c757d' }}>
               Color:{" "}
@@ -157,7 +160,7 @@ const ProductCard = ({ product }) => {
               </strong>
             </Card.Text>
             <Card.Text className="fw-bold fs-5" style={{ color: '#198754' }}>
-              ₹{product.price || "N/A"}
+              ₹{product.price || t("common.notAvailable")}
             </Card.Text>
           </Card.Body>
         </Card>
@@ -169,6 +172,7 @@ const ProductCard = ({ product }) => {
 // -------------------------------------------------------------
 function PhotoFrame() {
   const categoryName = "Home";
+   const { t } = useTranslation();  
   const PAGE_SIZE = 8;
   const [products, setProducts] = useState([]);
   const [lastVisible, setLastVisible] = useState(null);
@@ -341,7 +345,7 @@ function PhotoFrame() {
     <div style={containerStyle}>
       <Container className="my-5 text-center">
         <h2 className="fw-bold mb-3" style={titleStyle}>
-          🖼️ {categoryName} Collection
+          🖼️ {t("home.collectionTitle", { category: categoryName })}
         </h2>
         <p className="mb-5" style={textStyle}>
           Discover premium{" "}
@@ -354,7 +358,7 @@ function PhotoFrame() {
           <div className="text-center my-5">
             <Spinner animation="border" variant="warning" />
             <p className="mt-3" style={loadingTextStyle}>
-              Loading {categoryName.toLowerCase()} products...
+              {t("home.loading")}
             </p>
           </div>
         ) : products.length > 0 ? (
@@ -375,13 +379,13 @@ function PhotoFrame() {
             {loadingMore && (
               <div className="text-center my-4">
                 <Spinner animation="grow" variant="secondary" />
-                <p className="mt-2" style={textStyle}>Loading more...</p>
+                <p className="mt-2" style={textStyle}>{t("common.loadingMore")}</p>
               </div>
             )}
 
             {!hasMore && (
               <p className="mt-4" style={textStyle}>
-                refresh the website
+                {t("common.refresh")}
               </p>
             )}
           </>
@@ -396,7 +400,8 @@ function PhotoFrame() {
             }}
           >
             <p className="fw-bold mb-0">
-              No products found in {categoryName}.
+              {t("home.noProducts", { category: categoryName })}
+
             </p>
           </Alert>
         )}

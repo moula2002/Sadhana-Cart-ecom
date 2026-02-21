@@ -1,15 +1,17 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
-import { Navbar, Nav, Container, Button, Modal, Form, Badge, Dropdown } from "react-bootstrap";
-import { motion, AnimatePresence } from "framer-motion"; 
-// Redux & Components
+import { Navbar, Nav, Container, Button, Modal, Badge, Dropdown } from "react-bootstrap";
+import { motion, AnimatePresence } from "framer-motion";
+
 import AuthPage from "../pages/LoginPage";
 import SecondHeader from "./searchBar/SecondHeader";
 
 import "./Navbar.css";
 import logo from "../Images/Sadhanacart1.png";
+import LanguageSwitcher from "../language/LanguageSwitcher";
+import { useTranslation } from "react-i18next";
 
 // Firebase
 import { db } from "../firebase";
@@ -17,9 +19,10 @@ import { collection, query, getDocs, orderBy, limit, where, doc, getDoc } from "
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 
 const auth = getAuth();
-
 /* ---------------- MODALS ---------------- */
 const LoginConfirmationModal = ({ show, onClose, userName }) => {
+  const { t } = useTranslation();
+
   return (
     <Modal show={show} onHide={onClose} centered className="login-success-modal">
       <AnimatePresence>
@@ -38,10 +41,10 @@ const LoginConfirmationModal = ({ show, onClose, userName }) => {
               >
                 <i className="fas fa-check-circle fa-3x"></i>
               </motion.div>
-              <h4 className="mb-2 fw-bolder text-dark">Welcome Back!</h4>
+              <h4 className="mb-2 fw-bolder text-dark">{t("welcomeBack")}</h4>
               <p className="text-muted mt-3 mb-0">
-                Hello, <span className="fw-bold text-primary">{userName}</span>!
-                You are now signed in.
+                {t("hello")} <span className="fw-bold text-primary">{userName}</span>! <br />
+                {t("signedIn")}
               </p>
             </Modal.Body>
           </motion.div>
@@ -52,6 +55,8 @@ const LoginConfirmationModal = ({ show, onClose, userName }) => {
 };
 
 const LogoutConfirmationModal = ({ show, onClose }) => {
+  const { t } = useTranslation();
+
   return (
     <Modal show={show} onHide={onClose} centered className="logout-success-modal">
       <AnimatePresence>
@@ -70,8 +75,8 @@ const LogoutConfirmationModal = ({ show, onClose }) => {
               >
                 <i className="fas fa-sign-out-alt fa-3x"></i>
               </motion.div>
-              <h4 className="mb-2 fw-bold text-danger">Logout Successful!</h4>
-              <p className="text-muted mt-3 mb-0">You've been securely logged out.</p>
+              <h4 className="mb-2 fw-bold text-danger">{t("logoutSuccess")}</h4>
+              <p className="text-muted mt-3 mb-0">{t("loggedOut")}</p>
             </Modal.Body>
           </motion.div>
         )}
@@ -80,8 +85,9 @@ const LogoutConfirmationModal = ({ show, onClose }) => {
   );
 };
 
-/* ---------------- SEARCH BAR COMPONENT ---------------- */
+/* ---------------- SEARCH BAR COMPONENT WITH FILTER BUTTON ---------------- */
 const SearchBar = () => {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [trending, setTrending] = useState([]);
@@ -214,6 +220,11 @@ const SearchBar = () => {
     navigate(`/search-results?q=${encodeURIComponent(searchTerm)}`);
   };
 
+  /* ---------------- FILTER BUTTON HANDLER ---------------- */
+  const handleFilterClick = () => {
+    navigate("/advanced-search");
+  };
+
   /* ---------------- DELETE SINGLE RECENT SEARCH ---------------- */
   const deleteRecentSearch = (term, e) => {
     e.stopPropagation();
@@ -245,41 +256,41 @@ const SearchBar = () => {
 
   return (
     <div className="position-relative w-100" ref={dropdownRef}>
-      <div className="input-group">
+      <div className="search-wrapper">
+        <span className="search-icon-left">
+          <i className="fas fa-search"></i>
+        </span>
         <input
           type="text"
-          className="form-control search-input-desktop border-end-0 rounded-start-pill"
-          placeholder="What are you looking for?"
+          className="search-input-desktop"
+          placeholder="What are you looking for"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           onFocus={() => setShowDropdown(true)}
           onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
         />
-
-        {/* X Button - shows only when typing, positioned before search button */}
         {searchTerm && (
-          <Button
-            variant="outline-secondary"
-            className="border-start-0 border-end-0 rounded-0 px-3"
+          <button
+            className="search-clear-btn"
             onClick={clearSearchText}
-            style={{ borderColor: '#dee2e6' }}
+            type="button"
           >
             <i className="fas fa-times"></i>
-          </Button>
+          </button>
         )}
-
-        <Button
-          variant="warning"
-          className="rounded-end-pill px-4"
-          onClick={handleSubmit}
+        <button
+          className="filter-button"
+          onClick={handleFilterClick}
+          type="button"
         >
-          <i className="fas fa-search"></i>
-        </Button>
+          <i className="fas fa-sliders-h"></i>
+          <span className="filter-text">Filter</span>
+        </button>
       </div>
 
       {showDropdown && (
         <motion.div
-          className="suggestions-dropdown shadow-lg border-0 rounded-3 mt-1"
+          className="suggestions-dropdown"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0 }}
@@ -294,67 +305,66 @@ const SearchBar = () => {
               suggestions.map((p) => (
                 <div
                   key={p.id}
-                  className="suggestion-item p-3 border-bottom"
+                  className="suggestion-item"
                   onClick={() => handleSelect(p)}
                 >
-                  <div className="d-flex align-items-center gap-3">
+                  <i className="fas fa-search suggestion-icon"></i>
+                  {p.image || p.images?.[0] ? (
                     <img
                       src={p.image || p.thumbnail || p.images?.[0]}
                       alt={p.pattern || p.name}
                       className="search-suggestion-img"
                       onError={(e) => e.target.src = "https://via.placeholder.com/40"}
                     />
-                    <div className="flex-grow-1">
-                      <div className="fw-bold text-dark">
-                        {highlightText(p.pattern || p.name, searchTerm)}
-                      </div>
-                      <div className="small text-muted">
-                        {p.category} • {p.subcategory || ""}
-                      </div>
-                      <div className="d-flex align-items-center gap-2 mt-1">
-
-                        {p.mrp && p.offerprice && (
-                          <Badge bg="danger" className="ms-2">
-                            {Math.round(((p.mrp - p.offerprice) / p.mrp) * 100)}% OFF
-                          </Badge>
-                        )}
-                      </div>
+                  ) : null}
+                  <div className="flex-grow-1">
+                    <div className="suggestion-title">
+                      {highlightText(p.pattern || p.name, searchTerm)}
+                    </div>
+                    <div className="suggestion-category">
+                      {p.category} • {p.subcategory || ""}
                     </div>
                   </div>
+                  {p.mrp && p.offerprice && (
+                    <Badge bg="danger" className="ms-2 suggestion-badge">
+                      {Math.round(((p.mrp - p.offerprice) / p.mrp) * 100)}% OFF
+                    </Badge>
+                  )}
                 </div>
               ))
             ) : (
-              <div className="p-3 text-center text-muted">
-                No products found for "{searchTerm}"
+              <div className="no-results-item">
+                <i className="fas fa-box-open"></i>
+                <p>No products found for "{searchTerm}"</p>
               </div>
             )
           ) : (
             <>
               {recentSearches.length > 0 && (
                 <>
-                  <div className="px-3 py-2 text-muted small fw-bold bg-light d-flex justify-content-between align-items-center">
-                    <span>
-                      <i className="fas fa-history me-2"></i> RECENT SEARCHES
-                    </span>
+                  <div className="recent-searches-header">
+                    <div className="recent-searches-title">
+                      <i className="fas fa-history"></i> Recent Searches
+                    </div>
                     <button
-                      className="btn btn-sm btn-link text-danger p-0"
+                      className="clear-all-btn"
                       onClick={clearAllRecentSearches}
                     >
-                      Clear all
+                      <i className="fas fa-trash-alt"></i> Clear All
                     </button>
                   </div>
                   {recentSearches.map((term, i) => (
                     <div
                       key={i}
-                      className="suggestion-item px-3 py-2 d-flex justify-content-between align-items-center"
+                      className="recent-search-item"
                       onClick={() => handleRecentSearchClick(term)}
                     >
-                      <div className="d-flex align-items-center">
-                        <i className="fas fa-clock me-2 text-muted"></i>
-                        <span>{term}</span>
+                      <div className="recent-search-content">
+                        <i className="fas fa-clock"></i>
+                        <span className="recent-search-text">{term}</span>
                       </div>
                       <button
-                        className="btn btn-sm btn-link text-danger p-0"
+                        className="recent-search-delete-btn"
                         onClick={(e) => deleteRecentSearch(term, e)}
                       >
                         <i className="fas fa-times"></i>
@@ -364,15 +374,14 @@ const SearchBar = () => {
                 </>
               )}
 
-
               {trending.map((p) => (
                 <div
                   key={p.id}
-                  className="suggestion-item px-3 py-2"
+                  className="suggestion-item trending-item"
                   onClick={() => handleSelect(p)}
                 >
-                  <i className="fas fa-chart-line me-2 text-primary"></i>
-                  {p.pattern || p.name}
+                  <i className="fas fa-chart-line trending-icon"></i>
+                  <span>{p.pattern || p.name}</span>
                 </div>
               ))}
             </>
@@ -385,17 +394,19 @@ const SearchBar = () => {
 
 /* ---------------- FLIPKART STYLE DROPDOWN COMPONENT ---------------- */
 const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [walletBalance, setWalletBalance] = useState(0);
   const [walletCoins, setWalletCoins] = useState(0);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [theme, setTheme] = useState('light'); // 'light' or 'dark'
+  const [theme, setTheme] = useState('light');
+  const [savedAddresses, setSavedAddresses] = useState([]);
 
   // Initialize theme from localStorage or system preference
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
     const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
+
     if (savedTheme) {
       setTheme(savedTheme);
       applyTheme(savedTheme);
@@ -434,6 +445,11 @@ const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal }) 
             const userData = userDoc.data();
             setWalletBalance(userData.walletBalance || 0);
             setWalletCoins(userData.walletCoins || 0);
+            
+            // Fetch saved addresses
+            if (userData.addresses) {
+              setSavedAddresses(userData.addresses);
+            }
           }
         } catch (error) {
           console.error("Error fetching wallet data:", error);
@@ -446,6 +462,11 @@ const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal }) 
 
   const handleProfileClick = () => {
     navigate("/profile");
+    setDropdownOpen(false);
+  };
+
+  const handleAddressClick = () => {
+    navigate("/save-address");
     setDropdownOpen(false);
   };
 
@@ -468,24 +489,23 @@ const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal }) 
     navigate("/orders");
     setDropdownOpen(false);
   };
-  
 
   return (
-    <Dropdown 
+    <Dropdown
       className="flipkart-login-dropdown"
       show={dropdownOpen}
       onToggle={(isOpen) => setDropdownOpen(isOpen)}
     >
-      <Dropdown.Toggle 
-        variant="light" 
+      <Dropdown.Toggle
+        variant="light"
         className="d-flex align-items-center gap-2 px-3 py-2 border-0"
         style={{ background: 'transparent' }}
       >
         <i className="fas fa-user text-primary"></i>
         <span className="d-none d-lg-inline text-dark fw-semibold theme-text">
-          {currentUser ? 
-            (currentUser.displayName || currentUser.email?.split("@")[0] || "User") : 
-            "Login"
+          {currentUser
+            ? (currentUser.displayName || currentUser.email?.split("@")[0] || "User")
+            : t("login")
           }
         </span>
         <i className="fas fa-chevron-down ms-1 small text-muted"></i>
@@ -495,25 +515,25 @@ const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal }) 
         {!currentUser ? (
           <>
             <div className="px-4 pt-3">
-              <button 
+              <button
                 className="btn btn-outline-primary w-100 rounded-pill fw-bold mb-3"
                 onClick={() => {
                   setShowAuthModal(true);
                   setDropdownOpen(false);
                 }}
               >
-                Login
+                {t("login")}
               </button>
             </div>
           </>
         ) : (
           <div className="px-4 pb-3 border-bottom">
             <div className="d-flex align-items-center gap-3 mb-3">
-              <div className="bg-primary bg-gradient text-white rounded-circle d-flex align-items-center justify-content-center" 
-                   style={{ width: '50px', height: '50px', fontSize: '1.2rem' }}>
-                {currentUser.displayName?.[0]?.toUpperCase() || 
-                 currentUser.email?.[0]?.toUpperCase() || 
-                 <i className="fas fa-user"></i>}
+              <div className="bg-primary bg-gradient text-white rounded-circle d-flex align-items-center justify-content-center"
+                style={{ width: '50px', height: '50px', fontSize: '1.2rem' }}>
+                {currentUser.displayName?.[0]?.toUpperCase() ||
+                  currentUser.email?.[0]?.toUpperCase() ||
+                  <i className="fas fa-user"></i>}
               </div>
               <div>
                 <h6 className="mb-0 fw-bold theme-text">{currentUser.displayName || currentUser.email?.split("@")[0] || "User"}</h6>
@@ -524,40 +544,55 @@ const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal }) 
         )}
 
         <div className="px-2">
-          <Dropdown.Item 
+          <Dropdown.Item
             className="py-3 px-3 d-flex align-items-center gap-3 theme-dropdown-item"
             onClick={handleProfileClick}
           >
             <i className="fas fa-user-circle text-primary"></i>
             <div>
-              <div className="fw-semibold theme-text">My Profile</div>
-              <small className="text-muted theme-text-secondary">View & edit profile</small>
+              <div className="fw-semibold theme-text">{t("myProfile")}</div>
             </div>
           </Dropdown.Item>
 
-          <Dropdown.Item 
+          <Dropdown.Item
+            className="py-3 px-3 d-flex align-items-center gap-3 theme-dropdown-item"
+            onClick={handleAddressClick}
+          >
+            <i className="fas fa-map-marker-alt text-warning"></i>
+            <div>
+              <div className="fw-semibold theme-text">{t("address")}</div>
+              {savedAddresses.length > 0 && (
+                <small className="text-muted theme-text-secondary">
+                  {savedAddresses.length}{" "}
+                  {savedAddresses.length === 1
+                    ? t("saved_address")
+                    : t("saved_addresses")}
+                </small>
+              )}
+            </div>
+          </Dropdown.Item>
+
+          <Dropdown.Item
             className="py-3 px-3 d-flex align-items-center gap-3 theme-dropdown-item"
             onClick={handleOrdersClick}
           >
             <i className="fas fa-box text-success"></i>
             <div>
-              <div className="fw-semibold theme-text">Orders</div>
-              <small className="text-muted theme-text-secondary">Track & manage orders</small>
+              <div className="fw-semibold theme-text">{t("orders.title")}</div>
             </div>
           </Dropdown.Item>
 
-          <Dropdown.Item 
+          <Dropdown.Item
             className="py-3 px-3 d-flex align-items-center gap-3 theme-dropdown-item"
             onClick={handleWishlistClick}
           >
             <i className="fas fa-heart text-danger"></i>
             <div>
-              <div className="fw-semibold theme-text">Wishlist</div>
-              <small className="text-muted theme-text-secondary">Saved items</small>
+              <div className="fw-semibold theme-text">{t("wishList")}</div>
             </div>
           </Dropdown.Item>
 
-          <Dropdown.Item 
+          <Dropdown.Item
             className="py-3 px-3 d-flex align-items-center gap-3 theme-dropdown-item"
             onClick={handleWalletClick}
           >
@@ -570,25 +605,32 @@ const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal }) 
               )}
             </div>
             <div>
-              <div className="fw-semibold theme-text">Wallet & Rewards</div>
-              <small className="text-muted theme-text-secondary">Balance: ₹{walletBalance} • Coins: {walletCoins}</small>
+              <div className="fw-semibold theme-text">{t("walletRewards")}</div>
             </div>
           </Dropdown.Item>
 
-          <Dropdown.Item 
+          <Dropdown.Item
             className="py-3 px-3 d-flex align-items-center gap-3 theme-dropdown-item"
             onClick={handleGiftCardsClick}
           >
             <i className="fas fa-credit-card text-info"></i>
             <div>
-              <div className="fw-semibold theme-text">Refer & Earn</div>
-              <small className="text-muted theme-text-secondary">Get ₹50 for each friend</small>
+              <div className="fw-semibold theme-text">{t("referEarn")}</div>
             </div>
           </Dropdown.Item>
 
+          {/* 🌍 LANGUAGE SWITCHER */}
+          <hr className="my-2" />
+          <div className="px-3">
+            <small className="text-muted fw-semibold">
+              {t("language")}
+            </small>
+            <LanguageSwitcher />
+          </div>
+
           {/* THEME TOGGLE BUTTON */}
           <hr className="my-2" />
-          <Dropdown.Item 
+          <Dropdown.Item
             className="py-3 px-3 d-flex align-items-center gap-3 theme-dropdown-item"
             onClick={toggleTheme}
           >
@@ -600,9 +642,9 @@ const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal }) 
               )}
             </div>
             <div>
-              <div className="fw-semibold theme-text">Theme</div>
+              <div className="fw-semibold theme-text">{t("theme")}</div>
               <small className="text-muted theme-text-secondary">
-                {theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
+                {theme === "light" ? t("darkMode") : t("lightMode")}
               </small>
             </div>
             <div className="ms-auto">
@@ -615,12 +657,12 @@ const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal }) 
           {currentUser && (
             <>
               <hr className="my-2" />
-              <Dropdown.Item 
+              <Dropdown.Item
                 className="py-3 px-3 d-flex align-items-center gap-3 text-danger theme-dropdown-item"
                 onClick={handleLogout}
               >
                 <i className="fas fa-sign-out-alt"></i>
-                <div className="fw-semibold theme-text">Logout</div>
+                <div className="fw-semibold theme-text">{t("logout")}</div>
               </Dropdown.Item>
             </>
           )}
@@ -632,16 +674,20 @@ const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal }) 
 
 /* ---------------- MAIN HEADER COMPONENT ---------------- */
 export default function Header() {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // Redux State
+  // 🔥 MEMOIZED SELECTORS - Fix Redux warning
   const { location } = useSelector((state) => state.header);
+  
+  // Memoized cart items selector
   const cartItems = useSelector((state) => state.cart?.items || []);
   const orders = useSelector((state) => state.orders?.items || []);
-
-  const cartCount = cartItems.length;
-  const orderCount = orders.length;
+  
+  // Memoized counts - prevents unnecessary re-renders
+  const cartCount = useMemo(() => cartItems.length, [cartItems]);
+  const orderCount = useMemo(() => orders.length, [orders]);
 
   // Local State
   const [currentUser, setCurrentUser] = useState(null);
@@ -720,13 +766,19 @@ export default function Header() {
                     style={{ width: "50px", height: "50px", objectFit: "contain" }}
                   />
                   <div className="ms-2">
-                    <div className="brand-text" style={{
-                      color: "goldenrod",
-                      fontWeight: "800",
-                      fontSize: "1.4rem",
-                      lineHeight: "1.1"
-                    }}>
-                      Sadhana<span className="brand-text-part" style={{ color: "navy" }}>Cart</span>
+                    <div
+                      className="brand-text"
+                      style={{
+                        color: "goldenrod",
+                        fontWeight: "800",
+                        fontSize: "1.4rem",
+                        lineHeight: "1.1"
+                      }}
+                    >
+                      {t("brandName")}
+                      <span className="brand-text-part" style={{ color: "navy" }}>
+                        {t("brandSuffix")}
+                      </span>
                     </div>
                   </div>
                 </motion.div>
@@ -745,7 +797,7 @@ export default function Header() {
                 </Button>
 
                 {/* Mobile Login Dropdown */}
-                <FlipkartLoginDropdown 
+                <FlipkartLoginDropdown
                   currentUser={currentUser}
                   handleLogout={handleLogout}
                   setShowAuthModal={setShowAuthModal}
@@ -759,7 +811,7 @@ export default function Header() {
                   onClick={goToCart}
                 >
                   <i className="fas fa-shopping-cart"></i>
-                  {cartCount > 0 && (
+                  {cartCount > 0 && ( 
                     <Badge
                       bg="danger"
                       className="position-absolute top-0 start-100 translate-middle rounded-pill"
@@ -790,13 +842,19 @@ export default function Header() {
           {/* DESKTOP VIEW */}
           <Navbar.Collapse id="navbar-collapse" className="d-none d-lg-flex">
 
-            {/* Search Bar */}
-            <Nav className="flex-grow-1 mx-4" style={{ maxWidth: "600px" }}>
+            {/* Search Bar with Filter Button */}
+            <Nav className="flex-grow-1 mx-4" style={{ maxWidth: "650px" }}>
               <SearchBar />
             </Nav>
 
             {/* Right Actions */}
             <Nav className="align-items-center gap-4">
+
+              {/* 🌍 Language Switcher - Desktop Only */}
+              <div className="d-none d-lg-block">
+                <LanguageSwitcher />
+              </div>
+
               {/* Seller */}
               <motion.div
                 whileHover={{ scale: 1.05 }}
@@ -805,11 +863,12 @@ export default function Header() {
                 onClick={handleSellerClick}
               >
                 <i className="fas fa-store text-primary mb-1"></i>
-                <small className="text-dark fw-semibold theme-text">Seller</small>
+                <small className="text-dark fw-semibold theme-text">
+                  {t("seller")}
+                </small>
               </motion.div>
 
-              {/* Flipkart Style Login Dropdown */}
-              <FlipkartLoginDropdown 
+              <FlipkartLoginDropdown
                 currentUser={currentUser}
                 handleLogout={handleLogout}
                 setShowAuthModal={setShowAuthModal}
@@ -823,7 +882,7 @@ export default function Header() {
                   onClick={goToCart}
                 >
                   <i className="fas fa-shopping-cart me-2"></i>
-                  <span className="theme-text">Cart</span>
+                  <span className="theme-text">{t("cartLabel")}</span>
                   {cartCount > 0 && (
                     <Badge
                       bg="danger"

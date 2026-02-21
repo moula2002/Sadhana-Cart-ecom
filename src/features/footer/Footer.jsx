@@ -1,10 +1,12 @@
 import React, { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useLocation } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Footer.css";
 import logo from "../../Images/Sadhanacart1.png";
 
 const Footer = () => {
+  const { t } = useTranslation();
   const location = useLocation();
 
   useEffect(() => {
@@ -21,72 +23,74 @@ const Footer = () => {
             <div className="footer-brand mb-3">
               <img src={logo} alt="SadhanaCart Logo" className="footer-logo-img" />
               <span className="footer-logo-text">
-                Sadhana<span className="cart-text">Cart</span>
+                {t("brandName")}
+                <span className="cart-text">{t("brandSuffix")}</span>
               </span>
             </div>
 
-            <h6 className="footer-heading">About Us</h6>
+            <h6 className="footer-heading">{t("aboutUs")}</h6>
             <p className="footer-text">
-              SadhanaCart is a multipurpose Ecommerce Platform for Electronics,
-              Fashion, Groceries, Gifts, Medical, and more.
+              {t("aboutDesc")}
+
             </p>
 
             <p className="footer-copyright">
-              © 2024–2025 All Rights Reserved<br />
+              © 2024–2025 {t("allRights")}<br />
               SadhanaCart Team
               <br />
               <span className="developer-text">
-                Developed by Innomatrics Technologies
+                {t("developedBy")}
               </span>
             </p>
           </div>
 
           {/* Column 2: Contact */}
           <div className="col-md-3 col-sm-6 mb-4">
-            <h6 className="footer-heading">Call Us</h6>
+            <h6 className="footer-heading">{t("callUs")}</h6>
             <p>
               <a href="tel:+919448810877">+91 94488 10877</a>
             </p>
 
-            <h6 className="footer-heading">Mail Us</h6>
+            <h6 className="footer-heading">{t("mailUs")}</h6>
             <p>
               <a href="mailto:support@sadhanacart.com">
                 support@sadhanacart.com
               </a>
             </p>
 
-            <h6 className="footer-heading">Working Hours</h6>
-            <p className="mb-0">Monday to Saturday</p>
+            <h6 className="footer-heading">{t("workingHours")}</h6>
+            <p className="mb-0">{t("workingDays")}</p>
             <p>9:00 AM – 6:00 PM</p>
           </div>
 
           {/* Column 3: Links */}
           <div className="col-md-3 col-sm-6 mb-4">
-            <h6 className="footer-heading">Useful Links</h6>
+            <h6 className="footer-heading">{t("usefulLinks")}</h6>
             <ul className="list-unstyled footer-links">
-              <li><Link to="/return-policy">Return Policy</Link></li>
-              <li><Link to="/shipping-policy">Shipping Policy</Link></li>
-              <li><Link to="/terms-and-conditions">Terms & Conditions</Link></li>
-              <li><Link to="/about-us">About Us</Link></li>
+              <Link to="/return-policy">{t("return-Policy")}</Link><br />
+              <Link to="/shipping-policy">{t("shipping-Policy")}</Link><br />
+              <Link to="/terms-and-conditions">{t("term's")}</Link><br />
+              <Link to="/about-us">{t("aboutUs")}</Link>
               <li>
                 <a href="https://wa.me/919448810877" target="_blank" rel="noreferrer">
-                  Chat With Us
+                  {t("chatWithUs")}
                 </a>
               </li>
-              <li><Link to="/faqs">FAQs</Link></li>
+              <Link to="/faqs">{t("faq's")}</Link>
             </ul>
           </div>
 
           {/* Column 4: Address */}
           <div className="col-md-3 col-sm-6 mb-4">
-            <h6 className="footer-heading">Located At</h6>
-            <p className="office-title">Registered Office</p>
+            <h6 className="footer-heading">{t("locatedAt")}</h6>
+            <p className="office-title">{t("registeredOffice")}</p>
             <address className="footer-address">
-              Ground Floor, Ward No. 24, A No. 4-14-155/36A,<br />
-              Teachers Colony, Near LIC Office,<br />
-              Gangawati – 583222, Koppal District,<br />
-              Karnataka.
+              {t("addresspage.line1")}<br />
+              {t("addresspage.line2")}<br />
+              {t("addresspage.line3")}<br />
+              {t("addresspage.line4")}
             </address>
+
           </div>
 
         </div>

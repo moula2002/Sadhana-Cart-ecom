@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
-// UI
 import { Container, Row, Col, Card, Button, Spinner, Modal, Alert } from "react-bootstrap";
 import { FaCoins } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { clearCart } from "../../redux/cartSlice";
-// Firestore + Auth
 import {
   collection,
   addDoc,
@@ -20,31 +19,28 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db } from "../../firebase";
 
 function CashOnDelivery() {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // Data from Checkout -> COD page (WITH COIN DATA)
+  // Data from Checkout -> COD page
   const billingDetails = location.state?.billingDetails || {};
   const cartItems = location.state?.cartItems || [];
   const productSkus = location.state?.productSkus || {};
   const totalPrice = location.state?.totalPrice || 0;
-  const finalAmount = location.state?.finalAmount || totalPrice; // After coins discount
+  const finalAmount = location.state?.finalAmount || totalPrice;
   const coinsToUse = location.state?.coinsToUse || 0;
   const walletCoins = location.state?.walletCoins || 0;
-const COIN_TO_RUPEE_RATE = 1;
-const coinDiscount = coinsToUse * COIN_TO_RUPEE_RATE;
-
+  const COIN_TO_RUPEE_RATE = 1;
+  const coinDiscount = coinsToUse * COIN_TO_RUPEE_RATE;
   const coordinates = location.state?.coordinates || { lat: null, lng: null };
-
-
+  const shippingCharges = location.state?.shippingCharges || 0;
 
   // Local state
   const [userId, setUserId] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [userWalletCoins, setUserWalletCoins] = useState(walletCoins);
-
-  // Modal states
   const [showModal, setShowModal] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
   const [modalMessage, setModalMessage] = useState("");
@@ -62,7 +58,6 @@ const coinDiscount = coinsToUse * COIN_TO_RUPEE_RATE;
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setUserId(user.uid);
-        // ✅ FETCH LATEST WALLET COINS FROM DATABASE
         try {
           const userDocRef = doc(db, "users", user.uid);
           const userSnap = await getDoc(userDocRef);
@@ -97,7 +92,7 @@ const coinDiscount = coinsToUse * COIN_TO_RUPEE_RATE;
     );
   };
 
-  // ✅ FUNCTION TO DEDUCT COINS FROM USER WALLET
+  // Deduct coins from wallet
   const deductCoinsFromWallet = async (coinsToDeduct) => {
     if (!userId || coinsToDeduct <= 0) return true;
 
@@ -114,7 +109,6 @@ const coinDiscount = coinsToUse * COIN_TO_RUPEE_RATE;
           return false;
         }
 
-        // Deduct coins
         await updateDoc(userRef, {
           walletCoins: currentCoins - coinsToDeduct
         });
@@ -131,7 +125,7 @@ const coinDiscount = coinsToUse * COIN_TO_RUPEE_RATE;
     return true;
   };
 
-  // Save order to sellers/{sellerId}/orders for vendor dashboard visibility
+  // Save order to seller collections (matches Flutter structure)
   const saveOrderToSellerCollections = async (orderData, userOrderDocId) => {
     try {
       const productsBySeller = {};
@@ -143,17 +137,14 @@ const coinDiscount = coinsToUse * COIN_TO_RUPEE_RATE;
 
       for (const [sellerId, sellerProducts] of Object.entries(productsBySeller)) {
         const sellerOrdersRef = collection(db, "sellers", sellerId, "orders");
-        const sellerSubtotal = sellerProducts.reduce((t, p) => t + (p.totalAmount || 0), 0);
+        const sellerSubtotal = sellerProducts.reduce((t, p) => t + (p.price || 0), 0);
 
         await addDoc(sellerOrdersRef, {
           orderId: orderData.orderId,
-          userOrderDocId, // Reference to the doc in users/{uid}/orders
+          userOrderDocId,
           userId: orderData.userId,
           products: sellerProducts,
           totalAmount: sellerSubtotal,
-          discountedAmount: sellerSubtotal - (sellerSubtotal * coinsToUse / totalPrice), // Proportional discount
-          coinsUsed: Math.round(sellerSubtotal * coinsToUse / totalPrice), // Proportional coins used
-          coinDiscount: Math.round(sellerSubtotal * coinDiscount / totalPrice), // Proportional discount
           paymentMethod: orderData.paymentMethod,
           orderStatus: orderData.orderStatus,
           createdAt: serverTimestamp(),
@@ -161,6 +152,7 @@ const coinDiscount = coinsToUse * COIN_TO_RUPEE_RATE;
           customerPhone: orderData.phoneNumber,
           address: orderData.address,
           sellerId,
+          shippingCharges: orderData.shippingCharges || 0,
         });
       }
     } catch (err) {
@@ -168,6 +160,7 @@ const coinDiscount = coinsToUse * COIN_TO_RUPEE_RATE;
     }
   };
 
+  // Update seller documents (matches Flutter structure)
   const updateSellerDocuments = async (sellerIds, userOrderDocId, orderData) => {
     try {
       for (const sellerId of sellerIds) {
@@ -175,34 +168,31 @@ const coinDiscount = coinsToUse * COIN_TO_RUPEE_RATE;
         const sellerRef = doc(db, "sellers", sellerId);
 
         const sellerProducts = (orderData.products || []).filter((p) => p.sellerId === sellerId);
-        const sellerSubtotal = sellerProducts.reduce((t, p) => t + (p.totalAmount || 0), 0);
+        const sellerSubtotal = sellerProducts.reduce((t, p) => t + (p.price || 0), 0);
 
         const orderSummary = {
           orderId: orderData.orderId,
           userOrderDocId,
           customerName: orderData.name,
           totalAmount: sellerSubtotal,
-          discountedAmount: sellerSubtotal - (sellerSubtotal * coinsToUse / totalPrice),
-          coinsUsed: Math.round(sellerSubtotal * coinsToUse / totalPrice),
-          orderDate: serverTimestamp(),
+          orderDate: new Date(),
           orderStatus: orderData.orderStatus,
         };
 
         const sellerSnap = await getDoc(sellerRef);
         if (!sellerSnap.exists()) {
-          // Initialize seller doc if it doesn't exist
-          await updateDoc(sellerRef, {
+          await setDoc(sellerRef, {
             sellerId,
             orders: [],
             totalSales: 0,
             createdAt: serverTimestamp(),
-          }).catch(() => {}); 
+          }).catch(() => {});
         }
 
         await updateDoc(sellerRef, {
           orders: arrayUnion(orderSummary),
           lastOrderDate: serverTimestamp(),
-          totalSales: increment(sellerSubtotal - (sellerSubtotal * coinsToUse / totalPrice)),
+          totalSales: increment(sellerSubtotal),
           updatedAt: serverTimestamp(),
         });
       }
@@ -211,13 +201,14 @@ const coinDiscount = coinsToUse * COIN_TO_RUPEE_RATE;
     }
   };
 
-  const saveOrderToFirestore = async (paymentMethod, status = "Pending") => {
+  // Save order to Firestore (MATCHES FLUTTER STRUCTURE EXACTLY)
+  const saveOrderToFirestore = async (paymentMethod, status = "pending") => {
     if (!userId) {
       showPopup("Authentication Required", "You must be logged in to place an order.");
       return { success: false };
     }
 
-    // ✅ DEDUCT COINS BEFORE SAVING ORDER
+    // Deduct coins if used
     if (coinsToUse > 0) {
       const coinsDeducted = await deductCoinsFromWallet(coinsToUse);
       if (!coinsDeducted) {
@@ -228,69 +219,165 @@ const coinDiscount = coinsToUse * COIN_TO_RUPEE_RATE;
     try {
       const sellerIdsInOrder = [...new Set((cartItems || []).map((it) => getSellerIdForCartItem(it)))].filter(Boolean);
       
+      // Build products array matching Flutter's OrderProductModel structure
       const products = (cartItems || []).map((item) => {
-        const finalSku = productSkus[item.id] || (item.sku !== "N/A" ? item.sku : item.id);
+        const finalSku = productSkus[item.id] || item.sku || item.id || "unknown_sku";
         const sellerId = getSellerIdForCartItem(item);
-        const itemTotal = (item.price || 0) * (item.quantity || 1);
-        const proportionalCoinsUsed = Math.round(itemTotal * coinsToUse / totalPrice);
+        const itemPrice = (item.price || 0) * (item.quantity || 1);
+        const proportionalCoinsUsed = totalPrice > 0 ? Math.round(itemPrice * coinsToUse / totalPrice) : 0;
 
         return {
-          productId: item.id,
+          productid: item.id,                    // Matches Flutter: productid
           name: item.title || item.name || "Unnamed Product",
-          price: item.price || 0,
-          quantity: item.quantity || 1,
-          sku: finalSku,
-          images: item.images || [],
-          sellerId,
-          totalAmount: itemTotal,
-          coinsUsed: proportionalCoinsUsed,
-          coinDiscount: proportionalCoinsUsed * COIN_TO_RUPEE_RATE,
+          price: itemPrice,                       // Matches Flutter: price (total for quantity)
+          stock: item.stock || 0,                  // Matches Flutter: stock
+          quantity: item.quantity || 1,            // Matches Flutter: quantity
+          sku: finalSku,                           // Matches Flutter: sku
+          sizevariants: item.sizeVariant ? [       // Matches Flutter: sizevariants array
+            {
+              size: item.sizeVariant.size,
+              stock: item.quantity,
+              skuSuffix: item.sizeVariant.skuSuffix,
+              color: item.sizeVariant.color,
+            }
+          ] : [],
+          images: item.images || [],                // Matches Flutter: images
+          sellerId,                                 // Additional field for seller tracking
         };
       });
 
       const selleridField = sellerIdsInOrder.length === 1 ? sellerIdsInOrder[0] : sellerIdsInOrder;
-      const orderId = `ORD-${Date.now()}`;
+      
+      // Generate order ID in Flutter format (without ORD- prefix)
+      const timestamp = Date.now();
+      const orderId = `order_${timestamp}`;  // Flutter uses auto-generated IDs, but we'll use consistent format
+      
+      // Use auto-generated document ID like Flutter
+      const ordersRef = collection(db, "users", userId, "orders");
+      
+      // Calculate cashback (1% of total)
+      const cashbackCoins = Math.floor(totalPrice * 0.01);
 
+      // Create order data EXACTLY matching Flutter structure
       const orderData = {
-        userId,
-        orderId,
-        orderStatus: status,
-        totalAmount: totalPrice,
-        discountedAmount: finalAmount,
-        coinsUsed: coinsToUse,
-        coinDiscount: coinDiscount,
-        paymentMethod,
-        phoneNumber: billingDetails.phone || null,
-        createdAt: serverTimestamp(),
-        orderDate: serverTimestamp(),
-        address: `${billingDetails.address || ""}, ${billingDetails.city || ""}, ${billingDetails.pincode || ""}, Karnataka`,
+        orderId: orderId,                         // Will be overridden by Firestore ID, but keep for reference
+        userId: userId,
+        quantity: products.reduce((sum, p) => sum + (p.quantity || 0), 0),
+        productsTotal: totalPrice,
+        payableAmount: finalAmount,
+        walletCoinsUsed: coinsToUse,
+        cashbackCoinsAdded: cashbackCoins,
+        shippingCharges: shippingCharges,
+        address: `${billingDetails.address || ""}, ${billingDetails.city || ""}, ${billingDetails.state || "Karnataka"}, ${billingDetails.pincode || ""}`,
+        phoneNumber: billingDetails.phone ? parseInt(billingDetails.phone) : null,
         latitude: coordinates.lat || null,
         longitude: coordinates.lng || null,
+        orderStatus: status,
+        orderDate: serverTimestamp(),
+        createdAt: serverTimestamp(),
+        products: products,
+        paymentMethod: paymentMethod,
         name: billingDetails.fullName || null,
         sellerid: selleridField,
-        products,
-        shippingCharges: 0,
-        walletCoinsAfterDeduction: userWalletCoins - coinsToUse,
       };
 
-      // TARGET PATH: /users/{userId}/orders/
-      const ordersRef = collection(db, "users", userId, "orders");
+      // Save to Firestore (auto-generated ID like Flutter)
       const userOrderDocRef = await addDoc(ordersRef, orderData);
+      
+      // Update the document with its own ID as orderId (like Flutter does)
+      await updateDoc(userOrderDocRef, {
+        orderId: userOrderDocRef.id
+      });
+
+      console.log("Order saved with ID:", userOrderDocRef.id);
+
+      // Add cashback to wallet (1% of total)
+      if (cashbackCoins > 0) {
+        try {
+          const userRef = doc(db, "users", userId);
+          await updateDoc(userRef, {
+            walletCoins: increment(cashbackCoins)
+          });
+          console.log(`Added ${cashbackCoins} cashback coins`);
+        } catch (e) {
+          console.error("Failed to add cashback:", e);
+        }
+      }
+
+      // Send to Shiprocket
+      try {
+        const response = await fetch(
+          "https://createshiprocketorder-cij4erke6a-uc.a.run.app",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              order_id: userOrderDocRef.id,
+              order_date: new Date().toISOString().split("T")[0],
+              billing_customer_name: billingDetails.fullName,
+              billing_last_name: "",
+              billing_address: billingDetails.address,
+              billing_city: billingDetails.city,
+              billing_pincode: billingDetails.pincode,
+              billing_state: billingDetails.state || "Karnataka",
+              billing_country: "India",
+              billing_email: billingDetails.email || "appasharan@gmail.com",
+              billing_phone: billingDetails.phone,
+              shipping_is_billing: true,
+              order_items: products.map((item) => ({
+                name: item.name,
+                sku: item.sku,
+                units: item.quantity,
+                selling_price: item.price / item.quantity, // Per unit price
+              })),
+              payment_method: "COD",
+              sub_total: totalPrice,
+              length: 1,
+              breadth: 1,
+              height: 1,
+              weight: 0.5,
+            }),
+          }
+        );
+
+        const shiprocketData = await response.json();
+        console.log("Shiprocket Response:", shiprocketData);
+
+        // Update order with Shiprocket details
+        await updateDoc(userOrderDocRef, {
+          shipmentId: shiprocketData.shipment_id,
+          shiprocketOrderId: shiprocketData.order_id,
+          shiprocketStatus: shiprocketData.status,
+          shiprocketRawResponse: shiprocketData,
+          shiprocketAttempted: true,
+        });
+
+      } catch (error) {
+        console.error("Shiprocket Error:", error);
+        await updateDoc(userOrderDocRef, {
+          shiprocketAttempted: true,
+          shiprocketError: error.message,
+          shiprocketLastAttemptAt: serverTimestamp(),
+        });
+      }
 
       // Sync with Seller data
       await saveOrderToSellerCollections(orderData, userOrderDocRef.id);
       await updateSellerDocuments(
-        Array.isArray(sellerIdsInOrder) ? sellerIdsInOrder : [sellerIdsInOrder], 
-        userOrderDocRef.id, 
+        Array.isArray(sellerIdsInOrder) ? sellerIdsInOrder : [sellerIdsInOrder],
+        userOrderDocRef.id,
         orderData
       );
 
-      return { 
-        success: true, 
-        docId: userOrderDocRef.id, 
+      return {
+        success: true,
+        docId: userOrderDocRef.id,
         sellerid: selleridField,
         coinsUsed: coinsToUse,
-        discount: coinDiscount
+        discount: coinDiscount,
+        orderData: orderData
       };
     } catch (error) {
       console.error("Error saving order:", error);
@@ -304,7 +391,7 @@ const coinDiscount = coinsToUse * COIN_TO_RUPEE_RATE;
     setShowConfirmModal(false);
     setIsSaving(true);
 
-    const result = await saveOrderToFirestore("Cash on Delivery", "Pending");
+    const result = await saveOrderToFirestore("Cash on Delivery", "pending");
 
     if (result && result.success) {
       dispatch(clearCart());
@@ -320,6 +407,7 @@ const coinDiscount = coinsToUse * COIN_TO_RUPEE_RATE;
           orderDocId: result.docId,
           coinsUsed: result.coinsUsed,
           discount: result.discount,
+          orderData: result.orderData,
         },
       });
     }
@@ -329,7 +417,6 @@ const coinDiscount = coinsToUse * COIN_TO_RUPEE_RATE;
   const handleConfirmOrder = () => {
     if (isSaving || !userId) return;
     
-    // Check if user still has enough coins
     if (coinsToUse > userWalletCoins) {
       showPopup("Insufficient Coins", `You only have ${userWalletCoins} coins available. Please go back and adjust your order.`);
       return;
@@ -339,14 +426,15 @@ const coinDiscount = coinsToUse * COIN_TO_RUPEE_RATE;
   };
 
   const handleBack = () => {
-    navigate("/checkout", { 
-      state: { 
-        cartItems, 
-        billingDetails, 
-        productSkus, 
-        totalPrice, 
-        coordinates 
-      } 
+    navigate("/checkout", {
+      state: {
+        cartItems,
+        billingDetails,
+        productSkus,
+        totalPrice,
+        coordinates,
+        shippingCharges
+      }
     });
   };
 
@@ -364,47 +452,46 @@ const coinDiscount = coinsToUse * COIN_TO_RUPEE_RATE;
     <Container className="py-5">
       <Row className="justify-content-center">
         <Col md={8}>
-          <h2 className="mb-4 text-center">Cash on Delivery</h2>
+          <h2 className="mb-4 text-center">{t("cod.title")}</h2>
           
-          {/* ✅ WALLET COINS DISPLAY SECTION */}
           {coinsToUse > 0 && (
             <Card className="mb-4 shadow-sm p-4 border-warning">
               <div className="d-flex align-items-center mb-3">
                 <FaCoins size={24} className="me-2 text-warning" />
-                <h5 className="fw-bold mb-0 text-warning">Wallet Coins Applied</h5>
+                <h5 className="fw-bold mb-0 text-warning">{t("cod.walletApplied")}</h5>
               </div>
               
               <Alert variant="success" className="py-3">
                 <div className="d-flex justify-content-between align-items-center">
                   <div>
                     <FaCoins className="me-2" />
-                    <strong>{coinsToUse} Coins</strong> (₹{coinsToUse}) applied
+                    <strong>{coinsToUse} {t("cod.coins")}</strong> (₹{coinsToUse}) applied
                   </div>
                   <div className="text-success fw-bold">
                     -{formatPrice(coinDiscount)}
                   </div>
                 </div>
                 <small className="d-block mt-2 text-muted">
-                  Available coins after purchase: {userWalletCoins - coinsToUse}
+                  {t("cod.availableAfter")}: {userWalletCoins - coinsToUse}
                 </small>
               </Alert>
               
               <div className="text-center small text-muted">
                 <FaCoins className="me-1" />
-                You save ₹{coinDiscount} using your wallet coins!
+                {t("cod.youSave", { amount: coinDiscount })}
               </div>
             </Card>
           )}
 
           <Card className="mb-4 shadow-sm p-4">
-            <h5 className="border-bottom pb-2">Delivery Details</h5>
+            <h5>{t("cod.deliveryDetails")}</h5>
             <p className="mb-1"><strong>{billingDetails.fullName}</strong></p>
             <p className="mb-1 text-muted">{billingDetails.phone}</p>
             <p className="mb-0">{billingDetails.address}, {billingDetails.city} - {billingDetails.pincode}</p>
           </Card>
 
           <Card className="mb-4 shadow-sm p-4">
-            <h5 className="border-bottom pb-2">Order Items</h5>
+            <h5>{t("cod.orderItems")}</h5>
             {cartItems.map((item, idx) => (
               <div key={idx} className="d-flex justify-content-between mb-2">
                 <span>{item.title} x {item.quantity}</span>
@@ -413,9 +500,8 @@ const coinDiscount = coinsToUse * COIN_TO_RUPEE_RATE;
             ))}
             <hr />
             
-            {/* ✅ ORDER SUMMARY WITH COIN DISCOUNT */}
             <div className="d-flex justify-content-between mb-2">
-              <span>Subtotal:</span>
+              <span>{t("cod.subtotal")}:</span>
               <span>{formatPrice(totalPrice)}</span>
             </div>
             
@@ -423,25 +509,32 @@ const coinDiscount = coinsToUse * COIN_TO_RUPEE_RATE;
               <div className="d-flex justify-content-between mb-2 text-success">
                 <span>
                   <FaCoins className="me-1" />
-                  Coins Discount:
+                  {t("cod.coinsDiscount")}:
                 </span>
                 <span className="fw-bold">-{formatPrice(coinDiscount)}</span>
               </div>
             )}
             
-            <div className="d-flex justify-content-between mb-2">
-              <span>Shipping:</span>
-              <span className="text-success fw-semibold">Free</span>
-            </div>
+            {shippingCharges > 0 ? (
+              <div className="d-flex justify-content-between mb-2">
+                <span>{t("cod.shipping")}:</span>
+                <span>{formatPrice(shippingCharges)}</span>
+              </div>
+            ) : (
+              <div className="d-flex justify-content-between mb-2">
+                <span>{t("cod.shipping")}:</span>
+                <span className="text-success fw-semibold">{t("cod.free")}</span>
+              </div>
+            )}
             
             <hr />
             <div className="d-flex justify-content-between fw-bold fs-5">
-              <span>Total Payable:</span>
+              <span>{t("cod.totalPayable")}:</span>
               <span className={coinsToUse > 0 ? "text-success" : ""}>
-                {formatPrice(finalAmount)}
+                {formatPrice(finalAmount + (shippingCharges || 0))}
                 {coinsToUse > 0 && (
                   <small className="text-muted ms-2">
-                    <s>{formatPrice(totalPrice)}</s>
+                    <s>{formatPrice(totalPrice + (shippingCharges || 0))}</s>
                   </small>
                 )}
               </span>
@@ -449,37 +542,43 @@ const coinDiscount = coinsToUse * COIN_TO_RUPEE_RATE;
           </Card>
 
           <div className="d-grid gap-2">
-            <Button 
-              variant="warning" 
-              className="py-3 fw-bold" 
-              onClick={handleConfirmOrder} 
+            <Button
+              variant="warning"
+              className="py-3 fw-bold"
+              onClick={handleConfirmOrder}
               disabled={isSaving}
             >
               {isSaving ? (
                 <>
                   <Spinner animation="border" size="sm" className="me-2" />
-                  Processing...
+                  {t("cod.processing")}
                 </>
               ) : (
-                `PLACE ORDER - ${formatPrice(finalAmount)}`
+                `${t("cod.placeOrder")} - ${formatPrice(finalAmount + (shippingCharges || 0))}`
               )}
             </Button>
             
-            <Button 
-              variant="outline-secondary" 
+            <Button
+              variant="outline-secondary"
               onClick={handleBack}
               disabled={isSaving}
             >
-              ← Back to Checkout
+              {t("cod.backToCheckout")}
             </Button>
           </div>
           
           {coinsToUse > 0 && (
             <Alert variant="info" className="mt-3 small">
               <FaCoins className="me-2" />
-              <strong>Note:</strong> {coinsToUse} coins will be deducted from your wallet immediately upon order confirmation.
+              <strong>{t("cod.note")}:</strong> {coinsToUse} coins will be deducted from your wallet immediately upon order confirmation.
             </Alert>
           )}
+          
+          {/* 1% Cashback info */}
+          <Alert variant="success" className="mt-2 small">
+            <FaCoins className="me-2" />
+            <strong>Cashback:</strong> You'll receive {Math.floor(totalPrice * 0.01)} coins (1% cashback) after order confirmation.
+          </Alert>
         </Col>
       </Row>
 
@@ -495,11 +594,11 @@ const coinDiscount = coinsToUse * COIN_TO_RUPEE_RATE;
         <Modal.Header closeButton>
           <Modal.Title>
             <FaCoins className="me-2 text-warning" />
-            Confirm Order
+            {t("cod.confirmOrder")}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <p>Place order for <strong>{formatPrice(finalAmount)}</strong> using Cash on Delivery?</p>
+          <p>{t("cod.placeOrderFor")} <strong>{formatPrice(finalAmount + (shippingCharges || 0))}</strong> {t("cod.usingCOD")}</p>
           
           {coinsToUse > 0 && (
             <Alert variant="warning" className="py-2">
@@ -509,13 +608,15 @@ const coinDiscount = coinsToUse * COIN_TO_RUPEE_RATE;
           )}
           
           <div className="small text-muted">
-            <strong>Delivery to:</strong> {billingDetails.address}, {billingDetails.city}
+            <strong>{t("cod.deliveryTo")}:</strong> {billingDetails.address}, {billingDetails.city}
           </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="light" onClick={() => setShowConfirmModal(false)}>Cancel</Button>
+          <Button variant="light" onClick={() => setShowConfirmModal(false)}>
+            {t("cod.cancel")}
+          </Button>
           <Button variant="warning" onClick={handleFinalOrderPlacement}>
-            {coinsToUse > 0 ? "Confirm & Use Coins" : "Confirm Order"}
+            {coinsToUse > 0 ? t("cod.confirmUseCoins") : t("cod.confirmOrder")}
           </Button>
         </Modal.Footer>
       </Modal>

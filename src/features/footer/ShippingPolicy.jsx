@@ -1,5 +1,6 @@
 import React from 'react';
 import './ShippingPolicy.css';
+import { useTranslation } from "react-i18next";
 import {
   MdAccessTime,
   MdLocalShipping,
@@ -22,83 +23,126 @@ const PolicySection = ({ number, title, icon: Icon, children, colorClass = '' })
   </div>
 );
 
-// --- Main Component ---
 const ShippingPolicy = () => {
-  // --- Gmail compose link ---
+  const { t } = useTranslation();
+
   const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=support@sadhanacart.com&su=Shipping%20Inquiry&body=Hello%20SadhanaCart%20Team,%0A%0AI%20have%20a%20question%20regarding%20shipping.%20Please%20assist.%0A%0AThank%20you!`;
 
   return (
     <div className="shipping-policy-page">
-      {/* Header Section */}
+
+      {/* Header */}
       <div className="shipping-header">
-        <h1>Shipping Policy</h1>
-        <p>Fast & Reliable Delivery</p>
+        <h1>{t("shippingPolicy.title")}</h1>
+        <p>{t("shippingPolicy.subtitle")}</p>
       </div>
 
       <div className="shipping-container">
+
         {/* Intro */}
-        <h2 className="shipping-intro-title">Shipping Policy</h2>
+        <h2 className="shipping-intro-title">
+          {t("shippingPolicy.title")}
+        </h2>
+
         <p className="shipping-intro-text">
-          At <strong>SadhanaCart</strong>, we are committed to delivering your orders quickly and efficiently. 
-          This Shipping Policy outlines how and when your items will be shipped.
+          {t("shippingPolicy.intro")}
         </p>
 
-        {/* Sections */}
-        <PolicySection number={1} title="Processing Time" icon={MdAccessTime}>
-          <li>Orders are typically processed within <strong>1–3 business days</strong>.</li>
-          <li>Vendors may require extra time during high-demand periods.</li>
+        {/* Section 1 */}
+        <PolicySection
+          number={1}
+          title={t("shippingPolicy.section1.title")}
+          icon={MdAccessTime}
+        >
+          <li>{t("shippingPolicy.section1.point1")}</li>
+          <li>{t("shippingPolicy.section1.point2")}</li>
         </PolicySection>
 
-        <PolicySection number={2} title="Shipping Methods" icon={MdLocalShipping}>
-          <li>We offer standard and express shipping options.</li>
-          <li>Shipping carriers may vary depending on location and vendor.</li>
+        {/* Section 2 */}
+        <PolicySection
+          number={2}
+          title={t("shippingPolicy.section2.title")}
+          icon={MdLocalShipping}
+        >
+          <li>{t("shippingPolicy.section2.point1")}</li>
+          <li>{t("shippingPolicy.section2.point2")}</li>
         </PolicySection>
 
-        <PolicySection number={3} title="Estimated Delivery Times" icon={MdCalendarToday}>
-          <li><strong>Standard:</strong> 4–7 business days</li>
-          <li><strong>Express:</strong> 1–3 business days</li>
-          <li>Delivery times may vary by vendor and region.</li>
+        {/* Section 3 */}
+        <PolicySection
+          number={3}
+          title={t("shippingPolicy.section3.title")}
+          icon={MdCalendarToday}
+        >
+          <li>{t("shippingPolicy.section3.point1")}</li>
+          <li>{t("shippingPolicy.section3.point2")}</li>
+          <li>{t("shippingPolicy.section3.point3")}</li>
         </PolicySection>
 
-        <PolicySection number={4} title="Shipping Charges" icon={MdAttachMoney}>
-          <li>Shipping charges are calculated at checkout.</li>
-          <li>Free shipping may be available on select products or orders above ₹500.</li>
+        {/* Section 4 */}
+        <PolicySection
+          number={4}
+          title={t("shippingPolicy.section4.title")}
+          icon={MdAttachMoney}
+        >
+          <li>{t("shippingPolicy.section4.point1")}</li>
+          <li>{t("shippingPolicy.section4.point2")}</li>
         </PolicySection>
 
-        <PolicySection number={5} title="International Shipping" icon={MdPublic} colorClass="red-highlight">
-          <li>Currently, we only ship within <strong>India</strong>.</li>
-          <li>International shipping options will be added in future updates.</li>
+        {/* Section 5 */}
+        <PolicySection
+          number={5}
+          title={t("shippingPolicy.section5.title")}
+          icon={MdPublic}
+          colorClass="red-highlight"
+        >
+          <li>{t("shippingPolicy.section5.point1")}</li>
+          <li>{t("shippingPolicy.section5.point2")}</li>
         </PolicySection>
 
-        <PolicySection number={6} title="Delays and Tracking" icon={MdWatchLater} colorClass="red-highlight">
-          <li>We'll notify you via email in case of delays due to weather, holidays, or vendor issues.</li>
-          <li>A tracking number will be provided once your order ships.</li>
+        {/* Section 6 */}
+        <PolicySection
+          number={6}
+          title={t("shippingPolicy.section6.title")}
+          icon={MdWatchLater}
+          colorClass="red-highlight"
+        >
+          <li>{t("shippingPolicy.section6.point1")}</li>
+          <li>{t("shippingPolicy.section6.point2")}</li>
         </PolicySection>
 
-        <PolicySection number={7} title="Undeliverable Packages" icon={MdWarning} colorClass="red-highlight">
-          <li>If a package is returned due to an incorrect address or failed delivery, we'll contact you to resolve it.</li>
+        {/* Section 7 */}
+        <PolicySection
+          number={7}
+          title={t("shippingPolicy.section7.title")}
+          icon={MdWarning}
+          colorClass="red-highlight"
+        >
+          <li>{t("shippingPolicy.section7.point1")}</li>
         </PolicySection>
 
         {/* Help Section */}
         <div className="help-card">
-          <h4><MdHelpOutline /> Need Help With Shipping?</h4>
-          <p>Contact our customer support team for any shipping-related questions or issues.</p>
+          <h4>
+            <MdHelpOutline /> {t("shippingPolicy.help.title")}
+          </h4>
+          <p>{t("shippingPolicy.help.description")}</p>
 
-          {/* Gmail Contact Button */}
           <a
             href={gmailLink}
             target="_blank"
             rel="noopener noreferrer"
             className="contact-btn"
           >
-            <i className="fas fa-envelope me-2"></i> Contact Support
+            {t("shippingPolicy.help.button")}
           </a>
         </div>
 
-        {/* Scroll to Top Button */}
+        {/* Scroll Button */}
         <a href="#" className="scroll-to-top-btn">
-          <i className="fas fa-arrow-up"></i>
+          ↑
         </a>
+
       </div>
     </div>
   );

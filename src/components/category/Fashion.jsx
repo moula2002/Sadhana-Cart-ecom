@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { Container, Spinner, Row, Col, Card, Alert } from "react-bootstrap";
 import { db } from "../../firebase";
+
 import {
   collection,
   getDocs,
@@ -22,17 +24,17 @@ const extractColorFromDescription = (description) => {
 const ProductCard = ({ product }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [theme, setTheme] = useState('light');
-  
+
   // Get current theme on mount and listen for changes
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') || 'light';
     setTheme(savedTheme);
-    
+
     const handleThemeChange = () => {
       const currentTheme = localStorage.getItem('theme') || 'light';
       setTheme(currentTheme);
     };
-    
+
     window.addEventListener('storage', handleThemeChange);
     return () => window.removeEventListener('storage', handleThemeChange);
   }, []);
@@ -141,8 +143,8 @@ const ProductCard = ({ product }) => {
             />
           </div>
           <Card.Body className="p-3 text-center">
-            <Card.Title 
-              className="fs-6 fw-semibold text-truncate" 
+            <Card.Title
+              className="fs-6 fw-semibold text-truncate"
               style={{ color: theme === 'dark' ? '#ffffff' : '#212529' }}
             >
               {product.name || "Unnamed Product"}
@@ -165,6 +167,7 @@ const ProductCard = ({ product }) => {
 
 // -------------------------------------------------------------
 function Fashion() {
+  const { t } = useTranslation();
   const categoryName = "Fashion";
   const PAGE_SIZE = 8;
   const [products, setProducts] = useState([]);
@@ -179,12 +182,12 @@ function Fashion() {
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') || 'light';
     setTheme(savedTheme);
-    
+
     const handleThemeChange = () => {
       const currentTheme = localStorage.getItem('theme') || 'light';
       setTheme(currentTheme);
     };
-    
+
     window.addEventListener('storage', handleThemeChange);
     return () => window.removeEventListener('storage', handleThemeChange);
   }, []);
@@ -338,20 +341,18 @@ function Fashion() {
     <div style={containerStyle}>
       <Container className="my-5 text-center">
         <h2 className="fw-bold mb-3" style={titleStyle}>
-          👗 {categoryName} Collection
+          👗 {t("fashion.collectionTitle", { category: categoryName })}
         </h2>
+
         <p className="mb-5" style={textStyle}>
-          Discover the latest trends in{" "}
-          <strong className="text-capitalize" style={{ color: theme === 'dark' ? '#ffffff' : 'inherit' }}>
-            {categoryName}
-          </strong> and elevate your style ✨
+          {t("fashion.description", { category: categoryName })}
         </p>
 
         {loading ? (
           <div className="text-center my-5">
             <Spinner animation="border" variant="warning" />
             <p className="mt-3" style={loadingTextStyle}>
-              Loading {categoryName.toLowerCase()} products...
+              {t("fashion.loading", { category: categoryName })}
             </p>
           </div>
         ) : products.length > 0 ? (
@@ -372,28 +373,28 @@ function Fashion() {
             {loadingMore && (
               <div className="text-center my-4">
                 <Spinner animation="grow" variant="secondary" />
-                <p className="mt-2" style={textStyle}>Loading more...</p>
+                <p className="mt-2" style={textStyle}>{t("fashion.loadingMore")}</p>
               </div>
             )}
 
             {!hasMore && (
               <p className="mt-4" style={textStyle}>
-                refresh the website
+                {t("fashion.refresh")}
               </p>
             )}
           </>
         ) : (
-          <Alert 
-            variant="warning" 
+          <Alert
+            variant="warning"
             className="p-4"
-            style={{ 
+            style={{
               backgroundColor: theme === 'dark' ? '#4a5568' : '#fff3cd',
               borderColor: theme === 'dark' ? '#6c757d' : '#ffecb5',
               color: theme === 'dark' ? '#ffffff' : '#856404'
             }}
           >
             <p className="fw-bold mb-0">
-              No products found in {categoryName}.
+              {t("fashion.noProducts", { category: categoryName })}
             </p>
           </Alert>
         )}

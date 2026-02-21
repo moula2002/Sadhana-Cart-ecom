@@ -5,17 +5,25 @@ import { useDispatch } from "react-redux";
 import { addToCart } from "../redux/cartSlice";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { FaStar, FaRegStar, FaTruck, FaFileContract, FaCalendarAlt, FaShieldAlt, FaHeart, FaRegHeart, FaEdit, FaTrash, FaCamera, FaTimes, FaExpand } from 'react-icons/fa';
+import {
+    FaStar, FaRegStar, FaTruck, FaFileContract, FaCalendarAlt,
+    FaShieldAlt, FaHeart, FaRegHeart, FaEdit, FaTrash, FaCamera,
+    FaTimes, FaExpand, FaCheck, FaStore, FaBox, FaRupeeSign,
+    FaArrowLeft, FaArrowRight, FaShoppingCart, FaBolt,
+    FaChevronLeft, FaChevronRight, FaImage, FaUser
+} from 'react-icons/fa';
 import { db, storage } from "../firebase";
 import { doc, getDoc, collection, getDocs, query, where, limit, addDoc, serverTimestamp, deleteDoc, updateDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { useTranslation } from "react-i18next";
 import ProductSuggestions from "../pages/ProductSuggestions";
 
 const EXCHANGE_RATE = 1;
 const auth = getAuth();
 
 function ProductDetailPage() {
+    const { t } = useTranslation();
     const { id } = useParams();
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -41,14 +49,14 @@ function ProductDetailPage() {
     const [sortBy, setSortBy] = useState("rating");
     const [filterPrice, setFilterPrice] = useState(50000);
 
-    // ⭐ Quantity state
+    // Quantity state
     const [quantity, setQuantity] = useState(1);
 
-    // 🚀 Variant (Size/Stock) states - Now dynamic
+    // Variant (Size/Stock) states
     const [productVariants, setProductVariants] = useState([]);
     const [selectedSize, setSelectedSize] = useState("N/A");
 
-    // ⭐ MERGED REVIEWS: Reviews and Ratings State
+    // Reviews and Ratings State
     const [reviewsData, setReviewsData] = useState({
         averageRating: 0.0,
         totalRatings: 0,
@@ -72,32 +80,32 @@ function ProductDetailPage() {
     const [editImageUrls, setEditImageUrls] = useState([]);
     const [deletingImages, setDeletingImages] = useState([]);
 
-    // 🆕 Image Viewer Modal State
+    // Image Viewer Modal State
     const [showImageModal, setShowImageModal] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
     const [currentReviewImages, setCurrentReviewImages] = useState([]);
 
-    // 🆕 Seller Information State
+    // Seller Information State
     const [sellerInfo, setSellerInfo] = useState({
         currentProductSeller: null,
         allSellers: [],
         loadingSellers: false
     });
 
-    // 🆕 Delivery & Terms State
+    // Delivery & Terms State
     const [deliveryTerms, setDeliveryTerms] = useState({
         deliveryDate: "",
         termsConditions: "",
         loading: false
     });
 
-    // 🆕 Wishlist State
+    // Wishlist State
     const [isInWishlist, setIsInWishlist] = useState(false);
     const [wishlistLoading, setWishlistLoading] = useState(false);
     const [wishlistId, setWishlistId] = useState(null);
 
-    // 🆕 Reset function for product-specific states
+    // Reset function for product-specific states
     const resetProductStates = useCallback(() => {
         setProduct(null);
         setMainImage(null);
@@ -123,14 +131,13 @@ function ProductDetailPage() {
         });
         setIsInWishlist(false);
         setWishlistId(null);
-        // 🆕 Reset image viewer states
         setShowImageModal(false);
         setSelectedImage(null);
         setSelectedImageIndex(0);
         setCurrentReviewImages([]);
     }, []);
 
-    // 🆕 Use effect to reset when product ID changes
+    // Use effect to reset when product ID changes
     useEffect(() => {
         resetProductStates();
         setLoading(true);
@@ -140,121 +147,123 @@ function ProductDetailPage() {
         setCatError(null);
     }, [id, resetProductStates]);
 
+    // Professional styles object
     const styles = {
         productDetailContainer: {
-            borderRadius: "12px",
-            boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
+            borderRadius: "16px",
+            boxShadow: "0 10px 40px rgba(0,0,0,0.08)",
             marginTop: "25px",
+            border: "none",
+            overflow: "hidden"
         },
         detailImg: {
-            maxHeight: "400px",
+            maxHeight: "450px",
             width: "auto",
             objectFit: "contain",
             transition: "transform 0.3s ease-in-out",
         },
         productImageCol: {
-            borderRight: "1px solid #eee",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
+            padding: "20px",
+            backgroundColor: "#fafafa",
         },
         productPrice: {
-            fontSize: "2.2rem",
-            fontWeight: 800,
-            color: "#dc3545",
+            fontSize: "2.5rem",
+            fontWeight: 700,
+            color: "#2c3e50",
             marginTop: "15px",
             marginBottom: "15px",
         },
         thumbnail: {
-            width: "60px",
-            height: "60px",
+            width: "70px",
+            height: "70px",
             objectFit: "contain",
             cursor: "pointer",
-            border: "1px solid #ddd",
+            border: "2px solid #e9ecef",
             margin: "0 5px",
-            padding: "3px",
-            transition: "border-color 0.2s",
+            padding: "5px",
+            transition: "all 0.2s",
+            borderRadius: "8px",
         },
         activeThumbnail: {
-            borderColor: "#dc3545",
-            boxShadow: "0 0 5px rgba(220, 53, 69, 0.5)",
+            borderColor: "#3498db",
+            boxShadow: "0 0 0 3px rgba(52, 152, 219, 0.2)",
         },
         sizeButton: {
-            padding: '8px 15px',
+            padding: '10px 20px',
             marginRight: '10px',
-            border: '1px solid #ccc',
+            marginBottom: '10px',
+            border: '2px solid #e9ecef',
             backgroundColor: '#fff',
-            color: '#333',
+            color: '#2c3e50',
             cursor: 'pointer',
-            borderRadius: '5px',
-            minWidth: '50px',
+            borderRadius: '8px',
+            minWidth: '60px',
             textAlign: 'center',
-            transition: 'all 0.1s',
+            transition: 'all 0.2s',
             fontWeight: '600',
         },
         activeSizeButton: {
-            borderColor: '#333',
-            backgroundColor: '#f8f8f8',
-            boxShadow: '0 0 0 2px #333',
+            borderColor: '#3498db',
+            backgroundColor: '#f0f7ff',
+            color: '#3498db',
         },
         outOfStock: {
-            backgroundColor: '#f0f0f0',
-            color: '#999',
+            backgroundColor: '#f8f9fa',
+            color: '#adb5bd',
             cursor: 'not-allowed',
-            textDecoration: 'line-through'
+            textDecoration: 'line-through',
+            borderColor: '#dee2e6',
         },
         sellerBadge: {
-            backgroundColor: '#6c757d',
-            color: 'white',
-            padding: '4px 8px',
-            borderRadius: '4px',
-            fontSize: '0.8rem',
+            backgroundColor: '#e9ecef',
+            color: '#495057',
+            padding: '6px 12px',
+            borderRadius: '20px',
+            fontSize: '0.85rem',
             fontWeight: '600'
         },
         wishlistButton: {
             background: 'transparent',
             border: 'none',
             cursor: 'pointer',
-            fontSize: '1.8rem',
-            transition: 'transform 0.2s'
-        },
-        wishlistButtonHover: {
-            transform: 'scale(1.1)'
+            fontSize: '2rem',
+            transition: 'transform 0.2s',
+            padding: '10px',
         },
         reviewImage: {
             width: '80px',
             height: '80px',
             objectFit: 'cover',
-            borderRadius: '8px',
+            borderRadius: '10px',
             marginRight: '10px',
             marginBottom: '10px',
             cursor: 'pointer',
-            border: '2px solid #ddd',
+            border: '2px solid #e9ecef',
             transition: 'all 0.3s'
-        },
-        reviewImageHover: {
-            transform: 'scale(1.05)',
-            borderColor: '#007bff'
         },
         imagePreviewContainer: {
             display: 'flex',
             flexWrap: 'wrap',
-            gap: '10px',
-            marginTop: '10px'
+            gap: '12px',
+            marginTop: '15px'
         },
         imagePreview: {
             width: '100px',
             height: '100px',
             objectFit: 'cover',
-            borderRadius: '8px',
-            position: 'relative'
+            borderRadius: '10px',
+            position: 'relative',
+            border: '2px solid #e9ecef'
         },
         removeImageBtn: {
             position: 'absolute',
             top: '-8px',
             right: '-8px',
-            backgroundColor: 'white',
+            backgroundColor: '#dc3545',
             borderRadius: '50%',
             width: '24px',
             height: '24px',
@@ -262,38 +271,69 @@ function ProductDetailPage() {
             alignItems: 'center',
             justifyContent: 'center',
             cursor: 'pointer',
-            boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
-            border: '1px solid #ddd'
+            boxShadow: '0 2px 8px rgba(220, 53, 69, 0.3)',
+            border: '2px solid white',
+            color: 'white'
         },
-        // 🆕 Image Viewer Modal Styles
         imageModalContent: {
             maxWidth: '90vw',
-            maxHeight: '85vh',
+            maxHeight: '80vh',
             objectFit: 'contain',
             margin: 'auto',
-            display: 'block'
+            display: 'block',
+            borderRadius: '8px'
         },
         thumbnailContainer: {
             display: 'flex',
             justifyContent: 'center',
             flexWrap: 'wrap',
-            gap: '10px',
-            marginTop: '20px'
+            gap: '12px',
+            marginTop: '20px',
+            padding: '15px',
+            backgroundColor: '#f8f9fa',
+            borderRadius: '12px'
         },
         modalThumbnail: {
-            width: '60px',
-            height: '60px',
+            width: '70px',
+            height: '70px',
             objectFit: 'cover',
-            borderRadius: '5px',
+            borderRadius: '8px',
             cursor: 'pointer',
-            border: '2px solid transparent',
+            border: '3px solid transparent',
             opacity: 0.7,
             transition: 'all 0.3s'
         },
         activeModalThumbnail: {
-            borderColor: '#007bff',
+            borderColor: '#3498db',
             opacity: 1,
-            transform: 'scale(1.1)'
+            transform: 'scale(1.05)',
+        },
+        ratingBar: {
+            height: '8px',
+            backgroundColor: '#e9ecef',
+            borderRadius: '4px',
+            overflow: 'hidden'
+        },
+        ratingBarFill: {
+            height: '100%',
+            backgroundColor: '#f1c40f',
+            borderRadius: '4px'
+        },
+        infoCard: {
+            borderRadius: '12px',
+            border: '1px solid #e9ecef',
+            padding: '20px',
+            backgroundColor: '#fff',
+            transition: 'transform 0.2s',
+        },
+        iconCircle: {
+            width: '48px',
+            height: '48px',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: '#f8f9fa'
         }
     };
 
@@ -306,7 +346,7 @@ function ProductDetailPage() {
         return () => unsubscribe();
     }, []);
 
-    // 🆕 Function to open image viewer
+    // Function to open image viewer
     const openImageViewer = (images, index = 0) => {
         setCurrentReviewImages(images);
         setSelectedImage(images[index]);
@@ -314,7 +354,7 @@ function ProductDetailPage() {
         setShowImageModal(true);
     };
 
-    // 🆕 Function to navigate to next image
+    // Function to navigate to next image
     const nextImage = () => {
         if (currentReviewImages.length > 0) {
             const nextIndex = (selectedImageIndex + 1) % currentReviewImages.length;
@@ -323,7 +363,7 @@ function ProductDetailPage() {
         }
     };
 
-    // 🆕 Function to navigate to previous image
+    // Function to navigate to previous image
     const prevImage = () => {
         if (currentReviewImages.length > 0) {
             const prevIndex = (selectedImageIndex - 1 + currentReviewImages.length) % currentReviewImages.length;
@@ -332,13 +372,13 @@ function ProductDetailPage() {
         }
     };
 
-    // 🆕 Function to select image from thumbnails
+    // Function to select image from thumbnails
     const selectImage = (image, index) => {
         setSelectedImage(image);
         setSelectedImageIndex(index);
     };
 
-    // 🆕 Function to close image viewer
+    // Function to close image viewer
     const closeImageViewer = () => {
         setShowImageModal(false);
         setSelectedImage(null);
@@ -346,7 +386,7 @@ function ProductDetailPage() {
         setCurrentReviewImages([]);
     };
 
-    // 🆕 Function to check if product is in wishlist
+    // Function to check if product is in wishlist
     const checkWishlistStatus = useCallback(async () => {
         if (!currentUser || !product) return;
 
@@ -371,14 +411,14 @@ function ProductDetailPage() {
         }
     }, [currentUser, product]);
 
-    // 🆕 Effect to check wishlist when user or product changes
+    // Effect to check wishlist when user or product changes
     useEffect(() => {
         if (currentUser && product) {
             checkWishlistStatus();
         }
     }, [currentUser, product, checkWishlistStatus]);
 
-    // 🆕 Function to add to wishlist
+    // Function to add to wishlist
     const addToWishlist = async () => {
         if (!currentUser) {
             toast.error("Please login to add to wishlist", { position: "top-right", autoClose: 3000 });
@@ -430,7 +470,7 @@ function ProductDetailPage() {
         }
     };
 
-    // 🆕 Function to remove from wishlist
+    // Function to remove from wishlist
     const removeFromWishlist = async () => {
         if (!currentUser || !wishlistId) return;
 
@@ -448,7 +488,7 @@ function ProductDetailPage() {
         }
     };
 
-    // 🆕 Function to toggle wishlist
+    // Function to toggle wishlist
     const toggleWishlist = () => {
         if (isInWishlist) {
             removeFromWishlist();
@@ -457,7 +497,7 @@ function ProductDetailPage() {
         }
     };
 
-    // 🆕 Function to fetch seller information
+    // Function to fetch seller information
     const fetchSellerInfo = async (productData) => {
         try {
             setSellerInfo(prev => ({ ...prev, loadingSellers: true }));
@@ -534,7 +574,7 @@ function ProductDetailPage() {
         }
     };
 
-    // 🆕 Function to fetch delivery and terms information
+    // Function to fetch delivery and terms information
     const fetchDeliveryTerms = async (productId) => {
         try {
             setDeliveryTerms(prev => ({ ...prev, loading: true }));
@@ -869,7 +909,7 @@ function ProductDetailPage() {
         setShowReviewModal(true);
     };
 
-    // 🆕 Function to handle image upload
+    // Function to handle image upload
     const handleImageUpload = async (files) => {
         const uploadedUrls = [];
         setUploadingImages(true);
@@ -903,7 +943,7 @@ function ProductDetailPage() {
         }
     };
 
-    // 🆕 Function to remove image from preview
+    // Function to remove image from preview
     const handleRemoveImage = (index, isEdit = false) => {
         if (isEdit) {
             const newImages = [...editImageUrls];
@@ -952,7 +992,7 @@ function ProductDetailPage() {
         }
     };
 
-    // 🆕 Function to open edit review modal
+    // Function to open edit review modal
     const handleEditReview = (review) => {
         setEditingReview(review);
         setEditRating(review.rating);
@@ -961,7 +1001,7 @@ function ProductDetailPage() {
         setShowEditModal(true);
     };
 
-    // 🆕 Function to close edit review modal
+    // Function to close edit review modal
     const handleCloseEditModal = () => {
         setShowEditModal(false);
         setEditingReview(null);
@@ -971,7 +1011,7 @@ function ProductDetailPage() {
         setDeletingImages([]);
     };
 
-    // 🆕 Function to submit edited review
+    // Function to submit edited review
     const handleSubmitEditReview = async (e) => {
         e.preventDefault();
 
@@ -1013,7 +1053,7 @@ function ProductDetailPage() {
         }
     };
 
-    // 🆕 Function to delete review
+    // Function to delete review
     const handleDeleteReview = async (reviewId) => {
         if (!window.confirm("Are you sure you want to delete this review?")) return;
 
@@ -1040,7 +1080,7 @@ function ProductDetailPage() {
         }
     };
 
-    // 🆕 Function to mark image for deletion in edit mode
+    // Function to mark image for deletion in edit mode
     const handleMarkImageForDeletion = (imageUrl) => {
         setDeletingImages(prev => [...prev, imageUrl]);
         setEditImageUrls(prev => prev.filter(img => img !== imageUrl));
@@ -1066,7 +1106,7 @@ function ProductDetailPage() {
         return list;
     }, [categoryProducts, sortBy, filterPrice]);
 
-    // 🆕 Helper function to format delivery date info
+    // Helper function to format delivery date info
     const formatDeliveryInfo = (deliveryDate) => {
         if (!deliveryDate || deliveryDate.trim() === "") return null;
 
@@ -1086,7 +1126,7 @@ function ProductDetailPage() {
         return deliveryDate;
     };
 
-    // 🆕 Helper function to parse terms conditions
+    // Helper function to parse terms conditions
     const parseTermsConditions = (termsConditions) => {
         if (!termsConditions || termsConditions.trim() === "") return [];
 
@@ -1099,7 +1139,7 @@ function ProductDetailPage() {
         return lines;
     };
 
-    // 🆕 Check if delivery or terms info exists
+    // Check if delivery or terms info exists
     const hasDeliveryInfo = deliveryTerms.deliveryDate && deliveryTerms.deliveryDate.trim() !== "";
     const hasTermsInfo = deliveryTerms.termsConditions && deliveryTerms.termsConditions.trim() !== "";
 
@@ -1108,10 +1148,26 @@ function ProductDetailPage() {
         return (
             <div className="text-center py-5">
                 <Spinner animation="border" variant="primary" />
+                <p className="mt-3 text-muted">{t("loading")}...</p>
             </div>
         );
-    if (error) return <Alert variant="danger" className="mt-4 text-center">{error}</Alert>;
-    if (!product) return <p className="text-center py-5">No product found.</p>;
+    if (error) return (
+        <Container className="py-5">
+            <Alert variant="danger" className="text-center shadow-sm">
+                <Alert.Heading>Error</Alert.Heading>
+                <p>{error}</p>
+            </Alert>
+        </Container>
+    );
+    if (!product) return (
+        <Container className="py-5">
+            <Alert variant="info" className="text-center shadow-sm">
+                <Alert.Heading>Product Not Found</Alert.Heading>
+                <p>The product you're looking for doesn't exist or has been removed.</p>
+                <Button variant="primary" onClick={() => navigate('/')}>Go to Home</Button>
+            </Alert>
+        </Container>
+    );
 
     const discountPercentage = (((calculatedOriginalPriceINR - calculatedPriceINR) / calculatedOriginalPriceINR) * 100).toFixed(0);
     const rating = { rate: reviewsData.averageRating, count: reviewsData.totalRatings };
@@ -1131,12 +1187,38 @@ function ProductDetailPage() {
 
     return (
         <Container className="py-4">
-            <ToastContainer />
+            <ToastContainer position="top-right" autoClose={3000} theme="colored" />
 
-            <Card style={styles.productDetailContainer} className="p-4 mb-5">
-                <Row>
+            {/* Breadcrumb */}
+            <nav className="mb-4" style={{ fontSize: '0.9rem' }}>
+                <Link to="/" className="text-decoration-none text-muted">Home</Link>
+                <span className="mx-2 text-muted">/</span>
+                <Link to={`/category/${product?.category}`} className="text-decoration-none text-muted">{product?.category}</Link>
+                <span className="mx-2 text-muted">/</span>
+                <span className="text-dark">{product?.name?.substring(0, 30)}...</span>
+            </nav>
+
+            {/* Main Product Card */}
+            <Card style={styles.productDetailContainer} className="mb-5">
+                <Row className="g-0">
                     <Col md={5} style={styles.productImageCol}>
-                        <img src={mainImage} alt={product.name} className="img-fluid mb-3" style={styles.detailImg} />
+                        <div className="position-relative">
+                            <img
+                                src={mainImage}
+                                alt={product.name}
+                                className="img-fluid mb-3"
+                                style={styles.detailImg}
+                            />
+                            {discountPercentage > 0 && (
+                                <Badge
+                                    bg="danger"
+                                    className="position-absolute top-0 start-0 m-3"
+                                    style={{ fontSize: '1rem', padding: '8px 12px' }}
+                                >
+                                    {discountPercentage}% OFF
+                                </Badge>
+                            )}
+                        </div>
                         <div className="d-flex justify-content-center flex-wrap mt-3 mb-3">
                             {productImages.map((img, i) => (
                                 <img
@@ -1153,14 +1235,17 @@ function ProductDetailPage() {
                         </div>
                     </Col>
 
-                    <Col md={7}>
+                    <Col md={7} className="p-4">
                         <div className="d-flex justify-content-between align-items-start mb-3">
                             <div>
-                                <h2 className="fw-bold">{product.name || product.title}</h2>
-                                <p className="text-primary fw-semibold text-uppercase">{product.category}</p>
+                                <h1 className="fw-bold h2 mb-2">{product.name || product.title}</h1>
+                                <Badge bg="light" text="dark" className="text-uppercase px-3 py-2">
+                                    <FaStore className="me-2" />
+                                    {product.category}
+                                </Badge>
                             </div>
 
-                            {/* 🆕 Wishlist Heart Button */}
+                            {/* Wishlist Heart Button */}
                             <button
                                 onClick={toggleWishlist}
                                 disabled={wishlistLoading}
@@ -1178,39 +1263,67 @@ function ProductDetailPage() {
                             </button>
                         </div>
 
-                        {/* 🆕 Display Seller Information if available */}
+                        {/* Seller Information */}
                         {sellerInfo.currentProductSeller && (
-                            <div className="mb-3">
+                            <div className="mb-3 d-flex align-items-center">
+                                <div className="bg-light rounded-circle p-2 me-2">
+                                    <FaUser className="text-secondary" />
+                                </div>
+                                <span className="fw-semibold me-2">{sellerInfo.currentProductSeller.name}</span>
                                 {sellerInfo.currentProductSeller.rating > 0 && (
-                                    <span className="ms-2 small">
-                                        <FaStar className="text-warning" size={12} /> {sellerInfo.currentProductSeller.rating.toFixed(1)}
-                                    </span>
+                                    <Badge bg="warning" text="dark" className="px-2 py-1">
+                                        <FaStar className="me-1" size={12} /> {sellerInfo.currentProductSeller.rating.toFixed(1)}
+                                    </Badge>
                                 )}
                             </div>
                         )}
 
+                        {/* Rating */}
                         <div className="product-rating mb-3">
-                            <span className="text-warning fw-bold me-2">
-                                {rating.rate.toFixed(1)} <i className="fas fa-star small"></i>
+                            <span className="fw-bold me-2" style={{ fontSize: '1.2rem' }}>
+                                {rating.rate.toFixed(1)}
                             </span>
-                            <span className="text-muted small">({rating.count} reviews)</span>
+                            {[...Array(5)].map((_, i) => (
+                                i < Math.round(rating.rate) ?
+                                    <FaStar key={i} className="text-warning me-1" size={16} /> :
+                                    <FaRegStar key={i} className="text-muted me-1" size={16} />
+                            ))}
+                            <span className="text-muted ms-2">({rating.count} reviews)</span>
                         </div>
-                        <hr />
-                        <h2 style={styles.productPrice}>
-                            ₹{calculatedPriceINR} /-
-                            <small className="text-muted ms-3 fs-6 text-decoration-line-through">₹{calculatedOriginalPriceINR}</small>
-                        </h2>
-                        <span className="badge bg-danger fs-6 mb-3">{discountPercentage}% OFF!</span>
-                        <p className="text-muted small">{product.description || "No description available."}</p>
 
-                        {/* 🚀 Size Selector */}
-                        <div className="mb-4 pt-3 border-top">
-                            {sortedVariants.length > 0 && (
-                                <Form.Label className="fw-semibold">Select Size:</Form.Label>
-                            )}
-                            <div className="d-flex align-items-center flex-wrap">
-                                {sortedVariants.length > 0 ? (
-                                    sortedVariants.map((variant) => (
+                        <hr />
+
+                        {/* Price */}
+                        <div className="mb-4">
+                            <div className="d-flex align-items-baseline">
+                                <h2 style={styles.productPrice} className="mb-0">
+                                    <FaRupeeSign size={24} className="me-1" />
+                                    {calculatedPriceINR}
+                                </h2>
+                                <span className="text-muted ms-3 fs-5 text-decoration-line-through">
+                                    <FaRupeeSign size={16} />{calculatedOriginalPriceINR}
+                                </span>
+                            </div>
+                            <p className="text-success mt-2 mb-0">
+                                <FaCheck className="me-2" />
+                                You save <FaRupeeSign size={12} />{(calculatedOriginalPriceINR - calculatedPriceINR)} ({discountPercentage}% OFF)
+                            </p>
+                        </div>
+
+                        {/* Description */}
+                        <p className="text-muted mb-4" style={{ lineHeight: '1.8' }}>
+                            {product.description || "No description available."}
+                        </p>
+
+                        {/* Size Selector */}
+                        {sortedVariants.length > 0 && (
+                            <div className="mb-4">
+                                <Form.Label className="fw-bold mb-3">
+                                    <FaBox className="me-2" />
+                                    Select Size
+                                </Form.Label>
+                                <div className="d-flex flex-wrap">
+                                    {sortedVariants.map((variant) => (
                                         <Button
                                             key={variant.size}
                                             onClick={() => handleSizeSelect(variant.size)}
@@ -1223,115 +1336,160 @@ function ProductDetailPage() {
                                             disabled={(variant.stock || 0) === 0}
                                         >
                                             {variant.size}
+ 
                                         </Button>
-                                    ))
-                                ) : (
-                                    null
-                                )}
+                                    ))}
+                                </div>
                             </div>
-                        </div>
+                        )}
 
-                        {/* ⭐ Quantity Selector */}
-                        <div className="mb-4 pt-3 border-top">
-                            <Form.Label className="fw-semibold">Quantity:</Form.Label>
-                            <InputGroup style={{ width: '150px' }}>
+                        {/* Quantity Selector */}
+                        {/* Attractive Quantity Selector */}
+                        <div className="mb-4">
+                            <Form.Label className="fw-bold mb-3 fs-5">Quantity</Form.Label>
+
+                            <div
+                                className="d-flex align-items-center justify-content-between px-3 py-2"
+                                style={{
+                                    width: "220px",
+                                    borderRadius: "12px",
+                                    border: "2px solid #f0f0f0",
+                                    background: "#fafafa",
+                                    boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+                                }}
+                            >
                                 <Button
-                                    variant="outline-secondary"
                                     onClick={() => setQuantity(q => Math.max(1, q - 1))}
                                     disabled={isOutOfStock}
+                                    style={{
+                                        borderRadius: "10px",
+                                        width: "40px",
+                                        height: "40px",
+                                        fontSize: "20px",
+                                        fontWeight: "bold",
+                                    }}
+                                    variant="light"
                                 >
                                     -
                                 </Button>
-                                <Form.Control
-                                    type="number"
-                                    min="1"
-                                    value={quantity}
-                                    onChange={handleQuantityChange}
-                                    style={{ textAlign: 'center' }}
-                                    disabled={isOutOfStock}
-                                />
+
+                                <span
+                                    style={{
+                                        fontSize: "20px",
+                                        fontWeight: "600",
+                                        minWidth: "40px",
+                                        textAlign: "center",
+                                    }}
+                                >
+                                    {quantity}
+                                </span>
+
                                 <Button
-                                    variant="outline-secondary"
                                     onClick={handleIncrementQuantity}
                                     disabled={isOutOfStock}
+                                    style={{
+                                        borderRadius: "10px",
+                                        width: "40px",
+                                        height: "40px",
+                                        fontSize: "20px",
+                                        fontWeight: "bold",
+                                    }}
+                                    variant="warning"
                                 >
                                     +
                                 </Button>
-                            </InputGroup>
+                            </div>
+
                         </div>
 
-                        {/* 🆕 Display Delivery Information from Firebase */}
-                        <div className="mb-3">
+
+                        {/* Delivery Information */}
+                        <div className="mb-4 p-3 bg-light rounded">
                             {hasDeliveryInfo ? (
                                 <div className="d-flex align-items-center">
-                                    <FaTruck className="text-success me-2" />
-                                    <span className="text-success fw-semibold">
-                                        {formatDeliveryInfo(deliveryTerms.deliveryDate)}
-                                        <span className="delivery-date-badge ms-2">
-                                            <FaCalendarAlt className="me-1" />
+                                    <div className="bg-success bg-opacity-10 p-2 rounded-circle me-3">
+                                        <FaTruck className="text-success" />
+                                    </div>
+                                    <div>
+                                        <span className="fw-bold text-success d-block">
+                                            {formatDeliveryInfo(deliveryTerms.deliveryDate)}
                                         </span>
-                                    </span>
+                                        <small className="text-muted">
+                                            <FaCalendarAlt className="me-1" size={12} />
+                                            Estimated delivery date
+                                        </small>
+                                    </div>
                                 </div>
                             ) : (
                                 <div className="d-flex align-items-center">
-                                    <FaTruck className="text-secondary me-2" />
-                                    <span className="text-muted">Standard delivery: 2–5 Business Days</span>
+                                    <div className="bg-secondary bg-opacity-10 p-2 rounded-circle me-3">
+                                        <FaTruck className="text-secondary" />
+                                    </div>
+                                    <div>
+                                        <span className="fw-bold d-block">Standard delivery</span>
+                                        <small className="text-muted">5-7 Business Days</small>
+                                    </div>
                                 </div>
                             )}
                         </div>
 
                         <hr />
-                        <div className="d-grid gap-3 d-md-block pt-3 border-top mt-4">
+
+                        {/* Action Buttons */}
+                        <div className="d-flex gap-3 pt-3">
                             <Button
                                 variant="warning"
-                                className="fw-bold me-3"
+                                size="lg"
+                                className="flex-grow-1 fw-bold py-3"
                                 onClick={handleAddToCart}
                                 disabled={isCartBuyDisabled}
                             >
-                                <i className="fas fa-shopping-cart me-2"></i> ADD TO CART
+                                <FaShoppingCart className="me-2" />
+                                {t("addToCart")}
                             </Button>
                             <Button
                                 variant="success"
-                                className="fw-bold"
+                                size="lg"
+                                className="flex-grow-1 fw-bold py-3"
                                 onClick={handleBuyNow}
-                                disabled={productVariants.length > 0 && (!selectedSize || isOutOfStock) || (!productVariants.length && isOutOfStock)}
+                                disabled={isCartBuyDisabled}
                             >
-                                <i className="fas fa-bolt me-2"></i> BUY NOW
+                                <FaBolt className="me-2" />
+                                {t("buyNow")}
                             </Button>
                         </div>
                     </Col>
                 </Row>
             </Card>
 
-            {/* 🆕 Delivery & Terms Information Section */}
+            {/* Delivery & Terms Information Section */}
             {(hasDeliveryInfo || hasTermsInfo) && (
                 <Card className="mb-5 border-0 shadow-sm">
-                    <Card.Body>
+                    <Card.Body className="p-4">
                         <h3 className="fw-bold mb-4">
                             <FaShieldAlt className="text-primary me-2" />
-                            Product Information & Policies
+                            Product Policies
                         </h3>
 
                         <Row>
                             {/* Delivery Information */}
                             {hasDeliveryInfo && (
                                 <Col md={6} className="mb-4 mb-md-0">
-                                    <div className="border rounded p-3 h-100">
+                                    <div className="border rounded p-4 h-100">
                                         <div className="d-flex align-items-center mb-3">
-                                            <div className="bg-primary bg-opacity-10 p-2 rounded-circle me-3">
-                                                <FaTruck className="text-primary" size={20} />
+                                            <div className="bg-primary bg-opacity-10 p-3 rounded-circle me-3">
+                                                <FaTruck className="text-primary" size={24} />
                                             </div>
                                             <h5 className="mb-0 fw-bold">Delivery Information</h5>
                                         </div>
                                         <div className="ms-5">
-                                            <p className="mb-2">
-                                                <strong>Delivery Timeline:</strong>
-                                            </p>
-                                            <div className="alert alert-success py-2">
+                                            <div className="alert alert-success border-0 bg-success bg-opacity-10">
                                                 <FaCalendarAlt className="me-2" />
-                                                {deliveryTerms.deliveryDate.includes("day") || deliveryTerms.deliveryDate.includes("Day")
-                                                    ? deliveryTerms.deliveryDate
-                                                    : `Delivery within ${deliveryTerms.deliveryDate} days`}
+                                                <span className="fw-semibold">
+                                                    {deliveryTerms.deliveryDate.includes("day") || deliveryTerms.deliveryDate.includes("Day")
+                                                        ? deliveryTerms.deliveryDate
+                                                        : `Delivery within ${deliveryTerms.deliveryDate} days`}
+                                                </span>
                                             </div>
                                             <p className="text-muted small mb-0">
                                                 <FaTruck className="me-1" />
@@ -1344,18 +1502,15 @@ function ProductDetailPage() {
 
                             {/* Terms & Conditions */}
                             {hasTermsInfo && (
-                                <Col md={6}>
-                                    <div className="border rounded p-3 h-100">
+                                <Col md={hasDeliveryInfo ? 6 : 12}>
+                                    <div className="border rounded p-4 h-100">
                                         <div className="d-flex align-items-center mb-3">
-                                            <div className="bg-warning bg-opacity-10 p-2 rounded-circle me-3">
-                                                <FaFileContract className="text-warning" size={20} />
+                                            <div className="bg-warning bg-opacity-10 p-3 rounded-circle me-3">
+                                                <FaFileContract className="text-warning" size={24} />
                                             </div>
                                             <h5 className="mb-0 fw-bold">Terms & Conditions</h5>
                                         </div>
                                         <div className="ms-5">
-                                            <p className="mb-2">
-                                                <strong>Product Policies:</strong>
-                                            </p>
                                             <div className="terms-content" style={{ maxHeight: '200px', overflowY: 'auto' }}>
                                                 {parseTermsConditions(deliveryTerms.termsConditions).map((term, index) => (
                                                     <div key={index} className="mb-2 d-flex">
@@ -1373,247 +1528,266 @@ function ProductDetailPage() {
                                 </Col>
                             )}
                         </Row>
-
-                        {/* Accordion for mobile view */}
-                        <div className="d-md-none mt-3">
-                            <Accordion>
-                                {hasDeliveryInfo && (
-                                    <Accordion.Item eventKey="0">
-                                        <Accordion.Header>
-                                            <FaTruck className="text-primary me-2" />
-                                            Delivery Information
-                                        </Accordion.Header>
-                                        <Accordion.Body>
-                                            <div className="alert alert-success py-2">
-                                                <FaCalendarAlt className="me-2" />
-                                                {deliveryTerms.deliveryDate.includes("day") || deliveryTerms.deliveryDate.includes("Day")
-                                                    ? deliveryTerms.deliveryDate
-                                                    : `Delivery within ${deliveryTerms.deliveryDate} days`}
-                                            </div>
-                                        </Accordion.Body>
-                                    </Accordion.Item>
-                                )}
-                                {hasTermsInfo && (
-                                    <Accordion.Item eventKey="1">
-                                        <Accordion.Header>
-                                            <FaFileContract className="text-warning me-2" />
-                                            Terms & Conditions
-                                        </Accordion.Header>
-                                        <Accordion.Body>
-                                            <div className="terms-content" style={{ maxHeight: '150px', overflowY: 'auto' }}>
-                                                {parseTermsConditions(deliveryTerms.termsConditions).map((term, index) => (
-                                                    <div key={index} className="mb-2 d-flex">
-                                                        <span className="text-primary me-2">•</span>
-                                                        <span>{term.trim()}</span>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </Accordion.Body>
-                                    </Accordion.Item>
-                                )}
-                            </Accordion>
-                        </div>
                     </Card.Body>
                 </Card>
             )}
 
             {/* Similar Products */}
-            <h3 className="mb-4 fw-bold">More from the {product.category} category</h3>
-
-            <Row className="mb-3 align-items-end">
-                <Col md={4}>
-                    <Form.Label>Max Price (₹): ₹{filterPrice.toLocaleString()}</Form.Label>
-                    <Form.Range min={0} max={100000} step={100} value={filterPrice} onChange={(e) => setFilterPrice(Number(e.target.value))} />
-                </Col>
-                <Col md={4}>
-                    <Form.Label>Sort By:</Form.Label>
-                    <Form.Select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-                        <option value="rating">Top Rated</option>
-                        <option value="price-asc">Price: Low to High</option>
-                        <option value="price-desc">Price: High to Low</option>
-                        <option value="name-asc">Name A-Z</option>
-                    </Form.Select>
-                </Col>
-            </Row>
-
-            {catLoading ? (
-                <div className="text-center py-3">
-                    <Spinner animation="border" size="sm" />
+            <div className="mb-5">
+                <div className="d-flex justify-content-between align-items-center mb-4">
+                    <h3 className="fw-bold mb-0">More from {product.category}</h3>
+                    <Link to={`/category/${product.category}`} className="text-decoration-none">
+                        View All <FaArrowRight size={14} />
+                    </Link>
                 </div>
-            ) : catError ? (
-                <Alert variant="warning">{catError}</Alert>
-            ) : filteredAndSortedCategory.length === 0 ? (
-                <Alert variant="info">No products found in this category.</Alert>
-            ) : (
-                <Row xs={1} sm={2} lg={4} className="g-4">
-                    {filteredAndSortedCategory.map((p) => (
-                        <Col key={p.id}>
-                            <Card className="h-100 shadow-sm border-0">
-                                <Link to={`/product/${p.id}`} className="text-decoration-none text-dark">
-                                    <div className="d-flex justify-content-center align-items-center p-3" style={{ height: "150px" }}>
-                                        <Card.Img src={p.images || p.image || "https://via.placeholder.com/120"} style={{ height: "120px", objectFit: "contain" }} />
-                                    </div>
-                                    <Card.Body>
-                                        <Card.Title className="fs-6 fw-bold text-truncate">{p.name || p.title}</Card.Title>
-                                        <div className="d-flex align-items-center mb-2">
-                                            <span className="text-warning fw-bold me-2">
-                                                {p.rating.rate.toFixed(1)} <i className="fas fa-star small"></i>
-                                            </span>
-                                            <span className="text-muted small">({p.rating.count})</span>
-                                        </div>
-                                        {/* 🆕 Display seller info for similar products */}
-                                        {p.sellerId && (
-                                            <div className="mb-2">
-                                                <small className="text-muted">Seller: </small>
-                                                <Badge bg="light" text="dark" className="ms-1 small">
-                                                    {p.sellerId}
-                                                </Badge>
-                                            </div>
-                                        )}
-                                        <Card.Text className="fw-bold text-danger fs-5 mt-auto">₹{p.priceINR}</Card.Text>
-                                        <Button
-                                            variant="warning"
-                                            size="sm"
-                                            className="mt-2"
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                dispatch(addToCart({
-                                                    id: p.id,
-                                                    title: p.name || p.title,
-                                                    price: p.priceValue,
-                                                    image: p.images || p.image,
-                                                    quantity: 1,
-                                                    sellerId: p.sellerId || "default_seller"
-                                                }));
-                                                toast.success(`Added "${p.name || p.title}" to cart!`, { position: "top-right", autoClose: 2000 });
-                                            }}
-                                        >
-                                            Add to Cart
-                                        </Button>
-                                    </Card.Body>
-                                </Link>
-                            </Card>
-                        </Col>
-                    ))}
+
+                <Row className="mb-4">
+                    <Col md={6}>
+                        <Form.Label className="fw-semibold">
+                            Max Price: <FaRupeeSign size={12} />{filterPrice.toLocaleString()}
+                        </Form.Label>
+                        <Form.Range
+                            min={0}
+                            max={100000}
+                            step={100}
+                            value={filterPrice}
+                            onChange={(e) => setFilterPrice(Number(e.target.value))}
+                        />
+                    </Col>
+                    <Col md={6}>
+                        <Form.Label className="fw-semibold">Sort By:</Form.Label>
+                        <Form.Select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+                            <option value="rating">Top Rated</option>
+                            <option value="price-asc">Price: Low to High</option>
+                            <option value="price-desc">Price: High to Low</option>
+                            <option value="name-asc">Name A-Z</option>
+                        </Form.Select>
+                    </Col>
                 </Row>
-            )}
+
+                {catLoading ? (
+                    <div className="text-center py-5">
+                        <Spinner animation="border" variant="primary" />
+                    </div>
+                ) : catError ? (
+                    <Alert variant="warning">{catError}</Alert>
+                ) : filteredAndSortedCategory.length === 0 ? (
+                    <Alert variant="info">No products found in this category.</Alert>
+                ) : (
+                    <Row xs={1} sm={2} lg={4} className="g-4">
+                        {filteredAndSortedCategory.map((p) => (
+                            <Col key={p.id}>
+                                <Card className="h-100 border-0 shadow-sm hover-shadow">
+                                    <Link to={`/product/${p.id}`} className="text-decoration-none text-dark">
+                                        <div className="d-flex justify-content-center align-items-center p-4" style={{ height: "200px", backgroundColor: '#f8f9fa' }}>
+                                            <Card.Img
+                                                src={p.images || p.image || "https://via.placeholder.com/150"}
+                                                style={{ height: "150px", objectFit: "contain" }}
+                                            />
+                                        </div>
+                                        <Card.Body>
+                                            <Card.Title className="fw-bold text-truncate">{p.name || p.title}</Card.Title>
+                                            <div className="d-flex align-items-center mb-2">
+                                                <span className="fw-bold me-2">
+                                                    {p.rating.rate.toFixed(1)}
+                                                </span>
+                                                {[...Array(5)].map((_, i) => (
+                                                    i < Math.round(p.rating.rate) ?
+                                                        <FaStar key={i} className="text-warning me-1" size={12} /> :
+                                                        <FaRegStar key={i} className="text-muted me-1" size={12} />
+                                                ))}
+                                                <span className="text-muted small ms-2">({p.rating.count})</span>
+                                            </div>
+                                            {p.sellerId && (
+                                                <div className="mb-2">
+                                                    <Badge bg="light" text="dark" className="small">
+                                                        <FaStore className="me-1" size={10} />
+                                                        {p.sellerId.substring(0, 8)}...
+                                                    </Badge>
+                                                </div>
+                                            )}
+                                            <div className="d-flex justify-content-between align-items-center mt-3">
+                                                <span className="fw-bold text-danger fs-5">
+                                                    <FaRupeeSign size={14} />{p.priceINR}
+                                                </span>
+                                                <Button
+                                                    variant="warning"
+                                                    size="sm"
+                                                    className="rounded-pill"
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        dispatch(addToCart({
+                                                            id: p.id,
+                                                            title: p.name || p.title,
+                                                            price: p.priceValue,
+                                                            image: p.images || p.image,
+                                                            quantity: 1,
+                                                            sellerId: p.sellerId || "default_seller"
+                                                        }));
+                                                        toast.success(`Added "${p.name || p.title}" to cart!`, { position: "top-right", autoClose: 2000 });
+                                                    }}
+                                                >
+                                                    <FaShoppingCart className="me-1" size={12} />
+                                                    Add
+                                                </Button>
+                                            </div>
+                                        </Card.Body>
+                                    </Link>
+                                </Card>
+                            </Col>
+                        ))}
+                    </Row>
+                )}
+            </div>
 
             {/* Reviews Section */}
-            <Card className="p-4 mt-5 border-0 shadow-sm">
-                <Row>
-                    <Col md={4} className="border-end">
-                        <h3 className="fw-bold mb-4">Ratings</h3>
-                        <div className="d-flex align-items-center mb-3">
-                            <span className="display-4 fw-bold me-3">{reviewsData.averageRating.toFixed(1)}</span>
-                            <div>
-                                <p className="mb-0 fw-bold">{reviewsData.totalRatings} Product Ratings</p>
-                            </div>
-                        </div>
+            <Card className="border-0 shadow-sm">
+                <Card.Body className="p-4">
+                    <Row>
+                        <Col md={4} className="border-end">
+                            <h3 className="fw-bold mb-4">Ratings & Reviews</h3>
 
-                        <div className="mb-4">
-                            {Object.entries(reviewsData.distribution).sort(([a], [b]) => b - a).map(([star, count]) => {
-                                const total = reviewsData.totalRatings;
-                                const percentage = total > 0 ? (count / total) * 100 : 0;
-                                return (
-                                    <Row key={star} className="align-items-center my-1 g-1">
-                                        <Col xs={1} className="text-end small text-muted">{star}<FaStar className="text-warning ms-1" size={10} /></Col>
-                                        <Col xs={9}>
-                                            <div className="progress" style={{ height: '8px', backgroundColor: '#e9ecef' }}>
-                                                <div
-                                                    className="progress-bar bg-warning"
-                                                    role="progressbar"
-                                                    style={{ width: `${percentage}%` }}
-                                                    aria-valuenow={percentage}
-                                                    aria-valuemin="0"
-                                                    aria-valuemax="100"
-                                                ></div>
-                                            </div>
-                                        </Col>
-                                        <Col xs={2} className="text-start small text-muted ps-2">{count}</Col>
-                                    </Row>
-                                )
-                            })}
-                        </div>
-
-                        <h4 className="fw-bold mt-4 mb-3">Review this product</h4>
-                        <p className="text-muted small">Share your thoughts with other customers</p>
-                        <Button
-                            variant="dark"
-                            onClick={handleWriteReviewClick}
-                            className="fw-bold"
-                        >
-                            Write a review
-                        </Button>
-                    </Col>
-
-                    {/* Reviews List */}
-                    <Col md={8} className="ps-md-5">
-                        <h3 className="fw-bold mb-4">Reviews</h3>
-
-                        {reviewsData.reviews.length === 0 ? (
-                            <div className="p-3 text-center" style={{ backgroundColor: '#e6f7ff', borderRadius: '5px' }}>
-                                <p className="text-info fw-semibold mb-0">There are no reviews yet.</p>
-                            </div>
-                        ) : (
-                            reviewsData.reviews.map((review, index) => (
-                                <div key={index} className="border-bottom pb-3 mb-3">
-                                    <div className="d-flex justify-content-between align-items-start mb-1">
-                                        <div className="d-flex align-items-center">
-                                            {[...Array(5)].map((_, i) => (
-                                                i < review.rating ? <FaStar key={i} className="text-warning me-1" size={14} /> : <FaRegStar key={i} className="text-muted me-1" size={14} />
-                                            ))}
-                                            <span className="fw-bold ms-2"></span>
-                                        </div>
-
-                                        {/* Edit/Delete buttons for user's own reviews */}
-                                        {currentUser && review.userId === currentUser.uid && (
-                                            <div className="d-flex gap-2">
-                                                <Button
-                                                    variant="outline-primary"
-                                                    size="sm"
-                                                    onClick={() => handleEditReview(review)}
-                                                    title="Edit Review"
-                                                >
-                                                    <FaEdit size={12} />
-                                                </Button>
-                                                <Button
-                                                    variant="outline-danger"
-                                                    size="sm"
-                                                    onClick={() => handleDeleteReview(review.id)}
-                                                    title="Delete Review"
-                                                >
-                                                    <FaTrash size={12} />
-                                                </Button>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <p className="mb-1 small text-muted">by {review.userName || 'Customer'} on {new Date(review.date).toLocaleDateString()}</p>
-                                    <p className="small mb-3">{review.comment}</p>
-
-                                    {/* Display Review Images */}
-                                    {review.images && review.images.length > 0 && (
-                                        <div className="d-flex flex-wrap gap-2 mt-2">
-                                            {review.images.map((img, imgIndex) => (
-                                                <Image
-                                                    key={imgIndex}
-                                                    src={img}
-                                                    alt={`Review ${index + 1} - Image ${imgIndex + 1}`}
-                                                    style={styles.reviewImage}
-                                                    onClick={() => openImageViewer(review.images, imgIndex)}
-                                                    title="Click to view full size"
-                                                    className="review-thumbnail"
-                                                />
-                                            ))}
-                                        </div>
-                                    )}
+                            {/* Average Rating */}
+                            <div className="text-center mb-4">
+                                <span className="display-1 fw-bold">{reviewsData.averageRating.toFixed(1)}</span>
+                                <div className="my-2">
+                                    {[...Array(5)].map((_, i) => (
+                                        i < Math.round(reviewsData.averageRating) ?
+                                            <FaStar key={i} className="text-warning mx-1" size={20} /> :
+                                            <FaRegStar key={i} className="text-muted mx-1" size={20} />
+                                    ))}
                                 </div>
-                            ))
-                        )}
-                    </Col>
-                </Row>
+                                <p className="text-muted mb-0">{reviewsData.totalRatings} total ratings</p>
+                            </div>
+
+                            {/* Rating Distribution */}
+                            <div className="mb-4">
+                                {[5, 4, 3, 2, 1].map((star) => {
+                                    const count = reviewsData.distribution[star];
+                                    const percentage = reviewsData.totalRatings > 0 ? (count / reviewsData.totalRatings) * 100 : 0;
+                                    return (
+                                        <div key={star} className="d-flex align-items-center mb-2">
+                                            <span className="me-2" style={{ minWidth: '40px' }}>{star} <FaStar className="text-warning ms-1" size={12} /></span>
+                                            <div className="flex-grow-1 mx-2">
+                                                <div style={styles.ratingBar}>
+                                                    <div style={{ ...styles.ratingBarFill, width: `${percentage}%` }}></div>
+                                                </div>
+                                            </div>
+                                            <span className="text-muted small" style={{ minWidth: '40px' }}>{count}</span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            {/* Write Review Button */}
+                            <div className="text-center">
+                                <h5 className="fw-bold mb-3">Share Your Experience</h5>
+                                <p className="text-muted small mb-3">Help other customers make better decisions</p>
+                                <Button
+                                    variant="dark"
+                                    size="lg"
+                                    onClick={handleWriteReviewClick}
+                                    className="px-5 rounded-pill"
+                                >
+                                    Write a Review
+                                </Button>
+                            </div>
+                        </Col>
+
+                        {/* Reviews List */}
+                        <Col md={8} className="ps-md-5">
+                            <h3 className="fw-bold mb-4">Customer Reviews</h3>
+
+                            {reviewsData.reviews.length === 0 ? (
+                                <div className="text-center py-5 bg-light rounded">
+                                    <FaRegStar size={40} className="text-muted mb-3" />
+                                    <h5 className="text-muted">No reviews yet</h5>
+                                    <p className="text-muted small">Be the first to review this product</p>
+                                </div>
+                            ) : (
+                                <div style={{ maxHeight: '600px', overflowY: 'auto' }}>
+                                    {reviewsData.reviews.map((review, index) => (
+                                        <div key={index} className="border-bottom pb-4 mb-4">
+                                            <div className="d-flex justify-content-between align-items-start mb-2">
+                                                <div>
+                                                    <div className="d-flex align-items-center mb-2">
+                                                        {[...Array(5)].map((_, i) => (
+                                                            i < review.rating ?
+                                                                <FaStar key={i} className="text-warning me-1" size={14} /> :
+                                                                <FaRegStar key={i} className="text-muted me-1" size={14} />
+                                                        ))}
+                                                    </div>
+                                                    <div className="d-flex align-items-center">
+                                                        <div className="bg-secondary bg-opacity-10 rounded-circle p-2 me-2">
+                                                            <FaUser size={14} className="text-secondary" />
+                                                        </div>
+                                                        <span className="fw-semibold me-2">{review.userName || 'Customer'}</span>
+                                                        <span className="text-muted small">
+                                                            {new Date(review.date).toLocaleDateString('en-US', {
+                                                                year: 'numeric',
+                                                                month: 'short',
+                                                                day: 'numeric'
+                                                            })}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                {/* Edit/Delete buttons for user's own reviews */}
+                                                {currentUser && review.userId === currentUser.uid && (
+                                                    <div className="d-flex gap-2">
+                                                        <Button
+                                                            variant="outline-primary"
+                                                            size="sm"
+                                                            onClick={() => handleEditReview(review)}
+                                                            className="rounded-circle"
+                                                            style={{ width: '36px', height: '36px' }}
+                                                        >
+                                                            <FaEdit size={14} />
+                                                        </Button>
+                                                        <Button
+                                                            variant="outline-danger"
+                                                            size="sm"
+                                                            onClick={() => handleDeleteReview(review.id)}
+                                                            className="rounded-circle"
+                                                            style={{ width: '36px', height: '36px' }}
+                                                        >
+                                                            <FaTrash size={14} />
+                                                        </Button>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <p className="mb-3" style={{ lineHeight: '1.8' }}>{review.comment}</p>
+
+                                            {/* Display Review Images */}
+                                            {review.images && review.images.length > 0 && (
+                                                <div className="d-flex flex-wrap gap-2 mt-3">
+                                                    {review.images.map((img, imgIndex) => (
+                                                        <div key={imgIndex} className="position-relative">
+                                                            <Image
+                                                                src={img}
+                                                                alt={`Review ${index + 1} - Image ${imgIndex + 1}`}
+                                                                style={styles.reviewImage}
+                                                                onClick={() => openImageViewer(review.images, imgIndex)}
+                                                                className="review-thumbnail"
+                                                            />
+                                                            <div className="position-absolute bottom-0 end-0 m-1 bg-dark bg-opacity-50 rounded-circle p-1">
+                                                                <FaExpand size={10} className="text-white" />
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </Col>
+                    </Row>
+                </Card.Body>
             </Card>
 
-            {/* 🆕 Image Viewer Modal */}
+            {/* Image Viewer Modal */}
             <Modal
                 show={showImageModal}
                 onHide={closeImageViewer}
@@ -1623,7 +1797,7 @@ function ProductDetailPage() {
                 className="image-viewer-modal"
             >
                 <Modal.Header closeButton className="border-0">
-                    <Modal.Title className="fw-bold small">
+                    <Modal.Title className="fw-bold">
                         Image {selectedImageIndex + 1} of {currentReviewImages.length}
                     </Modal.Title>
                 </Modal.Header>
@@ -1633,7 +1807,7 @@ function ProductDetailPage() {
                         {currentReviewImages.length > 1 && (
                             <Button
                                 variant="light"
-                                className="position-absolute start-0 top-50 translate-middle-y ms-3 rounded-circle"
+                                className="position-absolute start-0 top-50 translate-middle-y ms-3 rounded-circle shadow"
                                 onClick={prevImage}
                                 style={{
                                     width: '50px',
@@ -1642,10 +1816,9 @@ function ProductDetailPage() {
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     zIndex: 10,
-                                    boxShadow: '0 2px 10px rgba(0,0,0,0.2)'
                                 }}
                             >
-                                <i className="fas fa-chevron-left"></i>
+                                <FaChevronLeft />
                             </Button>
                         )}
 
@@ -1663,7 +1836,7 @@ function ProductDetailPage() {
                         {currentReviewImages.length > 1 && (
                             <Button
                                 variant="light"
-                                className="position-absolute end-0 top-50 translate-middle-y me-3 rounded-circle"
+                                className="position-absolute end-0 top-50 translate-middle-y me-3 rounded-circle shadow"
                                 onClick={nextImage}
                                 style={{
                                     width: '50px',
@@ -1672,22 +1845,23 @@ function ProductDetailPage() {
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     zIndex: 10,
-                                    boxShadow: '0 2px 10px rgba(0,0,0,0.2)'
                                 }}
                             >
-                                <i className="fas fa-chevron-right"></i>
+                                <FaChevronRight />
                             </Button>
                         )}
 
                         {/* Expand Icon */}
                         <div className="position-absolute top-0 end-0 m-3">
-                            <FaExpand
-                                className="text-white bg-dark bg-opacity-50 rounded p-1"
-                                size={24}
-                                style={{ cursor: 'pointer' }}
+                            <Button
+                                variant="light"
+                                size="sm"
+                                className="rounded-circle"
                                 onClick={() => window.open(selectedImage, '_blank')}
                                 title="Open in new tab"
-                            />
+                            >
+                                <FaExpand size={14} />
+                            </Button>
                         </div>
                     </div>
 
@@ -1718,32 +1892,35 @@ function ProductDetailPage() {
 
             {/* Write Review Modal */}
             <Modal show={showReviewModal} onHide={handleCloseReviewModal} centered size="lg">
-                <Modal.Header closeButton>
+                <Modal.Header closeButton className="border-0">
                     <Modal.Title className="fw-bold">Write a Review</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form onSubmit={handleSubmitReview}>
-                        <Form.Group className="mb-3">
-                            <Form.Label className="fw-semibold">Your Rating</Form.Label>
-                            <div>
+                        <Form.Group className="mb-4">
+                            <Form.Label className="fw-bold">Your Rating</Form.Label>
+                            <div className="d-flex gap-2">
                                 {[1, 2, 3, 4, 5].map((star) => (
                                     <span
                                         key={star}
                                         onClick={() => setUserRating(star)}
                                         style={{ cursor: 'pointer' }}
-                                        className="me-1"
                                     >
-                                        {star <= userRating ? <FaStar className="text-warning" size={24} /> : <FaRegStar className="text-muted" size={24} />}
+                                        {star <= userRating ?
+                                            <FaStar className="text-warning" size={32} /> :
+                                            <FaRegStar className="text-muted" size={32} />
+                                        }
                                     </span>
                                 ))}
                             </div>
                         </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label className="fw-semibold">Your Review</Form.Label>
+
+                        <Form.Group className="mb-4">
+                            <Form.Label className="fw-bold">Your Review</Form.Label>
                             <Form.Control
                                 as="textarea"
-                                rows={3}
-                                placeholder="What did you like or dislike about the product?"
+                                rows={4}
+                                placeholder="What did you like or dislike about the product? Share your experience..."
                                 value={reviewText}
                                 onChange={(e) => setReviewText(e.target.value)}
                                 required
@@ -1751,8 +1928,8 @@ function ProductDetailPage() {
                         </Form.Group>
 
                         {/* Image Upload Section */}
-                        <Form.Group className="mb-3">
-                            <Form.Label className="fw-semibold">
+                        <Form.Group className="mb-4">
+                            <Form.Label className="fw-bold">
                                 <FaCamera className="me-2" />
                                 Add Images (Optional)
                             </Form.Label>
@@ -1764,7 +1941,7 @@ function ProductDetailPage() {
                                 disabled={uploadingImages}
                             />
                             <Form.Text className="text-muted">
-                                You can upload multiple images. Maximum 5 images allowed.
+                                You can upload up to 5 images. Supported formats: JPG, PNG, GIF
                             </Form.Text>
 
                             {/* Image Preview */}
@@ -1776,7 +1953,6 @@ function ProductDetailPage() {
                                                 src={img}
                                                 alt={`Preview ${index + 1}`}
                                                 style={styles.imagePreview}
-                                                thumbnail
                                             />
                                             <div
                                                 style={styles.removeImageBtn}
@@ -1790,18 +1966,23 @@ function ProductDetailPage() {
                             )}
 
                             {uploadingImages && (
-                                <div className="mt-2">
+                                <div className="mt-3 text-center">
                                     <Spinner animation="border" size="sm" />
                                     <span className="ms-2">Uploading images...</span>
                                 </div>
                             )}
                         </Form.Group>
 
-                        <div className="d-flex gap-2">
-                            <Button variant="danger" type="submit" disabled={userRating === 0 || uploadingImages}>
+                        <div className="d-flex gap-3">
+                            <Button
+                                variant="primary"
+                                type="submit"
+                                disabled={userRating === 0 || uploadingImages}
+                                className="px-4"
+                            >
                                 {uploadingImages ? 'Uploading...' : 'Submit Review'}
                             </Button>
-                            <Button variant="secondary" onClick={handleCloseReviewModal}>
+                            <Button variant="outline-secondary" onClick={handleCloseReviewModal}>
                                 Cancel
                             </Button>
                         </div>
@@ -1811,32 +1992,34 @@ function ProductDetailPage() {
 
             {/* Edit Review Modal */}
             <Modal show={showEditModal} onHide={handleCloseEditModal} centered size="lg">
-                <Modal.Header closeButton>
+                <Modal.Header closeButton className="border-0">
                     <Modal.Title className="fw-bold">Edit Review</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form onSubmit={handleSubmitEditReview}>
-                        <Form.Group className="mb-3">
-                            <Form.Label className="fw-semibold">Your Rating</Form.Label>
-                            <div>
+                        <Form.Group className="mb-4">
+                            <Form.Label className="fw-bold">Your Rating</Form.Label>
+                            <div className="d-flex gap-2">
                                 {[1, 2, 3, 4, 5].map((star) => (
                                     <span
                                         key={star}
                                         onClick={() => setEditRating(star)}
                                         style={{ cursor: 'pointer' }}
-                                        className="me-1"
                                     >
-                                        {star <= editRating ? <FaStar className="text-warning" size={24} /> : <FaRegStar className="text-muted" size={24} />}
+                                        {star <= editRating ?
+                                            <FaStar className="text-warning" size={32} /> :
+                                            <FaRegStar className="text-muted" size={32} />
+                                        }
                                     </span>
                                 ))}
                             </div>
                         </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label className="fw-semibold">Your Review</Form.Label>
+
+                        <Form.Group className="mb-4">
+                            <Form.Label className="fw-bold">Your Review</Form.Label>
                             <Form.Control
                                 as="textarea"
-                                rows={3}
-                                placeholder="What did you like or dislike about the product?"
+                                rows={4}
                                 value={editText}
                                 onChange={(e) => setEditText(e.target.value)}
                                 required
@@ -1844,8 +2027,8 @@ function ProductDetailPage() {
                         </Form.Group>
 
                         {/* Edit Image Upload Section */}
-                        <Form.Group className="mb-3">
-                            <Form.Label className="fw-semibold">
+                        <Form.Group className="mb-4">
+                            <Form.Label className="fw-bold">
                                 <FaCamera className="me-2" />
                                 Review Images
                             </Form.Label>
@@ -1857,7 +2040,7 @@ function ProductDetailPage() {
                                 disabled={uploadingImages}
                             />
                             <Form.Text className="text-muted">
-                                You can add new images or remove existing ones.
+                                Add new images or remove existing ones
                             </Form.Text>
 
                             {/* Current Images with Delete Option */}
@@ -1869,7 +2052,6 @@ function ProductDetailPage() {
                                                 src={img}
                                                 alt={`Image ${index + 1}`}
                                                 style={styles.imagePreview}
-                                                thumbnail
                                             />
                                             <div
                                                 style={styles.removeImageBtn}
@@ -1885,25 +2067,30 @@ function ProductDetailPage() {
 
                             {/* Deleted Images Notice */}
                             {deletingImages.length > 0 && (
-                                <Alert variant="warning" className="mt-2 py-2">
+                                <Alert variant="warning" className="mt-3 py-2">
                                     <FaTrash className="me-2" />
                                     {deletingImages.length} image(s) will be deleted
                                 </Alert>
                             )}
 
                             {uploadingImages && (
-                                <div className="mt-2">
+                                <div className="mt-3 text-center">
                                     <Spinner animation="border" size="sm" />
                                     <span className="ms-2">Uploading images...</span>
                                 </div>
                             )}
                         </Form.Group>
 
-                        <div className="d-flex gap-2">
-                            <Button variant="danger" type="submit" disabled={editRating === 0 || uploadingImages}>
+                        <div className="d-flex gap-3">
+                            <Button
+                                variant="primary"
+                                type="submit"
+                                disabled={editRating === 0 || uploadingImages}
+                                className="px-4"
+                            >
                                 {uploadingImages ? 'Uploading...' : 'Update Review'}
                             </Button>
-                            <Button variant="secondary" onClick={handleCloseEditModal}>
+                            <Button variant="outline-secondary" onClick={handleCloseEditModal}>
                                 Cancel
                             </Button>
                         </div>
@@ -1911,7 +2098,29 @@ function ProductDetailPage() {
                 </Modal.Body>
             </Modal>
 
+            {/* Product Suggestions */}
             {product && <ProductSuggestions currentProductId={product.id} category={product.category} />}
+
+            {/* Custom CSS for hover effects */}
+            <style jsx>{`
+        .hover-shadow {
+          transition: all 0.3s ease;
+        }
+        .hover-shadow:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+        }
+        .review-thumbnail:hover {
+          transform: scale(1.05);
+          border-color: #3498db;
+        }
+        .wishlist-heart-btn:hover {
+          transform: scale(1.1);
+        }
+        .wishlist-heart-btn:active {
+          transform: scale(0.95);
+        }
+      `}</style>
         </Container>
     );
 }

@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useTranslation } from "react-i18next";
+
 import { Container, Row, Col, Spinner, Card, Alert, Form, Button, Badge } from 'react-bootstrap';
 import './CategoryPage.css'; // Custom CSS for animations
 
 const EXCHANGE_RATE = 83;
 
 function CategoryPage() {
+  const { t } = useTranslation();
   const { categoryName } = useParams();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -62,12 +65,17 @@ function CategoryPage() {
   if (loading) return (
     <Container className="text-center py-5">
       <Spinner animation="border" variant="primary" />
-      <h4 className="mt-3">Loading {pageTitle} products...</h4>
+      <h4 className="mt-3">
+  {t("category.loading", { category: pageTitle })}
+</h4>
     </Container>
   );
 
   if (error) return <Container className="py-5"><Alert variant="danger">{error}</Alert></Container>;
-  if (products.length === 0) return <Container className="py-5"><Alert variant="info">No products found in {pageTitle}</Alert></Container>;
+  if (products.length === 0) return <Container className="py-5"><Alert variant="info">
+  {t("category.noProducts", { category: pageTitle })}
+</Alert>
+</Container>;
 
   // Individual Product Card
   const ProductCard = ({ product }) => (
@@ -95,21 +103,31 @@ function CategoryPage() {
   return (
     <Container className="py-5">
       <h1 className="mb-3 fw-light text-capitalize">{pageTitle}</h1>
-      <p className="text-muted">{filteredAndSortedProducts.length} items found (out of {products.length})</p>
+     <p className="text-muted">
+  {t("category.itemsFound", {
+    count: filteredAndSortedProducts.length,
+    total: products.length
+  })}
+</p>
 
       <Row>
         {/* Sidebar Filters */}
         <Col md={3}>
           <Card className="shadow-sm p-3 mb-4 sticky-top">
-            <h5 className="mb-3 fw-bold">Filters</h5>
+            <h5 className="mb-3 fw-bold">
+  {t("category.filters")}
+</h5>
             <Form.Group className="mb-4">
-              <Form.Label className="fw-semibold">Max Price (₹{filterPrice.toLocaleString()})</Form.Label>
+             <Form.Label className="fw-semibold">
+  {t("category.maxPrice")} (₹{filterPrice.toLocaleString()})
+</Form.Label>
+
               <Form.Range
                 min={0} max={100000} step={100} value={filterPrice}
                 onChange={(e) => setFilterPrice(Number(e.target.value))}
               />
             </Form.Group>
-            <Button variant="outline-secondary" size="sm" onClick={() => setFilterPrice(100000)}>Clear Filter</Button>
+            <Button variant="outline-secondary" size="sm" onClick={() => setFilterPrice(100000)}>{t("category.clearFilter")}</Button>
           </Card>
         </Col>
 
@@ -118,13 +136,14 @@ function CategoryPage() {
           {/* Sorting */}
           <div className="d-flex justify-content-end mb-4">
             <Form.Group as={Row} className="align-items-center">
-              <Form.Label column sm="3" className="text-end fw-semibold">Sort By:</Form.Label>
+              <Form.Label column sm="3" className="text-end fw-semibold">{t("category.sortBy")}:</Form.Label>
               <Col sm="9">
                 <Form.Select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-                  <option value="rating">Top Rated (Default)</option>
-                  <option value="price-asc">Price: Low to High</option>
-                  <option value="price-desc">Price: High to Low</option>
-                  <option value="name-asc">Name (A-Z)</option>
+                  <option value="rating">{t("category.topRated")}</option>
+<option value="price-asc">{t("category.priceLowHigh")}</option>
+<option value="price-desc">{t("category.priceHighLow")}</option>
+<option value="name-asc">{t("category.nameAZ")}</option>
+
                 </Form.Select>
               </Col>
             </Form.Group>
@@ -140,7 +159,8 @@ function CategoryPage() {
 
           {filteredAndSortedProducts.length === 0 && (
             <Alert variant="warning" className="mt-4 text-center">
-              The current filters hide all products. Try lowering the max price.
+              {t("category.filterWarning")}
+
             </Alert>
           )}
         </Col>

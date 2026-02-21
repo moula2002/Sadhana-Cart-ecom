@@ -14,6 +14,8 @@ import { Link } from "react-router-dom";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import "react-lazy-load-image-component/src/effects/blur.css";
 import "./HomeAccessoriesSection.css"
+import { useTranslation } from "react-i18next";
+
 
 // 🎨 UPDATED STYLE CONSTANTS (Nature/Green Theme with Dark Mode)
 const PRIMARY_TEXT_COLOR = "#1B3022";
@@ -271,6 +273,7 @@ const AnimationStyles = () => (
 );
 
 function HomeAccessoriesSection() {
+  const { t } = useTranslation();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 576);
@@ -356,18 +359,26 @@ function HomeAccessoriesSection() {
           {/* Header */}
           <div className="text-center mb-5">
             <h3 style={customStyles.header} className="accessories-section-title theme-text">
-              ACCESSORIES <span style={{ color: isDarkMode ? ACCENT_COLOR_DARK : ACCENT_COLOR }}>COLLECTION</span>
-              <div style={customStyles.headerUnderline}></div>
-            </h3>
+  {t("accessoriesTitle")}{" "}
+  <span style={{ color: isDarkMode ? ACCENT_COLOR_DARK : ACCENT_COLOR }}>
+    {t("accessoriesCollection")}
+  </span>
+  <div style={customStyles.headerUnderline}></div>
+</h3>
+
             <p className="mt-2 fw-light" style={customStyles.subtitle}>
-              Eco-conscious luxury items to complete your signature look.
-            </p>
+  {t("accessoriesSubtitle")}
+</p>
+
           </div>
 
           {loading ? (
             <div className="text-center py-5">
               <Spinner animation="grow" variant="success" style={{ color: isDarkMode ? ACCENT_COLOR_DARK : ACCENT_COLOR }} />
-              <p className="mt-3 text-muted theme-text-secondary">Loading accessories...</p>
+              <p className="mt-3 text-muted theme-text-secondary">
+  {t("accessoriesLoading")}
+</p>
+
             </div>
           ) : (
             <>
@@ -423,7 +434,7 @@ function HomeAccessoriesSection() {
                               onMouseEnter={(e) => handleViewDealMouseEnter(e, isDarkMode, customStyles)}
                               onMouseLeave={(e) => handleViewDealMouseLeave(e, customStyles)}
                             >
-                              SHOP NOW
+                              {t("shopNow")}
                             </Button>
                           </Card.Body>
                         </Card>
@@ -441,7 +452,7 @@ function HomeAccessoriesSection() {
                     onMouseEnter={(e) => handleExploreMouseEnter(e, isDarkMode, customStyles)}
                     onMouseLeave={(e) => handleExploreMouseLeave(e, customStyles)}
                   >
-                    Explore All Accessories →
+                    {t("exploreAccessories")} →
                   </Button>
                 </Link>
               </div>

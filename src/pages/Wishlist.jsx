@@ -9,11 +9,14 @@ import "react-toastify/dist/ReactToastify.css";
 import { FaHeart, FaShoppingCart, FaTrash, FaStar, FaTag } from 'react-icons/fa';
 import { db } from "../firebase";
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { useTranslation } from "react-i18next";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 const auth = getAuth();
 
 function Wishlist() {
+  const { t } = useTranslation();
+
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
@@ -124,7 +127,7 @@ function Wishlist() {
     return (
       <Container className="py-5 text-center">
         <Spinner animation="border" variant="primary" />
-        <p className="mt-3">Loading your wishlist...</p>
+        <p className="mt-3">{t("wishlist.loading")}</p>
       </Container>
     );
   }
@@ -137,10 +140,10 @@ function Wishlist() {
         <div>
           <h1 className="fw-bold">
             <FaHeart className="text-danger me-2" />
-            My Wishlist
+            {t("wishlist.title")}
           </h1>
           <p className="text-muted">
-            {favorites.length} {favorites.length === 1 ? 'item' : 'items'} saved
+            {t("wishlist.itemsSaved", { count: favorites.length })}
           </p>
         </div>
 
@@ -152,14 +155,14 @@ function Wishlist() {
               onClick={moveAllToCart}
             >
               <FaShoppingCart className="me-2" />
-              Add All to Cart
+              {t("wishlist.addAll")}
             </Button>
             <Button
               variant="outline-danger"
               onClick={clearWishlist}
             >
               <FaTrash className="me-2" />
-              Clear All
+              {t("wishlist.clearAll")}
             </Button>
           </div>
         )}
@@ -169,16 +172,16 @@ function Wishlist() {
         <Card className="text-center py-5 border-0 shadow-sm">
           <Card.Body>
             <FaHeart className="text-muted" size={80} />
-            <h3 className="mt-4 mb-3">Your wishlist is empty</h3>
+            <h3 className="mt-4 mb-3">{t("wishlist.emptyTitle")}</h3>
             <p className="text-muted mb-4">
-              Save your favorite products here to access them later.
+              {t("wishlist.emptySubtitle")}
             </p>
             <Button
               variant="primary"
               onClick={() => navigate('/')}
               size="lg"
             >
-              Start Shopping
+              {t("wishlist.startShopping")}
             </Button>
           </Card.Body>
         </Card>
@@ -212,7 +215,7 @@ function Wishlist() {
                         size="sm"
                         className="position-absolute top-0 end-0 m-2 rounded-circle"
                         onClick={() => removeFromWishlist(item.id, item.name)}
-                        title="Remove from wishlist"
+                        title={t("wishlist.remove")}
                       >
                         <FaTrash size={14} />
                       </Button>
@@ -244,7 +247,7 @@ function Wishlist() {
 
                         {item.size && (
                           <div className="mb-3">
-                            <small className="text-muted">Size: </small>
+                            <small className="text-muted"><small className="text-muted">{t("wishlist.size")}</small> </small>
                             <Badge bg="secondary" className="ms-1">
                               {item.size}
                             </Badge>
@@ -257,13 +260,13 @@ function Wishlist() {
                             onClick={() => addToCartFromWishlist(item)}
                           >
                             <FaShoppingCart className="me-2" />
-                            Add to Cart
+                            {t("wishlist.addToCart")}
                           </Button>
                           <Button
                             variant="outline-dark"
                             onClick={() => navigate(`/product/${item.productId}`)}
                           >
-                            View Details
+                            {t("wishlist.viewDetails")}
                           </Button>
                         </div>
                       </div>
