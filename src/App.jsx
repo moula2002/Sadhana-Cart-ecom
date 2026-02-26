@@ -1,4 +1,3 @@
-// App.js
 import React from "react";
 import {
   BrowserRouter as Router,
@@ -23,7 +22,7 @@ import AuthPage from "./pages/LoginPage";
 import CategoryPage from "./pages/CategoryPage";
 import CategoryProducts from "./components/searchBar/CategoryProducts";
 import AdvancedSearchPage from "./pages/AdvancedSearchPage";
-import SearchResultsPage from "./pages/SearchResultsPage"; // ✅ ADDED
+import SearchResultsPage from "./pages/SearchResultsPage";
 
 /* ===== Cart & Checkout ===== */
 import CartPage from "./components/cartPage/CartPage";
@@ -31,9 +30,10 @@ import CheckoutPage from "./components/cartPage/CheckoutPage";
 import CashOnDelivery from "./components/cartPage/CashOnDelivey";
 import OrderConformPage from "./components/cartPage/OrderConformPage";
 import ViewOrderDetails from "./components/cartPage/ViewOrderDetails";
-import OrderDetails from "./components/cartPage/OrderDetails"
+import OrderDetails from "./components/cartPage/OrderDetails";
 import CancelOrderPage from "./components/cartPage/CancelOrderPage";
 import ProductReturnPage from "./components/cartPage/ProductReturnPage";
+import TrackOrder from "./components/cartPage/TrackOrder"; // ✅ ADDED TrackOrder import
 
 /* ===== Category Pages ===== */
 import Fashion from "./components/category/Fashion";
@@ -80,7 +80,6 @@ const AppContent = () => {
 
       <main>
         <Routes>
-
           {/* 🔹 Main Routes */}
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<AuthPage />} />
@@ -92,12 +91,13 @@ const AppContent = () => {
           <Route path="/order-details" element={<OrderDetails />} />
           <Route path="/cancel-order" element={<CancelOrderPage />} />
           <Route path="/return-order" element={<ProductReturnPage />} />
+          <Route path="/track-order" element={<TrackOrder />} /> {/* ✅ ADDED TrackOrder route */}
           <Route path="/support" element={<CustomerSupportCenter />} />
+
           {/* 🔹 User Pages */}
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/address" element={<SaveAddress/>} />
           <Route path="/save-address" element={<AddressList/>} />
-
           <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/refercode" element={<ReferCode />} />
           <Route path="/wallet" element={<Wallet />} />
@@ -105,7 +105,7 @@ const AppContent = () => {
 
           {/* 🔹 Search */}
           <Route path="/advanced-search" element={<AdvancedSearchPage />} />
-          <Route path="/search-results" element={<SearchResultsPage />} /> {/* ✅ FIXED */}
+          <Route path="/search-results" element={<SearchResultsPage />} />
 
           {/* 🔹 Product */}
           <Route path="/product/:id" element={<ProductDetailPage />} />

@@ -103,13 +103,13 @@ function OrderDetails() {
 
     setProductImage(getProductImage());
 
-    const userId = auth.currentUser.uid;
-    
-    const orderId = orderData.orderId || orderData.id || "";
-    const productId = product.id || product.productId || product.productid || product.product_id || "";
+    const userId = orderData.userId;
+    const orderId = orderData.orderId || orderData.id;
+    const productId =
+      product.id || product.productId || product.productid || product.product_id;
 
-    if (!orderId || !productId) {
-      console.warn("OrderDetails: Skipping checks due to missing IDs", { orderId, productId });
+    if (!userId || !orderId) {
+      console.warn("Missing userId or orderId");
       setLoadingReturn(false);
       setLoadingOrder(false);
       return;
@@ -139,11 +139,7 @@ function OrderDetails() {
           if (freshProduct) {
             if (freshProduct.image) setProductImage(freshProduct.image);
             else if (freshProduct.images?.[0]) setProductImage(freshProduct.images[0]);
-            
-            // Also check for return status in the product
-            if (freshProduct.returnStatus) {
-              setReturnStatus(freshProduct.returnStatus);
-            }
+        
           }
         } else {
           const mainOrderRef = doc(db, "orders", orderId);
@@ -183,21 +179,22 @@ function OrderDetails() {
     // Real-time Listener for return_requests
     const q = query(
       collection(db, "users", userId, "return_requests"),
-      where("orderId", "==", String(orderId)),
-      where("productId", "==", String(productId))
+      where("orderId", "==", orderId)
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
+      console.log("SNAPSHOT SIZE:", snapshot.size);
+
       if (!snapshot.empty) {
         const latestReturn = snapshot.docs[0].data();
-        setReturnStatus(latestReturn.status || latestReturn.orderStatus);
+        console.log("RETURN DOC:", latestReturn);
+        setReturnStatus(latestReturn.status);
+      } else {
+        console.log("NO RETURN DOC FOUND");
       }
-      setLoadingReturn(false);
-    }, (error) => {
-      console.error("Firestore Return Listener Error:", error);
+
       setLoadingReturn(false);
     });
-
     return () => unsubscribe();
   }, [orderData, product]);
 
@@ -233,32 +230,41 @@ function OrderDetails() {
   }
 
   const displayOrderData = firebaseOrderData || orderData;
-  const displayOrderStatus = orderStatus || displayOrderData.orderStatus || displayOrderData.status || "Pending";
-
-  const getDisplayStatus = () => {
-    if (returnStatus) {
-      return getDisplayStatusFromDbStatus(returnStatus);
-    }
-    return getDisplayStatusFromDbStatus(displayOrderStatus);
-  };
-
-  const displayStatus = getDisplayStatus();
   
-  // Check various status conditions
-  const isReturnRelated = returnStatus && (
-    returnStatus.toLowerCase() === "request_completed" || 
-    returnStatus.toLowerCase() === "return_approved" || 
-    returnStatus.toLowerCase() === "refund_completed" ||
-    returnStatus.toLowerCase() === "refunded"
-  );
+  // FINAL STATUS (Return status has priority)
+  const finalStatus = returnStatus
+    ? returnStatus
+    : (orderStatus || displayOrderData.orderStatus || displayOrderData.status || "pending");
 
-  const isRefundCompleted = returnStatus && (
-    returnStatus.toLowerCase() === "refund_completed" ||
-    returnStatus.toLowerCase() === "refunded"
-  );
+  const displayStatus = getDisplayStatusFromDbStatus(finalStatus);
 
-  const isCancelled = displayOrderStatus.toLowerCase() === "cancelled";
-  const isDelivered = displayOrderStatus.toLowerCase() === "delivered";
+  const isCancelled = finalStatus.toLowerCase() === "cancelled";
+  const isDelivered = finalStatus.toLowerCase() === "delivered";
+
+  const isRefundCompleted =
+    finalStatus.toLowerCase() === "refund_completed" ||
+    finalStatus.toLowerCase() === "refunded";
+
+  const isReturnRequested =
+    finalStatus.toLowerCase() === "return_requested";
+
+  const isReturnApproved =
+    finalStatus.toLowerCase() === "return_approved";
+
+  // Function to handle track order
+  const handleTrackOrder = () => {
+    navigate("/track-order", {
+      state: {
+        order: displayOrderData,
+        product: product,
+        orderStatus: displayStatus,
+        orderId: displayOrderData.orderId || displayOrderData.id,
+        estimatedDelivery: displayOrderData.estimatedDelivery,
+        trackingNumber: displayOrderData.trackingNumber,
+        carrier: displayOrderData.carrier
+      }
+    });
+  };
 
   return (
     <div style={{ background: "#fff", minHeight: "100vh" }}>
@@ -430,156 +436,73 @@ function OrderDetails() {
               </Badge>
             </div>
 
-            {!isCancelled && !isReturnRelated ? (
-              <div
+            {/* Track Order Button */}
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: "15px" }}>
+              <Button
+                variant="outline-primary"
+                onClick={handleTrackOrder}
                 style={{
-                  display: "flex",
-                  gap: "12px",
-                  justifyContent: "center"
+                  width: "100%",
+                  padding: "10px",
+                  fontWeight: "500",
+                  borderRadius: "8px"
                 }}
               >
-                <Button
-                  variant="outline-primary"
-                  style={{
-                    borderColor: "#4050b5",
-                    color: "#4050b5",
-                    borderRadius: "25px",
-                    padding: "8px 30px",
-                    fontSize: "14px",
-                    fontWeight: "500"
-                  }}
-                  onClick={() => navigate("/track-order", { 
-                    state: { 
-                      orderId: orderData.orderId || orderData.id,
-                      shipmentId: displayOrderData.shipmentId,
-                      product: product 
-                    } 
-                  })}
-                >
-                  Track
-                </Button>
+                Track Order
+              </Button>
+            </div>
 
-                {isDelivered ? (
-                  <Button
-                    variant="outline-warning"
-                    style={{
-                      borderColor: "#ffc107",
-                      color: "#ffc107",
-                      borderRadius: "25px",
-                      padding: "8px 30px",
-                      fontSize: "14px",
-                      fontWeight: "500"
-                    }}
-                    onClick={() =>
-                      navigate("/return-order", {
-                        state: {
-                          order: {
-                            ...orderData,
-                            ...displayOrderData,
-                            status: displayOrderStatus
-                          },
-                          product: {
-                            ...product,
-                            image: productImage || product.image
-                          },
-                        },
-                      })
-                    }
-                  >
-                    Return Order
-                  </Button>
-                ) : (
-                  <Button
-                    variant="outline-danger"
-                    style={{
-                      borderColor: "#dc3545",
-                      color: "#dc3545",
-                      borderRadius: "25px",
-                      padding: "8px 30px",
-                      fontSize: "14px",
-                      fontWeight: "500"
-                    }}
-                    onClick={() =>
-                      navigate("/cancel-order", { 
-                        state: {
-                          ...orderData,
-                          ...displayOrderData,
-                          status: displayOrderStatus
-                        } 
-                      })
-                    }
-                  >
-                    Cancel Order
-                  </Button>
-                )}
-              </div>
-            ) : isCancelled ? (
+            {isCancelled ? (
               <div style={{ textAlign: "center" }}>
-                <Button
-                  variant="danger"
-                  disabled
-                  style={{
-                    backgroundColor: "#f8d7da",
-                    color: "#842029",
-                    border: "none",
-                    borderRadius: "25px",
-                    padding: "8px 30px",
-                    fontSize: "14px",
-                    fontWeight: "500",
-                    opacity: 1
-                  }}
-                >
-                  ✕ Order Cancelled
+                <Button disabled variant="danger">
+                  Order Cancelled
                 </Button>
               </div>
             ) : isRefundCompleted ? (
-              // For refund completed, show only Track button
-              <div
-                style={{
-                  display: "flex",
-                  gap: "12px",
-                  justifyContent: "center"
-                }}
-              >
+              <div style={{ textAlign: "center" }}>
+                <Button disabled variant="success">
+                  Refund Completed
+                </Button>
+              </div>
+            ) : isReturnRequested ? (
+              <div style={{ textAlign: "center" }}>
+                <Button disabled variant="primary">
+                  Return Requested
+                </Button>
+              </div>
+            ) : isReturnApproved ? (
+              <div style={{ textAlign: "center" }}>
+                <Button disabled variant="info">
+                  Return Approved
+                </Button>
+              </div>
+            ) : isDelivered ? (
+              <div style={{ display: "flex", justifyContent: "center" }}>
                 <Button
-                  variant="outline-primary"
-                  style={{
-                    borderColor: "#4050b5",
-                    color: "#4050b5",
-                    borderRadius: "25px",
-                    padding: "8px 30px",
-                    fontSize: "14px",
-                    fontWeight: "500"
-                  }}
-                  onClick={() => navigate("/track-order", { 
-                    state: { 
-                      orderId: orderData.orderId || orderData.id,
-                      shipmentId: displayOrderData.shipmentId,
-                      product: product 
-                    } 
-                  })}
+                  variant="outline-warning"
+                  onClick={() =>
+                    navigate("/return-order", {
+                      state: {
+                        order: displayOrderData,
+                        product: product,
+                      },
+                    })
+                  }
                 >
-                  Track
+                  Return Order
                 </Button>
               </div>
             ) : (
-              <div style={{ textAlign: "center" }}>
+              <div style={{ display: "flex", justifyContent: "center" }}>
                 <Button
-                  variant="primary"
-                  disabled
-                  style={{
-                    backgroundColor: "#4050b5",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: "25px",
-                    padding: "8px 30px",
-                    fontSize: "14px",
-                    fontWeight: "500",
-                    opacity: 1,
-                    cursor: "default"
-                  }}
+                  variant="outline-danger"
+                  onClick={() =>
+                    navigate("/cancel-order", {
+                      state: displayOrderData,
+                    })
+                  }
                 >
-                  ✓ Return Request Sent
+                  Cancel Order
                 </Button>
               </div>
             )}

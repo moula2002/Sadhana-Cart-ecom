@@ -15,7 +15,10 @@ import {
   FaTruck,
   FaCheckCircle,
   FaTimesCircle,
-  FaBoxOpen
+  FaBoxOpen,
+  FaUndo,
+  FaCheckDouble,
+  FaMoneyBillWave
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
@@ -29,8 +32,21 @@ const formatCurrency = (val) =>
     minimumFractionDigits: 2,
   }).format(Number(val || 0));
 
+// Add getStatusIcon function
 const getStatusIcon = (status) => {
-  switch (status?.toLowerCase()) {
+  const statusLower = status?.toLowerCase() || "";
+
+  if (statusLower === "return_requested") {
+    return <FaUndo style={{ marginRight: "6px" }} />;
+  }
+  if (statusLower === "return_approved") {
+    return <FaCheckDouble style={{ marginRight: "6px" }} />;
+  }
+  if (statusLower === "refund_completed" || statusLower === "refunded") {
+    return <FaMoneyBillWave style={{ marginRight: "6px" }} />;
+  }
+
+  switch (statusLower) {
     case "pending":
     case "processing":
       return <FaBoxOpen style={{ marginRight: "6px" }} />;
@@ -46,7 +62,21 @@ const getStatusIcon = (status) => {
 };
 
 const getStatusBadgeStyle = (status) => {
-  switch (status?.toLowerCase()) {
+  const statusLower = status?.toLowerCase() || "";
+
+  // Return/Refund status styling
+  if (statusLower === "return_requested") {
+    return { background: "#e2e3ff", color: "#4050b5" };
+  }
+  if (statusLower === "return_approved") {
+    return { background: "#d1ecf1", color: "#0c5460" };
+  }
+  if (statusLower === "refund_completed" || statusLower === "refunded") {
+    return { background: "#d4edda", color: "#155724" };
+  }
+
+  // Regular order status styling
+  switch (statusLower) {
     case "pending":
       return { background: "#fff3cd", color: "#856404" };
     case "processing":
@@ -63,7 +93,21 @@ const getStatusBadgeStyle = (status) => {
 };
 
 const getStatusDisplayText = (status) => {
-  switch (status?.toLowerCase()) {
+  const statusLower = status?.toLowerCase() || "";
+
+  // Return/Refund status display text
+  if (statusLower === "return_requested") {
+    return "Return Requested";
+  }
+  if (statusLower === "return_approved") {
+    return "Return Approved";
+  }
+  if (statusLower === "refund_completed" || statusLower === "refunded") {
+    return "Refund Completed";
+  }
+
+  // Regular order status display text
+  switch (statusLower) {
     case "pending":
       return "Order Placed";
     case "processing":
@@ -74,21 +118,15 @@ const getStatusDisplayText = (status) => {
       return "Delivered";
     case "cancelled":
       return "Cancelled";
-    case "return_requested":
-      return "Return Requested";
-    case "return_approved":
-      return "Return Approved";
-    case "refunded":
-      return "Refunded";
     default:
-      return status;
+      return status || "Order Placed";
   }
 };
 
 // Helper function to safely format date
 const formatOrderDate = (dateValue) => {
   if (!dateValue) return "N/A";
-  
+
   try {
     // If it's a Firestore Timestamp with toDate method
     if (dateValue?.toDate && typeof dateValue.toDate === 'function') {
@@ -98,7 +136,7 @@ const formatOrderDate = (dateValue) => {
         year: 'numeric'
       });
     }
-    
+
     // If it's a Date object
     if (dateValue instanceof Date) {
       return dateValue.toLocaleDateString('en-IN', {
@@ -107,7 +145,7 @@ const formatOrderDate = (dateValue) => {
         year: 'numeric'
       });
     }
-    
+
     // If it's a string or number
     if (typeof dateValue === 'string' || typeof dateValue === 'number') {
       return new Date(dateValue).toLocaleDateString('en-IN', {
@@ -116,7 +154,7 @@ const formatOrderDate = (dateValue) => {
         year: 'numeric'
       });
     }
-    
+
     return "N/A";
   } catch (error) {
     console.error("Error formatting date:", error);
@@ -125,7 +163,15 @@ const formatOrderDate = (dateValue) => {
 };
 
 const mapFirestoreOrderToLocal = (docData, docId) => {
-  const status = docData.orderStatus || "Pending";
+  let status = docData.orderStatus || "Pending";
+
+  // If any product has returnStatus, use that as the order status
+  if (docData.products && docData.products.length > 0) {
+    const returnedProduct = docData.products.find(p => p.returnStatus);
+    if (returnedProduct?.returnStatus) {
+      status = returnedProduct.returnStatus;
+    }
+  }
 
   // Format date safely
   let orderDate = formatOrderDate(docData.orderDate);
@@ -139,14 +185,15 @@ const mapFirestoreOrderToLocal = (docData, docId) => {
     image: p.image || p.images?.[0] || "https://via.placeholder.com/400x500?text=Product",
     images: p.images || [p.image],
     productId: p.productId || p.id,
-    productImage: p.productImage || p.image
+    productImage: p.productImage || p.image,
+    returnStatus: p.returnStatus || null // Include return status for each product
   }));
 
   return {
     id: docId,
     orderId: docData.orderId || docId,
     status,
-    date: orderDate, // Now this is a string, not a Timestamp
+    date: orderDate,
     total: docData.payableAmount ?? docData.productsTotal ?? docData.totalAmount ?? 0,
     payableAmount: docData.payableAmount || 0,
     products: products,
@@ -154,7 +201,6 @@ const mapFirestoreOrderToLocal = (docData, docId) => {
     shiprocketOrderId: docData.shiprocketOrderId || null,
     shipmentId: docData.shipmentId || null,
     shiprocketStatus: docData.shiprocketStatus || null,
-    // Store the original timestamp as a serializable value if needed
     originalOrderDate: docData.orderDate ? {
       seconds: docData.orderDate.seconds,
       nanoseconds: docData.orderDate.nanoseconds
@@ -204,14 +250,28 @@ function ViewOrderDetails() {
     fetchOrders();
   }, [userId]);
 
-  const filteredOrders =
-    selectedTab === "All"
-      ? orders
-      : orders.filter(
-          (o) =>
-            o.status &&
-            o.status.toLowerCase() === selectedTab.toLowerCase()
-        );
+  const filteredOrders = selectedTab === "All"
+    ? orders
+    : orders.filter((o) => {
+      if (!o.status) return false;
+
+      const normalizedStatus = o.status.toLowerCase().replace(/_/g, " ");
+      const selectedNormalized = selectedTab.toLowerCase();
+
+      // Handle special cases for return/refund statuses
+      if (selectedNormalized === "return requested") {
+        return o.status.toLowerCase() === "return_requested";
+      }
+      if (selectedNormalized === "return approved") {
+        return o.status.toLowerCase() === "return_approved";
+      }
+      if (selectedNormalized === "refund completed") {
+        return o.status.toLowerCase() === "refund_completed" ||
+          o.status.toLowerCase() === "refunded";
+      }
+
+      return normalizedStatus === selectedNormalized;
+    });
 
   const statusTabs = [
     "All",
@@ -220,7 +280,9 @@ function ViewOrderDetails() {
     "Shipped",
     "Delivered",
     "Cancelled",
-    "Return Requested"
+    "Return Requested",
+    "Return Approved",
+    "Refund Completed"
   ];
 
   if (loading) {
@@ -273,8 +335,7 @@ function ViewOrderDetails() {
                 color: selectedTab === tab ? "#4050b5" : "#666",
                 cursor: "pointer",
                 paddingBottom: "8px",
-                borderBottom:
-                  selectedTab === tab ? "3px solid #4050b5" : "none",
+                borderBottom: selectedTab === tab ? "3px solid #4050b5" : "none",
               }}
             >
               {tab}
@@ -339,6 +400,22 @@ function ViewOrderDetails() {
                       <div style={{ fontWeight: "600", marginTop: "4px" }}>
                         {formatCurrency(product.price * product.quantity)}
                       </div>
+                      {product.returnStatus && (
+                        <Badge
+                          style={{
+                            ...getStatusBadgeStyle(product.returnStatus),
+                            borderRadius: "20px",
+                            padding: "4px 12px",
+                            marginTop: "8px",
+                            fontSize: "12px",
+                            display: "inline-flex",
+                            alignItems: "center"
+                          }}
+                        >
+                          {getStatusIcon(product.returnStatus)}
+                          {getStatusDisplayText(product.returnStatus)}
+                        </Badge>
+                      )}
                     </Col>
                   </Row>
                 ))}
@@ -367,11 +444,13 @@ function ViewOrderDetails() {
                       variant="link"
                       style={{ color: "#4050b5", textDecoration: "none" }}
                       onClick={() =>
-                        navigate("/order-details", { 
+                        navigate("/order-details", {
                           state: {
                             ...order,
+                            userId: userId,   // ✅ use state variable
+                            orderId: order.orderId || order.id,
                             items: order.products
-                          } 
+                          }
                         })
                       }
                     >
