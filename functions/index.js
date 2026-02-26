@@ -237,21 +237,52 @@ exports.trackOrder = onCall(
 // ❌ CANCEL SHIPMENT
 // ======================================================
 exports.cancelShipment = onRequest(
-  { region: "us-central1", secrets: ["SHIPROCKET_EMAIL", "SHIPROCKET_PASSWORD"] },
+  {
+    region: "us-central1",
+    secrets: ["SHIPROCKET_EMAIL", "SHIPROCKET_PASSWORD"],
+    cors: true
+  },
   async (req, res) => {
     try {
       const orderId = req.body.orderId;
-      if (!orderId) return res.status(400).json({ success: false, message: "orderId is required" });
+
+      if (!orderId) {
+        return res.status(400).json({
+          success: false,
+          message: "orderId is required"
+        });
+      }
+
+      console.log("🔥 Cancelling Shiprocket Order ID:", orderId);
 
       const token = await getShiprocketToken();
+
       const response = await axios.post(
         "https://apiv2.shiprocket.in/v1/external/orders/cancel",
         { ids: [orderId] },
-        { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          timeout: 20000
+        }
       );
-      return res.status(200).json({ success: true, data: response.data });
+
+      console.log("✅ Shiprocket cancel response:", response.data);
+
+      return res.status(200).json({
+        success: true,
+        data: response.data
+      });
+
     } catch (error) {
-      return res.status(500).json({ success: false, error: error.response?.data || error.message });
+      console.error("❌ Cancel error:", error.response?.data || error.message);
+
+      return res.status(500).json({
+        success: false,
+        error: error.response?.data || error.message
+      });
     }
   }
 );

@@ -31,6 +31,9 @@ import CheckoutPage from "./components/cartPage/CheckoutPage";
 import CashOnDelivery from "./components/cartPage/CashOnDelivey";
 import OrderConformPage from "./components/cartPage/OrderConformPage";
 import ViewOrderDetails from "./components/cartPage/ViewOrderDetails";
+import OrderDetails from "./components/cartPage/OrderDetails"
+import CancelOrderPage from "./components/cartPage/CancelOrderPage";
+import ProductReturnPage from "./components/cartPage/ProductReturnPage";
 
 /* ===== Category Pages ===== */
 import Fashion from "./components/category/Fashion";
@@ -86,8 +89,10 @@ const AppContent = () => {
           <Route path="/cod" element={<CashOnDelivery />} />
           <Route path="/order-confirm" element={<OrderConformPage />} />
           <Route path="/orders" element={<ViewOrderDetails />} />
+          <Route path="/order-details" element={<OrderDetails />} />
+          <Route path="/cancel-order" element={<CancelOrderPage />} />
+          <Route path="/return-order" element={<ProductReturnPage />} />
           <Route path="/support" element={<CustomerSupportCenter />} />
-
           {/* 🔹 User Pages */}
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/address" element={<SaveAddress/>} />
