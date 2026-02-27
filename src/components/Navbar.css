@@ -353,6 +353,7 @@ body {
 }
 
 /* ==================== FLIPKART STYLE DROPDOWN ==================== */
+
 .flipkart-login-dropdown .dropdown-toggle::after {
     display: none !important;
 }
@@ -1614,3 +1615,5 @@ body {
 .flipkart-login-dropdown .dropdown-item:focus {
     text-decoration: none !important;
 }
+
+

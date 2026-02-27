@@ -218,6 +218,33 @@ const ProductReturnPage = () => {
 
       // Save return request
       await setDoc(returnRef, returnData);
+      /* ===============================
+   🔥 WALLET REFUND LOGIC
+================================ */
+
+if (refundType === "wallet") {
+  const userRef = doc(db, "users", userId);
+  const userSnap = await getDoc(userRef);
+
+  if (userSnap.exists()) {
+    const currentCoins = Number(userSnap.data().walletCoins || 0);
+
+    // ₹1 = 1 Coin conversion
+    const coinsFromAmount = Math.round(amountToRefund);
+
+    const newCoins = currentCoins + coinsFromAmount;
+
+    console.log("Refund Amount:", amountToRefund);
+    console.log("Coins Adding:", coinsFromAmount);
+    console.log("New Wallet Coins:", newCoins);
+
+    await updateDoc(userRef, {
+      walletCoins: newCoins,
+      walletBalance: newCoins,
+      updatedAt: serverTimestamp(),
+    });
+  }
+}
 
       // Update the order with return status
       const updatedProducts = (currentOrderData.products || []).map((p) => {
@@ -254,8 +281,8 @@ const ProductReturnPage = () => {
         }
       });
 
-      alert("Return request submitted successfully");
-      navigate("/orders");
+      alert("Return request submitted & Wallet credited successfully");
+navigate("/wallet");
     } catch (error) {
       console.error("Return Error Details:", error);
       setError(`Failed to submit return request: ${error.message}`);

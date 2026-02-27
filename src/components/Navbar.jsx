@@ -445,7 +445,7 @@ const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal }) 
             const userData = userDoc.data();
             setWalletBalance(userData.walletBalance || 0);
             setWalletCoins(userData.walletCoins || 0);
-            
+
             // Fetch saved addresses
             if (userData.addresses) {
               setSavedAddresses(userData.addresses);
@@ -680,11 +680,11 @@ export default function Header() {
 
   // 🔥 MEMOIZED SELECTORS - Fix Redux warning
   const { location } = useSelector((state) => state.header);
-  
+
   // Memoized cart items selector
   const cartItems = useSelector((state) => state.cart?.items || []);
   const orders = useSelector((state) => state.orders?.items || []);
-  
+
   // Memoized counts - prevents unnecessary re-renders
   const cartCount = useMemo(() => cartItems.length, [cartItems]);
   const orderCount = useMemo(() => orders.length, [orders]);
@@ -795,6 +795,15 @@ export default function Header() {
                 >
                   <i className="fas fa-search"></i>
                 </Button>
+                {/* Mobile Seller Button */}
+                <Button
+                  variant="outline-primary"
+                  size="sm"
+                  className="border-0 theme-button"
+                  onClick={handleSellerClick}
+                >
+                  <i className="fas fa-store"></i>
+                </Button>
 
                 {/* Mobile Login Dropdown */}
                 <FlipkartLoginDropdown
@@ -802,6 +811,7 @@ export default function Header() {
                   handleLogout={handleLogout}
                   setShowAuthModal={setShowAuthModal}
                 />
+
 
                 {/* Cart with Badge */}
                 <Button
@@ -811,7 +821,7 @@ export default function Header() {
                   onClick={goToCart}
                 >
                   <i className="fas fa-shopping-cart"></i>
-                  {cartCount > 0 && ( 
+                  {cartCount > 0 && (
                     <Badge
                       bg="danger"
                       className="position-absolute top-0 start-100 translate-middle rounded-pill"
