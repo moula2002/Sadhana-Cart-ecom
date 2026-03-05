@@ -13,7 +13,7 @@ import { getFunctions, httpsCallable } from "firebase/functions";
 import { app } from "../../firebase";
 
 /* ===============================
-   Helpers
+    Helpers
 ================================ */
 
 const formatDate = (date) => {
@@ -32,7 +32,7 @@ const formatDate = (date) => {
 };
 
 /* ===============================
-   Component
+    Component
 ================================ */
 
 function TrackOrder() {
@@ -72,31 +72,31 @@ function TrackOrder() {
   }, [order]);
 
   /* ===============================
-     Loading
+      Loading
   ================================= */
   if (loading) {
     return (
-      <div style={{ minHeight: "100vh", background: "#fff" }}>
+      <div className="bg-body" style={{ minHeight: "100vh" }}>
         <Header navigate={navigate} />
         <Container className="text-center py-5">
-          <Spinner animation="border" />
-          <p className="mt-3">Loading tracking...</p>
+          <Spinner animation="border" variant="primary" />
+          <p className="mt-3 text-body">Loading tracking...</p>
         </Container>
       </div>
     );
   }
 
   /* ===============================
-     Error
+      Error
   ================================= */
   if (error) {
     return (
-      <div style={{ minHeight: "100vh", background: "#fff" }}>
+      <div className="bg-body" style={{ minHeight: "100vh" }}>
         <Header navigate={navigate} />
         <Container className="text-center py-5">
           <FaExclamationTriangle size={50} color="red" />
-          <h5 className="mt-3">Unable to load tracking</h5>
-          <p>{error}</p>
+          <h5 className="mt-3 text-body">Unable to load tracking</h5>
+          <p className="text-secondary">{error}</p>
           <Button onClick={() => window.location.reload()}>
             Retry
           </Button>
@@ -112,11 +112,11 @@ function TrackOrder() {
 
   if (!shipment) {
     return (
-      <div style={{ minHeight: "100vh", background: "#fff" }}>
+      <div className="bg-body" style={{ minHeight: "100vh" }}>
         <Header navigate={navigate} />
         <Container className="text-center py-5">
-          <FaTruck size={60} color="#999" />
-          <h5 className="mt-3">
+          <FaTruck size={60} className="text-secondary" />
+          <h5 className="mt-3 text-body">
             Tracking will be available soon
           </h5>
         </Container>
@@ -129,12 +129,12 @@ function TrackOrder() {
   const eta = tracking?.etd;
 
   return (
-    <div style={{ minHeight: "100vh", background: "#fff" }}>
+    <div className="bg-body" style={{ minHeight: "100vh" }}>
       <Header navigate={navigate} />
 
       <Container style={{ maxWidth: "650px" }} className="py-4">
         {/* ================= STATUS CARD ================= */}
-        <Card className="mb-3 shadow-sm">
+        <Card className="mb-3 shadow-sm bg-body border">
           <Card.Body>
             <div className="d-flex justify-content-between align-items-center">
               <div>
@@ -142,22 +142,22 @@ function TrackOrder() {
                   {status}
                 </h5>
                 {eta && (
-                  <p className="mb-1">
+                  <p className="mb-1 text-body">
                     Delivery by {formatDate(eta)}
                   </p>
                 )}
               </div>
-              <span style={{ fontSize: "13px" }}>
+              <span className="text-secondary" style={{ fontSize: "13px" }}>
                 Order #{order?.shiprocketOrderId}
               </span>
             </div>
 
             <div className="mt-3">
-              <span className="badge bg-light text-dark me-2">
+              <span className="badge bg-secondary-subtle text-secondary-emphasis me-2">
                 AWB: {awb}
               </span>
               {eta && (
-                <span className="badge bg-light text-dark">
+                <span className="badge bg-secondary-subtle text-secondary-emphasis">
                   ETA: {formatDate(eta)}
                 </span>
               )}
@@ -166,24 +166,25 @@ function TrackOrder() {
         </Card>
 
         {/* ================= PROGRESS STEPPER ================= */}
-        <Card className="mb-3 shadow-sm">
+        <Card className="mb-3 shadow-sm bg-body border">
           <Card.Body>
-            <h6 className="mb-3">Delivery Progress</h6>
+            <h6 className="mb-3 text-body">Delivery Progress</h6>
             <Stepper status={status} />
           </Card.Body>
         </Card>
 
         {/* ================= HISTORY ================= */}
         {activities.length > 0 && (
-          <Card className="shadow-sm">
+          <Card className="shadow-sm bg-body border">
             <Card.Body>
-              <h6 className="mb-3">Tracking History</h6>
+              <h6 className="mb-3 text-body">Tracking History</h6>
               {activities.map((a, i) => (
                 <div key={i} className="mb-3">
                   <div className="d-flex gap-2">
                     <FaMapMarkerAlt color="#6366f1" />
                     <div>
                       <div
+                        className="text-body"
                         style={{
                           fontWeight: 500,
                           fontSize: "14px",
@@ -192,24 +193,25 @@ function TrackOrder() {
                         {a.activity}
                       </div>
                       <div
+                        className="text-secondary"
                         style={{
                           fontSize: "12px",
-                          color: "#666",
                         }}
                       >
                         {a.location}
                       </div>
                       <div
+                        className="text-secondary-emphasis"
                         style={{
                           fontSize: "11px",
-                          color: "#999",
+                          opacity: 0.7
                         }}
                       >
                         {formatDate(a.date)}
                       </div>
                     </div>
                   </div>
-                  {i !== activities.length - 1 && <hr />}
+                  {i !== activities.length - 1 && <hr className="text-secondary" />}
                 </div>
               ))}
             </Card.Body>
@@ -221,29 +223,31 @@ function TrackOrder() {
 }
 
 /* ===============================
-   Header
+    Header
 ================================ */
 
 const Header = ({ navigate }) => (
   <div
+    className="border-bottom"
     style={{
       padding: "16px",
-      borderBottom: "1px solid #eee",
       display: "flex",
       alignItems: "center",
       gap: "10px",
+      backgroundColor: "var(--bs-body-bg)"
     }}
   >
     <FaArrowLeft
+      className="text-body"
       style={{ cursor: "pointer" }}
       onClick={() => navigate(-1)}
     />
-    <h5 style={{ margin: 0 }}>Track Order</h5>
+    <h5 className="text-body" style={{ margin: 0 }}>Track Order</h5>
   </div>
 );
 
 /* ===============================
-   Stepper
+    Stepper
 ================================ */
 
 const Stepper = ({ status }) => {
@@ -256,7 +260,7 @@ const Stepper = ({ status }) => {
   ];
 
   const getCurrentStep = () => {
-    const s = status.toUpperCase();
+    const s = (status || "").toUpperCase();
     if (s.includes("DELIVERED")) return 4;
     if (s.includes("OUT")) return 3;
     if (s.includes("TRANSIT")) return 2;
@@ -279,10 +283,10 @@ const Stepper = ({ status }) => {
               {active ? (
                 <FaCheckCircle color="#6366f1" />
               ) : (
-                <FaCircle color="#ccc" />
+                <FaCircle className="text-secondary" style={{ opacity: 0.3 }} />
               )}
             </div>
-            <div style={{ fontSize: "14px" }}>
+            <div className={active ? "text-body" : "text-secondary"} style={{ fontSize: "14px" }}>
               {step}
             </div>
           </div>

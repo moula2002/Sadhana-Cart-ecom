@@ -12,9 +12,10 @@ import {
   doc,
   getDoc,
   updateDoc,
+  setDoc,
   arrayUnion,
   increment,
-} from "firebase/firestore";
+} from "firebase/firestore"; 
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db } from "../../firebase";
 
@@ -65,9 +66,9 @@ function CashOnDelivery() {
             const userData = userSnap.data();
             setUserWalletCoins(userData.walletCoins || 0);
           }
-        } catch (error) {
-          console.error("Error fetching wallet coins:", error);
-        }
+        }catch (error) {
+  console.error("Error fetching wallet coins:", error);
+}
       } else {
         setUserId(null);
       }
@@ -180,14 +181,14 @@ function CashOnDelivery() {
         };
 
         const sellerSnap = await getDoc(sellerRef);
-        if (!sellerSnap.exists()) {
-          await setDoc(sellerRef, {
-            sellerId,
-            orders: [],
-            totalSales: 0,
-            createdAt: serverTimestamp(),
-          }).catch(() => {});
-        }
+      if (!sellerSnap.exists()) {
+  await setDoc(sellerRef, {
+    sellerId,
+    orders: [],
+    totalSales: 0,
+    createdAt: serverTimestamp(),
+  });
+}
 
         await updateDoc(sellerRef, {
           orders: arrayUnion(orderSummary),
@@ -201,6 +202,65 @@ function CashOnDelivery() {
     }
   };
 
+  // 🔥 Reduce stock from products collection
+const reduceProductStock = async () => {
+  try {
+
+    for (const item of cartItems) {
+
+      const productRef = doc(db, "products", item.id);
+      const productSnap = await getDoc(productRef);
+
+      if (!productSnap.exists()) {
+  throw new Error("Product not found");
+}
+
+      const productData = productSnap.data();
+
+      const selectedSize =
+        item.sizeVariant?.size ||
+        item.size ||
+        null;
+
+      const variants = productData.sizevariants || [];
+
+   const updatedVariants = variants.map((variant) => {
+
+  if (selectedSize && variant.size === selectedSize) {
+
+    if (variant.stock < item.quantity) {
+  throw new Error(`Stock not available for ${variant.size}`);
+}
+
+    return {
+      ...variant,
+      stock: variant.stock - item.quantity
+    };
+
+  }
+
+  return variant; // ⭐ VERY IMPORTANT
+
+});
+
+   if (productData.stock < item.quantity) {
+  throw new Error("Product out of stock");
+}
+     await updateDoc(productRef, {
+  stock: productData.stock - item.quantity,
+  sizevariants: updatedVariants
+});
+      console.log(
+        `Stock reduced → Product ${item.id} | Size ${selectedSize} | Qty ${item.quantity}`
+      );
+
+    }
+
+  } catch (error) {
+  console.error("Stock update error:", error);
+  throw error;
+}
+};
   // Save order to Firestore (MATCHES FLUTTER STRUCTURE EXACTLY)
   const saveOrderToFirestore = async (paymentMethod, status = "pending") => {
     if (!userId) {
@@ -227,13 +287,13 @@ function CashOnDelivery() {
         const proportionalCoinsUsed = totalPrice > 0 ? Math.round(itemPrice * coinsToUse / totalPrice) : 0;
 
         return {
-          productid: item.id,                    // Matches Flutter: productid
+          productid: item.id,                   
           name: item.title || item.name || "Unnamed Product",
-          price: itemPrice,                       // Matches Flutter: price (total for quantity)
-          stock: item.stock || 0,                  // Matches Flutter: stock
-          quantity: item.quantity || 1,            // Matches Flutter: quantity
-          sku: finalSku,                           // Matches Flutter: sku
-          sizevariants: item.sizeVariant ? [       // Matches Flutter: sizevariants array
+          price: itemPrice,                      
+          stock: item.stock || 0,                 
+          quantity: item.quantity || 1,           
+          sku: finalSku,                           
+          sizevariants: item.sizeVariant ? [       
             {
               size: item.sizeVariant.size,
               stock: item.quantity,
@@ -392,8 +452,16 @@ function CashOnDelivery() {
     setIsSaving(true);
 
     const result = await saveOrderToFirestore("Cash on Delivery", "pending");
+    
 
     if (result && result.success) {
+      try {
+  await reduceProductStock();
+} catch (err) {
+  alert(err.message);
+  setIsSaving(false);
+  return;
+}
       dispatch(clearCart());
       navigate("/order-confirm", {
         state: {

@@ -502,8 +502,44 @@ const CheckoutPage = () => {
       console.error("Error in saveOrderToSellerCollections:", err);
     }
   };
+  // 🔥 Reduce stock from products collection
+const reduceProductStock = useCallback(async () => {
+
+  try {
+
+    for (const item of mergedCartItems) {
+
+      const productRef = doc(db, "products", item.id);
+      const productSnap = await getDoc(productRef);
+
+      if (!productSnap.exists()) {
+        throw new Error("Product not found");
+      }
+
+      const productData = productSnap.data();
+
+      if (productData.stock < item.quantity) {
+        throw new Error("Product out of stock");
+      }
+
+      await updateDoc(productRef, {
+        stock: productData.stock - item.quantity
+      });
+
+      console.log(
+        `Stock reduced → Product ${item.id} | Qty ${item.quantity}`
+      );
+    }
+
+  } catch (error) {
+    console.error("Stock update error:", error);
+    throw error;
+  }
+
+}, [mergedCartItems]);
 
   const updateSellerDocuments = async (sellerIds, userOrderDocId, orderData) => {
+    // 🔥 Reduce stock from products collection
     try {
       for (const sellerId of sellerIds) {
         if (!sellerId) continue;
@@ -530,7 +566,7 @@ const CheckoutPage = () => {
             orders: [],
             totalSales: 0,
             createdAt: serverTimestamp(),
-          }).catch(() => {}); 
+          }).catch(() => { });
         }
 
         await updateDoc(sellerRef, {
@@ -614,7 +650,7 @@ const CheckoutPage = () => {
       // 🔥 SEND TO SHIPROCKET (Same as CashOnDelivery component)
       try {
         const shiprocketPaymentMethod = paymentMethod === "Razorpay" ? "Prepaid" : "COD";
-        
+
         const response = await fetch(
           "https://createshiprocketorder-cij4erke6a-uc.a.run.app",
           {
@@ -665,8 +701,8 @@ const CheckoutPage = () => {
       // Sync with Seller data
       await saveOrderToSellerCollections(orderData, userOrderDocRef.id);
       await updateSellerDocuments(
-        Array.isArray(sellerIdsInOrder) ? sellerIdsInOrder : [sellerIdsInOrder], 
-        userOrderDocRef.id, 
+        Array.isArray(sellerIdsInOrder) ? sellerIdsInOrder : [sellerIdsInOrder],
+        userOrderDocRef.id,
         orderData
       );
 
@@ -732,34 +768,40 @@ const CheckoutPage = () => {
       currency: "INR",
       name: "SadhanaCart",
       description: "Purchase Checkout",
-      handler: async function (response) {
-        alert(
-          `Payment Successful! Payment ID: ${response.razorpay_payment_id}`
-        );
-        
-        const result = await saveOrderToFirestore(
-          "Razorpay",
-          "Paid",
-          response.razorpay_payment_id
-        );
+     handler: async function (response) {
 
-        if (result && result.success) {
-          navigate("/order-confirm", {
-            state: {
-              paymentMethod: "Razorpay",
-              total: formatPrice(finalAmount),
-              originalTotal: formatPrice(totalPrice),
-              itemsCount: mergedCartItems.length,
-              billingDetails,
-              cartItems: mergedCartItems,
-              sellerid: result.sellerid,
-              orderDocId: result.docId,
-              coinsUsed: result.coinsUsed,
-              discount: result.discount,
-            },
-          });
-        }
+  alert(`Payment Successful! Payment ID: ${response.razorpay_payment_id}`);
+
+  try {
+    await reduceProductStock();
+  } catch (err) {
+    alert(err.message);
+    return;
+  }
+
+  const result = await saveOrderToFirestore(
+    "Razorpay",
+    "Paid",
+    response.razorpay_payment_id
+  );
+
+  if (result && result.success) {
+    navigate("/order-confirm", {
+      state: {
+        paymentMethod: "Razorpay",
+        total: formatPrice(finalAmount),
+        originalTotal: formatPrice(totalPrice),
+        itemsCount: mergedCartItems.length,
+        billingDetails,
+        cartItems: mergedCartItems,
+        sellerid: result.sellerid,
+        orderDocId: result.docId,
+        coinsUsed: result.coinsUsed,
+        discount: result.discount,
       },
+    });
+  }
+},
       prefill: {
         name: billingDetails.fullName,
         email: billingDetails.email,
@@ -773,14 +815,14 @@ const CheckoutPage = () => {
       },
       theme: { color: "#FFA500" },
     };
-    
+
     const paymentObject = new window.Razorpay(options);
     paymentObject.open();
   };
 
   const handlePayment = async (e) => {
     e.preventDefault();
-    
+
     const requiredFields = [
       "fullName",
       "email",
@@ -789,7 +831,7 @@ const CheckoutPage = () => {
       "city",
       "pincode",
     ];
-    
+
     for (const field of requiredFields) {
       if (!billingDetails[field]) {
         alert(`Please fill in the required field: ${field}`);

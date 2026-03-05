@@ -723,14 +723,22 @@ function ProductDetailPage() {
     }, [selectedSize, productVariants]);
 
     const calculatedPriceINR = useMemo(() => {
-        if (!product) return 0;
-        const basePrice = currentVariant?.price || product.price || 0;
-        return (basePrice * EXCHANGE_RATE).toFixed(0);
-    }, [currentVariant, product]);
+    if (!product) return 0;
+
+    const basePrice =
+        product.offerprice ||
+        currentVariant?.price ||
+        product.price ||
+        0;
+
+    return (basePrice * EXCHANGE_RATE).toFixed(0);
+}, [currentVariant, product]);
 
     const calculatedOriginalPriceINR = useMemo(() => {
-        return (Number(calculatedPriceINR) * 1.5).toFixed(0);
-    }, [calculatedPriceINR]);
+    if (!product) return 0;
+
+    return (product.price || 0) * EXCHANGE_RATE;
+}, [product]);
 
     const sortedVariants = useMemo(() => {
         const sizeOrder = ["S", "M", "L", "XL", "XXL", "XXXL"];
@@ -1169,7 +1177,10 @@ function ProductDetailPage() {
         </Container>
     );
 
-    const discountPercentage = (((calculatedOriginalPriceINR - calculatedPriceINR) / calculatedOriginalPriceINR) * 100).toFixed(0);
+    const discountPercentage =
+    calculatedOriginalPriceINR > 0
+        ? (((calculatedOriginalPriceINR - calculatedPriceINR) / calculatedOriginalPriceINR) * 100).toFixed(0)
+        : 0;
     const rating = { rate: reviewsData.averageRating, count: reviewsData.totalRatings };
 
     const isOutOfStock = productVariants.length > 0

@@ -78,6 +78,7 @@ function OrderDetails() {
   const [firebaseOrderData, setFirebaseOrderData] = useState(null);
   const [productImage, setProductImage] = useState(null);
   const [formattedDate, setFormattedDate] = useState("N/A");
+  const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 
   // Get the first product safely with image fallback
   const product = orderData?.items?.[0] || orderData?.products?.[0];
@@ -267,7 +268,13 @@ function OrderDetails() {
   };
 
   return (
-    <div style={{ background: "#fff", minHeight: "100vh" }}>
+    <div
+  style={{
+    background: isDark ? "#0f172a" : "#ffffff",
+    minHeight: "100vh",
+    color: isDark ? "#ffffff" : "#212529"
+  }}
+>
       <div
         style={{
           padding: "20px 16px",
@@ -278,17 +285,17 @@ function OrderDetails() {
         }}
       >
         <FaArrowLeft
-          style={{ fontSize: "20px", cursor: "pointer", color: "#333" }}
+          style={{ fontSize: "20px", cursor: "pointer", color: isDark ? "#ffffff" : "#333" }}
           onClick={() => navigate(-1)}
         />
-        <h1
-          style={{
-            fontSize: "20px",
-            fontWeight: "600",
-            margin: 0,
-            color: "#333"
-          }}
-        >
+      <h1
+  style={{
+    fontSize: "20px",
+    fontWeight: "600",
+    margin: 0,
+    color: isDark ? "#ffffff" : "#333"
+  }}
+>
           Order Details
         </h1>
       </div>
@@ -313,30 +320,32 @@ function OrderDetails() {
               maxHeight: "300px",
               objectFit: "contain",
               borderRadius: "12px",
-              backgroundColor: "#f8f9fa",
+              backgroundColor: isDark ? "#0f172a" : "#f8f9fa",
               padding: "10px"
             }}
             onError={(e) => {
               e.target.onerror = null;
-              e.target.src = "https://via.placeholder.com/300x300?text=Image+Not+Available";
+              e.target.src = "https://dummyimage.com/300x300/cccccc/000000&text=No+Image";
             }}
           />
         </div>
 
-        <Card
-          style={{
-            border: "1px solid #e0e0e0",
-            borderRadius: "12px",
-            boxShadow: "none",
-            marginBottom: "20px"
-          }}
-        >
+       <Card
+  style={{
+    background: isDark ? "#1e293b" : "#ffffff",
+    border: isDark ? "1px solid #334155" : "1px solid #e0e0e0",
+    borderRadius: "12px",
+    boxShadow: "none",
+    marginBottom: "20px",
+    color: isDark ? "#ffffff" : "#212529"
+  }}
+>
           <Card.Body style={{ padding: "20px" }}>
             <h3
               style={{
                 fontSize: "18px",
                 fontWeight: "500",
-                color: "#333",
+                color: isDark ? "#ffffff" : "#333",
                 marginBottom: "20px",
                 lineHeight: "1.4"
               }}
@@ -354,14 +363,14 @@ function OrderDetails() {
                 borderBottom: "1px solid #f0f0f0"
               }}
             >
-              <span style={{ fontSize: "16px", color: "#666" }}>
+              <span style={{ fontSize: "16px", color: isDark ? "#cbd5e1" : "#666"}}>
                 Subtotal:
               </span>
               <span
                 style={{
                   fontSize: "18px",
                   fontWeight: "600",
-                  color: "#333"
+                  color: isDark ? "#ffffff" : "#333"
                 }}
               >
                 {formatCurrency(displayOrderData.payableAmount || displayOrderData.total || orderData.total)}
@@ -392,7 +401,7 @@ function OrderDetails() {
                   alignItems: "center",
                   marginBottom: "20px",
                   paddingBottom: "12px",
-                  borderBottom: "1px solid #f0f0f0"
+                  borderBottom: isDark ? "1px solid #334155" : "1px solid #f0f0f0"
                 }}
               >
                 <span style={{ fontSize: "16px", color: "#666" }}>
@@ -498,8 +507,11 @@ function OrderDetails() {
                   variant="outline-danger"
                   onClick={() =>
                     navigate("/cancel-order", {
-                      state: displayOrderData,
-                    })
+  state: {
+    order: displayOrderData,
+    product: product
+  }
+})
                   }
                 >
                   Cancel Order

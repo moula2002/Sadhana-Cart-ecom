@@ -41,7 +41,7 @@ const formatCurrency = (val) =>
 function CancelOrderPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const order = location.state;
+  const { order, product } = location.state || {};
 
   const [selectedReason, setSelectedReason] = useState("");
   const [otherReason, setOtherReason] = useState("");
@@ -50,6 +50,7 @@ function CancelOrderPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [userId, setUserId] = useState(null);
+  const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -60,8 +61,7 @@ function CancelOrderPage() {
 
   if (!order) return <Alert variant="danger">No Order Found</Alert>;
 
-  const product = order.items?.[0];
-  const firestoreDocId = order.id;
+ const firestoreDocId = order.id || order.orderId;
   const orderIdNumber = order.orderId;
   const shiprocketOrderId = order.shiprocketOrderId;
   const shipmentId = order.shipmentId;
@@ -261,11 +261,17 @@ function CancelOrderPage() {
   /* ================= UI ================= */
 
   return (
-    <div style={{ background: "#fff", minHeight: "100vh" }}>
+    <div
+  style={{
+    background: isDark ? "#0f172a" : "#ffffff",
+    minHeight: "100vh",
+    color: isDark ? "#ffffff" : "#212529"
+  }}
+>
       <div
         style={{
           padding: "20px",
-          borderBottom: "1px solid #eee",
+          borderBottom: isDark ? "1px solid #334155" : "1px solid #eee",
           display: "flex",
           alignItems: "center",
           gap: "10px"
@@ -281,19 +287,28 @@ function CancelOrderPage() {
       <Container className="py-4" style={{ maxWidth: "600px" }}>
         <div className="text-center mb-4">
           <Image
-            src={product?.image}
+            src={product?.image || product?.images?.[0] || "/no-image.png"}
             fluid
             style={{ maxHeight: "250px" }}
           />
         </div>
 
-        <Card className="mb-4">
+        <Card
+  className="mb-4"
+  style={{
+    background: isDark ? "#1e293b" : "#ffffff",
+    color: isDark ? "#ffffff" : "#212529",
+    border: isDark ? "1px solid #334155" : "1px solid #e0e0e0"
+  }}
+>
           <Card.Body>
             <h6>{product?.name}</h6>
 
             <div className="d-flex justify-content-between mt-3">
               <span>Subtotal</span>
-              <strong>{formatCurrency(order.total)}</strong>
+              <strong>
+{formatCurrency(order.payableAmount || order.total || order.amount)}
+</strong>
             </div>
 
             <div className="text-center mt-3">
