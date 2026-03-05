@@ -51,6 +51,7 @@ function ProductDetailPage() {
 
     // Quantity state
     const [quantity, setQuantity] = useState(1);
+    const [showFullDescription, setShowFullDescription] = useState(false);
 
     // Variant (Size/Stock) states
     const [productVariants, setProductVariants] = useState([]);
@@ -151,23 +152,39 @@ function ProductDetailPage() {
     const styles = {
         productDetailContainer: {
             borderRadius: "16px",
-            boxShadow: "0 10px 40px rgba(0,0,0,0.08)",
-            marginTop: "25px",
+            boxShadow: "0 6px 20px rgba(0,0,0,0.08)",
+            marginTop: "10px",
             border: "none",
-            overflow: "hidden"
+            overflow: "hidden",
+            padding: "5px",
         },
         detailImg: {
-            maxHeight: "450px",
+            maxHeight: "260px",
             width: "auto",
             objectFit: "contain",
             transition: "transform 0.3s ease-in-out",
+        },
+        descriptionBox: {
+            fontSize: "13px",
+            lineHeight: "1.5",
+            color: "#6c757d",
+            display: "-webkit-box",
+            WebkitLineClamp: 3,
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+        },
+
+        descriptionBoxExpanded: {
+            fontSize: "13px",
+            lineHeight: "1.5",
+            color: "#6c757d",
         },
         productImageCol: {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            justifyContent: "center",
-            padding: "20px",
+            justifyContent: "flex-start",
+            padding: "10px",
             backgroundColor: "#fafafa",
         },
         productPrice: {
@@ -178,15 +195,15 @@ function ProductDetailPage() {
             marginBottom: "15px",
         },
         thumbnail: {
-            width: "70px",
-            height: "70px",
+            width: "55px",
+            height: "55px",
             objectFit: "contain",
             cursor: "pointer",
             border: "2px solid #e9ecef",
-            margin: "0 5px",
-            padding: "5px",
+            margin: "0 4px",
+            padding: "3px",
             transition: "all 0.2s",
-            borderRadius: "8px",
+            borderRadius: "6px",
         },
         activeThumbnail: {
             borderColor: "#3498db",
@@ -284,14 +301,11 @@ function ProductDetailPage() {
             borderRadius: '8px'
         },
         thumbnailContainer: {
-            display: 'flex',
-            justifyContent: 'center',
-            flexWrap: 'wrap',
-            gap: '12px',
-            marginTop: '20px',
-            padding: '15px',
-            backgroundColor: '#f8f9fa',
-            borderRadius: '12px'
+            display: "flex",
+            justifyContent: "center",
+            flexWrap: "wrap",
+            gap: "6px",
+            marginTop: "10px",
         },
         modalThumbnail: {
             width: '70px',
@@ -723,22 +737,22 @@ function ProductDetailPage() {
     }, [selectedSize, productVariants]);
 
     const calculatedPriceINR = useMemo(() => {
-    if (!product) return 0;
+        if (!product) return 0;
 
-    const basePrice =
-        product.offerprice ||
-        currentVariant?.price ||
-        product.price ||
-        0;
+        const basePrice =
+            product.offerprice ||
+            currentVariant?.price ||
+            product.price ||
+            0;
 
-    return (basePrice * EXCHANGE_RATE).toFixed(0);
-}, [currentVariant, product]);
+        return (basePrice * EXCHANGE_RATE).toFixed(0);
+    }, [currentVariant, product]);
 
     const calculatedOriginalPriceINR = useMemo(() => {
-    if (!product) return 0;
+        if (!product) return 0;
 
-    return (product.price || 0) * EXCHANGE_RATE;
-}, [product]);
+        return (product.price || 0) * EXCHANGE_RATE;
+    }, [product]);
 
     const sortedVariants = useMemo(() => {
         const sizeOrder = ["S", "M", "L", "XL", "XXL", "XXXL"];
@@ -1178,9 +1192,9 @@ function ProductDetailPage() {
     );
 
     const discountPercentage =
-    calculatedOriginalPriceINR > 0
-        ? (((calculatedOriginalPriceINR - calculatedPriceINR) / calculatedOriginalPriceINR) * 100).toFixed(0)
-        : 0;
+        calculatedOriginalPriceINR > 0
+            ? (((calculatedOriginalPriceINR - calculatedPriceINR) / calculatedOriginalPriceINR) * 100).toFixed(0)
+            : 0;
     const rating = { rate: reviewsData.averageRating, count: reviewsData.totalRatings };
 
     const isOutOfStock = productVariants.length > 0
@@ -1321,19 +1335,138 @@ function ProductDetailPage() {
                             </p>
                         </div>
 
+
                         {/* Description */}
-                        <p className="text-muted mb-4" style={{ lineHeight: '1.8' }}>
-                            {product.description || "No description available."}
-                        </p>
+                        <div className="mb-2">
+
+                            <p
+                                className="text-muted"
+                                style={showFullDescription ? styles.descriptionBoxExpanded : styles.descriptionBox}
+                            >
+                                {product.description || "No description available."}
+                            </p>
+
+                            {product.description && product.description.length > 120 && (
+                                <Button
+                                    variant="link"
+                                    className="p-0"
+                                    style={{ fontSize: "13px", textDecoration: "none" }}
+                                    onClick={() => setShowFullDescription(!showFullDescription)}
+                                >
+                                    {showFullDescription ? "Show Less" : "Read More"}
+                                </Button>
+                            )}
+
+                        </div>
+
+                        {/* Product Details Accordion */}
+                        {product && (
+                            <Accordion className="mt-1 mb-1">
+                                <Accordion.Item eventKey="0">
+                                    <Accordion.Header>
+                                        <strong>Details</strong>
+                                    </Accordion.Header>
+
+                                    <Accordion.Body>
+
+                                        {product.material && (
+                                            <Row className="mb-2">
+                                                <Col xs={6}><strong>Material :</strong></Col>
+                                                <Col xs={6}>{product.material}</Col>
+                                            </Row>
+                                        )}
+
+                                        {product.pattern && (
+                                            <Row className="mb-2">
+                                                <Col xs={6}><strong>Pattern :</strong></Col>
+                                                <Col xs={6}>{product.pattern}</Col>
+                                            </Row>
+                                        )}
+
+                                        {product.sleevetype && (
+                                            <Row className="mb-2">
+                                                <Col xs={6}><strong>Sleeve Type :</strong></Col>
+                                                <Col xs={6}>{product.sleevetype}</Col>
+                                            </Row>
+                                        )}
+
+                                        {product.hsncode && (
+                                            <Row className="mb-2">
+                                                <Col xs={6}><strong>HSN Code :</strong></Col>
+                                                <Col xs={6}>{product.hsncode}</Col>
+                                            </Row>
+                                        )}
+
+                                        {product.fittype && (
+                                            <Row className="mb-2">
+                                                <Col xs={6}><strong>Fit Type :</strong></Col>
+                                                <Col xs={6}>{product.fittype}</Col>
+                                            </Row>
+                                        )}
+
+                                        {product.gender && (
+                                            <Row className="mb-2">
+                                                <Col xs={6}><strong>Gender :</strong></Col>
+                                                <Col xs={6}>{product.gender}</Col>
+                                            </Row>
+                                        )}
+
+                                        {product.necktype && (
+                                            <Row className="mb-2">
+                                                <Col xs={6}><strong>Neck Type :</strong></Col>
+                                                <Col xs={6}>{product.necktype}</Col>
+                                            </Row>
+                                        )}
+
+                                        {product.occasion && (
+                                            <Row className="mb-2">
+                                                <Col xs={6}><strong>Occasion :</strong></Col>
+                                                <Col xs={6}>{product.occasion}</Col>
+                                            </Row>
+                                        )}
+
+                                        {product.stitchtype && (
+                                            <Row className="mb-2">
+                                                <Col xs={6}><strong>Stitch Type :</strong></Col>
+                                                <Col xs={6}>{product.stitchtype}</Col>
+                                            </Row>
+                                        )}
+
+                                        {product.lining && (
+                                            <Row className="mb-2">
+                                                <Col xs={6}><strong>Lining :</strong></Col>
+                                                <Col xs={6}>{product.lining}</Col>
+                                            </Row>
+                                        )}
+
+                                        {product.slittype && (
+                                            <Row className="mb-2">
+                                                <Col xs={6}><strong>Slit Type :</strong></Col>
+                                                <Col xs={6}>{product.slittype}</Col>
+                                            </Row>
+                                        )}
+
+                                        {product.color && (
+                                            <Row className="mb-2">
+                                                <Col xs={6}><strong>Color :</strong></Col>
+                                                <Col xs={6}>{product.color}</Col>
+                                            </Row>
+                                        )}
+
+                                    </Accordion.Body>
+                                </Accordion.Item>
+                            </Accordion>
+                        )}
 
                         {/* Size Selector */}
+                        {/* Size Selector */}
                         {sortedVariants.length > 0 && (
-                            <div className="mb-4">
-                                <Form.Label className="fw-bold mb-3">
+                            <div className="mt-2 mb-3">
+                                <Form.Label className="fw-bold mb-2">
                                     <FaBox className="me-2" />
                                     Select Size
                                 </Form.Label>
-                                <div className="d-flex flex-wrap">
+                                <div className="d-flex flex-wrap mt-1">
                                     {sortedVariants.map((variant) => (
                                         <Button
                                             key={variant.size}
@@ -1347,7 +1480,7 @@ function ProductDetailPage() {
                                             disabled={(variant.stock || 0) === 0}
                                         >
                                             {variant.size}
- 
+
                                         </Button>
                                     ))}
                                 </div>
