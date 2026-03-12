@@ -15,7 +15,7 @@ const formatCurrency = (val) =>
 // Helper function to safely format date
 const formatOrderDate = (dateValue) => {
   if (!dateValue) return "N/A";
-  
+
   try {
     if (dateValue?.toDate && typeof dateValue.toDate === 'function') {
       return dateValue.toDate().toLocaleDateString('en-IN', {
@@ -24,7 +24,7 @@ const formatOrderDate = (dateValue) => {
         year: 'numeric'
       });
     }
-    
+
     if (dateValue instanceof Date) {
       return dateValue.toLocaleDateString('en-IN', {
         day: 'numeric',
@@ -32,7 +32,7 @@ const formatOrderDate = (dateValue) => {
         year: 'numeric'
       });
     }
-    
+
     if (typeof dateValue === 'string' || typeof dateValue === 'number') {
       return new Date(dateValue).toLocaleDateString('en-IN', {
         day: 'numeric',
@@ -40,7 +40,7 @@ const formatOrderDate = (dateValue) => {
         year: 'numeric'
       });
     }
-    
+
     return "N/A";
   } catch (error) {
     console.error("Error formatting date:", error);
@@ -51,9 +51,9 @@ const formatOrderDate = (dateValue) => {
 // Helper function to map database status to display text
 const getDisplayStatusFromDbStatus = (status) => {
   if (!status) return "Order Placed";
-  
+
   const statusLower = status.toLowerCase();
-  
+
   if (statusLower === "request_completed") return "Return Requested";
   if (statusLower === "return_approved") return "Return Approved";
   if (statusLower === "refund_completed" || statusLower === "refunded") return "Refund Completed";
@@ -62,7 +62,7 @@ const getDisplayStatusFromDbStatus = (status) => {
   if (statusLower === "shipped") return "Shipped";
   if (statusLower === "processing") return "Processing";
   if (statusLower === "pending") return "Order Placed";
-  
+
   return status;
 };
 
@@ -72,7 +72,7 @@ function OrderDetails() {
   const orderData = location.state;
 
   const [orderStatus, setOrderStatus] = useState(null);
-  const [returnStatus, setReturnStatus] = useState(null); 
+  const [returnStatus, setReturnStatus] = useState(null);
   const [loadingReturn, setLoadingReturn] = useState(true);
   const [loadingOrder, setLoadingOrder] = useState(true);
   const [firebaseOrderData, setFirebaseOrderData] = useState(null);
@@ -95,10 +95,10 @@ function OrderDetails() {
       if (product?.images?.[0]) return product.images[0];
       if (product?.productImage) return product.productImage;
       if (product?.thumbnail) return product.thumbnail;
-      
+
       if (orderData?.productImage) return orderData.productImage;
       if (orderData?.images?.[0]) return orderData.images[0];
-      
+
       return null;
     };
 
@@ -121,36 +121,36 @@ function OrderDetails() {
       try {
         const orderRef = doc(db, "users", userId, "orders", orderId);
         const orderSnap = await getDoc(orderRef);
-        
+
         if (orderSnap.exists()) {
           const freshOrderData = orderSnap.data();
           setFirebaseOrderData(freshOrderData);
           setOrderStatus(freshOrderData.orderStatus || "Pending");
-          
+
           if (freshOrderData.orderDate) {
             setFormattedDate(formatOrderDate(freshOrderData.orderDate));
           } else if (orderData.orderDate) {
             setFormattedDate(formatOrderDate(orderData.orderDate));
           }
-          
-          const freshProduct = freshOrderData.products?.find(p => 
+
+          const freshProduct = freshOrderData.products?.find(p =>
             p.id === productId || p.productId === productId || p.productid === productId
           );
-          
+
           if (freshProduct) {
             if (freshProduct.image) setProductImage(freshProduct.image);
             else if (freshProduct.images?.[0]) setProductImage(freshProduct.images[0]);
-        
+
           }
         } else {
           const mainOrderRef = doc(db, "orders", orderId);
           const mainOrderSnap = await getDoc(mainOrderRef);
-          
+
           if (mainOrderSnap.exists()) {
             const freshOrderData = mainOrderSnap.data();
             setFirebaseOrderData(freshOrderData);
             setOrderStatus(freshOrderData.orderStatus || "Pending");
-            
+
             if (freshOrderData.orderDate) {
               setFormattedDate(formatOrderDate(freshOrderData.orderDate));
             } else if (orderData.orderDate) {
@@ -231,7 +231,7 @@ function OrderDetails() {
   }
 
   const displayOrderData = firebaseOrderData || orderData;
-  
+
   // FINAL STATUS (Return status has priority)
   const finalStatus = returnStatus
     ? returnStatus
@@ -269,12 +269,12 @@ function OrderDetails() {
 
   return (
     <div
-  style={{
-    background: isDark ? "#0f172a" : "#ffffff",
-    minHeight: "100vh",
-    color: isDark ? "#ffffff" : "#212529"
-  }}
->
+      style={{
+        background: isDark ? "#0f172a" : "#ffffff",
+        minHeight: "100vh",
+        color: isDark ? "#ffffff" : "#212529"
+      }}
+    >
       <div
         style={{
           padding: "20px 16px",
@@ -288,14 +288,14 @@ function OrderDetails() {
           style={{ fontSize: "20px", cursor: "pointer", color: isDark ? "#ffffff" : "#333" }}
           onClick={() => navigate(-1)}
         />
-      <h1
-  style={{
-    fontSize: "20px",
-    fontWeight: "600",
-    margin: 0,
-    color: isDark ? "#ffffff" : "#333"
-  }}
->
+        <h1
+          style={{
+            fontSize: "20px",
+            fontWeight: "600",
+            margin: 0,
+            color: isDark ? "#ffffff" : "#333"
+          }}
+        >
           Order Details
         </h1>
       </div>
@@ -330,16 +330,16 @@ function OrderDetails() {
           />
         </div>
 
-       <Card
-  style={{
-    background: isDark ? "#1e293b" : "#ffffff",
-    border: isDark ? "1px solid #334155" : "1px solid #e0e0e0",
-    borderRadius: "12px",
-    boxShadow: "none",
-    marginBottom: "20px",
-    color: isDark ? "#ffffff" : "#212529"
-  }}
->
+        <Card
+          style={{
+            background: isDark ? "#1e293b" : "#ffffff",
+            border: isDark ? "1px solid #334155" : "1px solid #e0e0e0",
+            borderRadius: "12px",
+            boxShadow: "none",
+            marginBottom: "20px",
+            color: isDark ? "#ffffff" : "#212529"
+          }}
+        >
           <Card.Body style={{ padding: "20px" }}>
             <h3
               style={{
@@ -363,7 +363,7 @@ function OrderDetails() {
                 borderBottom: "1px solid #f0f0f0"
               }}
             >
-              <span style={{ fontSize: "16px", color: isDark ? "#cbd5e1" : "#666"}}>
+              <span style={{ fontSize: "16px", color: isDark ? "#cbd5e1" : "#666" }}>
                 Subtotal:
               </span>
               <span
@@ -424,16 +424,16 @@ function OrderDetails() {
                 style={{
                   backgroundColor:
                     displayStatus.includes("Return") || displayStatus.includes("Refund")
-                      ? "#e2e3ff" 
+                      ? "#e2e3ff"
                       : isCancelled
-                      ? "#f8d7da"
-                      : "#fff3cd",
+                        ? "#f8d7da"
+                        : "#fff3cd",
                   color:
                     displayStatus.includes("Return") || displayStatus.includes("Refund")
                       ? "#4050b5"
                       : isCancelled
-                      ? "#842029"
-                      : "#856404",
+                        ? "#842029"
+                        : "#856404",
                   fontWeight: "500",
                   fontSize: "16px",
                   padding: "8px 24px",
@@ -507,11 +507,11 @@ function OrderDetails() {
                   variant="outline-danger"
                   onClick={() =>
                     navigate("/cancel-order", {
-  state: {
-    order: displayOrderData,
-    product: product
-  }
-})
+                      state: {
+                        order: displayOrderData,
+                        product: product
+                      }
+                    })
                   }
                 >
                   Cancel Order

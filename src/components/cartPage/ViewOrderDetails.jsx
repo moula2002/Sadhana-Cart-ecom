@@ -177,17 +177,17 @@ const mapFirestoreOrderToLocal = (docData, docId) => {
   let orderDate = formatOrderDate(docData.orderDate);
 
   // Ensure products array exists and has images
-  const products = (docData.products || []).map((p) => ({
-    id: p.id || p.productId || p.productid || "",
-    name: p.name || "Product",
-    quantity: p.quantity || 1,
-    price: p.price || 0,
-    image: p.image || p.images?.[0] || "https://via.placeholder.com/400x500?text=Product",
-    images: p.images || [p.image],
-    productId: p.productId || p.id,
-    productImage: p.productImage || p.image,
-    returnStatus: p.returnStatus || null // Include return status for each product
-  }));
+ const products = (docData.products || []).map((p) => ({
+  id: p.id || p.productId || p.productid || "",
+  name: p.name || "Product",
+  quantity: p.quantity || 1,
+  price: p.price || 0,
+  image: p.images?.[0] || p.image || p.productImage || "https://via.placeholder.com/400x500?text=Product",
+  images: p.images || [],
+  productId: p.productId || p.id,
+  productImage: p.productImage || p.image,
+  returnStatus: p.returnStatus || null
+}));
 
   return {
     id: docId,

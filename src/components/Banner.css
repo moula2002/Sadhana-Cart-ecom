@@ -1,5 +1,5 @@
 /* ===============================
-   Banner Wrapper – Apple Glass
+   Banner Wrapper
 ================================ */
 .banner-wrapper {
   position: relative;
@@ -13,14 +13,38 @@
   align-items: center;
   justify-content: center;
   border-radius: 18px;
-  background: #ffffff;
-  box-shadow:
-    0 20px 40px rgba(0, 0, 0, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  background: #f0f0f0; /* Default background while loading */
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
 
 /* ===============================
-   Soft Blurred Background
+   Loading Screen (Simplified)
+================================ */
+.banner-loader-compact {
+  width: 100%;
+  height: 400px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f9f9f9;
+  border-radius: 18px;
+}
+
+.simple-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(0,0,0,0.1);
+  border-left-color: #ff0080;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ===============================
+   Background & Overlay
 ================================ */
 .banner-bg {
   position: absolute;
@@ -32,144 +56,122 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: blur(30px) brightness(1.1) saturate(1.05);
-  transform: scale(1.15);
+  filter: blur(25px) brightness(1.1);
+  transform: scale(1.1);
 }
 
-/* White glass overlay */
 .banner-bg .overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.7),
-    rgba(255, 255, 255, 0.95)
-  );
-  backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(15px);
 }
 
 /* ===============================
-   Slides Container
+   Slides
 ================================ */
 .slides-container {
   position: relative;
   width: 100%;
   height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   z-index: 2;
 }
 
-/* ===============================
-   Slides – BIGGER HEIGHT
-================================ */
 .banner-slide {
   position: absolute;
-  width: 42%;
-  height: 92%;              /* ✅ increased from 85% */
+  width: 45%;
+  height: 90%;
+  top: 5%;
+  left: 27.5%; /* Center calculation */
   opacity: 0;
-  pointer-events: none;
   border-radius: 22px;
   overflow: hidden;
-  background: #ffffff;
-  transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow:
-    0 30px 60px rgba(0, 0, 0, 0.18),
-    0 0 0 1px rgba(0, 0, 0, 0.06);
+  transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
 }
 
 .banner-slide img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.4s ease;
 }
 
-/* ===============================
-   Slide Positions
-================================ */
 .banner-slide.center {
   opacity: 1;
   z-index: 10;
-  transform: translateX(0) scale(1.06);
-  pointer-events: auto;
+  transform: scale(1.05);
 }
 
 .banner-slide.left {
-  opacity: 0.55;
+  opacity: 0.5;
   z-index: 5;
-  transform: translateX(-55%) scale(0.82);
+  transform: translateX(-65%) scale(0.85);
 }
 
 .banner-slide.right {
-  opacity: 0.55;
+  opacity: 0.5;
   z-index: 5;
-  transform: translateX(55%) scale(0.82);
+  transform: translateX(65%) scale(0.85);
 }
 
-/* Subtle hover zoom */
-.banner-slide.center:hover img {
-  transform: scale(1.04);
+.banner-slide.hidden {
+  display: none;
 }
 
 /* ===============================
-   Progress Bar – Minimal
+   Controls
 ================================ */
 .banner-progress {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  height: 3px;
+  height: 4px;
   background: rgba(0, 0, 0, 0.05);
   z-index: 20;
 }
 
+.progress-bar {
+  height: 100%;
+  background: #ff0080;
+  transition: width 0.05s linear;
+}
 
-
-/* ===============================
-   Navigation Buttons – Glass
-================================ */
 .banner-nav {
   position: absolute;
   width: 100%;
-  padding: 0 22px;
+  padding: 0 30px;
   display: flex;
   justify-content: space-between;
-  z-index: 30;
   top: 50%;
   transform: translateY(-50%);
+  z-index: 30;
   pointer-events: none;
 }
 
 .nav-btn {
-  width: 46px;
-  height: 46px;
+  width: 45px;
+  height: 45px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.85);
-  color: #111;
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  background: white;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   cursor: pointer;
   pointer-events: auto;
   display: flex;
-  align-items: center;
   justify-content: center;
-  backdrop-filter: blur(12px);
-  transition: all 0.3s ease;
+  align-items: center;
+  transition: 0.3s;
 }
 
 .nav-btn:hover {
-  transform: scale(1.12);
-  background: #ffffff;
+  background: #ff0080;
+  color: white;
 }
 
-/* ===============================
-   Dots – Minimal Apple Style
-================================ */
 .banner-dots {
   position: absolute;
-  bottom: 14px;
+  bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -178,47 +180,21 @@
 }
 
 .dot {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.3);
-  transition: 0.3s;
+  background: rgba(0, 0, 0, 0.2);
+  cursor: pointer;
 }
 
 .dot.active {
-  width: 26px;
-  border-radius: 13px;
+  width: 24px;
+  border-radius: 10px;
   background: #ff0080;
 }
 
-/* ===============================
-   Responsive
-================================ */
+/* Responsive */
 @media (max-width: 768px) {
-  .banner-wrapper {
-    height: 40vh;
-    min-height: 350px;
-  }
-
-  .banner-slide {
-    width: 75%;
-    height: 88%;           /* ✅ increased */
-  }
-
-  .banner-slide.left,
-  .banner-slide.right {
-    opacity: 0.3;
-    transform: scale(0.7);
-  }
-}
-
-@media (max-width: 480px) {
-  .banner-wrapper {
-    height: 320px;
-  }
-
-  .banner-slide {
-    width: 85%;
-    height: 85%;           /* ✅ increased */
-  }
+  .banner-slide { width: 85%; left: 7.5%; }
+  .banner-slide.left, .banner-slide.right { opacity: 0; }
 }

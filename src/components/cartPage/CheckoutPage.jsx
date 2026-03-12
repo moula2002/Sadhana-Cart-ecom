@@ -762,59 +762,70 @@ const reduceProductStock = useCallback(async () => {
       return;
     }
 
-    const options = {
-      key: RAZORPAY_KEY_ID,
-      amount: amountInPaise,
-      currency: "INR",
-      name: "SadhanaCart",
-      description: "Purchase Checkout",
-     handler: async function (response) {
+  const options = {
+  key: RAZORPAY_KEY_ID,
+  amount: amountInPaise,
+  currency: "INR",
+  name: "SadhanaCart",
+  description: "Purchase Checkout",
+  offer_id: "offer_SNpgKSdxp2aIIa",
+  method: {
+    card: true,
+    upi: true,
+    netbanking: true,
+    wallet: true
+  },
 
-  alert(`Payment Successful! Payment ID: ${response.razorpay_payment_id}`);
+  handler: async function (response) {
 
-  try {
-    await reduceProductStock();
-  } catch (err) {
-    alert(err.message);
-    return;
-  }
+    alert(`Payment Successful! Payment ID: ${response.razorpay_payment_id}`);
 
-  const result = await saveOrderToFirestore(
-    "Razorpay",
-    "Paid",
-    response.razorpay_payment_id
-  );
+    try {
+      await reduceProductStock();
+    } catch (err) {
+      alert(err.message);
+      return;
+    }
 
-  if (result && result.success) {
-    navigate("/order-confirm", {
-      state: {
-        paymentMethod: "Razorpay",
-        total: formatPrice(finalAmount),
-        originalTotal: formatPrice(totalPrice),
-        itemsCount: mergedCartItems.length,
-        billingDetails,
-        cartItems: mergedCartItems,
-        sellerid: result.sellerid,
-        orderDocId: result.docId,
-        coinsUsed: result.coinsUsed,
-        discount: result.discount,
-      },
-    });
-  }
-},
-      prefill: {
-        name: billingDetails.fullName,
-        email: billingDetails.email,
-        contact: billingDetails.phone,
-      },
-      notes: {
-        address: billingDetails.address,
-        pincode: billingDetails.pincode,
-        coins_used: coinsToUse,
-        coin_discount: coinDiscount,
-      },
-      theme: { color: "#FFA500" },
-    };
+    const result = await saveOrderToFirestore(
+      "Razorpay",
+      "Paid",
+      response.razorpay_payment_id
+    );
+
+    if (result && result.success) {
+      navigate("/order-confirm", {
+        state: {
+          paymentMethod: "Razorpay",
+          total: formatPrice(finalAmount),
+          originalTotal: formatPrice(totalPrice),
+          itemsCount: mergedCartItems.length,
+          billingDetails,
+          cartItems: mergedCartItems,
+          sellerid: result.sellerid,
+          orderDocId: result.docId,
+          coinsUsed: result.coinsUsed,
+          discount: result.discount,
+        },
+      });
+    }
+  },
+
+  prefill: {
+    name: billingDetails.fullName,
+    email: billingDetails.email,
+    contact: billingDetails.phone,
+  },
+
+  notes: {
+    address: billingDetails.address,
+    pincode: billingDetails.pincode,
+    coins_used: coinsToUse,
+    coin_discount: coinDiscount,
+  },
+
+  theme: { color: "#FFA500" },
+};
 
     const paymentObject = new window.Razorpay(options);
     paymentObject.open();

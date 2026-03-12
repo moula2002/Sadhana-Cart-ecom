@@ -424,12 +424,12 @@ const reduceProductStock = async () => {
       }
 
       // Sync with Seller data
-      await saveOrderToSellerCollections(orderData, userOrderDocRef.id);
-      await updateSellerDocuments(
-        Array.isArray(sellerIdsInOrder) ? sellerIdsInOrder : [sellerIdsInOrder],
-        userOrderDocRef.id,
-        orderData
-      );
+      // await saveOrderToSellerCollections(orderData, userOrderDocRef.id);
+      // await updateSellerDocuments(
+      //   Array.isArray(sellerIdsInOrder) ? sellerIdsInOrder : [sellerIdsInOrder],
+      //   userOrderDocRef.id,
+      //   orderData
+      // );
 
       return {
         success: true,

@@ -33,22 +33,7 @@ import ViewOrderDetails from "./components/cartPage/ViewOrderDetails";
 import OrderDetails from "./components/cartPage/OrderDetails";
 import CancelOrderPage from "./components/cartPage/CancelOrderPage";
 import ProductReturnPage from "./components/cartPage/ProductReturnPage";
-import TrackOrder from "./components/cartPage/TrackOrder"; // ✅ ADDED TrackOrder import
-
-/* ===== Category Pages ===== */
-import Fashion from "./components/category/Fashion";
-import Accessories from "./components/category/Accessories";
-import Cosmetics from "./components/category/Cosmetics";
-import Toys from "./components/category/Toys";
-import Stationary from "./components/category/Stationary";
-import Book from "./components/category/Book";
-import PhotoFrame from "./components/category/PhotoFrame";
-import Footwears from "./components/category/Footwears";
-import Jewellery from "./components/category/Jewellery";
-import Mens from "./components/category/Mens";
-import Kids from "./components/category/Kids";
-import Electronics from "./components/category/Electronics";
-import PersonalCare from "./components/category/PersonalCare";
+import TrackOrder from "./components/cartPage/TrackOrder";
 
 /* ===== Footer Pages ===== */
 import ReturnPolicy from "./features/footer/ReturnPolicy";
@@ -91,13 +76,13 @@ const AppContent = () => {
           <Route path="/order-details" element={<OrderDetails />} />
           <Route path="/cancel-order" element={<CancelOrderPage />} />
           <Route path="/return-order" element={<ProductReturnPage />} />
-          <Route path="/track-order" element={<TrackOrder />} /> {/* ✅ ADDED TrackOrder route */}
+          <Route path="/track-order" element={<TrackOrder />} />
           <Route path="/support" element={<CustomerSupportCenter />} />
 
           {/* 🔹 User Pages */}
           <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/address" element={<SaveAddress/>} />
-          <Route path="/save-address" element={<AddressList/>} />
+          <Route path="/address" element={<SaveAddress />} />
+          <Route path="/save-address" element={<AddressList />} />
           <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/refercode" element={<ReferCode />} />
           <Route path="/wallet" element={<Wallet />} />
@@ -118,19 +103,6 @@ const AppContent = () => {
 
           {/* 🔹 Category Pages */}
           <Route path="/category" element={<CategoryPage />} />
-          <Route path="/fashion" element={<Fashion />} />
-          <Route path="/accessories" element={<Accessories />} />
-          <Route path="/cosmetics" element={<Cosmetics />} />
-          <Route path="/toys" element={<Toys />} />
-          <Route path="/stationary" element={<Stationary />} />
-          <Route path="/book" element={<Book />} />
-          <Route path="/photoframe" element={<PhotoFrame />} />
-          <Route path="/footwears" element={<Footwears />} />
-          <Route path="/jewellery" element={<Jewellery />} />
-          <Route path="/mens" element={<Mens />} />
-          <Route path="/kids" element={<Kids />} />
-          <Route path="/electronics" element={<Electronics />} />
-          <Route path="/personal-care" element={<PersonalCare />} />
 
           {/* 🔹 Footer Policy Pages */}
           <Route path="/return-policy" element={<ReturnPolicy />} />

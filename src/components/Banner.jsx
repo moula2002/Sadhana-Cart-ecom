@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
-import { collection, getDocs } from "firebase/firestore";
+import React, { useEffect, useState, useCallback } from "react";
+import { collection, getDocs, query, where, limit } from "firebase/firestore";
 import { db } from "../firebase";
 import "./Banner.css";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
@@ -13,106 +13,76 @@ const Banner = () => {
   useEffect(() => {
     const fetchBanners = async () => {
       try {
-        setLoading(true);
-        const snap = await getDocs(collection(db, "posters"));
-        const list = [];
-        snap.forEach((doc) => {
-          const d = doc.data();
-          if (d.status === "active") {
-            list.push({ id: doc.id, image: d.image });
-          }
+        // Query-லேயே "active" மட்டும் எடுப்பது வேகமானது
+        const q = query(
+          collection(db, "posters"),
+          where("status", "==", "active"),
+          limit(5)
+        );
+        
+        const snap = await getDocs(q);
+        const list = snap.docs.map(doc => ({
+          id: doc.id,
+          image: doc.data().image
+        }));
+
+        setBanners(list);
+        setLoading(false); // உடனே Loading-ஐ நிறுத்தவும்
+
+        // படங்களை முன்கூட்டியே Cache செய்ய (Pre-fetching)
+        list.forEach((b) => {
+          const img = new Image();
+          img.src = b.image;
         });
-        setBanners(list.slice(0, 5));
+
       } catch (error) {
         console.error("Error fetching banners:", error);
-      } finally {
-        // Add slight delay for smooth transition
-        setTimeout(() => setLoading(false), 500);
+        setLoading(false);
       }
     };
     fetchBanners();
   }, []);
 
   const nextSlide = useCallback(() => {
+    if (banners.length === 0) return;
     setIndex((prev) => (prev + 1) % banners.length);
     setProgress(0);
   }, [banners.length]);
 
   const prevSlide = useCallback(() => {
+    if (banners.length === 0) return;
     setIndex((prev) => (prev - 1 + banners.length) % banners.length);
     setProgress(0);
   }, [banners.length]);
 
   useEffect(() => {
     if (banners.length <= 1 || loading) return;
+
     const interval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
           nextSlide();
           return 0;
         }
-        return prev + 0.7; // Speed of progress bar
+        return prev + 1; // வேகத்தை இங்கு மாற்றலாம்
       });
-    }, 50);
+    }, 40); // 50-லிருந்து 40-க்கு மாற்றப்பட்டது (Smoother)
+
     return () => clearInterval(interval);
   }, [banners.length, nextSlide, loading]);
 
-  // Helper to get 3 images to show
   const getVisibleIndices = () => {
-    const prev = (index - 1 + banners.length) % banners.length;
+    const len = banners.length;
+    const prev = (index - 1 + len) % len;
     const curr = index;
-    const next = (index + 1) % banners.length;
+    const next = (index + 1) % len;
     return { prev, curr, next };
   };
 
-  const { prev, curr, next } = getVisibleIndices();
-
   if (loading) {
     return (
-      <div className="banner-loader-wrapper">
-        {/* Animated Background */}
-        <div className="banner-loader-bg">
-          <div className="gradient-animation"></div>
-        </div>
-        
-        {/* Glassmorphism Container */}
-        <div className="banner-loader">
-          {/* Spinner */}
-          <div className="loader-spinner">
-            <div className="spinner-ring"></div>
-            <div className="spinner-ring"></div>
-            <div className="spinner-ring"></div>
-            <div className="spinner-center">
-              <div className="pulse-dot"></div>
-            </div>
-          </div>
-          
-          {/* Loading Text */}
-          <div className="loader-text" style={{textAlign : "center"}}>
-            <span className="loader-text-line" style={{color: "blueviolet"}}>Loading</span>
-            <div className="loader-dots">
-              <div className="dot-bounce"></div>
-              <div className="dot-bounce"></div>
-              <div className="dot-bounce"></div>
-            </div>
-          </div>
-          
-          {/* Progress Bar */}
-          <div className="loader-progress" style={{textAlign: "center"}}>
-            <div className="progress-track">
-              <div className="progress-fill"></div>
-            </div>
-            <div className="progress-text" style={{color: "forestgreen"}}>Preparing your experience</div>
-          </div>
-          
-          {/* Floating Elements */}
-          <div className="floating-shapes">
-            <div className="shape shape-1"></div>
-            <div className="shape shape-2"></div>
-            <div className="shape shape-3"></div>
-            <div className="shape shape-4"></div>
-          </div>
-        </div>
+      <div className="banner-loader-compact">
+        <div className="simple-spinner"></div>
       </div>
     );
   }
@@ -122,16 +92,17 @@ const Banner = () => {
       <div className="banner-empty">
         <div className="empty-icon">🎬</div>
         <h3>No banners available</h3>
-        <p>Check back soon for amazing content!</p>
       </div>
     );
   }
 
+  const { prev, curr, next } = getVisibleIndices();
+
   return (
     <section className="banner-wrapper">
-      {/* Dynamic Background */}
+      {/* Background with Blur */}
       <div className="banner-bg">
-        <img src={banners[curr]?.image} alt="bg" />
+        <img src={banners[curr]?.image} alt="bg" loading="eager" />
         <div className="overlay"></div>
       </div>
 
@@ -149,7 +120,7 @@ const Banner = () => {
 
           return (
             <div key={b.id} className={slideClass}>
-              <img src={b.image} alt="Banner" />
+              <img src={b.image} alt="Banner" loading="eager" />
             </div>
           );
         })}
