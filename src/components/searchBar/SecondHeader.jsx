@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./SecondHeader.css";
-import { FaBars, FaTimes, FaSpinner, FaChevronLeft, FaChevronRight,  } from "react-icons/fa";
+import { FaBars, FaTimes, FaSpinner, FaChevronLeft, FaChevronRight, } from "react-icons/fa";
 import { db, collection, getDocs } from "../../firebase";
 
 const SecondHeader = () => {
@@ -12,7 +12,7 @@ const SecondHeader = () => {
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
-  
+
   const navigate = useNavigate();
   const location = useLocation();
   const scrollContainerRef = useRef(null);
@@ -20,10 +20,10 @@ const SecondHeader = () => {
   // Check for dark mode
   useEffect(() => {
     const checkDarkMode = () => {
-      const isDark = document.body.classList.contains('dark-theme') || 
-                     document.documentElement.getAttribute('data-bs-theme') === 'dark';
+      const isDark = document.body.classList.contains('dark-theme') ||
+        document.documentElement.getAttribute('data-bs-theme') === 'dark';
       setIsDarkMode(isDark);
-      
+
       // Update CSS variables based on theme
       updateThemeColors(isDark);
     };
@@ -61,7 +61,7 @@ const SecondHeader = () => {
   const toggleDarkMode = () => {
     const html = document.documentElement;
     const body = document.body;
-    
+
     if (isDarkMode) {
       // Switch to light mode
       html.removeAttribute('data-bs-theme');
@@ -73,7 +73,7 @@ const SecondHeader = () => {
       body.classList.add('dark-theme');
       html.style.setProperty('color-scheme', 'dark');
     }
-    
+
     // Force re-check
     setIsDarkMode(!isDarkMode);
   };
@@ -138,13 +138,13 @@ const SecondHeader = () => {
   const handleScroll = (direction) => {
     const container = scrollContainerRef.current;
     if (container) {
-      const scrollAmount = 300; 
+      const scrollAmount = 300;
       if (direction === 'left') {
         container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
       } else {
         container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
       }
-      
+
       setTimeout(updateArrowVisibility, 300);
     }
   };
@@ -165,7 +165,7 @@ const SecondHeader = () => {
       container.addEventListener('scroll', updateArrowVisibility);
       window.addEventListener('resize', updateArrowVisibility);
       updateArrowVisibility();
-      
+
       return () => {
         container.removeEventListener('scroll', updateArrowVisibility);
         window.removeEventListener('resize', updateArrowVisibility);
@@ -177,9 +177,42 @@ const SecondHeader = () => {
     <div className="second-header-wrapper theme-bg">
       <div className="second-header">
         <div className="menu-left">
-          <div className="menu-item all" onClick={() => setMobileMenu(true)}>
-            <FaBars className="menu-icon" />
-            <span className="all-text theme-text">ALL CATEGORIES</span>
+          {/* MOBILE CATEGORY SCROLL UI */}
+          <div className="mobile-category-scroll">
+            {loading ? (
+              <div className="mobile-loading theme-text-secondary">
+                <FaSpinner className="spinner" /> Loading...
+              </div>
+            ) : (
+              <div className="mobile-category-list">
+                {categories.map((category) => (
+                  <div
+                    key={category.id}
+                    className="mobile-category-card"
+                    onClick={() => handleCategoryClick(category)}
+                  >
+                    <div className="mobile-category-img-wrapper">
+                      {category.imageUrl ? (
+                        <img
+                          src={category.imageUrl}
+                          alt={category.name}
+                          className="mobile-category-img"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="mobile-category-icon-placeholder theme-accent-bg">
+                          {category.name.charAt(0)}
+                        </div>
+                      )}
+                    </div>
+
+                    <span className="mobile-category-title">
+                      {category.name}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="desktop-menu-container">
