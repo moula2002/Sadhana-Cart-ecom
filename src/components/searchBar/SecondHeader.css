@@ -116,7 +116,7 @@
 .menu-item {
     flex: 0 0 auto;
     padding: 0 15px;
-    height: 60px;
+    height:80px;
     display: flex;
     align-items: center;
     cursor: pointer;
@@ -127,13 +127,15 @@
 
 .category-box {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
+    gap: 6px;
 }
 
 .category-image {
-    width: 28px;
-    height: 28px;
+    width: 35px;
+    height: 35px;
     border-radius: 50%;
     object-fit: cover;
     border: 1px solid var(--border-color);
@@ -259,10 +261,17 @@
     }
 
     .category-image {
-        width: 24px;
-        height: 24px
-    }
+    width: 55px;
+    height: 55px;
+}
 
+}
+
+.category-name{
+    color: var(--text-white);
+    font-size: 13px;
+    font-weight: 500;
+    text-transform: none;
 }
 
 /* SMALL MOBILE */

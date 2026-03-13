@@ -6,7 +6,7 @@ import { Navbar, Nav, Container, Button, Modal, Badge, Dropdown } from "react-bo
 import { motion, AnimatePresence } from "framer-motion";
 
 import AuthPage from "../pages/LoginPage";
-import SecondHeader from "./searchBar/SecondHeader";
+
 
 import "./Navbar.css";
 import logo from "../Images/Sadhanacart1.png";
@@ -908,8 +908,7 @@ export default function Header() {
         </Container>
       </Navbar>
 
-      {/* SECOND HEADER */}
-      <SecondHeader />
+      
 
       {/* MODALS */}
       <AnimatePresence>

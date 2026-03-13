@@ -1,7 +1,7 @@
 import React from "react";
 import { Container } from "react-bootstrap";
 import "./Home.css";
-
+import SecondHeader from "../components/searchBar/SecondHeader";
 import Banner from "../components/Banner";
 import FeatureProducts from "../components/category/FeatureProducts";
 import RecommendedProduct from "../components/category/RecommendedProduct";
@@ -10,6 +10,9 @@ import BestProducts from "../components/category/BestProducts";   // 👈 ADD TH
 function Home() {
   return (
     <div className="homepage-content">
+
+      {/* SECOND HEADER */}
+      <SecondHeader />
 
       {/* Banner Section */}
       <section className="banner-fade-in mb-5">
