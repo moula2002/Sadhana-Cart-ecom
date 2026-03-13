@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { db } from "../../firebase";
-import { collection, getDocs } from "firebase/firestore";
+import {
+  collection,
+  query,
+  orderBy,
+  limit,
+  startAfter,
+  getDocs,
+} from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { addToCart } from "../../redux/cartSlice";
@@ -10,10 +17,8 @@ function BestProducts() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const [allProducts, setAllProducts] = useState([]);
   const [products, setProducts] = useState([]);
-
-  const [page, setPage] = useState(1);
+  const [lastDoc, setLastDoc] = useState(null);
   const [loading, setLoading] = useState(false);
   const [hoveredProduct, setHoveredProduct] = useState(null);
 
@@ -25,31 +30,65 @@ function BestProducts() {
   // 🔀 RANDOM SHUFFLE
   const shuffleArray = (array) => {
     const arr = [...array];
-
     for (let i = arr.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [arr[i], arr[j]] = [arr[j], arr[i]];
     }
-
     return arr;
   };
 
-  // 🔹 FETCH PRODUCTS
+  // 🔹 FIRST LOAD (FAST)
   const fetchProducts = async () => {
     try {
       setLoading(true);
 
-      const snapshot = await getDocs(collection(db, "products"));
+      const q = query(
+        collection(db, "products"),
+        orderBy("productid"),
+        limit(PAGE_SIZE)
+      );
+
+      const snapshot = await getDocs(q);
 
       const list = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
 
-      const shuffled = shuffleArray(list);
+      setProducts(shuffleArray(list));
 
-      setAllProducts(shuffled);
-      setProducts(shuffled.slice(0, PAGE_SIZE));
+      setLastDoc(snapshot.docs[snapshot.docs.length - 1]);
+
+      setLoading(false);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // 🔹 LOAD MORE
+  const loadMoreProducts = async () => {
+    if (!lastDoc || loading) return;
+
+    try {
+      setLoading(true);
+
+      const q = query(
+        collection(db, "products"),
+        orderBy("productid"),
+        startAfter(lastDoc),
+        limit(PAGE_SIZE)
+      );
+
+      const snapshot = await getDocs(q);
+
+      const list = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      setProducts((prev) => shuffleArray([...prev, ...list]));
+
+      setLastDoc(snapshot.docs[snapshot.docs.length - 1]);
 
       setLoading(false);
     } catch (err) {
@@ -60,22 +99,6 @@ function BestProducts() {
   useEffect(() => {
     fetchProducts();
   }, []);
-
-  // 🔹 LOAD MORE
-  const loadMoreProducts = () => {
-    if (loading) return;
-
-    const nextPage = page + 1;
-    const start = page * PAGE_SIZE;
-    const end = nextPage * PAGE_SIZE;
-
-    const newProducts = allProducts.slice(start, end);
-
-    if (newProducts.length === 0) return;
-
-    setProducts((prev) => [...prev, ...newProducts]);
-    setPage(nextPage);
-  };
 
   // 🔹 INFINITE SCROLL
   useEffect(() => {
@@ -93,7 +116,7 @@ function BestProducts() {
     window.addEventListener("scroll", handleScroll);
 
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [page, allProducts]);
+  }, [lastDoc, loading]);
 
   const calculateDiscount = (price, offerprice) => {
     if (!price || !offerprice) return 0;
