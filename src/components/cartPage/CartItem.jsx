@@ -41,7 +41,7 @@ const CartItem = ({ item, onIncrease, onDecrease, onRemove }) => {
     image: {
       maxHeight: '90px',
       width: 'auto',
-      objectFit: 'contain' as const,
+      objectFit: 'contain' ,
       filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.05))',
     },
     title: {
@@ -78,13 +78,13 @@ const CartItem = ({ item, onIncrease, onDecrease, onRemove }) => {
     },
     quantitySection: {
       display: 'flex',
-      flexDirection: 'column' as const,
+      flexDirection: 'column' ,
       alignItems: 'center',
       gap: '8px',
     },
     quantityLabel: {
       fontSize: '0.75rem',
-      textTransform: 'uppercase' as const,
+      textTransform: 'uppercase' ,
       letterSpacing: '0.5px',
       color: '#94a3b8',
       fontWeight: '500',
@@ -125,7 +125,7 @@ const CartItem = ({ item, onIncrease, onDecrease, onRemove }) => {
     },
     quantityDisplay: {
       minWidth: '32px',
-      textAlign: 'center' as const,
+      textAlign: 'center' ,
       fontSize: '1rem',
       fontWeight: '600',
       color: '#1e293b',
