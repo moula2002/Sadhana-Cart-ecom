@@ -6,6 +6,7 @@ import {
   clearCart,
   clearCartError,
 } from "../../redux/cartSlice";
+
 import {
   Container,
   Row,
@@ -15,10 +16,12 @@ import {
   Toast,
   ToastContainer,
 } from "react-bootstrap";
+
 import { useNavigate, Link } from "react-router-dom";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../firebase";
+
 import CartItems from "./CartItems";
 import { useTranslation } from "react-i18next";
 
@@ -37,20 +40,24 @@ const CartPage = () => {
   const [toastMessage, setToastMessage] = useState("");
   const [stockData, setStockData] = useState({});
 
-  // Scroll to top on mount
+  /* ---------------- Scroll to top ---------------- */
+
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
-  // Detect login state
+  /* ---------------- Detect login state ---------------- */
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setIsLoggedIn(!!user);
     });
+
     return () => unsubscribe();
   }, [auth]);
 
-  // 🧠 Fetch stock for each product (take from first sizevariant)
+  /* ---------------- Fetch stock from Firestore ---------------- */
+
   useEffect(() => {
     const fetchStocks = async () => {
       const newStockData = {};
@@ -65,7 +72,6 @@ const CartPage = () => {
 
             let stockValue = 0;
 
-            // ✅ Prefer first sizevariant stock if available
             if (
               Array.isArray(data.sizevariants) &&
               data.sizevariants.length > 0
@@ -91,28 +97,35 @@ const CartPage = () => {
     if (cartItems.length > 0) fetchStocks();
   }, [cartItems]);
 
-  // Show toast when limit reached
+  /* ---------------- Stock limit toast ---------------- */
+
   useEffect(() => {
     if (errorId) {
       const item = cartItems.find((i) => i.id === errorId);
+
       if (item) {
         setToastMessage(
           `You've reached the maximum stock limit for "${item.title}".`
         );
+
         setShowToast(true);
         dispatch(clearCartError());
       }
     }
   }, [errorId, cartItems, dispatch]);
 
-  // ➕ Increase quantity with stock limit
+  /* ---------------- Increase quantity ---------------- */
+
   const handleIncrease = (item) => {
     const stock = stockData[item.id] ?? 0;
 
     if (item.quantity >= stock) {
       setToastMessage(
-        `Only ${stock} unit${stock > 1 ? "s" : ""} available for "${item.title}".`
+        `Only ${stock} unit${stock > 1 ? "s" : ""} available for "${
+          item.title
+        }".`
       );
+
       setShowToast(true);
       return;
     }
@@ -120,22 +133,28 @@ const CartPage = () => {
     dispatch(addToCart({ ...item, quantity: 1 }));
   };
 
-  // ➖ Decrease quantity
+  /* ---------------- Decrease quantity ---------------- */
+
   const handleDecrease = (item) => {
     if (item.quantity > 1) {
       dispatch(removeFromCart({ id: item.id, size: item.size, quantity: 1 }));
     }
   };
 
-  // 🗑 Remove item
+  /* ---------------- Remove item ---------------- */
+
   const handleRemove = (item) => {
     dispatch(removeFromCart({ id: item.id, size: item.size }));
   };
 
-  // 🧹 Clear cart
-  const handleClear = () => dispatch(clearCart());
+  /* ---------------- Clear cart ---------------- */
 
-  // 💰 Total price
+  const handleClear = () => {
+    dispatch(clearCart());
+  };
+
+  /* ---------------- Total price ---------------- */
+
   const totalPrice = cartItems.reduce(
     (total, item) => total + item.price * item.quantity,
     0
@@ -148,94 +167,141 @@ const CartPage = () => {
       maximumFractionDigits: 0,
     }).format(value);
 
-  // 🛒 Checkout
+  /* ---------------- Checkout ---------------- */
+
   const handleCheckout = () => {
-    if (isLoggedIn) navigate("/checkout");
-    else navigate("/login", { state: { from: "/checkout" } });
+    if (isLoggedIn) {
+      navigate("/checkout");
+    } else {
+      navigate("/login", { state: { from: "/checkout" } });
+    }
   };
 
-  // 🕳 Empty Cart View
+  /* ---------------- Empty cart view ---------------- */
+
   if (cartItems.length === 0)
     return (
-      <Container className="text-center py-5">
-       <h2 className="text-muted mb-4">{t("cart.emptyTitle")} 🛒</h2>
-<p>{t("cart.emptySubtitle")}</p>
-<Link to="/" className="btn btn-primary mt-3">
-  {t("cart.startShopping")}
-</Link>
+      <Container className="empty-cart-container py-5">
+        <div className="empty-cart-wrapper">
+          <div className="empty-cart-icon">
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.70711 15.2929C4.07714 15.9229 4.52331 17 5.41421 17H17M17 17C15.8954 17 15 17.8954 15 19C15 20.1046 15.8954 21 17 21C18.1046 21 19 20.1046 19 19C19 17.8954 18.1046 17 17 17ZM9 19C9 20.1046 8.10457 21 7 21C5.89543 21 5 20.1046 5 19C5 17.8954 5.89543 17 7 17C8.10457 17 9 17.8954 9 19Z" 
+              stroke="#6366F1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+          <h2 className="empty-cart-title">{t("cart.emptyTitle")}</h2>
+          <p className="empty-cart-subtitle">{t("cart.emptySubtitle")}</p>
+          <Link to="/" className="shop-now-btn">
+            {t("cart.startShopping")}
+          </Link>
+        </div>
       </Container>
     );
 
+  /* ---------------- Cart UI ---------------- */
+
   return (
-    <Container className="cart-container py-4">
-      <h2 className="cart-heading mb-4 text-center text-dark">
-        🛍️ {t("cart.heading")}
-      </h2>
+    <div className="cart-page-wrapper">
+      <Container className="py-5">
+        {/* Header with gradient */}
+        <div className="cart-header text-center mb-5">
+          <h1 className="cart-main-title">
+            <span className="cart-icon">🛒</span> 
+            {t("cart.heading")}
+          </h1>
+        </div>
 
-      {/* 🧩 Cart Items */}
-      <Row className="g-4">
-        <Col xs={12}>
-          <CartItems
-            items={cartItems.map((i) => ({
-              ...i,
-              stock: stockData[i.id] ?? 0,
-            }))}
-            onIncrease={handleIncrease}
-            onDecrease={handleDecrease}
-            onRemove={handleRemove}
-          />
-        </Col>
-      </Row>
+        {/* Main Content */}
+        <Row className="g-4">
+          {/* Cart Items Section */}
+          <Col lg={8}>
+            <div className="cart-items-container">
+              <CartItems
+                items={cartItems.map((i) => ({
+                  ...i,
+                  stock: stockData[i.id] ?? 0,
+                }))}
+                onIncrease={handleIncrease}
+                onDecrease={handleDecrease}
+                onRemove={handleRemove}
+              />
+            </div>
+          </Col>
 
-      {/* 🧾 Summary Section */}
-      <Row className="justify-content-center mt-5">
-        <Col xs={12} md={8} lg={6}>
-          <Card className="cart-summary-card shadow-lg border-0">
-            <Card.Body className="text-center">
-              <h3 className="fw-bold mb-3 text-dark">
-                {t("cart.total")}:{" "}
-                <span className="text-warning">{formatPrice(totalPrice)}</span>
-              </h3>
-              <div className="d-flex justify-content-center gap-3">
-                <Button
-                  variant="warning"
-                  className="checkout-btn px-4 fw-semibold"
-                  onClick={handleCheckout}
-                >
-                  {t("cart.proceed")}
-                </Button>
-                <Button
-                  variant="outline-danger"
-                  className="clear-btn px-4 fw-semibold"
-                  onClick={handleClear}
-                >
-                  {t("cart.clear")}
-                </Button>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
+          {/* Order Summary Section */}
+          <Col lg={4}>
+            <div className="order-summary-sticky">
+              <Card className="order-summary-card">
+                <Card.Header className="summary-header">
+                  <h3>Order Summary</h3>
+                </Card.Header>
+                <Card.Body>
+                  <div className="summary-details">
+                    <div className="summary-row">
+                      <span>Subtotal ({cartItems.length} items)</span>
+                      <span className="amount">{formatPrice(totalPrice)}</span>
+                    </div>
+                    <div className="summary-row">
+                      <span>Shipping</span>
+                      <span className="amount free-shipping">Free</span>
+                    </div>
+                    <div className="summary-row">
+                      <span>Tax</span>
+                      <span className="amount">Calculated at checkout</span>
+                    </div>
+                    <div className="summary-divider"></div>
+                    <div className="summary-row total">
+                      <span>Total Amount</span>
+                      <span className="total-amount">{formatPrice(totalPrice)}</span>
+                    </div>
+                  </div>
 
-      {/* 🔔 Toast for stock limit */}
-      <ToastContainer position="bottom-center" className="p-3">
+                  <div className="checkout-section">
+                    <Button 
+                      className="checkout-btn-modern" 
+                      onClick={handleCheckout}
+                    >
+                      <span>Proceed to Checkout</span>
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M4.16666 10H15.8333M15.8333 10L11.6667 5.83337M15.8333 10L11.6667 14.1667" 
+                        stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </Button>
+
+                    <Button className="clear-cart-modern" onClick={handleClear}>
+                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path d="M2.25 4.5H3.75H15.75M6 4.5V3C6 2.60218 6.15804 2.22064 6.43934 1.93934C6.72064 1.65804 7.10218 1.5 7.5 1.5H10.5C10.8978 1.5 11.2794 1.65804 11.5607 1.93934C11.842 2.22064 12 2.60218 12 3V4.5M14.25 4.5V15C14.25 15.3978 14.092 15.7794 13.8107 16.0607C13.5294 16.342 13.1478 16.5 12.75 16.5H5.25C4.85218 16.5 4.47064 16.342 4.18934 16.0607C3.90804 15.7794 3.75 15.3978 3.75 15V4.5H14.25Z" 
+                        stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      Clear Cart
+                    </Button>
+                  </div>
+                </Card.Body>
+              </Card>
+
+          
+            </div>
+          </Col>
+        </Row>
+      </Container>
+
+      {/* Toast message */}
+      <ToastContainer position="bottom-center" className="toast-container-custom">
         <Toast
-          onClose={() => setShowToast(false)}
           show={showToast}
           delay={3000}
           autohide
-          bg="dark"
-          className="text-white"
+          onClose={() => setShowToast(false)}
+          className="stock-toast-modern"
         >
-          <Toast.Header closeButton={false} className="bg-danger text-white">
+          <Toast.Header closeButton={false}>
+            <div className="toast-icon">⚠️</div>
             <strong className="me-auto">{t("cart.stockLimit")}</strong>
           </Toast.Header>
-          <Toast.Body className="text-center fw-semibold">
-            {toastMessage}
-          </Toast.Body>
+          <Toast.Body>{toastMessage}</Toast.Body>
         </Toast>
       </ToastContainer>
-    </Container>
+    </div>
   );
 };
 

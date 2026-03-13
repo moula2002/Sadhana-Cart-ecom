@@ -1186,7 +1186,7 @@ function ProductDetailPage() {
             <Alert variant="info" className="text-center shadow-sm">
                 <Alert.Heading>Product Not Found</Alert.Heading>
                 <p>The product you're looking for doesn't exist or has been removed.</p>
-                <Button variant="primary" onClick={() => navigate('/')}>Go to Home</Button>
+                <Button variant="" onClick={() => navigate('/')}>Go to Home</Button>
             </Alert>
         </Container>
     );
@@ -1582,24 +1582,27 @@ function ProductDetailPage() {
                         {/* Action Buttons */}
                         <div className="d-flex gap-3 pt-3">
                             <Button
-                                variant="warning"
                                 size="lg"
                                 className="flex-grow-1 fw-bold py-3"
+                                style={{
+                                    backgroundColor: "#0a0a8f",
+                                    border: "none",
+                                    color: "#fff"
+                                }}
                                 onClick={handleAddToCart}
                                 disabled={isCartBuyDisabled}
                             >
                                 <FaShoppingCart className="me-2" />
                                 {t("addToCart")}
                             </Button>
+
                             <Button
-                                variant="success"
                                 size="lg"
-                                className="flex-grow-1 fw-bold py-3"
+                                className="flex-grow-1 fw-bold py-3 buy-now-btn"
                                 onClick={handleBuyNow}
                                 disabled={isCartBuyDisabled}
                             >
-                                <FaBolt className="me-2" />
-                                {t("buyNow")}
+                                Buy Now
                             </Button>
                         </div>
                     </Col>
@@ -2264,6 +2267,17 @@ function ProductDetailPage() {
         .wishlist-heart-btn:active {
           transform: scale(0.95);
         }
+      .buy-now-btn{
+background:#1b1b8f !important;
+border:3px solid #1b1b8f !important;
+color:#ffffff !important;
+border-radius:14px !important;
+font-size:18px !important;
+box-shadow:none !important;
+transition:none !important;
+}
+
+
       `}</style>
         </Container>
     );
