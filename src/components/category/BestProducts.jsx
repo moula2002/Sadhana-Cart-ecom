@@ -168,12 +168,16 @@ function BestProducts() {
       </h2>
 
       <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill,minmax(200px,1fr))",
-          gap: "25px",
-        }}
-      >
+  style={{
+    display: "grid",
+    gridTemplateColumns:
+      window.innerWidth < 768
+        ? "repeat(2,1fr)"
+        : "repeat(auto-fill,minmax(200px,1fr))",
+    gap: "25px",
+    maxWidth: "100%"
+  }}
+>
         {products.map((product) => {
           const image =
             product.images?.[0] ||
