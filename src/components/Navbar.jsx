@@ -753,7 +753,7 @@ export default function Header() {
           {!mobileSearchActive && (
             <>
               {/* LOGO */}
-              <Navbar.Brand href="/" className="d-flex align-items-center me-auto">
+              <Navbar.Brand href="/" className="d-flex align-items-center">
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -785,7 +785,7 @@ export default function Header() {
               </Navbar.Brand>
 
               {/* MOBILE ACTIONS */}
-              <div className="d-flex d-lg-none align-items-center gap-2">
+              <div className="d-flex d-lg-none align-items-center gap-2 ms-auto">
                 {/* Search Toggle */}
                 <Button
                   variant="outline-dark"

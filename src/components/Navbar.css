@@ -1616,4 +1616,17 @@ body {
     text-decoration: none !important;
 }
 
+@media (max-width:768px){
+
+.brand-text{
+font-size:1.1rem !important;
+}
+
+.logo-img{
+width:40px !important;
+height:40px !important;
+}
+
+}
+
 

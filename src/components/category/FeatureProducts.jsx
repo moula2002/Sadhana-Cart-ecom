@@ -9,6 +9,44 @@ function FeatureProducts() {
   const scrollRef = useRef(null);
   const navigate = useNavigate();
 
+  // 🌙 THEME STATE (Navbar-oda sync aagum)
+  const [darkMode, setDarkMode] = useState(
+    localStorage.getItem("theme") === "dark"
+  );
+
+  // Sync logic for theme changes
+  useEffect(() => {
+    const checkTheme = () => {
+      const currentTheme = localStorage.getItem("theme") === "dark" || 
+                           document.documentElement.getAttribute("data-bs-theme") === "dark";
+      setDarkMode(currentTheme);
+    };
+
+    // Navbar toggle pannumpothu storage event trigger aagum
+    window.addEventListener("storage", checkTheme);
+
+    // Attribute changes-ah track panna observer
+    const observer = new MutationObserver(checkTheme);
+    observer.observe(document.documentElement, { attributes: true });
+
+    return () => {
+      window.removeEventListener("storage", checkTheme);
+      observer.disconnect();
+    };
+  }, []);
+
+  // Theme-based Styles
+  const themeStyles = {
+    containerBg: darkMode 
+      ? "linear-gradient(135deg, #1a1a1a 0%, #333333 100%)" 
+      : "linear-gradient(135deg, #0f52ba 0%, #4169e1 100%)",
+    cardBg: darkMode ? "#252525" : "white",
+    titleColor: darkMode ? "#ffffff" : "#333",
+    descColor: darkMode ? "#bbb" : "#666",
+    priceColor: darkMode ? "#5d64ff" : "#2c3e50",
+    shadow: darkMode ? "0 10px 30px rgba(0,0,0,0.5)" : "0 20px 40px rgba(0,0,0,0.1)",
+  };
+
   const fetchProducts = async () => {
     try {
       const querySnapshot = await getDocs(collection(db, "featuredProducts"));
@@ -34,9 +72,9 @@ function FeatureProducts() {
   const scroll = (direction) => {
     const { current } = scrollRef;
     if (direction === "left") {
-      current.scrollBy({ left: -400, behavior: "smooth" });
+      current.scrollBy({ left: -300, behavior: "smooth" });
     } else {
-      current.scrollBy({ left: 400, behavior: "smooth" });
+      current.scrollBy({ left: 300, behavior: "smooth" });
     }
   };
 
@@ -47,15 +85,22 @@ function FeatureProducts() {
   return (
     <div
       style={{
-        padding: "40px 20px",
-        background: "linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)",
+        padding: "40px 30px",
+        background: themeStyles.containerBg,
         borderRadius: "30px",
         marginTop: "40px",
-        position: "relative",
-        boxShadow: "0 20px 40px rgba(0,0,0,0.1)",
-        fontFamily: "'Inter', sans-serif",
+        boxShadow: themeStyles.shadow,
+        transition: "all 0.5s ease", // Smooth background transition
       }}
     >
+      <style>
+        {`
+        .featured-scroll::-webkit-scrollbar {
+          display: none;
+        }
+        `}
+      </style>
+
       {/* HEADER */}
       <div
         style={{
@@ -63,32 +108,13 @@ function FeatureProducts() {
           justifyContent: "space-between",
           alignItems: "center",
           marginBottom: "30px",
-          padding: "0 10px",
         }}
       >
-        <div>
-          <h2
-            style={{
-              color: "white",
-              fontSize: "28px",
-              fontWeight: "800",
-              margin: 0,
-            }}
-          >
-            Featured Deals
-          </h2>
-          <p
-            style={{
-              color: "rgba(255,255,255,0.7)",
-              margin: "5px 0 0 0",
-              fontSize: "14px",
-            }}
-          >
-            Handpicked bestsellers just for you
-          </p>
-        </div>
+        <h2 style={{ color: "white", fontWeight: "800" }}>
+          Featured Deals
+        </h2>
 
-        <div style={{ display: "flex", gap: "12px" }}>
+        <div style={{ display: "flex", gap: "10px" }}>
           <button onClick={() => scroll("left")} style={navButtonStyle}>
             ❮
           </button>
@@ -99,22 +125,20 @@ function FeatureProducts() {
         </div>
       </div>
 
-      {/* PRODUCTS */}
+      {/* PRODUCT LIST */}
       <div
         ref={scrollRef}
-        className="no-scrollbar"
+        className="featured-scroll"
         style={{
           display: "flex",
-          gap: "25px",
+          gap: "20px",
           overflowX: "auto",
-          scrollBehavior: "smooth",
-          padding: "10px 5px 30px 5px",
+          paddingBottom: "20px",
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+          alignItems: "flex-start",
         }}
       >
-        <style>
-          {`.no-scrollbar::-webkit-scrollbar { display: none; }`}
-        </style>
-
         {products.map((product) => {
           const info = product.featuredProductInfo || {};
           const price = product.price || 0;
@@ -130,107 +154,122 @@ function FeatureProducts() {
               onMouseEnter={() => setHoveredId(product.id)}
               onMouseLeave={() => setHoveredId(null)}
               style={{
-                minWidth: "280px",
-                maxWidth: "280px",
-                background: "white",
-                borderRadius: "24px",
+                minWidth: "260px",
+                maxWidth: "260px",
+                height: "320px",
+                background: themeStyles.cardBg,
+                borderRadius: "15px",
                 padding: "15px",
                 position: "relative",
                 flexShrink: 0,
-                transition: "all 0.3s ease",
-                transform: isHovered ? "translateY(-10px)" : "translateY(0)",
-                boxShadow: isHovered
-                  ? "0 20px 25px rgba(0,0,0,0.2)"
-                  : "0 4px 6px rgba(0,0,0,0.1)",
+                boxShadow: isHovered ? "0 12px 25px rgba(0,0,0,0.2)" : "0 8px 20px rgba(0,0,0,0.1)",
                 cursor: "pointer",
+                display: "flex",
+                flexDirection: "column",
+                transform: isHovered ? "translateY(-8px)" : "none",
+                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
               }}
             >
               {/* DISCOUNT */}
-              <div
-                style={{
-                  position: "absolute",
-                  top: "15px",
-                  right: "15px",
-                  background: "#ef4444",
-                  color: "white",
-                  padding: "4px 10px",
-                  borderRadius: "12px",
-                  fontSize: "12px",
-                  fontWeight: "700",
-                }}
-              >
-                {discount}% OFF
-              </div>
+              {discount > 0 && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "10px",
+                    left: "10px",
+                    background: "#ff4757",
+                    color: "white",
+                    padding: "5px 8px",
+                    borderRadius: "15px",
+                    fontWeight: "600",
+                    fontSize: "12px",
+                    zIndex: 2,
+                  }}
+                >
+                  {discount}% OFF
+                </div>
+              )}
 
               {/* IMAGE */}
               <div
                 style={{
-                  background: "#f8fafc",
-                  borderRadius: "18px",
+                  width: "100%",
+                  height: "150px",
                   overflow: "hidden",
-                  marginBottom: "15px",
+                  borderRadius: "10px",
+                  background: darkMode ? "#1a1a1a" : "#f9f9f9",
                 }}
               >
                 <img
                   src={image}
                   alt={info.title}
+                  loading="lazy"
                   style={{
                     width: "100%",
-                    height: "200px",
+                    height: "100%",
                     objectFit: "contain",
-                    transition: "transform 0.5s ease",
                     transform: isHovered ? "scale(1.1)" : "scale(1)",
+                    transition: "transform 0.4s ease",
                   }}
                 />
               </div>
 
-              {/* CONTENT */}
-              <div style={{ padding: "0 5px" }}>
-                <p
+              {/* NAME */}
+              <h4
+                style={{
+                  fontSize: "0.95rem",
+                  marginTop: "12px",
+                  color: themeStyles.titleColor,
+                  fontWeight: "600",
+                  transition: "color 0.3s ease",
+                }}
+              >
+                {info.title}
+              </h4>
+
+              {/* DESCRIPTION */}
+              <p
+                style={{
+                  fontSize: "0.85rem",
+                  color: themeStyles.descColor,
+                  marginTop: "6px",
+                  display: "-webkit-box",
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                }}
+              >
+                Limited Offer
+              </p>
+
+              {/* PRICE */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  marginTop: "auto",
+                }}
+              >
+                <span
                   style={{
-                    color: "#64748b",
-                    fontSize: "12px",
-                    textTransform: "uppercase",
-                    fontWeight: "600",
-                    margin: "0 0 5px 0",
+                    fontWeight: "700",
+                    fontSize: "1.1rem",
+                    color: themeStyles.priceColor,
                   }}
                 >
-                  Limited Offer
-                </p>
+                  ₹{price.toLocaleString()}
+                </span>
 
-                <h4
+                <span
                   style={{
-                    fontSize: "17px",
-                    margin: "0 0 12px 0",
-                    color: "#1e293b",
-                    height: "42px",
-                    overflow: "hidden",
+                    textDecoration: "line-through",
+                    color: "#999",
+                    fontSize: "0.9rem",
                   }}
                 >
-                  {info.title}
-                </h4>
-
-                <div style={{ display: "flex", gap: "8px" }}>
-                  <span
-                    style={{
-                      fontSize: "22px",
-                      fontWeight: "800",
-                      color: "#1e3a8a",
-                    }}
-                  >
-                    ₹{price.toLocaleString()}
-                  </span>
-
-                  <span
-                    style={{
-                      textDecoration: "line-through",
-                      color: "#94a3b8",
-                      fontSize: "14px",
-                    }}
-                  >
-                    ₹{oldPrice.toLocaleString()}
-                  </span>
-                </div>
+                  ₹{oldPrice.toLocaleString()}
+                </span>
               </div>
             </div>
           );
@@ -241,14 +280,15 @@ function FeatureProducts() {
 }
 
 const navButtonStyle = {
-  width: "45px",
-  height: "45px",
+  width: "40px",
+  height: "40px",
   borderRadius: "50%",
   border: "none",
-  background: "rgba(255,255,255,0.2)",
-  color: "#1e3a8a",
-  fontSize: "18px",
+  background: "rgba(255,255,255,0.25)",
+  color: "white",
+  fontSize: "16px",
   cursor: "pointer",
+  transition: "background 0.3s ease",
 };
 
 export default FeatureProducts;

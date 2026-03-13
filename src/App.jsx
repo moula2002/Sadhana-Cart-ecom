@@ -7,6 +7,7 @@ import {
 } from "react-router-dom";
 
 import "bootstrap/dist/css/bootstrap.min.css";
+
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 
@@ -19,7 +20,6 @@ import HomePage from "./pages/Home";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import CustomerSupportCenter from "./pages/CustomerService";
 import AuthPage from "./pages/LoginPage";
-import CategoryPage from "./pages/CategoryPage";
 import CategoryProducts from "./components/searchBar/CategoryProducts";
 import AdvancedSearchPage from "./pages/AdvancedSearchPage";
 import SearchResultsPage from "./pages/SearchResultsPage";
@@ -100,9 +100,6 @@ const AppContent = () => {
             path="/category/:categoryId"
             element={<CategoryProducts />}
           />
-
-          {/* 🔹 Category Pages */}
-          <Route path="/category" element={<CategoryPage />} />
 
           {/* 🔹 Footer Policy Pages */}
           <Route path="/return-policy" element={<ReturnPolicy />} />
