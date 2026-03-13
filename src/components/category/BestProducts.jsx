@@ -25,19 +25,55 @@ function BestProducts() {
   const [showToast, setShowToast] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
 
+  const [darkMode, setDarkMode] = useState(
+    localStorage.getItem("theme") === "dark"
+  );
+
   const PAGE_SIZE = 8;
 
-  // 🔀 RANDOM SHUFFLE
-  const shuffleArray = (array) => {
-    const arr = [...array];
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-    return arr;
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setDarkMode(localStorage.getItem("theme") === "dark");
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+
+    const observer = new MutationObserver(() => {
+      const isDark =
+        document.documentElement.getAttribute("data-bs-theme") === "dark" ||
+        document.body.classList.contains("dark-theme");
+      setDarkMode(isDark);
+    });
+
+    observer.observe(document.documentElement, { attributes: true });
+    observer.observe(document.body, { attributes: true });
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      observer.disconnect();
+    };
+  }, []);
+
+  const colors = {
+    bg: darkMode ? "#121212" : "#fafafa",
+    card: darkMode ? "#1e1e1e" : "white",
+    text: darkMode ? "#ffffff" : "#333",
+    subText: darkMode ? "#aaa" : "#999",
+    shadow: darkMode ? "rgba(0,0,0,0.5)" : "rgba(0,0,0,0.08)",
+    border: darkMode ? "#333" : "#eee",
   };
 
-  // 🔹 FIRST LOAD (FAST)
+  // 🔀 Better shuffle
+  const shuffleArray = (array) => {
+    const newArr = [...array];
+    for (let i = newArr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+    }
+    return newArr;
+  };
+
+  // 🔹 FIRST LOAD
   const fetchProducts = async () => {
     try {
       setLoading(true);
@@ -86,7 +122,16 @@ function BestProducts() {
         ...doc.data(),
       }));
 
-      setProducts((prev) => shuffleArray([...prev, ...list]));
+      setProducts((prev) => {
+        const combined = [...prev, ...list];
+
+        // remove duplicates
+        const unique = Array.from(
+          new Map(combined.map((item) => [item.id, item])).values()
+        );
+
+        return shuffleArray(unique);
+      });
 
       setLastDoc(snapshot.docs[snapshot.docs.length - 1]);
 
@@ -100,7 +145,6 @@ function BestProducts() {
     fetchProducts();
   }, []);
 
-  // 🔹 INFINITE SCROLL
   useEffect(() => {
     const handleScroll = () => {
       if (loading) return;
@@ -139,8 +183,22 @@ function BestProducts() {
   };
 
   return (
-    <div style={{ padding: "30px", background: "#fafafa", minHeight: "100vh" }}>
-      <h2 style={{ fontWeight: "800", marginBottom: "25px" }}>
+    <div
+      style={{
+        padding: "30px",
+        background: colors.bg,
+        minHeight: "100vh",
+        transition: "background 0.3s ease",
+      }}
+    >
+      <h2
+        style={{
+          fontWeight: "800",
+          marginBottom: "25px",
+          fontSize: "1.8rem",
+          color: colors.text,
+        }}
+      >
         Best Products
       </h2>
 
@@ -152,6 +210,7 @@ function BestProducts() {
               ? "repeat(2,1fr)"
               : "repeat(auto-fill,minmax(200px,1fr))",
           gap: "25px",
+          maxWidth: "100%",
         }}
       >
         {products.map((product) => {
@@ -171,11 +230,11 @@ function BestProducts() {
               onMouseEnter={() => setHoveredProduct(product.id)}
               onMouseLeave={() => setHoveredProduct(null)}
               style={{
-                background: "white",
+                background: colors.card,
                 borderRadius: "12px",
                 overflow: "hidden",
-                boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
-                transition: "all 0.3s",
+                boxShadow: `0 8px 20px ${colors.shadow}`,
+                transition: "all 0.3s ease",
                 position: "relative",
                 transform:
                   hoveredProduct === product.id
@@ -206,7 +265,7 @@ function BestProducts() {
                 style={{
                   height: "220px",
                   overflow: "hidden",
-                  background: "#f5f5f5",
+                  background: darkMode ? "#252525" : "#f5f5f5",
                 }}
               >
                 <img
@@ -232,6 +291,7 @@ function BestProducts() {
                     marginBottom: "8px",
                     minHeight: "42px",
                     fontWeight: "600",
+                    color: colors.text,
                   }}
                 >
                   {name}
@@ -242,20 +302,21 @@ function BestProducts() {
                     style={{
                       fontWeight: "700",
                       fontSize: "1.05rem",
+                      color: colors.text,
                     }}
                   >
-                    ₹{offerprice}
+                    ₹{offerprice.toLocaleString()}
                   </span>
 
                   <span
                     style={{
                       textDecoration: "line-through",
                       marginLeft: "8px",
-                      color: "#999",
+                      color: colors.subText,
                       fontSize: "0.9rem",
                     }}
                   >
-                    ₹{price}
+                    ₹{price.toLocaleString()}
                   </span>
                 </div>
               </div>
@@ -266,16 +327,17 @@ function BestProducts() {
                   bottom: hoveredProduct === product.id ? "0" : "-120px",
                   left: "0",
                   width: "100%",
-                  background: "white",
+                  background: colors.card,
                   padding: "12px",
                   transition: "0.35s",
+                  boxShadow: `0 -5px 12px ${colors.shadow}`,
                 }}
               >
                 <button
                   onClick={() => handleAddToCart(product)}
                   style={{
                     width: "100%",
-                    background: "#0a0f8f",
+                    background: "linear-gradient(135deg,#0a0f8f,#1d23ff)",
                     color: "white",
                     border: "none",
                     padding: "10px",
@@ -283,6 +345,7 @@ function BestProducts() {
                     fontWeight: "600",
                     marginBottom: "8px",
                     cursor: "pointer",
+                    fontSize: "0.9rem",
                   }}
                 >
                   Add to cart
@@ -293,12 +356,13 @@ function BestProducts() {
                   style={{
                     width: "100%",
                     background: "transparent",
-                    border: "2px solid #1d23ff",
-                    color: "#0a0f8f",
+                    border: `2px solid #1d23ff`,
+                    color: darkMode ? "#5d64ff" : "#0a0f8f",
                     padding: "10px",
                     borderRadius: "7px",
                     fontWeight: "600",
                     cursor: "pointer",
+                    fontSize: "0.9rem",
                   }}
                 >
                   Quick View
@@ -315,8 +379,11 @@ function BestProducts() {
           onClose={() => setShowToast(false)}
           delay={3000}
           autohide
+          bg={darkMode ? "dark" : "light"}
         >
-          <Toast.Body>{toastMsg}</Toast.Body>
+          <Toast.Body style={{ color: darkMode ? "white" : "black" }}>
+            {toastMsg}
+          </Toast.Body>
         </Toast>
       </ToastContainer>
     </div>
