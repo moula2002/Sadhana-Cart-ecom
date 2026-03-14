@@ -15,7 +15,7 @@ import {
   setDoc,
   arrayUnion,
   increment,
-} from "firebase/firestore"; 
+} from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db } from "../../firebase";
 
@@ -66,9 +66,9 @@ function CashOnDelivery() {
             const userData = userSnap.data();
             setUserWalletCoins(userData.walletCoins || 0);
           }
-        }catch (error) {
-  console.error("Error fetching wallet coins:", error);
-}
+        } catch (error) {
+          console.error("Error fetching wallet coins:", error);
+        }
       } else {
         setUserId(null);
       }
@@ -82,6 +82,50 @@ function CashOnDelivery() {
       currency: "INR",
       maximumFractionDigits: 2,
     }).format(value);
+
+  const getFirstImage = (item) => {
+
+    if (!item) return "/no-image.png";
+
+    let images = [];
+
+    if (Array.isArray(item.images)) {
+      images = item.images.flat(Infinity);
+    }
+
+    if (!images.length && item.image) {
+      images = [item.image];
+    }
+
+    if (!images.length && item.thumbnail) {
+      images = [item.thumbnail];
+    }
+
+    const valid = images.find((img) => typeof img === "string");
+
+    return valid || "/no-image.png";
+  };
+
+  const getProductImages = (item) => {
+
+    let images = [];
+
+    if (item.images) {
+      images = Array.isArray(item.images)
+        ? item.images.flat(Infinity)
+        : [item.images];
+    }
+
+    if (!images.length && item.image) {
+      images = [item.image];
+    }
+
+    if (!images.length && item.thumbnail) {
+      images = [item.thumbnail];
+    }
+
+    return images.filter((img) => typeof img === "string");
+  };
 
   const getSellerIdForCartItem = (item) => {
     return (
@@ -181,14 +225,14 @@ function CashOnDelivery() {
         };
 
         const sellerSnap = await getDoc(sellerRef);
-      if (!sellerSnap.exists()) {
-  await setDoc(sellerRef, {
-    sellerId,
-    orders: [],
-    totalSales: 0,
-    createdAt: serverTimestamp(),
-  });
-}
+        if (!sellerSnap.exists()) {
+          await setDoc(sellerRef, {
+            sellerId,
+            orders: [],
+            totalSales: 0,
+            createdAt: serverTimestamp(),
+          });
+        }
 
         await updateDoc(sellerRef, {
           orders: arrayUnion(orderSummary),
@@ -203,64 +247,64 @@ function CashOnDelivery() {
   };
 
   // 🔥 Reduce stock from products collection
-const reduceProductStock = async () => {
-  try {
+  const reduceProductStock = async () => {
+    try {
 
-    for (const item of cartItems) {
+      for (const item of cartItems) {
 
-      const productRef = doc(db, "products", item.id);
-      const productSnap = await getDoc(productRef);
+        const productRef = doc(db, "products", item.id);
+        const productSnap = await getDoc(productRef);
 
-      if (!productSnap.exists()) {
-  throw new Error("Product not found");
-}
+        if (!productSnap.exists()) {
+          throw new Error("Product not found");
+        }
 
-      const productData = productSnap.data();
+        const productData = productSnap.data();
 
-      const selectedSize =
-        item.sizeVariant?.size ||
-        item.size ||
-        null;
+        const selectedSize =
+          item.sizeVariant?.size ||
+          item.size ||
+          null;
 
-      const variants = productData.sizevariants || [];
+        const variants = productData.sizevariants || [];
 
-   const updatedVariants = variants.map((variant) => {
+        const updatedVariants = variants.map((variant) => {
 
-  if (selectedSize && variant.size === selectedSize) {
+          if (selectedSize && variant.size === selectedSize) {
 
-    if (variant.stock < item.quantity) {
-  throw new Error(`Stock not available for ${variant.size}`);
-}
+            if (variant.stock < item.quantity) {
+              throw new Error(`Stock not available for ${variant.size}`);
+            }
 
-    return {
-      ...variant,
-      stock: variant.stock - item.quantity
-    };
+            return {
+              ...variant,
+              stock: variant.stock - item.quantity
+            };
 
-  }
+          }
 
-  return variant; // ⭐ VERY IMPORTANT
+          return variant; // ⭐ VERY IMPORTANT
 
-});
+        });
 
-   if (productData.stock < item.quantity) {
-  throw new Error("Product out of stock");
-}
-     await updateDoc(productRef, {
-  stock: productData.stock - item.quantity,
-  sizevariants: updatedVariants
-});
-      console.log(
-        `Stock reduced → Product ${item.id} | Size ${selectedSize} | Qty ${item.quantity}`
-      );
+        if (productData.stock < item.quantity) {
+          throw new Error("Product out of stock");
+        }
+        await updateDoc(productRef, {
+          stock: productData.stock - item.quantity,
+          sizevariants: updatedVariants
+        });
+        console.log(
+          `Stock reduced → Product ${item.id} | Size ${selectedSize} | Qty ${item.quantity}`
+        );
 
+      }
+
+    } catch (error) {
+      console.error("Stock update error:", error);
+      throw error;
     }
-
-  } catch (error) {
-  console.error("Stock update error:", error);
-  throw error;
-}
-};
+  };
   // Save order to Firestore (MATCHES FLUTTER STRUCTURE EXACTLY)
   const saveOrderToFirestore = async (paymentMethod, status = "pending") => {
     if (!userId) {
@@ -276,45 +320,75 @@ const reduceProductStock = async () => {
       }
     }
 
+
     try {
       const sellerIdsInOrder = [...new Set((cartItems || []).map((it) => getSellerIdForCartItem(it)))].filter(Boolean);
-      
+
       // Build products array matching Flutter's OrderProductModel structure
-      const products = (cartItems || []).map((item) => {
+      const products = [];
+
+      for (const item of cartItems) {
+
+        const productRef = doc(db, "products", item.id);
+        const productSnap = await getDoc(productRef);
+
+        let pickupLocation = (item.pickup_location || "").trim();
+
+        if (!pickupLocation && productSnap.exists()) {
+          const productData = productSnap.data();
+          pickupLocation = productData.pickup_location || "";
+        }
+
         const finalSku = productSkus[item.id] || item.sku || item.id || "unknown_sku";
         const sellerId = getSellerIdForCartItem(item);
         const itemPrice = (item.price || 0) * (item.quantity || 1);
-        const proportionalCoinsUsed = totalPrice > 0 ? Math.round(itemPrice * coinsToUse / totalPrice) : 0;
 
-        return {
-          productid: item.id,                   
+        // 🔥 IMAGE FIX START
+        let productImages = getProductImages(item);
+
+        if (!productImages.length && productSnap.exists()) {
+          const productData = productSnap.data();
+
+          if (productData.images) {
+            productImages = Array.isArray(productData.images)
+              ? productData.images
+              : [productData.images];
+          }
+          else if (productData.image) {
+            productImages = [productData.image];
+          }
+          else if (productData.thumbnail) {
+            productImages = [productData.thumbnail];
+          }
+        }
+        // 🔥 IMAGE FIX END
+
+        products.push({
+          productid: item.id,
           name: item.title || item.name || "Unnamed Product",
-          price: itemPrice,                      
-          stock: item.stock || 0,                 
-          quantity: item.quantity || 1,           
-          sku: finalSku,                           
-          sizevariants: item.sizeVariant ? [       
-            {
-              size: item.sizeVariant.size,
-              stock: item.quantity,
-              skuSuffix: item.sizeVariant.skuSuffix,
-              color: item.sizeVariant.color,
-            }
-          ] : [],
-          images: item.images || [],                // Matches Flutter: images
-          sellerId,                                 // Additional field for seller tracking
-        };
-      });
+          price: itemPrice,
+          stock: item.stock || 0,
+          quantity: item.quantity || 1,
+          sku: finalSku,
+
+          pickup_location: pickupLocation,
+
+          images: productImages, // ✅ Correct Images Save
+
+          sellerId,
+        });
+
+      }
 
       const selleridField = sellerIdsInOrder.length === 1 ? sellerIdsInOrder[0] : sellerIdsInOrder;
-      
+
       // Generate order ID in Flutter format (without ORD- prefix)
       const timestamp = Date.now();
       const orderId = `order_${timestamp}`;  // Flutter uses auto-generated IDs, but we'll use consistent format
-      
+
       // Use auto-generated document ID like Flutter
       const ordersRef = collection(db, "users", userId, "orders");
-      
+
       // Calculate cashback (1% of total)
       const cashbackCoins = Math.floor(totalPrice * 0.01);
 
@@ -341,10 +415,11 @@ const reduceProductStock = async () => {
         sellerid: selleridField,
       };
 
-      // Save to Firestore (auto-generated ID like Flutter)
+      console.log("ORDER DATA", JSON.stringify(orderData, null, 2));
+
       const userOrderDocRef = await addDoc(ordersRef, orderData);
-      
-      // Update the document with its own ID as orderId (like Flutter does)
+
+      // Update the document with its own ID as orderId 
       await updateDoc(userOrderDocRef, {
         orderId: userOrderDocRef.id
       });
@@ -365,71 +440,92 @@ const reduceProductStock = async () => {
       }
 
       // Send to Shiprocket
+      // ================================
+      // Send to Shiprocket (FIXED)
+      // ================================
+
       try {
-        const response = await fetch(
-          "https://createshiprocketorder-cij4erke6a-uc.a.run.app",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              order_id: userOrderDocRef.id,
-              order_date: new Date().toISOString().split("T")[0],
-              billing_customer_name: billingDetails.fullName,
-              billing_last_name: "",
-              billing_address: billingDetails.address,
-              billing_city: billingDetails.city,
-              billing_pincode: billingDetails.pincode,
-              billing_state: billingDetails.state || "Karnataka",
-              billing_country: "India",
-              billing_email: billingDetails.email || "appasharan@gmail.com",
-              billing_phone: billingDetails.phone,
-              shipping_is_billing: true,
-              order_items: products.map((item) => ({
-                name: item.name,
-                sku: item.sku,
-                units: item.quantity,
-                selling_price: item.price / item.quantity, // Per unit price
-              })),
-              payment_method: "COD",
-              sub_total: totalPrice,
-              length: 1,
-              breadth: 1,
-              height: 1,
-              weight: 0.5,
-            }),
+
+        // GROUP PRODUCTS BY PICKUP LOCATION
+        const ordersByPickup = {};
+
+        for (const product of products) {
+
+          let pickup = (product.pickup_location || "").trim();
+
+          if (!pickup) {
+            pickup = "Office";
           }
-        );
 
-        const shiprocketData = await response.json();
-        console.log("Shiprocket Response:", shiprocketData);
+          if (!ordersByPickup[pickup]) {
+            ordersByPickup[pickup] = [];
+          }
 
-        // Update order with Shiprocket details
-        await updateDoc(userOrderDocRef, {
-          shipmentId: shiprocketData.shipment_id,
-          shiprocketOrderId: shiprocketData.order_id,
-          shiprocketStatus: shiprocketData.status,
-          shiprocketRawResponse: shiprocketData,
-          shiprocketAttempted: true,
-        });
+          ordersByPickup[pickup].push(product);
+        }
+
+        for (const pickupLocation in ordersByPickup) {
+
+          const orderProducts = ordersByPickup[pickupLocation];
+
+          const response = await fetch(
+            "https://createshiprocketorder-cij4erke6a-uc.a.run.app",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                order_id: userOrderDocRef.id + "_" + pickupLocation + "_" + Date.now(),
+                order_date: new Date().toISOString().split("T")[0],
+                pickup_location: pickupLocation,
+
+                billing_customer_name: billingDetails.fullName,
+                billing_last_name: "",
+                billing_address: billingDetails.address,
+                billing_city: billingDetails.city,
+                billing_pincode: billingDetails.pincode,
+                billing_state: billingDetails.state || "Karnataka",
+                billing_country: "India",
+                billing_email: billingDetails.email || "appasharan@gmail.com",
+                billing_phone: (billingDetails.phone || "").toString().slice(-10),
+
+                shipping_is_billing: true,
+
+                order_items: orderProducts.map((item) => ({
+                  name: item.name,
+                  sku: item.sku,
+                  units: item.quantity,
+                  selling_price: item.price / item.quantity,
+                })),
+
+                payment_method: "COD",
+                sub_total: Number(orderProducts.reduce((sum, p) => sum + p.price, 0).toFixed(2)),
+
+                length: 1,
+                breadth: 1,
+                height: 1,
+                weight: 0.5,
+              }),
+            }
+          );
+
+          const shiprocketData = await response.json();
+
+          if (!response.ok || shiprocketData.status === false) {
+            console.error("Shiprocket API Error:", shiprocketData);
+          } else {
+            console.log("Shiprocket Order Created:", shiprocketData);
+          }
+
+        }
 
       } catch (error) {
+
         console.error("Shiprocket Error:", error);
-        await updateDoc(userOrderDocRef, {
-          shiprocketAttempted: true,
-          shiprocketError: error.message,
-          shiprocketLastAttemptAt: serverTimestamp(),
-        });
+
       }
 
-      // Sync with Seller data
-      // await saveOrderToSellerCollections(orderData, userOrderDocRef.id);
-      // await updateSellerDocuments(
-      //   Array.isArray(sellerIdsInOrder) ? sellerIdsInOrder : [sellerIdsInOrder],
-      //   userOrderDocRef.id,
-      //   orderData
-      // );
 
       return {
         success: true,
@@ -452,16 +548,16 @@ const reduceProductStock = async () => {
     setIsSaving(true);
 
     const result = await saveOrderToFirestore("Cash on Delivery", "pending");
-    
+
 
     if (result && result.success) {
       try {
-  await reduceProductStock();
-} catch (err) {
-  alert(err.message);
-  setIsSaving(false);
-  return;
-}
+        await reduceProductStock();
+      } catch (err) {
+        alert(err.message);
+        setIsSaving(false);
+        return;
+      }
       dispatch(clearCart());
       navigate("/order-confirm", {
         state: {
@@ -484,12 +580,12 @@ const reduceProductStock = async () => {
 
   const handleConfirmOrder = () => {
     if (isSaving || !userId) return;
-    
+
     if (coinsToUse > userWalletCoins) {
       showPopup("Insufficient Coins", `You only have ${userWalletCoins} coins available. Please go back and adjust your order.`);
       return;
     }
-    
+
     setShowConfirmModal(true);
   };
 
@@ -521,14 +617,14 @@ const reduceProductStock = async () => {
       <Row className="justify-content-center">
         <Col md={8}>
           <h2 className="mb-4 text-center">{t("cod.title")}</h2>
-          
+
           {coinsToUse > 0 && (
             <Card className="mb-4 shadow-sm p-4 border-warning">
               <div className="d-flex align-items-center mb-3">
                 <FaCoins size={24} className="me-2 text-warning" />
                 <h5 className="fw-bold mb-0 text-warning">{t("cod.walletApplied")}</h5>
               </div>
-              
+
               <Alert variant="success" className="py-3">
                 <div className="d-flex justify-content-between align-items-center">
                   <div>
@@ -543,7 +639,7 @@ const reduceProductStock = async () => {
                   {t("cod.availableAfter")}: {userWalletCoins - coinsToUse}
                 </small>
               </Alert>
-              
+
               <div className="text-center small text-muted">
                 <FaCoins className="me-1" />
                 {t("cod.youSave", { amount: coinDiscount })}
@@ -561,18 +657,50 @@ const reduceProductStock = async () => {
           <Card className="mb-4 shadow-sm p-4">
             <h5>{t("cod.orderItems")}</h5>
             {cartItems.map((item, idx) => (
-              <div key={idx} className="d-flex justify-content-between mb-2">
-                <span>{item.title} x {item.quantity}</span>
-                <span>{formatPrice(item.price * item.quantity)}</span>
+              <div
+                key={idx}
+                className="d-flex justify-content-between align-items-center mb-3"
+              >
+                <div className="d-flex align-items-center">
+
+                  {/* Product Image */}
+                  <img
+                    src={getFirstImage(item)}
+                    alt={item.title || item.name}
+                    style={{
+                      width: "60px",
+                      height: "60px",
+                      objectFit: "cover",
+                      borderRadius: "8px",
+                      marginRight: "12px",
+                    }}
+                  />
+
+                  {/* Product Name */}
+                  <div>
+                    <div className="fw-semibold">
+                      {item.title || item.name}
+                    </div>
+
+                    <small className="text-muted">
+                      Qty: {item.quantity}
+                    </small>
+                  </div>
+                </div>
+
+                {/* Price */}
+                <span className="fw-semibold">
+                  {formatPrice(item.price * item.quantity)}
+                </span>
               </div>
             ))}
             <hr />
-            
+
             <div className="d-flex justify-content-between mb-2">
               <span>{t("cod.subtotal")}:</span>
               <span>{formatPrice(totalPrice)}</span>
             </div>
-            
+
             {coinsToUse > 0 && (
               <div className="d-flex justify-content-between mb-2 text-success">
                 <span>
@@ -582,7 +710,7 @@ const reduceProductStock = async () => {
                 <span className="fw-bold">-{formatPrice(coinDiscount)}</span>
               </div>
             )}
-            
+
             {shippingCharges > 0 ? (
               <div className="d-flex justify-content-between mb-2">
                 <span>{t("cod.shipping")}:</span>
@@ -594,7 +722,7 @@ const reduceProductStock = async () => {
                 <span className="text-success fw-semibold">{t("cod.free")}</span>
               </div>
             )}
-            
+
             <hr />
             <div className="d-flex justify-content-between fw-bold fs-5">
               <span>{t("cod.totalPayable")}:</span>
@@ -625,7 +753,7 @@ const reduceProductStock = async () => {
                 `${t("cod.placeOrder")} - ${formatPrice(finalAmount + (shippingCharges || 0))}`
               )}
             </Button>
-            
+
             <Button
               variant="outline-secondary"
               onClick={handleBack}
@@ -634,14 +762,14 @@ const reduceProductStock = async () => {
               {t("cod.backToCheckout")}
             </Button>
           </div>
-          
+
           {coinsToUse > 0 && (
             <Alert variant="info" className="mt-3 small">
               <FaCoins className="me-2" />
               <strong>{t("cod.note")}:</strong> {coinsToUse} coins will be deducted from your wallet immediately upon order confirmation.
             </Alert>
           )}
-          
+
           {/* 1% Cashback info */}
           <Alert variant="success" className="mt-2 small">
             <FaCoins className="me-2" />
@@ -667,14 +795,14 @@ const reduceProductStock = async () => {
         </Modal.Header>
         <Modal.Body>
           <p>{t("cod.placeOrderFor")} <strong>{formatPrice(finalAmount + (shippingCharges || 0))}</strong> {t("cod.usingCOD")}</p>
-          
+
           {coinsToUse > 0 && (
             <Alert variant="warning" className="py-2">
               <FaCoins className="me-1" />
               <strong>{coinsToUse} coins</strong> (₹{coinsToUse}) will be deducted from your wallet.
             </Alert>
           )}
-          
+
           <div className="small text-muted">
             <strong>{t("cod.deliveryTo")}:</strong> {billingDetails.address}, {billingDetails.city}
           </div>

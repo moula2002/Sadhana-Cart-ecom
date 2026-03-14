@@ -82,6 +82,13 @@ exports.createShiprocketOrder = onRequest(
       req.body.height = req.body.height || 1;
       req.body.weight = req.body.weight || 1;
 
+      // Pickup location logic
+      req.body.pickup_location =
+        req.body.pickup_location &&
+          req.body.pickup_location.trim() !== ""
+          ? req.body.pickup_location
+          : "Office";
+
       if (!req.body.order_items?.length) {
         return res.status(400).json({ success: false, error: "order_items cannot be empty" });
       }
@@ -751,11 +758,11 @@ app.get("/health", (req, res) => {
 app.post("/admin/health-check", (req, res) => {
   const adminSecret = process.env.ADMIN_SECRET;
   const provided = req.headers["x-admin-secret"];
-  
+
   if (!adminSecret || provided !== adminSecret) {
     return res.status(401).json({ success: false, error: "Unauthorized" });
   }
-  
+
   res.status(200).json({ success: true, message: "Admin access granted" });
 });
 
@@ -763,7 +770,7 @@ app.post("/admin/health-check", (req, res) => {
 // 🚀 EXPORT EXPRESS APP AS CLOUD FUNCTION
 // ======================================================
 exports.api = onRequest(
-  { 
+  {
     region: "us-central1",
     secrets: ["ADMIN_SECRET"] // Add other secrets as needed
   },

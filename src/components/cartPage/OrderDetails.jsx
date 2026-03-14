@@ -12,32 +12,31 @@ const formatCurrency = (val) =>
     minimumFractionDigits: 2,
   }).format(Number(val || 0));
 
-// Helper function to safely format date
 const formatOrderDate = (dateValue) => {
   if (!dateValue) return "N/A";
 
   try {
-    if (dateValue?.toDate && typeof dateValue.toDate === 'function') {
-      return dateValue.toDate().toLocaleDateString('en-IN', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric'
+    if (dateValue?.toDate && typeof dateValue.toDate === "function") {
+      return dateValue.toDate().toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
       });
     }
 
     if (dateValue instanceof Date) {
-      return dateValue.toLocaleDateString('en-IN', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric'
+      return dateValue.toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
       });
     }
 
-    if (typeof dateValue === 'string' || typeof dateValue === 'number') {
-      return new Date(dateValue).toLocaleDateString('en-IN', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric'
+    if (typeof dateValue === "string" || typeof dateValue === "number") {
+      return new Date(dateValue).toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
       });
     }
 
@@ -48,7 +47,6 @@ const formatOrderDate = (dateValue) => {
   }
 };
 
-// Helper function to map database status to display text
 const getDisplayStatusFromDbStatus = (status) => {
   if (!status) return "Order Placed";
 
@@ -71,6 +69,9 @@ function OrderDetails() {
   const navigate = useNavigate();
   const orderData = location.state;
 
+  const products = orderData?.items || orderData?.products || [];
+  const firstProduct = products[0];
+
   const [orderStatus, setOrderStatus] = useState(null);
   const [returnStatus, setReturnStatus] = useState(null);
   const [loadingReturn, setLoadingReturn] = useState(true);
@@ -78,23 +79,21 @@ function OrderDetails() {
   const [firebaseOrderData, setFirebaseOrderData] = useState(null);
   const [productImage, setProductImage] = useState(null);
   const [formattedDate, setFormattedDate] = useState("N/A");
+
   const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 
-  // Get the first product safely with image fallback
-  const product = orderData?.items?.[0] || orderData?.products?.[0];
-
   useEffect(() => {
-    if (!auth.currentUser || !orderData || !product) {
+    if (!auth.currentUser || !orderData || !firstProduct) {
       setLoadingReturn(false);
       setLoadingOrder(false);
       return;
     }
 
     const getProductImage = () => {
-      if (product?.image) return product.image;
-      if (product?.images?.[0]) return product.images[0];
-      if (product?.productImage) return product.productImage;
-      if (product?.thumbnail) return product.thumbnail;
+      if (firstProduct?.image) return firstProduct.image;
+      if (firstProduct?.images?.[0]) return firstProduct.images[0];
+      if (firstProduct?.productImage) return firstProduct.productImage;
+      if (firstProduct?.thumbnail) return firstProduct.thumbnail;
 
       if (orderData?.productImage) return orderData.productImage;
       if (orderData?.images?.[0]) return orderData.images[0];
@@ -106,8 +105,12 @@ function OrderDetails() {
 
     const userId = orderData.userId;
     const orderId = orderData.orderId || orderData.id;
+
     const productId =
-      product.id || product.productId || product.productid || product.product_id;
+      firstProduct.id ||
+      firstProduct.productId ||
+      firstProduct.productid ||
+      firstProduct.product_id;
 
     if (!userId || !orderId) {
       console.warn("Missing userId or orderId");
@@ -116,7 +119,6 @@ function OrderDetails() {
       return;
     }
 
-    // Fetch fresh order data from Firebase
     const fetchOrderData = async () => {
       try {
         const orderRef = doc(db, "users", userId, "orders", orderId);
@@ -132,44 +134,9 @@ function OrderDetails() {
           } else if (orderData.orderDate) {
             setFormattedDate(formatOrderDate(orderData.orderDate));
           }
-
-          const freshProduct = freshOrderData.products?.find(p =>
-            p.id === productId || p.productId === productId || p.productid === productId
-          );
-
-          if (freshProduct) {
-            if (freshProduct.image) setProductImage(freshProduct.image);
-            else if (freshProduct.images?.[0]) setProductImage(freshProduct.images[0]);
-
-          }
-        } else {
-          const mainOrderRef = doc(db, "orders", orderId);
-          const mainOrderSnap = await getDoc(mainOrderRef);
-
-          if (mainOrderSnap.exists()) {
-            const freshOrderData = mainOrderSnap.data();
-            setFirebaseOrderData(freshOrderData);
-            setOrderStatus(freshOrderData.orderStatus || "Pending");
-
-            if (freshOrderData.orderDate) {
-              setFormattedDate(formatOrderDate(freshOrderData.orderDate));
-            } else if (orderData.orderDate) {
-              setFormattedDate(formatOrderDate(orderData.orderDate));
-            }
-          } else {
-            console.warn("Order not found in Firebase");
-            setOrderStatus(orderData.orderStatus || orderData.status || "Pending");
-            if (orderData.orderDate) {
-              setFormattedDate(formatOrderDate(orderData.orderDate));
-            }
-          }
         }
       } catch (error) {
         console.error("Error fetching order data:", error);
-        setOrderStatus(orderData.orderStatus || orderData.status || "Pending");
-        if (orderData.orderDate) {
-          setFormattedDate(formatOrderDate(orderData.orderDate));
-        }
       } finally {
         setLoadingOrder(false);
       }
@@ -177,27 +144,21 @@ function OrderDetails() {
 
     fetchOrderData();
 
-    // Real-time Listener for return_requests
     const q = query(
       collection(db, "users", userId, "return_requests"),
       where("orderId", "==", orderId)
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      console.log("SNAPSHOT SIZE:", snapshot.size);
-
       if (!snapshot.empty) {
         const latestReturn = snapshot.docs[0].data();
-        console.log("RETURN DOC:", latestReturn);
         setReturnStatus(latestReturn.status);
-      } else {
-        console.log("NO RETURN DOC FOUND");
       }
-
       setLoadingReturn(false);
     });
+
     return () => unsubscribe();
-  }, [orderData, product]);
+  }, [orderData, firstProduct]);
 
   if (!orderData) {
     return (
@@ -210,7 +171,7 @@ function OrderDetails() {
     );
   }
 
-  if (!product) {
+  if (!products.length) {
     return (
       <div className="text-center py-5">
         <h3>No Product Found in Order</h3>
@@ -232,10 +193,9 @@ function OrderDetails() {
 
   const displayOrderData = firebaseOrderData || orderData;
 
-  // FINAL STATUS (Return status has priority)
   const finalStatus = returnStatus
     ? returnStatus
-    : (orderStatus || displayOrderData.orderStatus || displayOrderData.status || "pending");
+    : orderStatus || displayOrderData.orderStatus || displayOrderData.status || "pending";
 
   const displayStatus = getDisplayStatusFromDbStatus(finalStatus);
 
@@ -252,18 +212,14 @@ function OrderDetails() {
   const isReturnApproved =
     finalStatus.toLowerCase() === "return_approved";
 
-  // Function to handle track order
-  const handleTrackOrder = () => {
+  const handleTrackOrder = (product) => {
     navigate("/track-order", {
       state: {
         order: displayOrderData,
         product: product,
         orderStatus: displayStatus,
         orderId: displayOrderData.orderId || displayOrderData.id,
-        estimatedDelivery: displayOrderData.estimatedDelivery,
-        trackingNumber: displayOrderData.trackingNumber,
-        carrier: displayOrderData.carrier
-      }
+      },
     });
   };
 
@@ -272,7 +228,7 @@ function OrderDetails() {
       style={{
         background: isDark ? "#0f172a" : "#ffffff",
         minHeight: "100vh",
-        color: isDark ? "#ffffff" : "#212529"
+        color: isDark ? "#ffffff" : "#212529",
       }}
     >
       <div
@@ -281,214 +237,112 @@ function OrderDetails() {
           borderBottom: "1px solid #e0e0e0",
           display: "flex",
           alignItems: "center",
-          gap: "16px"
+          gap: "16px",
         }}
       >
         <FaArrowLeft
-          style={{ fontSize: "20px", cursor: "pointer", color: isDark ? "#ffffff" : "#333" }}
+          style={{ fontSize: "20px", cursor: "pointer" }}
           onClick={() => navigate(-1)}
         />
-        <h1
-          style={{
-            fontSize: "20px",
-            fontWeight: "600",
-            margin: 0,
-            color: isDark ? "#ffffff" : "#333"
-          }}
-        >
+        <h1 style={{ fontSize: "20px", fontWeight: "600", margin: 0 }}>
           Order Details
         </h1>
       </div>
 
       <Container className="py-4" style={{ maxWidth: "600px" }}>
-        <div
-          style={{
-            textAlign: "center",
-            marginBottom: "24px"
-          }}
-        >
-          <Image
-            src={
-              productImage ||
-              product?.image ||
-              product?.images?.[0] ||
-              displayOrderData?.productImage ||
-              "https://via.placeholder.com/300x300?text=Product+Image"
-            }
-            fluid
+
+        {products.map((product, index) => (
+
+          <Card
+            key={index}
             style={{
-              maxHeight: "300px",
-              objectFit: "contain",
               borderRadius: "12px",
-              backgroundColor: isDark ? "#0f172a" : "#f8f9fa",
-              padding: "10px"
+              marginBottom: "25px",
             }}
-            onError={(e) => {
-              e.target.onerror = null;
-              e.target.src = "https://dummyimage.com/300x300/cccccc/000000&text=No+Image";
-            }}
-          />
-        </div>
+          >
 
-        <Card
-          style={{
-            background: isDark ? "#1e293b" : "#ffffff",
-            border: isDark ? "1px solid #334155" : "1px solid #e0e0e0",
-            borderRadius: "12px",
-            boxShadow: "none",
-            marginBottom: "20px",
-            color: isDark ? "#ffffff" : "#212529"
-          }}
-        >
-          <Card.Body style={{ padding: "20px" }}>
-            <h3
-              style={{
-                fontSize: "18px",
-                fontWeight: "500",
-                color: isDark ? "#ffffff" : "#333",
-                marginBottom: "20px",
-                lineHeight: "1.4"
-              }}
-            >
-              {product.name || "Product Name Not Available"}
-            </h3>
+            <Card.Body style={{ padding: "20px" }}>
 
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "12px",
-                paddingBottom: "12px",
-                borderBottom: "1px solid #f0f0f0"
-              }}
-            >
-              <span style={{ fontSize: "16px", color: isDark ? "#cbd5e1" : "#666" }}>
-                Subtotal:
-              </span>
-              <span
-                style={{
-                  fontSize: "18px",
-                  fontWeight: "600",
-                  color: isDark ? "#ffffff" : "#333"
-                }}
-              >
-                {formatCurrency(displayOrderData.payableAmount || displayOrderData.total || orderData.total)}
-              </span>
-            </div>
+              <div style={{ textAlign: "center", marginBottom: "20px" }}>
+                <Image
+                  src={
+                    product?.image ||
+                    product?.images?.[0] ||
+                    "https://via.placeholder.com/300"
+                  }
+                  fluid
+                  style={{
+                    maxHeight: "250px",
+                    objectFit: "contain",
+                    borderRadius: "10px",
+                  }}
+                />
+              </div>
 
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "20px"
-              }}
-            >
-              <span style={{ fontSize: "16px", color: "#666" }}>
-                Quantity:
-              </span>
-              <span style={{ fontSize: "16px", color: "#333" }}>
-                {product.quantity || 1}
-              </span>
-            </div>
+              <h3 style={{ fontSize: "18px", marginBottom: "20px" }}>
+                {product.name}
+              </h3>
 
-            {(formattedDate !== "N/A" || displayOrderData.orderDate) && (
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "20px",
-                  paddingBottom: "12px",
-                  borderBottom: isDark ? "1px solid #334155" : "1px solid #f0f0f0"
-                }}
-              >
-                <span style={{ fontSize: "16px", color: "#666" }}>
-                  Order Date:
-                </span>
-                <span style={{ fontSize: "16px", color: "#333" }}>
-                  {formattedDate}
+              <div className="d-flex justify-content-between mb-2">
+                <span>Subtotal</span>
+                <span>
+                  {formatCurrency(product.price * (product.quantity || 1))}
                 </span>
               </div>
-            )}
 
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                marginBottom: "20px"
-              }}
-            >
-              <Badge
-                style={{
-                  backgroundColor:
-                    displayStatus.includes("Return") || displayStatus.includes("Refund")
-                      ? "#e2e3ff"
-                      : isCancelled
-                        ? "#f8d7da"
-                        : "#fff3cd",
-                  color:
-                    displayStatus.includes("Return") || displayStatus.includes("Refund")
-                      ? "#4050b5"
-                      : isCancelled
-                        ? "#842029"
-                        : "#856404",
-                  fontWeight: "500",
-                  fontSize: "16px",
-                  padding: "8px 24px",
-                  borderRadius: "30px",
-                  border: "none"
-                }}
-              >
-                {loadingReturn ? <Spinner animation="border" size="sm" /> : displayStatus}
-              </Badge>
-            </div>
+              <div className="d-flex justify-content-between mb-2">
+                <span>Quantity</span>
+                <span>{product.quantity || 1}</span>
+              </div>
 
-            {/* Track Order Button */}
-            <div style={{ display: "flex", justifyContent: "center", marginBottom: "15px" }}>
+              <div className="d-flex justify-content-between mb-3">
+                <span>Order Date</span>
+                <span>{formattedDate}</span>
+              </div>
+
+              <div className="text-center mb-3">
+                <Badge
+                  style={{
+                    padding: "8px 20px",
+                    borderRadius: "30px",
+                  }}
+                >
+                  {loadingReturn ? (
+                    <Spinner animation="border" size="sm" />
+                  ) : (
+                    displayStatus
+                  )}
+                </Badge>
+              </div>
+
               <Button
                 variant="outline-primary"
-                onClick={handleTrackOrder}
-                style={{
-                  width: "100%",
-                  padding: "10px",
-                  fontWeight: "500",
-                  borderRadius: "8px"
-                }}
+                className="w-100 mb-2"
+                onClick={() => handleTrackOrder(product)}
               >
                 Track Order
               </Button>
-            </div>
 
-            {isCancelled ? (
-              <div style={{ textAlign: "center" }}>
-                <Button disabled variant="danger">
+              {isCancelled ? (
+                <Button disabled variant="danger" className="w-100">
                   Order Cancelled
                 </Button>
-              </div>
-            ) : isRefundCompleted ? (
-              <div style={{ textAlign: "center" }}>
-                <Button disabled variant="success">
+              ) : isRefundCompleted ? (
+                <Button disabled variant="success" className="w-100">
                   Refund Completed
                 </Button>
-              </div>
-            ) : isReturnRequested ? (
-              <div style={{ textAlign: "center" }}>
-                <Button disabled variant="primary">
+              ) : isReturnRequested ? (
+                <Button disabled variant="primary" className="w-100">
                   Return Requested
                 </Button>
-              </div>
-            ) : isReturnApproved ? (
-              <div style={{ textAlign: "center" }}>
-                <Button disabled variant="info">
+              ) : isReturnApproved ? (
+                <Button disabled variant="info" className="w-100">
                   Return Approved
                 </Button>
-              </div>
-            ) : isDelivered ? (
-              <div style={{ display: "flex", justifyContent: "center" }}>
+              ) : isDelivered ? (
                 <Button
                   variant="outline-warning"
+                  className="w-100"
                   onClick={() =>
                     navigate("/return-order", {
                       state: {
@@ -500,26 +354,29 @@ function OrderDetails() {
                 >
                   Return Order
                 </Button>
-              </div>
-            ) : (
-              <div style={{ display: "flex", justifyContent: "center" }}>
+              ) : (
                 <Button
                   variant="outline-danger"
+                  className="w-100"
                   onClick={() =>
                     navigate("/cancel-order", {
                       state: {
                         order: displayOrderData,
-                        product: product
-                      }
+                        product: product,
+                      },
                     })
                   }
                 >
                   Cancel Order
                 </Button>
-              </div>
-            )}
-          </Card.Body>
-        </Card>
+              )}
+
+            </Card.Body>
+
+          </Card>
+
+        ))}
+
       </Container>
     </div>
   );

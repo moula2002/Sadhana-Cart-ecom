@@ -661,7 +661,7 @@ const reduceProductStock = useCallback(async () => {
             body: JSON.stringify({
               order_id: orderId,
               order_date: new Date().toISOString().split("T")[0],
-              pickup_location: "Office",
+              pickup_location: mergedCartItems?.[0]?.pickup_location || "Office",
               billing_customer_name: billingDetails.fullName,
               billing_last_name: "",
               billing_address: billingDetails.address,
