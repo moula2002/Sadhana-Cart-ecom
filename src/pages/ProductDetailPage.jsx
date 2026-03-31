@@ -18,6 +18,7 @@ import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useTranslation } from "react-i18next";
 import ProductSuggestions from "../pages/ProductSuggestions";
+import LoginPage from "./LoginPage";
 
 const EXCHANGE_RATE = 1;
 const auth = getAuth();
@@ -32,6 +33,7 @@ function ProductDetailPage() {
     const [currentUser, setCurrentUser] = useState(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isAuthReady, setIsAuthReady] = useState(false);
+    const [showLogin, setShowLogin] = useState(false);
 
     // Product states
     const [product, setProduct] = useState(null);
@@ -911,7 +913,8 @@ function ProductDetailPage() {
         if (isLoggedIn) {
             navigate("/checkout", { state: { paymentMethod: "online", product: productForCheckout, quantity } });
         } else {
-            navigate("/login", { state: { from: "/checkout", paymentMethod: "online", product: productForCheckout, quantity } });
+            setShowLogin(true);
+            return;
         }
     };
 
@@ -1212,7 +1215,11 @@ function ProductDetailPage() {
 
     return (
         <Container className="py-4">
+            
             <ToastContainer position="top-right" autoClose={3000} theme="colored" />
+            {showLogin && (
+                <LoginPage onClose={() => setShowLogin(false)} />
+            )}
 
             {/* Breadcrumb */}
             <nav className="mb-4" style={{ fontSize: '0.9rem' }}>
@@ -1459,7 +1466,6 @@ function ProductDetailPage() {
                         )}
 
                         {/* Size Selector */}
-                        {/* Size Selector */}
                         {sortedVariants.length > 0 && (
                             <div className="mt-2 mb-3">
                                 <Form.Label className="fw-bold mb-2">
@@ -1487,7 +1493,6 @@ function ProductDetailPage() {
                             </div>
                         )}
 
-                        {/* Quantity Selector */}
                         {/* Attractive Quantity Selector */}
                         <div className="mb-4">
                             <Form.Label className="fw-bold mb-3 fs-5">Quantity</Form.Label>

@@ -466,12 +466,20 @@ const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal }) 
   };
 
   const handleAddressClick = () => {
-    navigate("/save-address");
+    if (!currentUser) {
+  setShowAuthModal(true);
+  return;
+}
+navigate("/save-address");
     setDropdownOpen(false);
   };
 
   const handleWishlistClick = () => {
-    navigate("/wishlist");
+    if (!currentUser) {
+  setShowAuthModal(true);
+  return;
+}
+navigate("/wishlist");
     setDropdownOpen(false);
   };
 
@@ -486,7 +494,11 @@ const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal }) 
   };
 
   const handleOrdersClick = () => {
-    navigate("/orders");
+    if (!currentUser) {
+  setShowAuthModal(true);
+  return;
+}
+navigate("/orders");
     setDropdownOpen(false);
   };
 

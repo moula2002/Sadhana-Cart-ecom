@@ -26,21 +26,21 @@ import {
   onAuthStateChanged
 } from "firebase/auth";
 
-import { 
-  doc, 
-  setDoc, 
-  getDoc, 
-  serverTimestamp, 
-  collection, 
-  query, 
-  where, 
-  getDocs, 
-  updateDoc 
+import {
+  doc,
+  setDoc,
+  getDoc,
+  serverTimestamp,
+  collection,
+  query,
+  where,
+  getDocs,
+  updateDoc
 } from "firebase/firestore";
 import { auth, db, googleProvider } from "../firebase";
 
 export default function LoginPage({ onClose }) {
-  const { t } = useTranslation(); 
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const recaptchaRef = useRef(null);
   const [isLogin, setIsLogin] = useState(true);
@@ -107,15 +107,15 @@ export default function LoginPage({ onClose }) {
         // Find user with the provided referral code
         const q = query(collection(db, "users"), where("referralCode", "==", referralCode.trim().toUpperCase()));
         const querySnapshot = await getDocs(q);
-        
+
         if (!querySnapshot.empty) {
           const referrerDoc = querySnapshot.docs[0];
           const referrerData = referrerDoc.data();
           referredBy = referrerDoc.id;
-          
+
           // Credit ₹50 to new user
           walletBalance = 50;
-          
+
           // Credit ₹50 to referrer
           const referrerNewBalance = (referrerData.walletBalance || 0) + 50;
           await updateDoc(doc(db, "users", referrerDoc.id), {
@@ -144,18 +144,18 @@ export default function LoginPage({ onClose }) {
       try {
         const q = query(collection(db, "users"), where("referralCode", "==", referralCode.trim().toUpperCase()));
         const querySnapshot = await getDocs(q);
-        
+
         if (!querySnapshot.empty) {
           const referrerDoc = querySnapshot.docs[0];
           const referrerData = referrerDoc.data();
-          
+
           // Credit ₹50 to new user
           await updateDoc(doc(db, "users", userId), {
             walletBalance: 50,
             referredBy: referrerDoc.id,
             updatedAt: serverTimestamp()
           });
-          
+
           // Credit ₹50 to referrer
           const referrerNewBalance = (referrerData.walletBalance || 0) + 50;
           await updateDoc(doc(db, "users", referrerDoc.id), {
@@ -203,7 +203,7 @@ export default function LoginPage({ onClose }) {
 
         // Generate referral code for new user
         const userReferralCode = generateReferralCode();
-        
+
         // Process referral if code provided
         const referralResult = await processReferral(res.user.uid, userReferralCode);
         if (referralResult === null) {
@@ -227,13 +227,13 @@ export default function LoginPage({ onClose }) {
         });
 
         showToast(`Account created ✅ ${referralResult.referralMessage || ""}`);
-        
+
         // Clear form after successful signup
         setName("");
         setEmail("");
         setPassword("");
         setReferralCode("");
-        
+
         // Switch to login mode
         setIsLogin(true);
       }
@@ -257,10 +257,10 @@ export default function LoginPage({ onClose }) {
       if (!snap.exists()) {
         // Generate referral code for new user
         const userReferralCode = generateReferralCode();
-        
+
         // Process referral if code provided
         const referralMessage = await processGoogleReferral(res.user.uid);
-        
+
         await setDoc(ref, {
           name: res.user.displayName,
           email: res.user.email,
@@ -292,9 +292,9 @@ export default function LoginPage({ onClose }) {
       if (onClose) {
         onClose();
       }
-      
+
       navigate("/", { replace: true });
-      
+
     } catch (err) {
       setError(getFirebaseErrorMessage(err.code));
     } finally {
@@ -317,7 +317,7 @@ export default function LoginPage({ onClose }) {
       if (!recaptchaRef.current) {
         recaptchaRef.current = new RecaptchaVerifier(
           "recaptcha-container",
-          { 
+          {
             size: "invisible",
             callback: () => {
               console.log("reCAPTCHA verified");
@@ -360,21 +360,21 @@ export default function LoginPage({ onClose }) {
       if (!snap.exists()) {
         // Generate referral code for new user
         const userReferralCode = generateReferralCode();
-        
+
         // Process referral if code provided (for phone signup)
         let referredBy = null;
         let walletBalance = 0;
-        
+
         if (referralCode.trim()) {
           const q = query(collection(db, "users"), where("referralCode", "==", referralCode.trim().toUpperCase()));
           const querySnapshot = await getDocs(q);
-          
+
           if (!querySnapshot.empty) {
             const referrerDoc = querySnapshot.docs[0];
             const referrerData = referrerDoc.data();
             referredBy = referrerDoc.id;
             walletBalance = 50;
-            
+
             // Credit ₹50 to referrer
             const referrerNewBalance = (referrerData.walletBalance || 0) + 50;
             await updateDoc(doc(db, "users", referrerDoc.id), {
@@ -414,9 +414,9 @@ export default function LoginPage({ onClose }) {
       if (onClose) {
         onClose();
       }
-      
+
       navigate("/", { replace: true });
-      
+
     } catch (err) {
       setError(getFirebaseErrorMessage(err.code));
     }
@@ -438,7 +438,7 @@ export default function LoginPage({ onClose }) {
       "auth/code-expired": "OTP has expired. Please request a new one.",
       "auth/too-many-requests": "Too many attempts. Please try again later.",
     };
-    
+
     return messages[errorCode] || "An error occurred. Please try again.";
   };
 
@@ -470,9 +470,9 @@ export default function LoginPage({ onClose }) {
               <h2>{isLogin ? t("auth.login") : t("auth.joinUs")}</h2>
               <p>
                 {isLogin
-                 ? t("auth.accessText")
-: t("auth.signupText")
-}
+                  ? t("auth.accessText")
+                  : t("auth.signupText")
+                }
               </p>
               {!isLogin && (
                 <div className="referral-benefit">
@@ -494,7 +494,13 @@ export default function LoginPage({ onClose }) {
             <Button
               variant="link"
               className="close-btn"
-              onClick={onClose}
+              onClick={() => {
+                if (onClose) {
+                  onClose();
+                } else {
+                  navigate(-1);
+                }
+              }}
               aria-label="Close"
             >
               ✕
@@ -521,7 +527,7 @@ export default function LoginPage({ onClose }) {
 
                   <Form.Group className="mb-3">
                     <Form.Control
-                     placeholder={t("auth.referralCode")}
+                      placeholder={t("auth.referralCode")}
                       value={referralCode}
                       onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
                       className="custom-input"
@@ -565,14 +571,14 @@ export default function LoginPage({ onClose }) {
                 </span>
               </Form.Group>
 
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="w-100 mb-3 auth-btn"
                 disabled={isLoading}
               >
                 {isLoading
-  ? t("auth.processing")
-  : (isLogin ? t("auth.login") : t("auth.signup"))}
+                  ? t("auth.processing")
+                  : (isLogin ? t("auth.login") : t("auth.signup"))}
 
               </Button>
             </Form>
@@ -599,12 +605,12 @@ export default function LoginPage({ onClose }) {
               )}
 
               {!confirmation ? (
-                <Button 
-                  className="w-100 otp-btn" 
+                <Button
+                  className="w-100 otp-btn"
                   onClick={sendOtp}
                   disabled={!phone || phone.length !== 10}
                 >
-                 {t("auth.requestOtp")}
+                  {t("auth.requestOtp")}
                 </Button>
               ) : (
                 <>
@@ -616,8 +622,8 @@ export default function LoginPage({ onClose }) {
                     onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
                   />
                   <div className="d-flex gap-2">
-                    <Button 
-                      variant="outline-secondary" 
+                    <Button
+                      variant="outline-secondary"
                       className="flex-grow-1 change-number-btn"
                       onClick={() => {
                         setConfirmation(null);
@@ -626,7 +632,7 @@ export default function LoginPage({ onClose }) {
                     >
                       {t("auth.changeNumber")}
                     </Button>
-                    <Button 
+                    <Button
                       className="flex-grow-1 auth-btn"
                       onClick={verifyOtp}
                       disabled={!otp || otp.length !== 6}
@@ -645,7 +651,7 @@ export default function LoginPage({ onClose }) {
               onClick={handleGoogleLogin}
               disabled={googleLoading}
             >
-              <FcGoogle size={20} /> 
+              <FcGoogle size={20} />
               {googleLoading ? "Signing in..." : t("auth.continueGoogle")}
             </Button>
 
@@ -657,8 +663,8 @@ export default function LoginPage({ onClose }) {
               >
                 {isLogin
                   ? t("auth.newUser")
-: t("auth.alreadyUser")
-}
+                  : t("auth.alreadyUser")
+                }
               </Button>
             </div>
 
