@@ -1215,7 +1215,7 @@ function ProductDetailPage() {
 
     return (
         <Container className="py-4">
-            
+
             <ToastContainer position="top-right" autoClose={3000} theme="colored" />
             {showLogin && (
                 <LoginPage onClose={() => setShowLogin(false)} />
@@ -1248,6 +1248,15 @@ function ProductDetailPage() {
                                     style={{ fontSize: '1rem', padding: '8px 12px' }}
                                 >
                                     {discountPercentage}% OFF
+                                </Badge>
+                            )}
+                            {isOutOfStock && (
+                                <Badge
+                                    bg="dark"
+                                    className="position-absolute top-0 end-0 m-3"
+                                    style={{ fontSize: '0.9rem', padding: '6px 10px' }}
+                                >
+                                    Out of Stock
                                 </Badge>
                             )}
                         </div>
@@ -1341,6 +1350,17 @@ function ProductDetailPage() {
                                 You save <FaRupeeSign size={12} />{(calculatedOriginalPriceINR - calculatedPriceINR)} ({discountPercentage}% OFF)
                             </p>
                         </div>
+                        {/* OUT OF STOCK MESSAGE */}
+                        {isOutOfStock && (
+                            <div style={{
+                                color: "red",
+                                fontWeight: "bold",
+                                marginTop: "10px",
+                                fontSize: "18px"
+                            }}>
+                                ❌ Out of Stock
+                            </div>
+                        )}
 
 
                         {/* Description */}

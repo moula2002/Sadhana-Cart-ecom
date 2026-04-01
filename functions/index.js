@@ -378,33 +378,80 @@ exports.onReturnRequestWritten = onDocumentWritten(
 // ======================================================
 // 📱 OTP SECTION
 // ======================================================
-let otpStore = {};
+// ======================================================
+// 📱 OTP SECTION - FIXED VERSION
+// ======================================================
+const OTP_COLLECTION = "otps";
 
 function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
 exports.sendOtp = onRequest(
-  { region: "us-central1", secrets: ["FAST2SMS_API_KEY"] },
+  {
+    region: "us-central1",
+    secrets: ["FAST2SMS_API_KEY"],
+    cors: true
+  },
   async (req, res) => {
-    try {
-      const phone = req.body.phone;
+    // Enable CORS
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.set('Access-Control-Allow-Headers', 'Content-Type');
 
-      if (!phone) {
+    if (req.method === 'OPTIONS') {
+      res.status(204).send('');
+      return;
+    }
+
+    try {
+      const phoneRaw = req.body.phone;
+
+      if (!phoneRaw) {
         return res.status(400).json({
           success: false,
           message: "Phone number required",
         });
       }
 
-      const otp = generateOTP();
-      otpStore[phone] = otp;
+      // Clean phone: strip any symbols and keep last 10 digits
+      const phone = phoneRaw.replace(/\D/g, "").slice(-10);
 
-      await axios.post(
+      if (phone.length !== 10) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid phone number - must be 10 digits",
+        });
+      }
+
+      if (!process.env.FAST2SMS_API_KEY) {
+        console.error("❌ FAST2SMS_API_KEY secret is missing from environment");
+        return res.status(500).json({
+          success: false,
+          message: "SMS Service configuration error",
+        });
+      }
+
+      const otp = generateOTP();
+
+      // Store OTP in Firestore with 5-minute expiry
+      await db.collection(OTP_COLLECTION).doc(phone).set({
+        otp: otp,
+        expiresAt: Date.now() + (5 * 60000),
+        createdAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+
+      console.log(`Sending OTP ${otp} to ${phone}`);
+
+      // Fast2SMS API call with correct parameters
+      const fastRes = await axios.post(
         "https://www.fast2sms.com/dev/bulkV2",
         {
-          route: "otp",
-          variables_values: otp,
+          route: "dlt_manual",
+          sender_id: "SDCART",
+          message: `Dear User, your OTP for Sadhana Cart login is ${otp}. It is valid for 5 minutes. Do not share this OTP. - Sadhana Cart`,
+          template_id: "1207177485290721004",
+          entity_id: "1201177208523134361",
           numbers: phone,
         },
         {
@@ -412,30 +459,61 @@ exports.sendOtp = onRequest(
             authorization: process.env.FAST2SMS_API_KEY,
             "Content-Type": "application/json",
           },
+          timeout: 15000
         }
       );
 
-      return res.status(200).json({
-        success: true,
-        message: "OTP sent successfully",
-      });
+      console.log("✅ Fast2SMS Response:", fastRes.data);
+
+      // Check Fast2SMS response
+      if (fastRes.data && fastRes.data.return === true) {
+        return res.status(200).json({
+          success: true,
+          message: "OTP sent successfully",
+        });
+      } else {
+        console.error("❌ Fast2SMS Failed:", fastRes.data);
+        return res.status(500).json({
+          success: false,
+          message: fastRes.data?.message || "Failed to send OTP",
+          details: fastRes.data
+        });
+      }
     } catch (error) {
-      console.error(
-        "OTP send error:",
-        error.response?.data || error.message
-      );
+      console.error("🔥 Fast2SMS Error:", error.response?.data || error.message);
+
+      // Provide user-friendly error message
+      let errorMessage = "Failed to send OTP";
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message.includes("timeout")) {
+        errorMessage = "Request timed out. Please try again.";
+      }
 
       return res.status(500).json({
         success: false,
-        error: error.message,
+        message: errorMessage,
       });
     }
   }
 );
 
 exports.verifyOtp = onRequest(
-  { region: "us-central1" },
+  {
+    region: "us-central1",
+    cors: true
+  },
   async (req, res) => {
+    // Enable CORS
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.set('Access-Control-Allow-Headers', 'Content-Type');
+
+    if (req.method === 'OPTIONS') {
+      res.status(204).send('');
+      return;
+    }
+
     try {
       const { phone, otp } = req.body;
 
@@ -446,24 +524,56 @@ exports.verifyOtp = onRequest(
         });
       }
 
-      if (otpStore[phone] === otp) {
-        delete otpStore[phone];
+      // Clean phone number
+      const cleanPhone = phone.replace(/\D/g, "").slice(-10);
+
+      console.log(`Verifying OTP for ${cleanPhone}: ${otp}`);
+
+      const otpRef = db.collection(OTP_COLLECTION).doc(cleanPhone);
+      const otpDoc = await otpRef.get();
+
+      if (!otpDoc.exists) {
+        return res.status(400).json({
+          success: false,
+          message: "OTP not found or expired",
+        });
+      }
+
+      const otpData = otpDoc.data();
+
+      // Check expiry
+      if (Date.now() > otpData.expiresAt) {
+        await otpRef.delete();
+        return res.status(400).json({
+          success: false,
+          message: "OTP has expired. Please request a new one.",
+        });
+      }
+
+      if (otpData.otp === otp) {
+        await otpRef.delete(); // Cleanup
+
+        // Generate a Custom Token for Firebase Auth login
+        // Use phone number as UID for custom token
+        const customToken = await admin.auth().createCustomToken(cleanPhone);
+
         return res.status(200).json({
           success: true,
           message: "OTP verified successfully",
+          customToken: customToken
         });
       }
 
       return res.status(400).json({
         success: false,
-        message: "Invalid OTP",
+        message: "Invalid OTP. Please check and try again.",
       });
     } catch (error) {
       console.error("OTP verify error:", error.message);
 
       return res.status(500).json({
         success: false,
-        error: error.message,
+        message: "OTP verification failed. Please try again.",
       });
     }
   }

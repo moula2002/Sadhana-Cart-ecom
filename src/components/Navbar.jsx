@@ -479,7 +479,7 @@ navigate("/save-address");
   setShowAuthModal(true);
   return;
 }
-navigate("/wishlist");
+navigate("/wishlist"); 
     setDropdownOpen(false);
   };
 

@@ -30,7 +30,8 @@ import "./CheckoutPage.css";
 import { FaCoins } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 
-const RAZORPAY_KEY_ID = "rzp_live_RF5gE7NCdAsEIs";
+const RAZORPAY_KEY_ID = "rzp_live_SRuwxqek1NJhN6";
+const KEY_SECRET = "BqBBHF6z6q105tYnsuEPporm";
 const NOMINATIM_CONTACT_EMAIL = "your.app.contact@example.com";
 const COIN_TO_RUPEE_RATE = 1;
 

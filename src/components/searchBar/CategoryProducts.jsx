@@ -58,6 +58,9 @@ const CategoryProducts = () => {
         }));
       }
 
+      // ✅ IMPORTANT FIX (stock 0 irundhalum show aagum)
+      list = list.filter((p) => p.isActive !== false);
+
       setProducts(list);
       setFilteredProducts(list);
 

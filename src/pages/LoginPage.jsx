@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import axios from "axios";
 import {
   Button,
   Form,
@@ -12,7 +13,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import logo from "../Images/Sadhanacart1.png"
-
+import { sendOtp as sendFastOtp } from "../services/fastSmsService";
 /* CSS */
 import "./LoginPage.css";
 
@@ -22,6 +23,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithPopup,
   signInWithPhoneNumber,
+  signInWithCustomToken,
   RecaptchaVerifier,
   onAuthStateChanged
 } from "firebase/auth";
@@ -304,69 +306,69 @@ export default function LoginPage({ onClose }) {
   };
 
   /* ================= PHONE OTP ================= */
-  const sendOtp = async () => {
-    setError("");
+ const sendOtp = async () => {
+  setError("");
 
-    // Validate phone number
-    if (!phone || phone.length !== 10) {
-      setError("Please enter a valid 10-digit phone number");
-      return;
+  if (!phone || phone.length !== 10) {
+    setError("Enter valid number");
+    return;
+  }
+
+  try {
+    const result = await sendFastOtp({
+      phone: `+91${phone}`
+    });
+
+    if (result.success) {
+      setConfirmation(true); // just flag
+      showToast("OTP sent 📲");
+    } else {
+      setError(result.message);
     }
 
-    try {
-      if (!recaptchaRef.current) {
-        recaptchaRef.current = new RecaptchaVerifier(
-          "recaptcha-container",
-          {
-            size: "invisible",
-            callback: () => {
-              console.log("reCAPTCHA verified");
-            }
-          },
-          auth
-        );
-      }
-
-      const formattedPhone = phone.startsWith("+91")
-        ? phone
-        : `+91${phone}`;
-
-      const result = await signInWithPhoneNumber(
-        auth,
-        formattedPhone,
-        recaptchaRef.current
-      );
-
-      setConfirmation(result);
-      showToast("OTP sent to your phone 📲");
-    } catch (err) {
-      setError(getFirebaseErrorMessage(err.code));
-    }
-  };
+  } catch (err) {
+    setError("Failed to send OTP");
+  }
+};
 
   const verifyOtp = async () => {
-    setError("");
+  setError("");
 
-    if (!otp || otp.length !== 6) {
-      setError("Please enter a valid 6-digit OTP");
-      return;
-    }
+  if (!otp || otp.length !== 6) {
+    setError("Please enter a valid 6-digit OTP");
+    return;
+  }
 
-    try {
-      const res = await confirmation.confirm(otp);
-      const ref = doc(db, "users", res.user.uid);
-      const snap = await getDoc(ref);
+  try {
+    // 🔥 Backend verify call
+    const response = await axios.post(
+      "https://us-central1-sadhana-cart.cloudfunctions.net/verifyOtp",
+      {
+        phone: phone,
+        otp: otp
+      }
+    );
 
-      if (!snap.exists()) {
-        // Generate referral code for new user
+    if (response.data.success && response.data.customToken) {
+      // ✅ Real Firebase Login
+      const userCredential = await signInWithCustomToken(auth, response.data.customToken);
+      const user = userCredential.user;
+
+      // ✅ Check if this is a new user in Firestore
+      const userRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userRef);
+
+      if (!userSnap.exists()) {
+        // 🔥 New User + Referral Logic
         const userReferralCode = generateReferralCode();
-
-        // Process referral if code provided (for phone signup)
         let referredBy = null;
         let walletBalance = 0;
 
         if (referralCode.trim()) {
-          const q = query(collection(db, "users"), where("referralCode", "==", referralCode.trim().toUpperCase()));
+          const q = query(
+            collection(db, "users"),
+            where("referralCode", "==", referralCode.trim().toUpperCase())
+          );
           const querySnapshot = await getDocs(q);
 
           if (!querySnapshot.empty) {
@@ -375,18 +377,19 @@ export default function LoginPage({ onClose }) {
             referredBy = referrerDoc.id;
             walletBalance = 50;
 
-            // Credit ₹50 to referrer
-            const referrerNewBalance = (referrerData.walletBalance || 0) + 50;
+            // 💰 Award bonus to referrer
             await updateDoc(doc(db, "users", referrerDoc.id), {
-              walletBalance: referrerNewBalance,
+              walletBalance: (referrerData.walletBalance || 0) + 50,
               updatedAt: serverTimestamp()
             });
           }
         }
 
-        await setDoc(ref, {
-          name: "User", // Default name for phone signup
-          phone: res.user.phoneNumber,
+        // Create the user document
+        await setDoc(userRef, {
+          name: "User",
+          phone: phone,
+          email: "",
           profileImage: "",
           referralCode: userReferralCode,
           referredBy: referredBy,
@@ -399,28 +402,34 @@ export default function LoginPage({ onClose }) {
         });
 
         if (walletBalance > 0) {
-          showToast("Login successful 🎉 + ₹50 referral bonus!");
+          showToast("Welcome! 🎉 + ₹50 referral bonus awarded");
         } else {
-          showToast("Login successful 🎉");
+          showToast("Welcome to Sadhana Cart! 🎉");
         }
       } else {
-        await setDoc(ref, {
+        // ✅ Existing User - Update last login
+        await updateDoc(userRef, {
           lastLogin: serverTimestamp(),
           updatedAt: serverTimestamp()
-        }, { merge: true });
-        showToast("Welcome back! 👋");
+        });
+        showToast("Welcome back 👋");
       }
-
-      if (onClose) {
-        onClose();
-      }
-
-      navigate("/", { replace: true });
-
-    } catch (err) {
-      setError(getFirebaseErrorMessage(err.code));
+    } else {
+      setError(response.data.message || "Invalid OTP");
     }
-  };
+
+    if (onClose) {
+      onClose();
+    }
+
+    navigate("/", { replace: true });
+
+  } catch (err) {
+    console.error(err);
+    const errorMessage = err.response?.data?.message || "OTP verification failed";
+    setError(errorMessage);
+  }
+};
 
   /* Helper function to format error messages */
   const getFirebaseErrorMessage = (errorCode) => {
