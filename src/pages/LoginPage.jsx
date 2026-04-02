@@ -306,130 +306,130 @@ export default function LoginPage({ onClose }) {
   };
 
   /* ================= PHONE OTP ================= */
- const sendOtp = async () => {
-  setError("");
+  const sendOtp = async () => {
+    setError("");
 
-  if (!phone || phone.length !== 10) {
-    setError("Enter valid number");
-    return;
-  }
-
-  try {
-    const result = await sendFastOtp({
-      phone: `+91${phone}`
-    });
-
-    if (result.success) {
-      setConfirmation(true); // just flag
-      showToast("OTP sent 📲");
-    } else {
-      setError(result.message);
+    if (!phone || phone.length !== 10) {
+      setError("Enter valid number");
+      return;
     }
 
-  } catch (err) {
-    setError("Failed to send OTP");
-  }
-};
+    try {
+      const result = await sendFastOtp({
+        phone: `+91${phone}`
+      });
+
+      if (result.success) {
+        setConfirmation(true); // just flag
+        showToast("OTP sent 📲");
+      } else {
+        setError(result.message);
+      }
+
+    } catch (err) {
+      setError("Failed to send OTP");
+    }
+  };
 
   const verifyOtp = async () => {
-  setError("");
+    setError("");
 
-  if (!otp || otp.length !== 6) {
-    setError("Please enter a valid 6-digit OTP");
-    return;
-  }
+    if (!otp || otp.length !== 6) {
+      setError("Please enter a valid 6-digit OTP");
+      return;
+    }
 
-  try {
-    // 🔥 Backend verify call
-    const response = await axios.post(
-      "https://us-central1-sadhana-cart.cloudfunctions.net/verifyOtp",
-      {
-        phone: phone,
-        otp: otp
-      }
-    );
-
-    if (response.data.success && response.data.customToken) {
-      // ✅ Real Firebase Login
-      const userCredential = await signInWithCustomToken(auth, response.data.customToken);
-      const user = userCredential.user;
-
-      // ✅ Check if this is a new user in Firestore
-      const userRef = doc(db, "users", user.uid);
-      const userSnap = await getDoc(userRef);
-
-      if (!userSnap.exists()) {
-        // 🔥 New User + Referral Logic
-        const userReferralCode = generateReferralCode();
-        let referredBy = null;
-        let walletBalance = 0;
-
-        if (referralCode.trim()) {
-          const q = query(
-            collection(db, "users"),
-            where("referralCode", "==", referralCode.trim().toUpperCase())
-          );
-          const querySnapshot = await getDocs(q);
-
-          if (!querySnapshot.empty) {
-            const referrerDoc = querySnapshot.docs[0];
-            const referrerData = referrerDoc.data();
-            referredBy = referrerDoc.id;
-            walletBalance = 50;
-
-            // 💰 Award bonus to referrer
-            await updateDoc(doc(db, "users", referrerDoc.id), {
-              walletBalance: (referrerData.walletBalance || 0) + 50,
-              updatedAt: serverTimestamp()
-            });
-          }
-        }
-
-        // Create the user document
-        await setDoc(userRef, {
-          name: "User",
+    try {
+      // 🔥 Backend verify call
+      const response = await axios.post(
+        "https://us-central1-sadhana-cart.cloudfunctions.net/verifyOtp",
+        {
           phone: phone,
-          email: "",
-          profileImage: "",
-          referralCode: userReferralCode,
-          referredBy: referredBy,
-          walletBalance: walletBalance,
-          walletCoins: 0,
-          provider: "phone",
-          createdAt: serverTimestamp(),
-          lastLogin: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        });
+          otp: otp
+        }
+      );
 
-        if (walletBalance > 0) {
-          showToast("Welcome! 🎉 + ₹50 referral bonus awarded");
+      if (response.data.success && response.data.customToken) {
+        // ✅ Real Firebase Login
+        const userCredential = await signInWithCustomToken(auth, response.data.customToken);
+        const user = userCredential.user;
+
+        // ✅ Check if this is a new user in Firestore
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+
+        if (!userSnap.exists()) {
+          // 🔥 New User + Referral Logic
+          const userReferralCode = generateReferralCode();
+          let referredBy = null;
+          let walletBalance = 0;
+
+          if (referralCode.trim()) {
+            const q = query(
+              collection(db, "users"),
+              where("referralCode", "==", referralCode.trim().toUpperCase())
+            );
+            const querySnapshot = await getDocs(q);
+
+            if (!querySnapshot.empty) {
+              const referrerDoc = querySnapshot.docs[0];
+              const referrerData = referrerDoc.data();
+              referredBy = referrerDoc.id;
+              walletBalance = 50;
+
+              // 💰 Award bonus to referrer
+              await updateDoc(doc(db, "users", referrerDoc.id), {
+                walletBalance: (referrerData.walletBalance || 0) + 50,
+                updatedAt: serverTimestamp()
+              });
+            }
+          }
+
+          // Create the user document
+          await setDoc(userRef, {
+            name: "User",
+            phone: phone,
+            email: "",
+            profileImage: "",
+            referralCode: userReferralCode,
+            referredBy: referredBy,
+            walletBalance: walletBalance,
+            walletCoins: 0,
+            provider: "phone",
+            createdAt: serverTimestamp(),
+            lastLogin: serverTimestamp(),
+            updatedAt: serverTimestamp()
+          });
+
+          if (walletBalance > 0) {
+            showToast("Welcome! 🎉 + ₹50 referral bonus awarded");
+          } else {
+            showToast("Welcome to Sadhana Cart! 🎉");
+          }
         } else {
-          showToast("Welcome to Sadhana Cart! 🎉");
+          // ✅ Existing User - Update last login
+          await updateDoc(userRef, {
+            lastLogin: serverTimestamp(),
+            updatedAt: serverTimestamp()
+          });
+          showToast("Welcome back 👋");
         }
       } else {
-        // ✅ Existing User - Update last login
-        await updateDoc(userRef, {
-          lastLogin: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        });
-        showToast("Welcome back 👋");
+        setError(response.data.message || "Invalid OTP");
       }
-    } else {
-      setError(response.data.message || "Invalid OTP");
+
+      if (onClose) {
+        onClose();
+      }
+
+      navigate("/profile", { replace: true });
+
+    } catch (err) {
+      console.error(err);
+      const errorMessage = err.response?.data?.message || "OTP verification failed";
+      setError(errorMessage);
     }
-
-    if (onClose) {
-      onClose();
-    }
-
-    navigate("/", { replace: true });
-
-  } catch (err) {
-    console.error(err);
-    const errorMessage = err.response?.data?.message || "OTP verification failed";
-    setError(errorMessage);
-  }
-};
+  };
 
   /* Helper function to format error messages */
   const getFirebaseErrorMessage = (errorCode) => {

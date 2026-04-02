@@ -51,6 +51,7 @@ import Wallet from "./pages/Wallet";
 import Theme from "./pages/Theme";
 import SaveAddress from "./pages/SaveAddress";
 import AddressList from "./pages/AddressList";
+import Coupens from "./pages/Coupens";
 
 /* ================= APP CONTENT ================= */
 const AppContent = () => {
@@ -111,6 +112,7 @@ const AppContent = () => {
           <Route path="/about-us" element={<AboutUs />} />
           <Route path="/faqs" element={<Faqs />} />
           <Route path="/contact" element={<ContactForm />} />
+           <Route path="/coupens" element={<Coupens/>} />
 
           {/* 🔹 404 */}
           <Route

@@ -22,12 +22,13 @@ import {
   updateDoc,
   arrayUnion,
   increment,
+  getDocs,
 } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db } from "../../firebase";
 import "./CartPage.css";
 import "./CheckoutPage.css";
-import { FaCoins } from "react-icons/fa";
+import { FaCoins, FaTags, FaChevronRight } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 
 const RAZORPAY_KEY_ID = "rzp_live_SRuwxqek1NJhN6";
@@ -100,16 +101,20 @@ const CheckoutPage = () => {
   const [userId, setUserId] = useState(null);
   const [productSkus, setProductSkus] = useState({});
   const [productSellers, setProductSellers] = useState({});
-  const [billingDetails, setBillingDetails] = useState({
-    fullName: "",
-    email: "",
-    phone: "",
-    address: "",
-    city: "",
-    pincode: "",
-  });
-  const [paymentMethod, setPaymentMethod] = useState("razorpay");
-  const [coordinates, setCoordinates] = useState({ lat: null, lng: null });
+  const savedCheckoutState = location.state?.checkoutState;
+
+  const [billingDetails, setBillingDetails] = useState(
+    savedCheckoutState?.billingDetails || {
+      fullName: "",
+      email: "",
+      phone: "",
+      address: "",
+      city: "",
+      pincode: "",
+    }
+  );
+  const [paymentMethod, setPaymentMethod] = useState(savedCheckoutState?.paymentMethod || "razorpay");
+  const [coordinates, setCoordinates] = useState(savedCheckoutState?.coordinates || { lat: null, lng: null });
   const [geocodingError, setGeocodingError] = useState(null);
   const [locationStatusMessage, setLocationStatusMessage] = useState(null);
   const [isLocating, setIsLocating] = useState(false);
@@ -213,21 +218,25 @@ const CheckoutPage = () => {
         const data = docSnap.data();
 
         const coords = data.shipping_address?.coordinates;
-        if (coords) {
+        if (coords && (!savedCheckoutState || !savedCheckoutState.coordinates)) {
           setCoordinates({ lat: coords.latitude, lng: coords.longitude });
           setGeocodingError(null);
         }
 
         setWalletCoins(data.walletCoins || 0);
-        setBillingDetails((prev) => ({
-          ...prev,
-          fullName: data.name || prev.fullName,
-          email: data.email || prev.email,
-          phone: data.phone || prev.phone || "",
-          address: data.shipping_address?.addressLine1 || prev.address,
-          city: data.shipping_address?.city || prev.city,
-          pincode: data.shipping_address?.postalCode || prev.pincode,
-        }));
+
+        setBillingDetails((prev) => {
+          if (savedCheckoutState?.billingDetails) return prev;
+          return {
+            ...prev,
+            fullName: data.name || prev.fullName,
+            email: data.email || prev.email,
+            phone: data.phone || prev.phone || "",
+            address: data.shipping_address?.addressLine1 || prev.address,
+            city: data.shipping_address?.city || prev.city,
+            pincode: data.shipping_address?.postalCode || prev.pincode,
+          };
+        });
       }
     } catch (error) {
       console.error("Error fetching user data:", error);
@@ -246,8 +255,131 @@ const CheckoutPage = () => {
     }
   }, [walletCoins, totalPrice]);
 
+  const [coupons, setCoupons] = useState([]);
+  const [inputCode, setInputCode] = useState(savedCheckoutState?.inputCode || "");
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponDiscount, setCouponDiscount] = useState(0);
+
+  const [appliedRazorpayOffer, setAppliedRazorpayOffer] = useState(null);
+  const [razorpayDiscount, setRazorpayDiscount] = useState(0);
+
+  useEffect(() => {
+    const fetchCoupons = async () => {
+      try {
+        const snapshot = await getDocs(collection(db, "coupons"));
+        const list = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setCoupons(list);
+      } catch (error) {
+        console.error("Error fetching coupons:", error);
+      }
+    };
+    fetchCoupons();
+  }, []);
+
+  const handleApplyCoupon = () => {
+    if (!inputCode.trim()) return;
+    const found = coupons.find(
+      (c) =>
+        c.code?.toLowerCase() === inputCode.trim().toLowerCase() &&
+        c.status === "Enabled"
+    );
+
+    if (!found) {
+      alert("❌ Invalid Coupon");
+      return;
+    }
+
+    if (totalPrice < Number(found.minOrderAmount)) {
+      alert(`Minimum order ₹${found.minOrderAmount} required`);
+      return;
+    }
+
+    const discountAmount = (totalPrice * Number(found.discountPercent)) / 100;
+
+    setCouponDiscount(discountAmount);
+    setAppliedCoupon(found);
+
+    alert("✅ Coupon Applied Successfully");
+  };
+
+  const appliedCouponCodeFromLocation = location.state?.appliedCouponCode;
+
+  useEffect(() => {
+    if (appliedCouponCodeFromLocation && coupons.length > 0 && totalPrice > 0 && !appliedCoupon) {
+      const found = coupons.find(
+        (c) => c.code?.toLowerCase() === appliedCouponCodeFromLocation.toLowerCase() && c.status === "Enabled"
+      );
+      if (found && totalPrice >= Number(found.minOrderAmount)) {
+        setAppliedCoupon(found);
+        setCouponDiscount((totalPrice * Number(found.discountPercent)) / 100);
+        setInputCode(found.code);
+      } else if (found && totalPrice < Number(found.minOrderAmount)) {
+        alert(`Minimum order ₹${found.minOrderAmount} required for coupon ${found.code}`);
+      }
+    }
+  }, [appliedCouponCodeFromLocation, coupons, totalPrice, appliedCoupon]);
+
+  const removeCoupon = () => {
+    setCouponDiscount(0);
+    setAppliedCoupon(null);
+    setInputCode("");
+  };
+
+  const appliedRazorpayOfferFromLocation = location.state?.appliedRazorpayOffer;
+
+  useEffect(() => {
+    if (appliedRazorpayOfferFromLocation && totalPrice > 0 && !appliedRazorpayOffer) {
+      setAppliedRazorpayOffer(appliedRazorpayOfferFromLocation);
+
+      let discountValue = 0;
+      
+      // Calculate discount flexibly based on whatever field the admin entered
+      if (appliedRazorpayOfferFromLocation.discountPercent) {
+        discountValue = (totalPrice * Number(appliedRazorpayOfferFromLocation.discountPercent)) / 100;
+      } else if (appliedRazorpayOfferFromLocation.percentage) {
+        discountValue = (totalPrice * Number(appliedRazorpayOfferFromLocation.percentage)) / 100;
+      } else if (appliedRazorpayOfferFromLocation.discountPercentage) {
+        discountValue = (totalPrice * Number(appliedRazorpayOfferFromLocation.discountPercentage)) / 100;
+      } else if (appliedRazorpayOfferFromLocation.discountAmount) {
+        discountValue = Number(appliedRazorpayOfferFromLocation.discountAmount);
+      } else if (appliedRazorpayOfferFromLocation.amount) {
+        discountValue = Number(appliedRazorpayOfferFromLocation.amount);
+      } else {
+        // Fallback: Smart scan of the offer text for percentages like "10%" or amounts like "₹500"
+        const textToScan = `${appliedRazorpayOfferFromLocation.offerName} ${appliedRazorpayOfferFromLocation.offerDetails} ${appliedRazorpayOfferFromLocation.displayText}`;
+        const percentMatch = textToScan.match(/(\d+(?:\.\d+)?)%/);
+        if (percentMatch) {
+            discountValue = (totalPrice * Number(percentMatch[1])) / 100;
+        } else {
+            const amountMatch = textToScan.match(/(?:₹|Rs\.?)\s*(\d+(?:\.\d+)?)/i);
+            if (amountMatch) {
+                discountValue = Number(amountMatch[1]);
+            }
+        }
+      }
+
+      // Respect max discount caps if set
+      if (appliedRazorpayOfferFromLocation.maxDiscount && discountValue > Number(appliedRazorpayOfferFromLocation.maxDiscount)) {
+        discountValue = Number(appliedRazorpayOfferFromLocation.maxDiscount);
+      }
+      setRazorpayDiscount(discountValue);
+      setPaymentMethod("Razorpay"); // Force Razorpay if a bank offer is applied
+    }
+  }, [appliedRazorpayOfferFromLocation, totalPrice, appliedRazorpayOffer]);
+
+  const removeRazorpayOffer = () => {
+    setRazorpayDiscount(0);
+    setAppliedRazorpayOffer(null);
+  };
+
   const coinDiscount = coinsToUse * COIN_TO_RUPEE_RATE;
-  const finalAmount = Math.max(0, totalPrice - coinDiscount);
+  // Display amount is heavily modified by both standard discounts and gateway deals.
+  const finalAmount = Math.max(0, totalPrice - coinDiscount - couponDiscount - razorpayDiscount);
+  // Razorpay Gateway MUST trigger its calculation using the amount BEFORE the Bank offer is subtracted.
+  const razorpayOriginalAmount = Math.max(0, totalPrice - coinDiscount - couponDiscount);
 
   const geocodeAddress = useCallback(async (details) => {
     const fullAddress = `${details.address}, ${details.city}, ${details.pincode}`;
@@ -504,40 +636,40 @@ const CheckoutPage = () => {
     }
   };
   // 🔥 Reduce stock from products collection
-const reduceProductStock = useCallback(async () => {
+  const reduceProductStock = useCallback(async () => {
 
-  try {
+    try {
 
-    for (const item of mergedCartItems) {
+      for (const item of mergedCartItems) {
 
-      const productRef = doc(db, "products", item.id);
-      const productSnap = await getDoc(productRef);
+        const productRef = doc(db, "products", item.id);
+        const productSnap = await getDoc(productRef);
 
-      if (!productSnap.exists()) {
-        throw new Error("Product not found");
+        if (!productSnap.exists()) {
+          throw new Error("Product not found");
+        }
+
+        const productData = productSnap.data();
+
+        if (productData.stock < item.quantity) {
+          throw new Error("Product out of stock");
+        }
+
+        await updateDoc(productRef, {
+          stock: productData.stock - item.quantity
+        });
+
+        console.log(
+          `Stock reduced → Product ${item.id} | Qty ${item.quantity}`
+        );
       }
 
-      const productData = productSnap.data();
-
-      if (productData.stock < item.quantity) {
-        throw new Error("Product out of stock");
-      }
-
-      await updateDoc(productRef, {
-        stock: productData.stock - item.quantity
-      });
-
-      console.log(
-        `Stock reduced → Product ${item.id} | Qty ${item.quantity}`
-      );
+    } catch (error) {
+      console.error("Stock update error:", error);
+      throw error;
     }
 
-  } catch (error) {
-    console.error("Stock update error:", error);
-    throw error;
-  }
-
-}, [mergedCartItems]);
+  }, [mergedCartItems]);
 
   const updateSellerDocuments = async (sellerIds, userOrderDocId, orderData) => {
     // 🔥 Reduce stock from products collection
@@ -631,6 +763,10 @@ const reduceProductStock = useCallback(async () => {
         discountedAmount: finalAmount,
         coinsUsed: coinsToUse,
         coinDiscount: coinDiscount,
+        couponDiscount: couponDiscount,
+        razorpayOfferDiscount: razorpayDiscount,
+        appliedCoupon: appliedCoupon ? appliedCoupon.code : null,
+        appliedRazorpayOfferId: appliedRazorpayOffer ? (appliedRazorpayOffer.offerId || appliedRazorpayOffer.id) : null,
         paymentMethod,
         phoneNumber: billingDetails.phone || null,
         createdAt: serverTimestamp(),
@@ -712,7 +848,7 @@ const reduceProductStock = useCallback(async () => {
         docId: userOrderDocRef.id,
         sellerid: selleridField,
         coinsUsed: coinsToUse,
-        discount: coinDiscount
+        discount: coinDiscount + couponDiscount
       };
 
     } catch (error) {
@@ -756,77 +892,81 @@ const reduceProductStock = useCallback(async () => {
     );
     if (!res) return alert(t("checkout.razorpayFailed"));
 
-    const amountInPaise = Math.round(finalAmount * 100);
+    // Razorpay must receive the original price BEFORE the bank offer is deducted frontend 
+    // so it can apply the offer deduction correctly on their side without doubling it. 
+    const amountInPaise = Math.round(razorpayOriginalAmount * 100);
 
-    if (amountInPaise < 100 && finalAmount > 0) {
+    if (amountInPaise < 100 && razorpayOriginalAmount > 0) {
       alert(t("checkout.minimumAmount"));
       return;
     }
 
-  const options = {
-  key: RAZORPAY_KEY_ID,
-  amount: amountInPaise,
-  currency: "INR",
-  name: "SadhanaCart",
-  description: "Purchase Checkout",
-  offer_id: "offer_SNpgKSdxp2aIIa",
-  method: {
-    card: true,
-    upi: true,
-    netbanking: true,
-    wallet: true
-  },
+    const options = {
+      key: RAZORPAY_KEY_ID,
+      amount: amountInPaise,
+      currency: "INR",
+      name: "SadhanaCart",
+      description: "Purchase Checkout",
+      offer_id: appliedRazorpayOffer ? (appliedRazorpayOffer.offerId || appliedRazorpayOffer.id) : undefined,
+      method: {
+        card: true,
+        upi: true,
+        netbanking: true,
+        wallet: true
+      },
 
-  handler: async function (response) {
+      handler: async function (response) {
 
-    alert(`Payment Successful! Payment ID: ${response.razorpay_payment_id}`);
+        alert(`Payment Successful! Payment ID: ${response.razorpay_payment_id}`);
 
-    try {
-      await reduceProductStock();
-    } catch (err) {
-      alert(err.message);
-      return;
-    }
+        try {
+          await reduceProductStock();
+        } catch (err) {
+          alert(err.message);
+          return;
+        }
 
-    const result = await saveOrderToFirestore(
-      "Razorpay",
-      "Paid",
-      response.razorpay_payment_id
-    );
+        const result = await saveOrderToFirestore(
+          "Razorpay",
+          "Paid",
+          response.razorpay_payment_id
+        );
 
-    if (result && result.success) {
-      navigate("/order-confirm", {
-        state: {
-          paymentMethod: "Razorpay",
-          total: formatPrice(finalAmount),
-          originalTotal: formatPrice(totalPrice),
-          itemsCount: mergedCartItems.length,
-          billingDetails,
-          cartItems: mergedCartItems,
-          sellerid: result.sellerid,
-          orderDocId: result.docId,
-          coinsUsed: result.coinsUsed,
-          discount: result.discount,
-        },
-      });
-    }
-  },
+        if (result && result.success) {
+          navigate("/order-confirm", {
+            state: {
+              paymentMethod: "Razorpay",
+              total: formatPrice(finalAmount),
+              originalTotal: formatPrice(totalPrice),
+              itemsCount: mergedCartItems.length,
+              billingDetails,
+              cartItems: mergedCartItems,
+              sellerid: result.sellerid,
+              orderDocId: result.docId,
+              coinsUsed: result.coinsUsed,
+              discount: result.discount,
+            },
+          });
+        }
+      },
 
-  prefill: {
-    name: billingDetails.fullName,
-    email: billingDetails.email,
-    contact: billingDetails.phone,
-  },
+      prefill: {
+        name: billingDetails.fullName,
+        email: billingDetails.email,
+        contact: billingDetails.phone,
+      },
 
-  notes: {
-    address: billingDetails.address,
-    pincode: billingDetails.pincode,
-    coins_used: coinsToUse,
-    coin_discount: coinDiscount,
-  },
+      notes: {
+        address: billingDetails.address,
+        pincode: billingDetails.pincode,
+        coins_used: coinsToUse,
+        coin_discount: coinDiscount,
+        coupon_discount: couponDiscount,
+        applied_coupon: appliedCoupon ? appliedCoupon.code : "none",
+      },
 
-  theme: { color: "#FFA500" },
-};
+      theme: { color: "#FFA500" },
+    };
 
     const paymentObject = new window.Razorpay(options);
     paymentObject.open();
@@ -874,6 +1014,8 @@ const reduceProductStock = useCallback(async () => {
           coinsToUse,
           walletCoins,
           coordinates,
+          couponDiscount,
+          appliedCoupon: appliedCoupon ? appliedCoupon.code : null,
         },
       });
       return;
@@ -1208,48 +1350,126 @@ const reduceProductStock = useCallback(async () => {
             )}
 
             {mergedCartItems && mergedCartItems.length > 0 && (
-              <div className="mt-3 border-top pt-3 theme-border">
-                <p className="d-flex justify-content-between mb-2 theme-text-primary">
-                  <span>{t("checkout.subtotal")}:</span>
-                  <span>{formatPrice(totalPrice)}</span>
-                </p>
+              <>
 
-                {coinsToUse > 0 && (
-                  <p className="d-flex justify-content-between mb-2 theme-text-success">
-                    <span>
-                      <FaCoins className="me-1" />
-                      Coins Discount ({coinsToUse} coins):
-                    </span>
-                    <span className="fw-bold">-{formatPrice(coinDiscount)}</span>
-                  </p>
-                )}
 
-                <p className="d-flex justify-content-between mb-2 theme-text-primary">
-                  <span>{t("checkout.shipping")}</span>
-                  <span className="fw-semibold theme-text-success">{t("checkout.free")}</span>
-                </p>
-                <hr className="theme-border" />
-                <h5 className="d-flex justify-content-between fw-bold theme-text-primary">
-                  <span>{t("checkout.total")}:</span>
-                  <span className={coinsToUse > 0 ? "theme-text-success" : "theme-text-primary"}>
-                    {formatPrice(finalAmount)}
-                    {coinsToUse > 0 && (
-                      <small className="ms-2 theme-text-muted">
-                        <s>{formatPrice(totalPrice)}</s>
-                      </small>
-                    )}
-                  </span>
-                </h5>
-
-                {coinsToUse > 0 && (
-                  <div className="mt-2 py-2 theme-coins-saved">
-                    <small>
-                      <FaCoins className="me-1" />
-                      {t("checkout.savedMessage", { amount: coinDiscount, coins: coinsToUse })}
-                    </small>
+                {!appliedCoupon && !appliedRazorpayOffer && (
+                  <div className="mb-4 mt-3">
+                    <Button
+                      variant="primary"
+                      className="w-100 d-flex justify-content-between align-items-center py-3 px-4 shadow-sm"
+                      style={{
+                        background: "linear-gradient(135deg, #4f46e5, #3b82f6)",
+                        border: "none",
+                        borderRadius: "10px"
+                      }}
+                      onClick={() => navigate("/coupens", {
+                        state: {
+                          ...location.state,
+                          totalPrice,
+                          checkoutState: {
+                            billingDetails,
+                            paymentMethod,
+                            coordinates,
+                            inputCode
+                          }
+                        }
+                      })}
+                    >
+                      <div className="d-flex align-items-center text-white">
+                        <FaTags size={20} className="me-3" />
+                        <span className="fw-bold fs-6 tracking-wide">View All Coupons & Offers</span>
+                      </div>
+                      <FaChevronRight className="text-white opacity-75" />
+                    </Button>
                   </div>
                 )}
-              </div>
+
+                {appliedCoupon && (
+                  <div className="mb-3 p-2 rounded d-flex justify-content-between align-items-center" style={{ border: "1px dashed green", background: "#f0fff0", color: "green" }}>
+                    <div>
+                      <small className="fw-bold d-block">
+                        ✅ {appliedCoupon.title || appliedCoupon.code} Applied
+                      </small>
+                      <small>
+                        You save {formatPrice(couponDiscount)} with this coupon!
+                      </small>
+                    </div>
+                    <Button variant="outline-success" size="sm" onClick={removeCoupon}>REMOVE</Button>
+                  </div>
+                )}
+
+                {appliedRazorpayOffer && (
+                  <div className="mb-3 p-2 rounded d-flex justify-content-between align-items-center" style={{ border: "1px dashed #0d6efd", background: "#f0f8ff", color: "#0d6efd" }}>
+                    <div>
+                      <small className="fw-bold d-block">
+                        🏦 {appliedRazorpayOffer.bankName} Offer Applied
+                      </small>
+                      <small>
+                        You save {formatPrice(razorpayDiscount)} at checkout!
+                      </small>
+                    </div>
+                    <Button variant="outline-primary" size="sm" onClick={removeRazorpayOffer}>REMOVE</Button>
+                  </div>
+                )}
+
+                <div className="mt-3 border-top pt-3 theme-border">
+                  <p className="d-flex justify-content-between mb-2 theme-text-primary">
+                    <span>{t("checkout.subtotal")}:</span>
+                    <span>{formatPrice(totalPrice)}</span>
+                  </p>
+
+                  {appliedCoupon && (
+                    <p className="d-flex justify-content-between mb-2 text-success">
+                      <span>Coupon Discount:</span>
+                      <span className="fw-bold">-{formatPrice(couponDiscount)}</span>
+                    </p>
+                  )}
+
+                  {appliedRazorpayOffer && razorpayDiscount >= 0 && (
+                    <p className="d-flex justify-content-between mb-2 text-primary">
+                      <span>Bank Offer ({appliedRazorpayOffer.bankName}):</span>
+                      <span className="fw-bold">-{formatPrice(razorpayDiscount)}</span>
+                    </p>
+                  )}
+
+                  {coinsToUse > 0 && (
+                    <p className="d-flex justify-content-between mb-2 theme-text-success">
+                      <span>
+                        <FaCoins className="me-1" />
+                        Coins Discount ({coinsToUse} coins):
+                      </span>
+                      <span className="fw-bold">-{formatPrice(coinDiscount)}</span>
+                    </p>
+                  )}
+
+                  <p className="d-flex justify-content-between mb-2 theme-text-primary">
+                    <span>{t("checkout.shipping")}</span>
+                    <span className="fw-semibold theme-text-success">{t("checkout.free")}</span>
+                  </p>
+                  <hr className="theme-border" />
+                  <h5 className="d-flex justify-content-between fw-bold theme-text-primary">
+                    <span>{t("checkout.total")}:</span>
+                    <span className={coinsToUse > 0 ? "theme-text-success" : "theme-text-primary"}>
+                      {formatPrice(finalAmount)}
+                      {coinsToUse > 0 && (
+                        <small className="ms-2 theme-text-muted">
+                          <s>{formatPrice(totalPrice)}</s>
+                        </small>
+                      )}
+                    </span>
+                  </h5>
+
+                  {coinsToUse > 0 && (
+                    <div className="mt-2 py-2 theme-coins-saved">
+                      <small>
+                        <FaCoins className="me-1" />
+                        {t("checkout.savedMessage", { amount: coinDiscount, coins: coinsToUse })}
+                      </small>
+                    </div>
+                  )}
+                </div>
+              </>
             )}
           </Card>
         </Col>

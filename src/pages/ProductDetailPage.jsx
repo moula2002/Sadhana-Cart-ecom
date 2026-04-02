@@ -19,6 +19,7 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useTranslation } from "react-i18next";
 import ProductSuggestions from "../pages/ProductSuggestions";
 import LoginPage from "./LoginPage";
+import RazorpayOffers from "./RazorpayOffers";
 
 const EXCHANGE_RATE = 1;
 const auth = getAuth();
@@ -1634,6 +1635,8 @@ function ProductDetailPage() {
                 </Row>
             </Card>
 
+            <RazorpayOffers />
+
             {/* Delivery & Terms Information Section */}
             {(hasDeliveryInfo || hasTermsInfo) && (
                 <Card className="mb-5 border-0 shadow-sm">
@@ -2301,7 +2304,6 @@ font-size:18px !important;
 box-shadow:none !important;
 transition:none !important;
 }
-
 
       `}</style>
         </Container>
