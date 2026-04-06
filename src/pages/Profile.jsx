@@ -45,7 +45,7 @@ function Profile() {
         setName(user.displayName || "");
         setPhoto(user.photoURL || "");
         setPreviewPhoto(user.photoURL || "");
-        setEmail(user.email || "");
+        setEmail("");
 
         const docRef = doc(db, "users", user.uid);
         const docSnap = await getDoc(docRef);
@@ -242,12 +242,15 @@ function Profile() {
                 <div className="floating-input-group">
                   <div className="floating-input-wrapper">
                     <FaEnvelope className="floating-icon" />
-                    <input
-                      type="email"
-                      className="floating-input"
-                      value={email}
-                      disabled
-                    />
+                  <input
+  type="email"
+  className="floating-input"
+  value={email}
+  onChange={(e) => setEmail(e.target.value)}
+  onFocus={() => handleFocus('email')}
+  onBlur={handleBlur}
+  required
+/>
                     <label className="floating-label filled">Email Address</label>
                   </div>
                 </div>

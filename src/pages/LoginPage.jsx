@@ -387,7 +387,7 @@ export default function LoginPage({ onClose }) {
 
           // Create the user document
           await setDoc(userRef, {
-            name: "User",
+            name: user.uid,
             phone: phone,
             email: "",
             profileImage: "",

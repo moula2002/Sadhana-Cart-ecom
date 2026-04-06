@@ -1,6 +1,3 @@
-// ======================================================
-// 🔥 COMPLETE FIXED PRODUCTION FUNCTIONS FILE
-// ======================================================
 
 const { onRequest, onCall } = require("firebase-functions/v2/https");
 const { onDocumentWritten } = require("firebase-functions/v2/firestore");
@@ -553,9 +550,19 @@ exports.verifyOtp = onRequest(
       if (otpData.otp === otp) {
         await otpRef.delete(); // Cleanup
 
-        // Generate a Custom Token for Firebase Auth login
-        // Use phone number as UID for custom token
-        const customToken = await admin.auth().createCustomToken(cleanPhone);
+let userRecord;
+
+try {
+  userRecord = await admin.auth().getUserByPhoneNumber("+91" + cleanPhone);
+} catch (error) {
+  // If not exists → create new user
+  userRecord = await admin.auth().createUser({
+    phoneNumber: "+91" + cleanPhone
+  });
+}
+
+// Step 2: Use UID (NOT phone)
+const customToken = await admin.auth().createCustomToken(userRecord.uid);
 
         return res.status(200).json({
           success: true,
