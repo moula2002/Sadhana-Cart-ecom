@@ -5,6 +5,7 @@ import { useDispatch } from "react-redux";
 import { addToCart } from "../redux/cartSlice";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Loading from "../pages/Loading";
 import {
     FaStar, FaRegStar, FaTruck, FaFileContract, FaCalendarAlt,
     FaShieldAlt, FaHeart, FaRegHeart, FaEdit, FaTrash, FaCamera,
@@ -1170,13 +1171,9 @@ function ProductDetailPage() {
     const hasTermsInfo = deliveryTerms.termsConditions && deliveryTerms.termsConditions.trim() !== "";
 
     // --- Render Checks ---
-    if (loading || !isAuthReady)
-        return (
-            <div className="text-center py-5">
-                <Spinner animation="border" variant="primary" />
-                <p className="mt-3 text-muted">{t("loading")}...</p>
-            </div>
-        );
+    if (loading || !isAuthReady) {
+  return <Loading />;
+}
     if (error) return (
         <Container className="py-5">
             <Alert variant="danger" className="text-center shadow-sm">

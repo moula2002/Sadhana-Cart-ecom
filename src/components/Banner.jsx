@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { collection, getDocs, query, where, limit } from "firebase/firestore";
 import { db } from "../firebase";
 import "./Banner.css";
+import Loading from "../pages/Loading"; // path correct pannunga
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
 const Banner = () => {
@@ -121,24 +122,18 @@ const Banner = () => {
 
   };
 
-  if(loading){
+if (loading) {
+  return <Loading />;
+}
 
-    return(
-      <div className="banner-loader-compact"></div>
-    );
-
-  }
-
-  if(banners.length<1){
-
-    return(
-      <div className="banner-empty">
-        <div className="empty-icon">🎬</div>
-        <h3>No banners available</h3>
-      </div>
-    );
-
-  }
+if (banners.length < 1) {
+  return (
+    <div className="banner-empty">
+      <div className="empty-icon">🎬</div>
+      <h3>No banners available</h3>
+    </div>
+  );
+}
 
   const {prev,curr,next}=getVisibleIndices();
 
@@ -227,7 +222,8 @@ onClick={()=>setIndex(i)}
 </section>
 
   );
+}
 
-};
+
 
 export default Banner;

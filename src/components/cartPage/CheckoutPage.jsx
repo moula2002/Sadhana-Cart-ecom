@@ -28,6 +28,7 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db } from "../../firebase";
 import "./CartPage.css";
 import "./CheckoutPage.css";
+import Loading from "../../pages/Loading";
 import { FaCoins, FaTags, FaChevronRight } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 
@@ -1029,16 +1030,9 @@ const CheckoutPage = () => {
     await handleRazorpayPayment();
   };
 
-  if (loading) {
-    return (
-      <Container className="py-5 text-center theme-container">
-        <Spinner animation="border" variant="warning" />
-        <p className="mt-3 theme-text-primary">
-          {t("checkout.fetching")}
-        </p>
-      </Container>
-    );
-  }
+if (loading) {
+  return <Loading />;
+}
 
   if (mergedCartItems.length === 0) {
     return (

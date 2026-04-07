@@ -181,7 +181,14 @@ const SecondHeader = () => {
           <div className="mobile-category-scroll">
             {loading ? (
               <div className="mobile-loading theme-text-secondary">
-                <FaSpinner className="spinner" /> Loading...
+                <div className="header-loader">
+  <div className="orbit">
+    <span className="dot dot1"></span>
+    <span className="dot dot2"></span>
+    <span className="dot dot3"></span>
+    <span className="dot dot4"></span>
+  </div>
+</div>
               </div>
             ) : (
               <div className="mobile-category-list">
@@ -224,10 +231,17 @@ const SecondHeader = () => {
 
             <ul className="menu-list desktop-menu theme-bg" ref={scrollContainerRef}>
               {loading ? (
-                <li className="menu-item loading theme-text-secondary">
-                  <FaSpinner className="spinner" /> Loading...
-                </li>
-              ) : (
+  <li className="menu-item loading">
+    <div className="header-loader">
+      <div className="orbit">
+        <span className="dot dot1"></span>
+        <span className="dot dot2"></span>
+        <span className="dot dot3"></span>
+        <span className="dot dot4"></span>
+      </div>
+    </div>
+  </li>
+) : (
                 categories.map((category) => (
                   <li
                     key={category.id}

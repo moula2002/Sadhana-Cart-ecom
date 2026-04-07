@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useLocation, useNavigate, Link } from "react-router-dom";
 import { db, collection, getDocs, query, where } from "../../firebase";
 import "./CategoryProducts.css";
+import Loading from "../../pages/Loading"; 
 import { FaHome, FaSpinner, FaSearch, FaTag, FaChevronRight, FaTimes } from "react-icons/fa";
 
 const CategoryProducts = () => {
@@ -147,11 +148,8 @@ const CategoryProducts = () => {
       <div className="divider"></div>
 
       {loading ? (
-        <div className="loading-container">
-          <FaSpinner className="spinner-large" />
-          <p>Loading...</p>
-        </div>
-      ) : filteredProducts.length > 0 ? (
+  <Loading />
+) : filteredProducts.length > 0 ? (
 
         <div className="products-grid">
 
