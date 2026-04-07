@@ -389,8 +389,6 @@ function CashOnDelivery() {
       // Use auto-generated document ID like Flutter
       const ordersRef = collection(db, "users", userId, "orders");
 
-      // Calculate cashback (1% of total)
-      const cashbackCoins = Math.floor(totalPrice * 0.01);
 
       // Create order data EXACTLY matching Flutter structure
       const orderData = {
@@ -400,7 +398,6 @@ function CashOnDelivery() {
         productsTotal: totalPrice,
         payableAmount: finalAmount,
         walletCoinsUsed: coinsToUse,
-        cashbackCoinsAdded: cashbackCoins,
         shippingCharges: shippingCharges,
         address: `${billingDetails.address || ""}, ${billingDetails.city || ""}, ${billingDetails.state || "Karnataka"}, ${billingDetails.pincode || ""}`,
         phoneNumber: billingDetails.phone ? parseInt(billingDetails.phone) : null,
@@ -426,18 +423,7 @@ function CashOnDelivery() {
 
       console.log("Order saved with ID:", userOrderDocRef.id);
 
-      // Add cashback to wallet (1% of total)
-      if (cashbackCoins > 0) {
-        try {
-          const userRef = doc(db, "users", userId);
-          await updateDoc(userRef, {
-            walletCoins: increment(cashbackCoins)
-          });
-          console.log(`Added ${cashbackCoins} cashback coins`);
-        } catch (e) {
-          console.error("Failed to add cashback:", e);
-        }
-      }
+
 
       // Send to Shiprocket
       // ================================
@@ -769,12 +755,6 @@ function CashOnDelivery() {
               <strong>{t("cod.note")}:</strong> {coinsToUse} coins will be deducted from your wallet immediately upon order confirmation.
             </Alert>
           )}
-
-          {/* 1% Cashback info */}
-          <Alert variant="success" className="mt-2 small">
-            <FaCoins className="me-2" />
-            <strong>Cashback:</strong> You'll receive {Math.floor(totalPrice * 0.01)} coins (1% cashback) after order confirmation.
-          </Alert>
         </Col>
       </Row>
 

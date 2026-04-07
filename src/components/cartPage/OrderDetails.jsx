@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
 import { collection, query, where, onSnapshot, doc, getDoc } from "firebase/firestore";
 import { db, auth } from "../../firebase";
+import { updateDoc } from "firebase/firestore";
 
 const formatCurrency = (val) =>
   new Intl.NumberFormat("en-IN", {
@@ -149,11 +150,54 @@ function OrderDetails() {
       where("orderId", "==", orderId)
     );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    const unsubscribe = onSnapshot(q, async (snapshot) => {
       if (!snapshot.empty) {
         const latestReturn = snapshot.docs[0].data();
         setReturnStatus(latestReturn.status);
+
+        // ✅ ONLY WHEN RETURN COMPLETED
+        if (
+          latestReturn.status === "returned" ||
+          latestReturn.status === "refund_completed"
+        ) {
+          try {
+            const userRef = doc(db, "users", userId);
+            const userSnap = await getDoc(userRef);
+
+            if (userSnap.exists()) {
+              const currentCoins = Number(userSnap.data().walletCoins || 0);
+
+              // ⚡ avoid duplicate add (important)
+              if (!latestReturn.walletCredited) {
+                const coinsToAdd = Math.round(latestReturn.refundAmount || 0);
+
+                const newCoins = currentCoins + coinsToAdd;
+
+                await updateDoc(userRef, {
+                  walletCoins: newCoins,
+                  walletBalance: newCoins,
+                });
+
+                // ✅ mark as credited
+                const returnDocRef = doc(
+                  db,
+                  "users",
+                  userId,
+                  "return_requests",
+                  snapshot.docs[0].id
+                );
+
+                await updateDoc(returnDocRef, {
+                  walletCredited: true,
+                });
+              }
+            }
+          } catch (err) {
+            console.error("Wallet credit error:", err);
+          }
+        }
       }
+
       setLoadingReturn(false);
     });
 
@@ -201,6 +245,7 @@ function OrderDetails() {
 
   const isCancelled = finalStatus.toLowerCase() === "cancelled";
   const isDelivered = finalStatus.toLowerCase() === "delivered";
+  const isReturned = finalStatus.toLowerCase() === "returned";
 
   const isRefundCompleted =
     finalStatus.toLowerCase() === "refund_completed" ||
@@ -211,6 +256,7 @@ function OrderDetails() {
 
   const isReturnApproved =
     finalStatus.toLowerCase() === "return_approved";
+
 
   const handleTrackOrder = (product) => {
     navigate("/track-order", {
@@ -314,16 +360,42 @@ function OrderDetails() {
                   )}
                 </Badge>
               </div>
+              {isReturned && (
+                <div
+                  style={{
+                    textAlign: "center",
+                    marginBottom: "20px",
+                    padding: "12px",
+                    borderRadius: "10px",
+                    background: "#e6f4ea",
+                    border: "1px solid #b7ebc6"
+                  }}
+                >
+                  <h6 style={{ color: "#28a745", marginBottom: "5px" }}>
+                    ✅ Returned Successfully
+                  </h6>
 
-              <Button
-                variant="outline-primary"
-                className="w-100 mb-2"
-                onClick={() => handleTrackOrder(product)}
-              >
-                Track Order
-              </Button>
+                  <p style={{ margin: 0, fontSize: "14px", color: "#155724" }}>
+                    Your refund has been credited to your wallet 💰
+                  </p>
 
-              {isCancelled ? (
+                  <small style={{ color: "#555" }}>
+                    You can check your updated balance in Wallet
+                  </small>
+                </div>
+              )}
+
+              {!isReturned && (
+                <Button
+                  variant="outline-primary"
+                  className="w-100 mb-2"
+                  onClick={() => handleTrackOrder(product)}
+                >
+                  Track Order
+                </Button>
+              )}
+
+              {isReturned ? null : isCancelled ? (
                 <Button disabled variant="danger" className="w-100">
                   Order Cancelled
                 </Button>

@@ -102,6 +102,7 @@ const CheckoutPage = () => {
   const [productSkus, setProductSkus] = useState({});
   const [productSellers, setProductSellers] = useState({});
   const savedCheckoutState = location.state?.checkoutState;
+  const [useCoins, setUseCoins] = useState(true);
 
   const [billingDetails, setBillingDetails] = useState(
     savedCheckoutState?.billingDetails || {
@@ -246,6 +247,11 @@ const CheckoutPage = () => {
   };
 
   useEffect(() => {
+    if (!useCoins) {
+      setCoinsToUse(0);
+      return;
+    }
+
     if (walletCoins > 0 && totalPrice > 0) {
       const maxAllowedCoins = Math.floor(totalPrice * 0.1);
       const autoCoins = Math.min(walletCoins, maxAllowedCoins);
@@ -253,7 +259,7 @@ const CheckoutPage = () => {
     } else {
       setCoinsToUse(0);
     }
-  }, [walletCoins, totalPrice]);
+  }, [walletCoins, totalPrice, useCoins]);
 
   const [coupons, setCoupons] = useState([]);
   const [inputCode, setInputCode] = useState(savedCheckoutState?.inputCode || "");
@@ -335,7 +341,7 @@ const CheckoutPage = () => {
       setAppliedRazorpayOffer(appliedRazorpayOfferFromLocation);
 
       let discountValue = 0;
-      
+
       // Calculate discount flexibly based on whatever field the admin entered
       if (appliedRazorpayOfferFromLocation.discountPercent) {
         discountValue = (totalPrice * Number(appliedRazorpayOfferFromLocation.discountPercent)) / 100;
@@ -352,12 +358,12 @@ const CheckoutPage = () => {
         const textToScan = `${appliedRazorpayOfferFromLocation.offerName} ${appliedRazorpayOfferFromLocation.offerDetails} ${appliedRazorpayOfferFromLocation.displayText}`;
         const percentMatch = textToScan.match(/(\d+(?:\.\d+)?)%/);
         if (percentMatch) {
-            discountValue = (totalPrice * Number(percentMatch[1])) / 100;
+          discountValue = (totalPrice * Number(percentMatch[1])) / 100;
         } else {
-            const amountMatch = textToScan.match(/(?:₹|Rs\.?)\s*(\d+(?:\.\d+)?)/i);
-            if (amountMatch) {
-                discountValue = Number(amountMatch[1]);
-            }
+          const amountMatch = textToScan.match(/(?:₹|Rs\.?)\s*(\d+(?:\.\d+)?)/i);
+          if (amountMatch) {
+            discountValue = Number(amountMatch[1]);
+          }
         }
       }
 
@@ -892,8 +898,6 @@ const CheckoutPage = () => {
     );
     if (!res) return alert(t("checkout.razorpayFailed"));
 
-    // Razorpay must receive the original price BEFORE the bank offer is deducted frontend 
-    // so it can apply the offer deduction correctly on their side without doubling it. 
     const amountInPaise = Math.round(razorpayOriginalAmount * 100);
 
     if (amountInPaise < 100 && razorpayOriginalAmount > 0) {
@@ -1235,11 +1239,22 @@ const CheckoutPage = () => {
           <Card className="shadow-lg border-0 p-4 theme-card">
             {walletCoins > 0 && (
               <div className="mb-4 p-4 rounded theme-wallet-section">
-                <div className="d-flex align-items-center mb-3">
-                  <FaCoins size={22} className="me-2 theme-coin-icon" />
-                  <h6 className="fw-bold mb-0 theme-text-primary">
-                    {t("checkout.useCoins")}
-                  </h6>
+                <div className="d-flex align-items-center justify-content-between mb-3">
+                  <div className="d-flex align-items-center">
+                    <FaCoins size={22} className="me-2 theme-coin-icon" />
+                    <h6 className="fw-bold mb-0 theme-text-primary">
+                      {t("checkout.useCoins")}
+                    </h6>
+                  </div>
+
+                  {/* 🔥 TOGGLE */}
+                  <Form.Check
+                    type="switch"
+                    id="use-coins-toggle"
+                    label={useCoins ? "ON" : "OFF"}
+                    checked={useCoins}
+                    onChange={(e) => setUseCoins(e.target.checked)}
+                  />
                 </div>
 
                 <p className="small mb-2 theme-text-secondary">

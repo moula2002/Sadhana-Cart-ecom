@@ -25,12 +25,17 @@ function ReferCode() {
     walletCoins: 0,
   });
 
-  const generateReferCode = (input = "US") => {
-    const cleanText = input.replace(/[^a-zA-Z]/g, "");
-    const firstTwo = cleanText.substring(0, 2).toUpperCase() || "US";
-    const randomDigits = Math.floor(10000 + Math.random() * 90000);
-    return `${firstTwo}${randomDigits}`;
-  };
+const generateReferCode = (input = "US") => {
+  const cleanText = input.replace(/[^a-zA-Z]/g, "");
+
+  // First 2 letters
+  const firstTwo = cleanText.substring(0, 2).toUpperCase() || "US";
+
+  // Exactly 5 digits (always)
+  const randomDigits = Math.random().toString().slice(2, 7);
+
+  return `${firstTwo}${randomDigits}`;
+};
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (currentUser) => {

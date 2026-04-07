@@ -8,7 +8,9 @@ import {
   Button,
   Spinner,
   Image,
-  Alert
+  Alert,
+  Toast,
+  ToastContainer
 } from "react-bootstrap";
 import { doc, collection, setDoc, updateDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import { db, auth } from "../../firebase";
@@ -29,6 +31,7 @@ const ProductReturnPage = () => {
   const [productImage, setProductImage] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showToast, setShowToast] = useState(false);
 
   useEffect(() => {
     if (!order || !product) {
@@ -42,9 +45,9 @@ const ProductReturnPage = () => {
       if (product?.images?.[0]) return product.images[0];
       if (product?.productImage) return product.productImage;
       if (order?.products) {
-        const foundProduct = order.products.find(p => 
-          p.id === product.id || 
-          p.productId === product.productId || 
+        const foundProduct = order.products.find(p =>
+          p.id === product.id ||
+          p.productId === product.productId ||
           p.productid === product.productid
         );
         if (foundProduct?.image) return foundProduct.image;
@@ -79,17 +82,17 @@ const ProductReturnPage = () => {
   // Safe ID extraction with fallbacks
   const orderId = order?.orderId || order?.id || "";
   const productId = product?.id || product?.productId || product?.productid || product?.product_id || "";
-  
+
   // Safe amount calculations
   const totalOrderAmount = Number(order?.payableAmount || order?.total || 0);
   const productAmount = Number(product?.price || product?.productPrice || 0);
-  
+
   // Prevent division by zero
   const proportion = totalOrderAmount > 0 ? productAmount / totalOrderAmount : 0;
-  
+
   const usedCoins = Number(order?.walletCoinsUsed || order?.usedCoins || 0);
   const payableAmount = Number(order?.payableAmount || totalOrderAmount);
-  
+
   const coinsToRefund = Math.round(usedCoins * proportion) || 0;
   const amountToRefund = (payableAmount * proportion) || 0;
 
@@ -138,7 +141,7 @@ const ProductReturnPage = () => {
 
   const submitReturnRequest = async () => {
     setError("");
-    
+
     if (!validateInputs()) {
       return;
     }
@@ -157,9 +160,9 @@ const ProductReturnPage = () => {
       // First, get the latest order data
       const orderRef = doc(db, "users", userId, "orders", orderId);
       const orderSnap = await getDoc(orderRef);
-      
+
       let currentOrderData = orderSnap.exists() ? orderSnap.data() : null;
-      
+
       if (!currentOrderData) {
         // Try main orders collection
         const mainOrderRef = doc(db, "orders", orderId);
@@ -174,7 +177,7 @@ const ProductReturnPage = () => {
 
       // Create return request document
       const returnRef = doc(collection(db, "users", userId, "return_requests"));
-      
+
       // Clean the product object - remove any undefined values
       const cleanProduct = {
         id: productId || "",
@@ -218,33 +221,6 @@ const ProductReturnPage = () => {
 
       // Save return request
       await setDoc(returnRef, returnData);
-      /* ===============================
-   🔥 WALLET REFUND LOGIC
-================================ */
-
-if (refundType === "wallet") {
-  const userRef = doc(db, "users", userId);
-  const userSnap = await getDoc(userRef);
-
-  if (userSnap.exists()) {
-    const currentCoins = Number(userSnap.data().walletCoins || 0);
-
-    // ₹1 = 1 Coin conversion
-    const coinsFromAmount = Math.round(amountToRefund);
-
-    const newCoins = currentCoins + coinsFromAmount;
-
-    console.log("Refund Amount:", amountToRefund);
-    console.log("Coins Adding:", coinsFromAmount);
-    console.log("New Wallet Coins:", newCoins);
-
-    await updateDoc(userRef, {
-      walletCoins: newCoins,
-      walletBalance: newCoins,
-      updatedAt: serverTimestamp(),
-    });
-  }
-}
 
       // Update the order with return status
       const updatedProducts = (currentOrderData.products || []).map((p) => {
@@ -281,8 +257,11 @@ if (refundType === "wallet") {
         }
       });
 
-      alert("Return request submitted & Wallet credited successfully");
-navigate("/wallet");
+      setShowToast(true);
+
+      setTimeout(() => {
+        navigate("/");
+      }, 8000);
     } catch (error) {
       console.error("Return Error Details:", error);
       setError(`Failed to submit return request: ${error.message}`);
@@ -292,168 +271,242 @@ navigate("/wallet");
   };
 
   return (
-    <Container className="py-4" style={{ maxWidth: "600px" }}>
-      <h3 className="mb-4">Return Product</h3>
+    <>
+      <Container className="py-4" style={{ maxWidth: "600px" }}>
+        <h3 className="mb-4">Return Product</h3>
 
-      {error && (
-        <Alert variant="danger" className="mb-3" onClose={() => setError("")} dismissible>
-          {error}
-        </Alert>
-      )}
+        {error && (
+          <Alert variant="danger" className="mb-3" onClose={() => setError("")} dismissible>
+            {error}
+          </Alert>
+        )}
 
-      <Card className="p-3 mb-4">
-        <Row>
-          <Col xs={4}>
-            <Image
-              src={productImage}
-              fluid
-              style={{
-                height: "100px",
-                width: "100%",
-                objectFit: "cover",
-                borderRadius: "8px",
-                backgroundColor: "#f8f9fa"
-              }}
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = "https://via.placeholder.com/400x500?text=Product";
-              }}
+        <Card className="p-3 mb-4">
+          <Row>
+            <Col xs={4}>
+              <Image
+                src={productImage}
+                fluid
+                style={{
+                  height: "100px",
+                  width: "100%",
+                  objectFit: "cover",
+                  borderRadius: "8px",
+                  backgroundColor: "#f8f9fa"
+                }}
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = "https://via.placeholder.com/400x500?text=Product";
+                }}
+              />
+            </Col>
+            <Col xs={8}>
+              <h5>{product?.name || "Product"}</h5>
+              <p className="mb-1">Quantity: {product?.quantity || 1}</p>
+              <p className="mb-1">Price: ₹{productAmount.toFixed(2)}</p>
+            </Col>
+          </Row>
+
+          <Row className="mt-3">
+            <Col>
+              <p className="mb-1">
+                <strong>Product Amount:</strong> ₹{productAmount.toFixed(2)}
+              </p>
+              <p className="mb-1">
+                <strong>Refund Amount:</strong>{" "}
+                <span className="text-success">
+                  ₹{amountToRefund.toFixed(2)}
+                </span>
+              </p>
+              <p className="mb-1">
+                <strong>Coins to Refund:</strong> {coinsToRefund}
+              </p>
+            </Col>
+          </Row>
+        </Card>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Refund Method</Form.Label>
+          <Form.Check
+            type="radio"
+            id="wallet-refund"
+            label="Wallet (Instant Refund)"
+            checked={refundType === "wallet"}
+            onChange={() => setRefundType("wallet")}
+          />
+          <Form.Check
+            type="radio"
+            id="bank-refund"
+            label="Bank Account (2-3 business days)"
+            checked={refundType === "bank"}
+            onChange={() => setRefundType("bank")}
+          />
+        </Form.Group>
+
+        {refundType === "bank" && (
+          <>
+            <Form.Control
+              className="mb-2"
+              placeholder="Account Holder Name"
+              value={accountName}
+              onChange={(e) => setAccountName(e.target.value)}
+              required
             />
-          </Col>
-          <Col xs={8}>
-            <h5>{product?.name || "Product"}</h5>
-            <p className="mb-1">Quantity: {product?.quantity || 1}</p>
-            <p className="mb-1">Price: ₹{productAmount.toFixed(2)}</p>
-          </Col>
-        </Row>
+            <Form.Control
+              className="mb-2"
+              placeholder="Account Number"
+              value={accountNumber}
+              onChange={(e) => setAccountNumber(e.target.value)}
+              required
+            />
+            <Form.Control
+              className="mb-3"
+              placeholder="IFSC Code (e.g., SBIN0123456)"
+              value={ifsc}
+              onChange={(e) => setIfsc(e.target.value.toUpperCase())}
+              required
+            />
+            <Form.Text className="text-muted mb-3 d-block">
+              IFSC format: First 4 letters, then 0, then 6 alphanumeric characters
+            </Form.Text>
+          </>
+        )}
 
-        <Row className="mt-3">
+        <Form.Group className="mb-3">
+          <Form.Label>Reason for Return</Form.Label>
+          <Form.Select
+            value={selectedReason}
+            onChange={(e) => setSelectedReason(e.target.value)}
+          >
+            <option value="">Select Reason</option>
+            <option value="Received wrong item">Received wrong item</option>
+            <option value="Defective / Damaged">Defective / Damaged</option>
+            <option value="Quality not as expected">Quality not as expected</option>
+            <option value="Missing parts">Missing parts</option>
+            <option value="Size issue">Size issue</option>
+            <option value="Other">Other</option>
+          </Form.Select>
+        </Form.Group>
+
+        <Form.Group className="mb-4">
+          <Form.Label>Additional Details (Optional)</Form.Label>
+          <Form.Control
+            as="textarea"
+            rows={3}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Please provide more details about the issue..."
+          />
+        </Form.Group>
+
+        <Row>
           <Col>
-            <p className="mb-1">
-              <strong>Product Amount:</strong> ₹{productAmount.toFixed(2)}
-            </p>
-            <p className="mb-1">
-              <strong>Refund Amount:</strong>{" "}
-              <span className="text-success">
-                ₹{amountToRefund.toFixed(2)}
-              </span>
-            </p>
-            <p className="mb-1">
-              <strong>Coins to Refund:</strong> {coinsToRefund}
-            </p>
+            <Button
+              variant="secondary"
+              className="w-100"
+              onClick={() => navigate(-1)}
+              disabled={isLoading}
+            >
+              Cancel
+            </Button>
+          </Col>
+          <Col>
+            <Button
+              variant="warning"
+              className="w-100"
+              onClick={submitReturnRequest}
+              disabled={isLoading}
+              style={{
+                backgroundColor: "#ffc107",
+                borderColor: "#ffc107",
+                color: "#000"
+              }}
+            >
+              {isLoading ? (
+                <>
+                  <Spinner size="sm" className="me-2" />
+                  Submitting...
+                </>
+              ) : (
+                "Submit Return Request"
+              )}
+            </Button>
           </Col>
         </Row>
-      </Card>
-
-      <Form.Group className="mb-3">
-        <Form.Label>Refund Method</Form.Label>
-        <Form.Check
-          type="radio"
-          id="wallet-refund"
-          label="Wallet (Instant Refund)"
-          checked={refundType === "wallet"}
-          onChange={() => setRefundType("wallet")}
-        />
-        <Form.Check
-          type="radio"
-          id="bank-refund"
-          label="Bank Account (2-3 business days)"
-          checked={refundType === "bank"}
-          onChange={() => setRefundType("bank")}
-        />
-      </Form.Group>
-
-      {refundType === "bank" && (
-        <>
-          <Form.Control
-            className="mb-2"
-            placeholder="Account Holder Name"
-            value={accountName}
-            onChange={(e) => setAccountName(e.target.value)}
-            required
-          />
-          <Form.Control
-            className="mb-2"
-            placeholder="Account Number"
-            value={accountNumber}
-            onChange={(e) => setAccountNumber(e.target.value)}
-            required
-          />
-          <Form.Control
-            className="mb-3"
-            placeholder="IFSC Code (e.g., SBIN0123456)"
-            value={ifsc}
-            onChange={(e) => setIfsc(e.target.value.toUpperCase())}
-            required
-          />
-          <Form.Text className="text-muted mb-3 d-block">
-            IFSC format: First 4 letters, then 0, then 6 alphanumeric characters
-          </Form.Text>
-        </>
-      )}
-
-      <Form.Group className="mb-3">
-        <Form.Label>Reason for Return</Form.Label>
-        <Form.Select
-          value={selectedReason}
-          onChange={(e) => setSelectedReason(e.target.value)}
+      </Container>
+      {showToast && (
+        <div
+          style={{
+            position: "fixed",
+            top: "20px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            background: "#323232",
+            color: "#fff",
+            padding: "14px 20px",
+            borderRadius: "10px",
+            boxShadow: "0 4px 15px rgba(0,0,0,0.3)",
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            zIndex: 9999,
+            animation: "slideDown 0.4s ease",
+            overflow: "hidden"
+          }}
         >
-          <option value="">Select Reason</option>
-          <option value="Received wrong item">Received wrong item</option>
-          <option value="Defective / Damaged">Defective / Damaged</option>
-          <option value="Quality not as expected">Quality not as expected</option>
-          <option value="Missing parts">Missing parts</option>
-          <option value="Size issue">Size issue</option>
-          <option value="Other">Other</option>
-        </Form.Select>
-      </Form.Group>
+          <span style={{ fontSize: "18px" }}>✅</span>
+          <div style={{ fontSize: "14px" }}>
+            Your return request has been submitted successfully.
+            Once the return is completed, the refund amount will be credited to your wallet. 💰
+          </div>
 
-      <Form.Group className="mb-4">
-        <Form.Label>Additional Details (Optional)</Form.Label>
-        <Form.Control
-          as="textarea"
-          rows={3}
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Please provide more details about the issue..."
-        />
-      </Form.Group>
-
-      <Row>
-        <Col>
-          <Button
-            variant="secondary"
-            className="w-100"
-            onClick={() => navigate(-1)}
-            disabled={isLoading}
-          >
-            Cancel
-          </Button>
-        </Col>
-        <Col>
-          <Button
-            variant="warning"
-            className="w-100"
-            onClick={submitReturnRequest}
-            disabled={isLoading}
+          <div
             style={{
-              backgroundColor: "#ffc107",
-              borderColor: "#ffc107",
-              color: "#000"
+              position: "absolute",
+              bottom: "0",
+              left: "0",
+              height: "3px",
+              background: "#4caf50",
+              animation: "progressBar 2s linear",
+              borderRadius: "0 0 10px 10px"
             }}
-          >
-            {isLoading ? (
-              <>
-                <Spinner size="sm" className="me-2" />
-                Submitting...
-              </>
-            ) : (
-              "Submit Return Request"
-            )}
-          </Button>
-        </Col>
-      </Row>
-    </Container>
+          />
+        </div>
+      )}
+      <style>
+        {`
+@keyframes slideUp {
+  from {
+    transform: translate(-50%, 100%);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+}
+@keyframes progressBar {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+  @keyframes slideDown {
+  from {
+    transform: translate(-50%, -100%);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+}
+`}
+      </style>
+    </>
+
   );
 };
 

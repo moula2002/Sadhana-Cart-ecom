@@ -74,6 +74,9 @@ const getStatusBadgeStyle = (status) => {
   if (statusLower === "refund_completed" || statusLower === "refunded") {
     return { background: "#d4edda", color: "#155724" };
   }
+  if (statusLower === "returned") {
+  return { background: "#007bff", color: "#fff" };
+}
 
   // Regular order status styling
   switch (statusLower) {
@@ -168,9 +171,17 @@ const mapFirestoreOrderToLocal = (docData, docId) => {
   // If any product has returnStatus, use that as the order status
   if (docData.products && docData.products.length > 0) {
     const returnedProduct = docData.products.find(p => p.returnStatus);
-    if (returnedProduct?.returnStatus) {
-      status = returnedProduct.returnStatus;
-    }
+
+// ✅ PRIORITY: returned / refund_completed FIRST
+if (
+  docData.orderStatus === "returned" ||
+  docData.orderStatus === "refund_completed"
+) {
+  status = docData.orderStatus;
+}
+else if (returnedProduct?.returnStatus) {
+  status = returnedProduct.returnStatus;
+}
   }
 
   // Format date safely
@@ -400,22 +411,6 @@ function ViewOrderDetails() {
                       <div style={{ fontWeight: "600", marginTop: "4px" }}>
                         {formatCurrency(product.price * product.quantity)}
                       </div>
-                      {product.returnStatus && (
-                        <Badge
-                          style={{
-                            ...getStatusBadgeStyle(product.returnStatus),
-                            borderRadius: "20px",
-                            padding: "4px 12px",
-                            marginTop: "8px",
-                            fontSize: "12px",
-                            display: "inline-flex",
-                            alignItems: "center"
-                          }}
-                        >
-                          {getStatusIcon(product.returnStatus)}
-                          {getStatusDisplayText(product.returnStatus)}
-                        </Badge>
-                      )}
                     </Col>
                   </Row>
                 ))}

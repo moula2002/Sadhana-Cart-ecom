@@ -24,7 +24,6 @@ import {
   signInWithPopup,
   signInWithPhoneNumber,
   signInWithCustomToken,
-  RecaptchaVerifier,
   onAuthStateChanged
 } from "firebase/auth";
 
@@ -58,6 +57,8 @@ export default function LoginPage({ onClose }) {
   const [toast, setToast] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [timer, setTimer] = useState(0);
+  const [canResend, setCanResend] = useState(false);
 
   const showToast = (msg) => {
     setToast(msg);
@@ -96,6 +97,22 @@ export default function LoginPage({ onClose }) {
       }
     };
   }, []);
+
+  useEffect(() => {
+    let interval;
+
+    if (timer > 0) {
+      interval = setInterval(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
+    }
+
+    if (timer === 0 && confirmation) {
+      setCanResend(true);
+    }
+
+    return () => clearInterval(interval);
+  }, [timer, confirmation]);
 
   /* Process referral for email signup */
   const processReferral = async (userId, userReferralCode) => {
@@ -322,6 +339,8 @@ export default function LoginPage({ onClose }) {
       if (result.success) {
         setConfirmation(true); // just flag
         showToast("OTP sent 📲");
+        setTimer(30);        // 30 sec start
+        setCanResend(false); // resend disable
       } else {
         setError(result.message);
       }
@@ -340,7 +359,7 @@ export default function LoginPage({ onClose }) {
     }
 
     try {
-      // 🔥 Backend verify call
+
       const response = await axios.post(
         "https://us-central1-sadhana-cart.cloudfunctions.net/verifyOtp",
         {
@@ -619,7 +638,7 @@ export default function LoginPage({ onClose }) {
                   onClick={sendOtp}
                   disabled={!phone || phone.length !== 10}
                 >
-                  {t("auth.requestOtp")}
+                  Request OTP
                 </Button>
               ) : (
                 <>
@@ -630,23 +649,40 @@ export default function LoginPage({ onClose }) {
                     maxLength={6}
                     onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
                   />
+
+                  {/* 🔥 TIMER */}
+                  {!canResend ? (
+                    <div className="text-center mb-2">
+                      ⏳ Resend OTP in {timer}s
+                    </div>
+                  ) : (
+                    <Button
+                      variant="link"
+                      className="w-100 text-primary"
+                      onClick={sendOtp}
+                    >
+                      🔁 Resend OTP
+                    </Button>
+                  )}
+
                   <div className="d-flex gap-2">
                     <Button
                       variant="outline-secondary"
-                      className="flex-grow-1 change-number-btn"
                       onClick={() => {
                         setConfirmation(null);
                         setOtp("");
+                        setTimer(0);
                       }}
                     >
-                      {t("auth.changeNumber")}
+                      Change Number
                     </Button>
+
                     <Button
-                      className="flex-grow-1 auth-btn"
+                      className="auth-btn"
                       onClick={verifyOtp}
                       disabled={!otp || otp.length !== 6}
                     >
-                      {t("auth.verifyOtp")}
+                      Verify OTP
                     </Button>
                   </div>
                 </>
