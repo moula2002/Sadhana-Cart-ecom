@@ -3,7 +3,7 @@
 /* Import fonts */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
 
-/* Global CSS Variables */
+/* Global CSS Variables - Light Theme (Default) */
 :root {
   /* Light Theme Variables */
   --primary-color: #0d6efd;
@@ -24,6 +24,28 @@
   --teal-primary: #00a8a0;
   --teal-light: #33b8b0;
   --teal-dark: #00827b;
+  
+  /* Background Colors */
+  --bg-body: #ffffff;
+  --bg-card: #ffffff;
+  --bg-modal: #ffffff;
+  --bg-table-striped: rgba(0, 0, 0, 0.02);
+  
+  /* Text Colors */
+  --text-body: #212529;
+  --text-muted: #6c757d;
+  
+  /* Border Colors */
+  --border-color: #dee2e6;
+  --border-light: #e9ecef;
+  
+  /* Form Colors */
+  --form-bg: #ffffff;
+  --form-border: #ced4da;
+  --form-focus-shadow: rgba(13, 110, 253, 0.25);
+  
+  /* Progress Colors */
+  --progress-bg: #e9ecef;
   
   /* Typography */
   --font-primary: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -64,9 +86,9 @@
   --z-tooltip: 1070;
 }
 
-/* Dark Theme Variables */
-[data-bs-theme="dark"],
-.dark-theme {
+/* Dark Theme Variables - Only when .dark-theme or [data-bs-theme="dark"] is added */
+.dark-theme,
+[data-bs-theme="dark"] {
   --primary-color: #6ea8fe;
   --secondary-color: #a7acb1;
   --success-color: #75b798;
@@ -85,6 +107,28 @@
   --teal-primary: #00c9bf;
   --teal-light: #33d4ca;
   --teal-dark: #00a69a;
+  
+  /* Background Colors */
+  --bg-body: #121212;
+  --bg-card: #1e1e1e;
+  --bg-modal: #1e1e1e;
+  --bg-table-striped: rgba(255, 255, 255, 0.05);
+  
+  /* Text Colors */
+  --text-body: #e9ecef;
+  --text-muted: #a7acb1;
+  
+  /* Border Colors */
+  --border-color: #2d2d2d;
+  --border-light: #2b3035;
+  
+  /* Form Colors */
+  --form-bg: #2b3035;
+  --form-border: #495057;
+  --form-focus-shadow: rgba(0, 201, 191, 0.25);
+  
+  /* Progress Colors */
+  --progress-bg: #2b3035;
   
   /* Shadows for Dark Mode */
   --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.3);
@@ -112,16 +156,11 @@ body {
   font-family: var(--font-primary);
   font-weight: 400;
   line-height: 1.6;
-  color: var(--dark-color);
-  background-color: #ffffff;
+  color: var(--text-body);
+  background-color: var(--bg-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: background-color var(--transition-normal), color var(--transition-normal);
-}
-
-.dark-theme body {
-  background-color: #121212;
-  color: #e9ecef;
 }
 
 /* Typography */
@@ -154,10 +193,6 @@ a {
 a:hover {
   color: var(--teal-dark);
   text-decoration: underline;
-}
-
-.dark-theme a {
-  color: var(--teal-light);
 }
 
 .dark-theme a:hover {
@@ -223,11 +258,6 @@ textarea {
 
 .overflow-hidden { overflow: hidden; }
 
-/* Smooth scroll behavior */
-html {
-  scroll-behavior: smooth;
-}
-
 /* Focus styles for accessibility */
 :focus {
   outline: 2px solid var(--teal-primary);
@@ -264,10 +294,6 @@ html {
   background: var(--light-color);
 }
 
-.dark-theme ::-webkit-scrollbar-track {
-  background: #2b3035;
-}
-
 ::-webkit-scrollbar-thumb {
   background: var(--secondary-color);
   border-radius: 6px;
@@ -275,10 +301,6 @@ html {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--teal-primary);
-}
-
-.dark-theme ::-webkit-scrollbar-thumb {
-  background: #495057;
 }
 
 .dark-theme ::-webkit-scrollbar-thumb:hover {
@@ -297,7 +319,7 @@ html {
   }
 }
 
-/* Responsive typography */
+/* Responsive typography - Mobile Responsive */
 @media (max-width: 768px) {
   html {
     font-size: 14px;
@@ -308,6 +330,18 @@ html {
   h3 { font-size: 1.5rem; }
   h4 { font-size: 1.25rem; }
   h5 { font-size: 1.125rem; }
+}
+
+@media (max-width: 576px) {
+  html {
+    font-size: 13px;
+  }
+  
+  h1 { font-size: 1.75rem; }
+  h2 { font-size: 1.5rem; }
+  h3 { font-size: 1.35rem; }
+  h4 { font-size: 1.2rem; }
+  h5 { font-size: 1.05rem; }
 }
 
 /* High contrast mode support */
@@ -329,6 +363,11 @@ html {
     scroll-behavior: auto !important;
   }
 }
+
+/* ============================================
+   DARK THEME SPECIFIC STYLES
+   These only apply when dark-theme class is present
+   ============================================ */
 
 /* Bootstrap overrides for dark theme */
 .dark-theme .btn-outline-primary {
@@ -354,50 +393,113 @@ html {
 
 /* Card styles for dark theme */
 .dark-theme .card {
-  background-color: #1e1e1e;
-  border-color: #2d2d2d;
-  color: #e9ecef;
+  background-color: var(--bg-card);
+  border-color: var(--border-color);
+  color: var(--text-body);
 }
 
 /* Form controls in dark theme */
 .dark-theme .form-control {
-  background-color: #2b3035;
-  border-color: #495057;
-  color: #e9ecef;
+  background-color: var(--form-bg);
+  border-color: var(--form-border);
+  color: var(--text-body);
 }
 
 .dark-theme .form-control:focus {
-  background-color: #2b3035;
+  background-color: var(--form-bg);
   border-color: var(--teal-light);
-  color: #e9ecef;
-  box-shadow: 0 0 0 0.25rem rgba(0, 201, 191, 0.25);
+  color: var(--text-body);
+  box-shadow: 0 0 0 0.25rem var(--form-focus-shadow);
+}
+
+.dark-theme .form-control::placeholder {
+  color: var(--text-muted);
+}
+
+.dark-theme .form-label {
+  color: var(--text-body);
+}
+
+.dark-theme .input-group-text {
+  background-color: var(--form-bg);
+  border-color: var(--form-border);
+  color: var(--text-body);
 }
 
 /* Table styles for dark theme */
 .dark-theme .table {
-  color: #e9ecef;
+  color: var(--text-body);
+  border-color: var(--border-color);
 }
 
 .dark-theme .table-striped tbody tr:nth-of-type(odd) {
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: var(--bg-table-striped);
+}
+
+.dark-theme .table thead th {
+  border-bottom-color: var(--border-color);
+}
+
+.dark-theme .table td,
+.dark-theme .table th {
+  border-color: var(--border-color);
 }
 
 /* Modal styles for dark theme */
 .dark-theme .modal-content {
-  background-color: #1e1e1e;
-  border-color: #2d2d2d;
+  background-color: var(--bg-modal);
+  border-color: var(--border-color);
+  color: var(--text-body);
 }
 
 .dark-theme .modal-header,
 .dark-theme .modal-footer {
-  border-color: #2d2d2d;
+  border-color: var(--border-color);
+}
+
+.dark-theme .modal-title {
+  color: var(--text-body);
+}
+
+.dark-theme .btn-close {
+  filter: invert(1) grayscale(100%) brightness(200%);
 }
 
 /* Alert styles for dark theme */
 .dark-theme .alert {
-  background-color: #2b3035;
-  border-color: #495057;
-  color: #e9ecef;
+  background-color: var(--form-bg);
+  border-color: var(--border-color);
+  color: var(--text-body);
+}
+
+.dark-theme .alert-primary {
+  background-color: rgba(13, 110, 253, 0.2);
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.dark-theme .alert-success {
+  background-color: rgba(25, 135, 84, 0.2);
+  border-color: var(--success-color);
+  color: var(--success-color);
+}
+
+.dark-theme .alert-danger {
+  background-color: rgba(220, 53, 69, 0.2);
+  border-color: var(--danger-color);
+  color: var(--danger-color);
+}
+
+.dark-theme .alert-warning {
+  background-color: rgba(255, 193, 7, 0.2);
+  border-color: var(--warning-color);
+  color: var(--warning-color);
+}
+
+.dark-theme .alert-info {
+  background-color: rgba(13, 202, 240, 0.2);
+  border-color: var(--info-color);
+  color: var(--info-color);
 }
 
 /* Badge styles for dark theme */
@@ -407,7 +509,153 @@ html {
 
 /* Progress bar styles for dark theme */
 .dark-theme .progress {
-  background-color: #2b3035;
+  background-color: var(--progress-bg);
+}
+
+/* Dropdown styles for dark theme */
+.dark-theme .dropdown-menu {
+  background-color: var(--bg-card);
+  border-color: var(--border-color);
+  color: var(--text-body);
+}
+
+.dark-theme .dropdown-item {
+  color: var(--text-body);
+}
+
+.dark-theme .dropdown-item:hover,
+.dark-theme .dropdown-item:focus {
+  background-color: var(--border-light);
+  color: var(--text-body);
+}
+
+.dark-theme .dropdown-divider {
+  border-top-color: var(--border-color);
+}
+
+/* Navbar styles for dark theme */
+.dark-theme .navbar {
+  background-color: var(--bg-card) !important;
+}
+
+.dark-theme .navbar-brand,
+.dark-theme .nav-link {
+  color: var(--text-body);
+}
+
+.dark-theme .navbar-nav .nav-link.active {
+  color: var(--teal-light);
+}
+
+/* List group styles for dark theme */
+.dark-theme .list-group-item {
+  background-color: var(--bg-card);
+  border-color: var(--border-color);
+  color: var(--text-body);
+}
+
+.dark-theme .list-group-item-action:hover {
+  background-color: var(--border-light);
+}
+
+/* Pagination styles for dark theme */
+.dark-theme .page-link {
+  background-color: var(--bg-card);
+  border-color: var(--border-color);
+  color: var(--teal-light);
+}
+
+.dark-theme .page-link:hover {
+  background-color: var(--border-light);
+  border-color: var(--border-color);
+  color: var(--teal-primary);
+}
+
+.dark-theme .page-item.active .page-link {
+  background-color: var(--teal-primary);
+  border-color: var(--teal-primary);
+  color: #121212;
+}
+
+.dark-theme .page-item.disabled .page-link {
+  background-color: var(--bg-card);
+  border-color: var(--border-color);
+  color: var(--text-muted);
+}
+
+/* Tooltip styles for dark theme */
+.dark-theme .tooltip .tooltip-inner {
+  background-color: var(--bg-card);
+  color: var(--text-body);
+  border: 1px solid var(--border-color);
+}
+
+/* Popover styles for dark theme */
+.dark-theme .popover {
+  background-color: var(--bg-card);
+  border-color: var(--border-color);
+  color: var(--text-body);
+}
+
+.dark-theme .popover-header {
+  background-color: var(--border-light);
+  border-bottom-color: var(--border-color);
+  color: var(--text-body);
+}
+
+.dark-theme .popover-body {
+  color: var(--text-body);
+}
+
+/* Accordion styles for dark theme */
+.dark-theme .accordion-item {
+  background-color: var(--bg-card);
+  border-color: var(--border-color);
+}
+
+.dark-theme .accordion-header {
+  background-color: var(--bg-card);
+}
+
+.dark-theme .accordion-button {
+  background-color: var(--bg-card);
+  color: var(--text-body);
+}
+
+.dark-theme .accordion-button:not(.collapsed) {
+  background-color: var(--border-light);
+  color: var(--teal-light);
+}
+
+.dark-theme .accordion-body {
+  background-color: var(--bg-card);
+  color: var(--text-body);
+}
+
+/* Nav tabs styles for dark theme */
+.dark-theme .nav-tabs {
+  border-bottom-color: var(--border-color);
+}
+
+.dark-theme .nav-tabs .nav-link {
+  color: var(--text-body);
+}
+
+.dark-theme .nav-tabs .nav-link:hover {
+  border-color: var(--border-light);
+}
+
+.dark-theme .nav-tabs .nav-link.active {
+  background-color: var(--bg-card);
+  border-color: var(--border-color);
+  border-bottom-color: var(--bg-card);
+  color: var(--teal-light);
+}
+
+/* Close button for dark theme */
+.dark-theme .close,
+.dark-theme .btn-close {
+  color: var(--text-body);
 }
 
 /* Smooth transitions for all elements */
@@ -416,4 +664,107 @@ html {
               color var(--transition-normal), 
               border-color var(--transition-normal),
               box-shadow var(--transition-normal);
+}
+
+/* Responsive container adjustments */
+.container,
+.container-fluid,
+.container-sm,
+.container-md,
+.container-lg,
+.container-xl {
+  width: 100%;
+  padding-right: var(--spacing-md);
+  padding-left: var(--spacing-md);
+  margin-right: auto;
+  margin-left: auto;
+}
+
+@media (min-width: 576px) {
+  .container {
+    max-width: 540px;
+  }
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: 720px;
+  }
+}
+
+@media (min-width: 992px) {
+  .container {
+    max-width: 960px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .container {
+    max-width: 1140px;
+  }
+}
+
+@media (min-width: 1400px) {
+  .container {
+    max-width: 1320px;
+  }
+}
+
+/* Grid system responsive utilities */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-right: calc(-1 * var(--spacing-md));
+  margin-left: calc(-1 * var(--spacing-md));
+}
+
+.col {
+  flex: 1 0 0%;
+  padding-right: var(--spacing-md);
+  padding-left: var(--spacing-md);
+}
+
+/* Responsive spacing utilities */
+@media (max-width: 768px) {
+  .mobile-stack {
+    flex-direction: column;
+  }
+  
+  .mobile-full-width {
+    width: 100%;
+  }
+  
+  .mobile-text-center {
+    text-align: center;
+  }
+  
+  .mobile-mt-1 {
+    margin-top: var(--spacing-sm);
+  }
+  
+  .mobile-mb-1 {
+    margin-bottom: var(--spacing-sm);
+  }
+  
+  .mobile-p-1 {
+    padding: var(--spacing-sm);
+  }
+}
+
+/* Hide elements on mobile */
+@media (max-width: 576px) {
+  .hide-on-mobile {
+    display: none !important;
+  }
+}
+
+/* Show elements only on mobile */
+.show-on-mobile {
+  display: none !important;
+}
+
+@media (max-width: 576px) {
+  .show-on-mobile {
+    display: block !important;
+  }
 }
