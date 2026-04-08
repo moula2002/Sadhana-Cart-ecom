@@ -152,7 +152,7 @@ function Coupens() {
                     >
                       <FaUniversity className="text-primary" size={20} />
                     </span>
-                    {offer.bankName}
+                    {offer.bankName || offer.bank_name || offer.bank || "Bank Offer"}
                   </h5>
 
                   <div 

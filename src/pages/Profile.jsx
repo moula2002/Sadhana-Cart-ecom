@@ -18,12 +18,10 @@ import {
   FaEnvelope,
   FaCamera,
   FaSave,
-  FaSpinner,
   FaEdit,
   FaTimesCircle,
   FaLock,
   FaArrowRight,
-  FaPhone,
   FaVenusMars,
   FaCheckCircle,
 } from "react-icons/fa";
@@ -59,17 +57,33 @@ function Profile() {
         const userRef = doc(db, "users", user.uid);
         const docSnap = await getDoc(userRef);
 
+        let data = null;
+        let actualDocId = user.uid;
+
         if (docSnap.exists()) {
-          const data = docSnap.data();
+          data = docSnap.data();
+          actualDocId = user.uid;
+        } else if (phone) {
+          // Fallback: Check by phone number in case doc exists with a different ID
+          const usersRef = collection(db, "users");
+          const q = query(usersRef, where("contactNo", "==", String(phone)));
+          const querySnapshot = await getDocs(q);
+          if (!querySnapshot.empty) {
+            const foundDoc = querySnapshot.docs[0];
+            data = foundDoc.data();
+            actualDocId = foundDoc.id;
+          }
+        }
 
-          setDocId(user.uid); // 🔥 important
-
+        if (data) {
+          setDocId(actualDocId);
           setName(data.name || "");
           setEmail(data.email || "");
           setGender(data.gender || "");
           setPhoto(data.profileImage || "");
           setPreviewPhoto(data.profileImage || "");
         } else {
+          setDocId(user.uid);
           setIsEditing(true);
         }
 

@@ -375,33 +375,52 @@ export default function LoginPage({ onClose }) {
         const user = userCredential.user;
         localStorage.setItem("userPhone", phone);
 
-        // 🔍 check existing user by phone
-       const userRef = doc(db, "users", user.uid);
-const docSnap = await getDoc(userRef);
+        // 🔍 check existing user by UID first, then by phone
+        let userRef = doc(db, "users", user.uid);
+        let docSnap = await getDoc(userRef);
+        let existingDoc = null;
 
-if (docSnap.exists()) {
-  await updateDoc(userRef, {
-    lastLogin: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-  });
+        if (docSnap.exists()) {
+          existingDoc = docSnap;
+        } else {
+          // Fallback: Check by phone number in case the document was created with a different ID (e.g., from the mobile app)
+          const usersRef = collection(db, "users");
+          const q = query(usersRef, where("contactNo", "==", String(phone)));
+          const querySnapshot = await getDocs(q);
+          if (!querySnapshot.empty) {
+            existingDoc = querySnapshot.docs[0];
+            userRef = existingDoc.ref;
+          }
+        }
 
-  showToast("Welcome back 👋");
-} else {
-  await setDoc(userRef, {
-    contactNo: String(phone),
-    createdAt: serverTimestamp(),
-    customerId: user.uid,
-    email: "",
-    fcmToken: "",
-    name: "User",
-    profileImage: "",
-    referralCode: generateReferralCode(),
-    walletBalance: 0,
-    walletCoins: 0,
-  });
+        if (existingDoc) {
+          await updateDoc(userRef, {
+            lastLogin: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+            customerId: user.uid, // Ensure current UID is linked
+            contactNo: String(phone)
+          });
 
-  showToast("Welcome new user 🎉");
-}
+          showToast("Welcome back 👋");
+        } else {
+          await setDoc(userRef, {
+            contactNo: String(phone),
+            createdAt: serverTimestamp(),
+            customerId: user.uid,
+            email: "",
+            fcmToken: "",
+            name: "User",
+            profileImage: "",
+            referralCode: generateReferralCode(),
+            walletBalance: 0,
+            walletCoins: 0,
+            provider: "phone",
+            lastLogin: serverTimestamp(),
+            updatedAt: serverTimestamp()
+          });
+
+          showToast("Welcome new user 🎉");
+        }
       } else {
         setError(response.data.message || "Invalid OTP");
       }

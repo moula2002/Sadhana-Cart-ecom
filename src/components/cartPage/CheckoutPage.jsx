@@ -269,6 +269,7 @@ const CheckoutPage = () => {
 
   const [appliedRazorpayOffer, setAppliedRazorpayOffer] = useState(null);
   const [razorpayDiscount, setRazorpayDiscount] = useState(0);
+  const [hasHandledStateOffer, setHasHandledStateOffer] = useState(false);
 
   useEffect(() => {
     const fetchCoupons = async () => {
@@ -338,25 +339,33 @@ const CheckoutPage = () => {
   const appliedRazorpayOfferFromLocation = location.state?.appliedRazorpayOffer;
 
   useEffect(() => {
-    if (appliedRazorpayOfferFromLocation && totalPrice > 0 && !appliedRazorpayOffer) {
+    if (appliedRazorpayOfferFromLocation && totalPrice > 0 && !hasHandledStateOffer) {
       setAppliedRazorpayOffer(appliedRazorpayOfferFromLocation);
-
+      setHasHandledStateOffer(true);
+      
       let discountValue = 0;
+      const offer = appliedRazorpayOfferFromLocation;
+
+      // Extract Bank Name if missing
+      if (!offer.bankName && !offer.bank_name) {
+        const textForBank = `${offer.displayText1 || ""} ${offer.displayText || ""} ${offer.terms || ""}`;
+        const bankMatch = textForBank.match(/(Axis|HDFC|ICICI|SBI|KOTAK|YES|PNB|BOB|CITI|RBL|IDFC|STANDARD CHARTERED|HSBC)/i);
+        if (bankMatch) {
+          offer.bankName = bankMatch[0] + " Bank";
+        }
+      }
 
       // Calculate discount flexibly based on whatever field the admin entered
-      if (appliedRazorpayOfferFromLocation.discountPercent) {
-        discountValue = (totalPrice * Number(appliedRazorpayOfferFromLocation.discountPercent)) / 100;
-      } else if (appliedRazorpayOfferFromLocation.percentage) {
-        discountValue = (totalPrice * Number(appliedRazorpayOfferFromLocation.percentage)) / 100;
-      } else if (appliedRazorpayOfferFromLocation.discountPercentage) {
-        discountValue = (totalPrice * Number(appliedRazorpayOfferFromLocation.discountPercentage)) / 100;
-      } else if (appliedRazorpayOfferFromLocation.discountAmount) {
-        discountValue = Number(appliedRazorpayOfferFromLocation.discountAmount);
-      } else if (appliedRazorpayOfferFromLocation.amount) {
-        discountValue = Number(appliedRazorpayOfferFromLocation.amount);
+      const dPercent = offer.discountWorth || offer.discountPercent || offer.percentage || offer.discountPercentage || offer.discount_percent || offer.discount_percentage;
+      const dAmount = offer.discountAmount || offer.amount || offer.discount_amount || offer.value;
+
+      if (dPercent) {
+        discountValue = (totalPrice * Number(dPercent)) / 100;
+      } else if (dAmount) {
+        discountValue = Number(dAmount);
       } else {
         // Fallback: Smart scan of the offer text for percentages like "10%" or amounts like "₹500"
-        const textToScan = `${appliedRazorpayOfferFromLocation.offerName} ${appliedRazorpayOfferFromLocation.offerDetails} ${appliedRazorpayOfferFromLocation.displayText}`;
+        const textToScan = `${offer.offerName || ""} ${offer.offerDetails || ""} ${offer.displayText || ""} ${offer.displayText1 || ""} ${offer.bankName || ""} ${offer.bank_name || ""}`;
         const percentMatch = textToScan.match(/(\d+(?:\.\d+)?)%/);
         if (percentMatch) {
           discountValue = (totalPrice * Number(percentMatch[1])) / 100;
@@ -369,13 +378,15 @@ const CheckoutPage = () => {
       }
 
       // Respect max discount caps if set
-      if (appliedRazorpayOfferFromLocation.maxDiscount && discountValue > Number(appliedRazorpayOfferFromLocation.maxDiscount)) {
-        discountValue = Number(appliedRazorpayOfferFromLocation.maxDiscount);
+      const maxD = offer.maxCashback || offer.maxDiscount || offer.max_discount || offer.maxDiscountAmount;
+      if (maxD && discountValue > Number(maxD)) {
+        discountValue = Number(maxD);
       }
+      
       setRazorpayDiscount(discountValue);
-      setPaymentMethod("Razorpay"); // Force Razorpay if a bank offer is applied
+      setPaymentMethod("razorpay"); // Using lowercase to match radio buttons
     }
-  }, [appliedRazorpayOfferFromLocation, totalPrice, appliedRazorpayOffer]);
+  }, [appliedRazorpayOfferFromLocation, totalPrice, hasHandledStateOffer]);
 
   const removeRazorpayOffer = () => {
     setRazorpayDiscount(0);
@@ -383,8 +394,12 @@ const CheckoutPage = () => {
   };
 
   const coinDiscount = coinsToUse * COIN_TO_RUPEE_RATE;
+  
+  // Bank offer discount should only apply if Razorpay is selected
+  const effectiveRazorpayDiscount = (paymentMethod?.toLowerCase() === "razorpay") ? razorpayDiscount : 0;
+
   // Display amount is heavily modified by both standard discounts and gateway deals.
-  const finalAmount = Math.max(0, totalPrice - coinDiscount - couponDiscount - razorpayDiscount);
+  const finalAmount = Math.max(0, totalPrice - coinDiscount - couponDiscount - effectiveRazorpayDiscount);
   // Razorpay Gateway MUST trigger its calculation using the amount BEFORE the Bank offer is subtracted.
   const razorpayOriginalAmount = Math.max(0, totalPrice - coinDiscount - couponDiscount);
 
@@ -899,7 +914,7 @@ const CheckoutPage = () => {
     );
     if (!res) return alert(t("checkout.razorpayFailed"));
 
-    const amountInPaise = Math.round(razorpayOriginalAmount * 100);
+    const amountInPaise = Math.round(finalAmount * 100);
 
     if (amountInPaise < 100 && razorpayOriginalAmount > 0) {
       alert(t("checkout.minimumAmount"));
@@ -912,7 +927,6 @@ const CheckoutPage = () => {
       currency: "INR",
       name: "SadhanaCart",
       description: "Purchase Checkout",
-      offer_id: appliedRazorpayOffer ? (appliedRazorpayOffer.offerId || appliedRazorpayOffer.id) : undefined,
       method: {
         card: true,
         upi: true,
@@ -968,6 +982,8 @@ const CheckoutPage = () => {
         coin_discount: coinDiscount,
         coupon_discount: couponDiscount,
         applied_coupon: appliedCoupon ? appliedCoupon.code : "none",
+        bank_offer_id: appliedRazorpayOffer ? (appliedRazorpayOffer.offerId || appliedRazorpayOffer.id) : "none",
+        bank_offer_discount: razorpayDiscount,
       },
 
       theme: { color: "#FFA500" },
@@ -1412,11 +1428,21 @@ if (loading) {
                   <div className="mb-3 p-2 rounded d-flex justify-content-between align-items-center" style={{ border: "1px dashed #0d6efd", background: "#f0f8ff", color: "#0d6efd" }}>
                     <div>
                       <small className="fw-bold d-block">
-                        🏦 {appliedRazorpayOffer.bankName} Offer Applied
+                        🏦 {appliedRazorpayOffer.bankName || appliedRazorpayOffer.bank_name || appliedRazorpayOffer.bank || "Bank"} Offer Applied
                       </small>
-                      <small>
-                        You save {formatPrice(razorpayDiscount)} at checkout!
-                      </small>
+                      {paymentMethod?.toLowerCase() !== "razorpay" ? (
+                        <small className="text-danger">
+                          Select Razorpay payment to enable this offer
+                        </small>
+                      ) : (appliedRazorpayOffer.minPayment || appliedRazorpayOffer.min_payment) && totalPrice < Number(appliedRazorpayOffer.minPayment || appliedRazorpayOffer.min_payment) ? (
+                        <small className="text-danger">
+                          Add {formatPrice(Number(appliedRazorpayOffer.minPayment || appliedRazorpayOffer.min_payment) - totalPrice)} more to unlock this deal!
+                        </small>
+                      ) : (
+                        <small>
+                          You save {formatPrice(razorpayDiscount)} at checkout!
+                        </small>
+                      )}
                     </div>
                     <Button variant="outline-primary" size="sm" onClick={removeRazorpayOffer}>REMOVE</Button>
                   </div>
@@ -1435,10 +1461,10 @@ if (loading) {
                     </p>
                   )}
 
-                  {appliedRazorpayOffer && razorpayDiscount >= 0 && (
-                    <p className="d-flex justify-content-between mb-2 text-primary">
-                      <span>Bank Offer ({appliedRazorpayOffer.bankName}):</span>
-                      <span className="fw-bold">-{formatPrice(razorpayDiscount)}</span>
+                  {appliedRazorpayOffer && (
+                    <p className={`d-flex justify-content-between mb-2 ${paymentMethod?.toLowerCase() === "razorpay" ? "text-primary" : "text-muted opacity-50"}`}>
+                      <span>Bank Offer ({appliedRazorpayOffer.bankName || appliedRazorpayOffer.bank_name || appliedRazorpayOffer.bank || ""}):</span>
+                      <span className="fw-bold">-{formatPrice(effectiveRazorpayDiscount)}</span>
                     </p>
                   )}
 
