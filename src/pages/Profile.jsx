@@ -2,7 +2,13 @@ import React, { useEffect, useState } from "react";
 import { auth, storage, db } from "../firebase";
 import { updateProfile, onAuthStateChanged } from "firebase/auth";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  serverTimestamp
+} from "firebase/firestore";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -29,7 +35,6 @@ function Profile() {
 
   const [name, setName] = useState("");
   const [photo, setPhoto] = useState("");
-  const [phone, setPhone] = useState("");
   const [gender, setGender] = useState("");
   const [email, setEmail] = useState("");
 
@@ -38,6 +43,7 @@ function Profile() {
   const [previewPhoto, setPreviewPhoto] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [focusedField, setFocusedField] = useState(null);
+  const [docId, setDocId] = useState("");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -48,12 +54,26 @@ function Profile() {
         setPreviewPhoto(user.photoURL || "");
         setEmail("");
 
-        const docRef = doc(db, "users", user.uid);
-        const docSnap = await getDoc(docRef);
+        const phone = localStorage.getItem("userPhone");
+
+        const userRef = doc(db, "users", user.uid);
+        const docSnap = await getDoc(userRef);
+
         if (docSnap.exists()) {
-          setPhone(docSnap.data().phone || "");
-          setGender(docSnap.data().gender || "");
+          const data = docSnap.data();
+
+          setDocId(user.uid); // 🔥 important
+
+          setName(data.name || "");
+          setEmail(data.email || "");
+          setGender(data.gender || "");
+          setPhoto(data.profileImage || "");
+          setPreviewPhoto(data.profileImage || "");
+        } else {
+          setIsEditing(true);
         }
+
+
       } else {
         setCurrentUser(null);
       }
@@ -96,15 +116,13 @@ function Profile() {
       });
 
       await setDoc(
-        doc(db, "users", currentUser.uid),
+        doc(db, "users", docId),
         {
-          uid: currentUser.uid,
           name,
           email,
-          phone,
           gender,
-          photoURL: finalPhotoURL,
-          updatedAt: new Date(),
+          profileImage: finalPhotoURL, // 🔥 ADD THIS
+          updatedAt: serverTimestamp(),
         },
         { merge: true }
       );
@@ -127,9 +145,9 @@ function Profile() {
     setFocusedField(null);
   };
 
-if (authLoading) {
-  return <Loading />;
-}
+  if (authLoading) {
+    return <Loading />;
+  }
 
   if (!currentUser) {
     return (
@@ -145,7 +163,7 @@ if (authLoading) {
           </div>
           <h2>Access Restricted</h2>
           <p>Please log in to view your profile</p>
-          <button 
+          <button
             className="denied-btn"
             onClick={() => (window.location.href = "/login")}
           >
@@ -158,7 +176,7 @@ if (authLoading) {
 
   return (
     <div className="profile-container">
-      <ToastContainer 
+      <ToastContainer
         position="top-right"
         autoClose={3000}
         hideProgressBar={false}
@@ -192,9 +210,9 @@ if (authLoading) {
                 </div>
               )}
             </div>
-            
+
             {!isEditing && (
-              <button 
+              <button
                 className="edit-button"
                 onClick={() => setIsEditing(true)}
               >
@@ -236,36 +254,18 @@ if (authLoading) {
                 <div className="floating-input-group">
                   <div className="floating-input-wrapper">
                     <FaEnvelope className="floating-icon" />
-                  <input
-  type="email"
-  className="floating-input"
-  value={email}
-  onChange={(e) => setEmail(e.target.value)}
-  onFocus={() => handleFocus('email')}
-  onBlur={handleBlur}
-  required
-/>
+                    <input
+                      type="email"
+                      className="floating-input"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      onFocus={() => handleFocus('email')}
+                      onBlur={handleBlur}
+                      required
+                    />
                     <label className="floating-label filled">Email Address</label>
                   </div>
                 </div>
-
-                <div className="floating-input-group">
-                  <div className="floating-input-wrapper">
-                    <FaPhone className="floating-icon" />
-                    <input
-                      type="tel"
-                      className="floating-input"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      onFocus={() => handleFocus('phone')}
-                      onBlur={handleBlur}
-                    />
-                    <label className={`floating-label ${phone ? 'filled' : ''}`}>
-                      Phone Number
-                    </label>
-                  </div>
-                </div>
-
                 <div className="floating-input-group">
                   <div className="floating-input-wrapper">
                     <FaVenusMars className="floating-icon" />
@@ -312,8 +312,8 @@ if (authLoading) {
                     disabled={loading}
                   >
                     {loading ? (
-  <Loading />
-) : (
+                      <Loading />
+                    ) : (
                       <>
                         <FaSave /> Save Changes
                       </>
@@ -347,18 +347,6 @@ if (authLoading) {
                     <div>
                       <div className="info-label">Email Address</div>
                       <div className="info-value">{email}</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="info-card">
-                  <div className="d-flex">
-                    <FaPhone className="info-icon" />
-                    <div>
-                      <div className="info-label">Phone Number</div>
-                      <div className={`info-value ${!phone ? 'empty' : ''}`}>
-                        {phone || "Not added yet"}
-                      </div>
                     </div>
                   </div>
                 </div>
