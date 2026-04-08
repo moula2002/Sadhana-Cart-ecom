@@ -7,6 +7,7 @@ import { FaCopy, FaWallet, FaRupeeSign, FaGift, FaShareAlt } from "react-icons/f
 import { useTranslation } from "react-i18next";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Loading from "../pages/Loading";
 import { useNavigate } from "react-router-dom"; // ✅ ADD
 
 function ReferCode() {
@@ -139,7 +140,7 @@ const generateReferCode = (input = "US") => {
       : navigator.clipboard.writeText(text);
   };
 
- if (loading) return <div className="text-center py-5">{t("refer.loading")}</div>;
+if (loading) return <Loading />;
 
   return (
     <div className="container py-5">

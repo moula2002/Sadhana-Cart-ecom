@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Container, Form, Button, Card } from "react-bootstrap";
 import { FaHome, FaBriefcase, FaMapMarkerAlt, FaCrosshairs, FaUser, FaPhone, FaEnvelope, FaCity, FaGlobe, FaMapPin } from "react-icons/fa";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import Loading from "../pages/Loading";
 import {
   collection,
   addDoc,
@@ -156,6 +157,10 @@ function SaveAddress() {
     setLoading(false);
   };
 
+  if (!userId) {
+    return <Loading />;
+  }
+
   return (
     <div className="save-address-page">
       {/* Background decoration */}
@@ -176,8 +181,8 @@ function SaveAddress() {
               {existingAddress ? "✏️ Edit Address" : "📍 Add New Address"}
             </h2>
             <p className="text-muted mb-0">
-              {existingAddress 
-                ? "Update your delivery address details" 
+              {existingAddress
+                ? "Update your delivery address details"
                 : "Fill in your address details for seamless delivery"}
             </p>
           </Card.Body>
@@ -194,9 +199,8 @@ function SaveAddress() {
                 <Card
                   key={type}
                   onClick={() => setAddressType(type)}
-                  className={`address-type-option flex-fill ${
-                    addressType === type ? "active" : ""
-                  }`}
+                  className={`address-type-option flex-fill ${addressType === type ? "active" : ""
+                    }`}
                 >
                   <Card.Body className="text-center p-3">
                     <div className="type-icon mb-2">
@@ -239,7 +243,7 @@ function SaveAddress() {
               {/* Step 1: Contact Information */}
               <div className={`form-step ${step === 1 ? 'active' : ''}`}>
                 <h6 className="fw-bold mb-3">Contact Information</h6>
-                
+
                 <Form.Group className="mb-3 floating-label-group">
                   <div className={`floating-input-wrapper ${focusedField === 'fullName' || formData.fullName ? 'focused' : ''}`}>
                     <FaUser className="input-icon" />
@@ -297,8 +301,8 @@ function SaveAddress() {
                 </Form.Group>
 
                 <div className="step-navigation mt-4">
-                  <Button 
-                    variant="primary" 
+                  <Button
+                    variant="primary"
                     className="next-step-btn"
                     onClick={() => setStep(2)}
                   >
@@ -372,14 +376,14 @@ function SaveAddress() {
                 </Form.Group>
 
                 <div className="step-navigation d-flex justify-content-between mt-4">
-                  <Button 
-                    variant="outline-secondary" 
+                  <Button
+                    variant="outline-secondary"
                     onClick={() => setStep(1)}
                   >
                     <i className="fas fa-arrow-left me-2"></i> Back
                   </Button>
-                  <Button 
-                    variant="primary" 
+                  <Button
+                    variant="primary"
                     className="next-step-btn"
                     onClick={() => setStep(3)}
                   >
@@ -468,8 +472,8 @@ function SaveAddress() {
                 </Form.Group>
 
                 <div className="step-navigation d-flex justify-content-between mt-4">
-                  <Button 
-                    variant="outline-secondary" 
+                  <Button
+                    variant="outline-secondary"
                     onClick={() => setStep(2)}
                   >
                     <i className="fas fa-arrow-left me-2"></i> Back
@@ -480,10 +484,7 @@ function SaveAddress() {
                     disabled={loading}
                   >
                     {loading ? (
-                      <>
-                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                        Saving...
-                      </>
+                      "Saving..."
                     ) : (
                       <>
                         <i className="fas fa-check-circle me-2"></i>

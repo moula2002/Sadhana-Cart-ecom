@@ -6,6 +6,7 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Loading from "../pages/Loading";
 import {
   FaUser,
   FaEnvelope,
@@ -126,16 +127,9 @@ function Profile() {
     setFocusedField(null);
   };
 
-  if (authLoading) {
-    return (
-      <div className="loader-container">
-        <div className="spinner-wrapper">
-          <div className="main-spinner"></div>
-        </div>
-        <p>Loading your profile...</p>
-      </div>
-    );
-  }
+if (authLoading) {
+  return <Loading />;
+}
 
   if (!currentUser) {
     return (
@@ -318,10 +312,8 @@ function Profile() {
                     disabled={loading}
                   >
                     {loading ? (
-                      <>
-                        <FaSpinner className="spin" /> Saving...
-                      </>
-                    ) : (
+  <Loading />
+) : (
                       <>
                         <FaSave /> Save Changes
                       </>
