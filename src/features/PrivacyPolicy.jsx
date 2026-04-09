@@ -9,8 +9,10 @@ function PrivacyPolicy() {
       <header className="privacy-header-bg">
         <div className="privacy-header-content">
           <i className="fas fa-shield-alt privacy-icon"></i>
-          <h1 className="header-title">Privacy Policy</h1>
-          <h2 className="header-subtitle">SadhanaCart</h2>
+          <h1 className="header-title text-center">
+  Privacy Policy
+</h1>
+          
         </div>
       </header>
 
@@ -145,10 +147,10 @@ function PrivacyPolicy() {
             <p>If you have any questions about this Privacy Policy:</p>
 
             <ul>
-              <li>📧 Email: support@sadhanacart.com</li>
-              <li>📞 Phone: +91 94488 10877</li>
+              <li> Email: support@sadhanacart.com</li>
+              <li> Phone: +91 94488 10877</li>
               <li>
-                📍 Address: <br />
+                 Address: <br />
                 Ground Floor, Ward No. 24,<br />
                 A No. 4-14-155/36A,<br />
                 Teachers Colony, Near LIC Office,<br />

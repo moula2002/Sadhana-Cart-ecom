@@ -1,187 +1,124 @@
-/* --- Base Layout and Colors --- */
+/* --- Theme Variables --- */
 .privacy-container {
-    background-color: #f7f7f7; 
+  --page-bg: #f7f7f7;
+  --header-bg: #ff6a00;
+  --header-text: #ffffff;
+  --card-bg: #ffffff;
+  --text-primary: #333333;
+  --text-secondary: #555555;
+  --text-muted: #666666;
+  --primary-orange: #ff6a00;
+  --secondary-orange: #cc5400;
+  --shadow-color: rgba(0, 0, 0, 0.1);
 }
 
-/* --- Header Styling (Matches Screenshot) --- */
+/* --- Base Layout --- */
+.privacy-container {
+  background-color: var(--page-bg);
+  color: var(--text-primary);
+  font-family: Arial, sans-serif;
+  min-height: 100vh;
+}
+
+/* --- Header --- */
 .privacy-header-bg {
-    background-color: #ff6a00; /* Vibrant orange color */
-    color: white;
-    padding: 30px 0; /* Reduced padding to match the screenshot */
-    text-align: center;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background-color: var(--header-bg);
+  color: var(--header-text);
+  padding: 60px 0;
+  text-align: center;
+  box-shadow: 0 4px 6px var(--shadow-color);
 }
 
 .privacy-header-content {
-    max-width: 900px;
-    margin: 0 auto; 
-    padding: 0 15px; /* Add internal padding */
-    display: flex; /* Use flexbox to align elements horizontally */
-    align-items: center; 
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
 }
 
-/* Icon (Top Left) */
-.privacy-header-icon-wrapper {
-    flex-shrink: 0; /* Prevents the icon from shrinking */
-    margin-right: 20px;
-}
-
-/* Updated Icon Styling */
-.privacy-icon {
-    font-size: 2rem; 
-    color: white;
-}
-
-/* Titles (Align Left/Center) */
 .header-title {
-    font-size: 1.5rem;
-    font-weight: 400; /* Lighter font weight for the small title */
-    margin-bottom: 0;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--header-text);
+  margin: 0;
 }
 
-.header-subtitle {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin-left: 20px; /* Separator spacing */
-}
-
-/* --- Main Content Styling (Centered White Card) --- */
+/* --- Content Card --- */
 .privacy-main-content {
-    max-width: 900px; 
-    padding: 40px 30px; /* Increased side padding */
-    margin-top: -30px; 
-    position: relative;
-    background-color: white;
-    border-radius: 8px;
-    margin-left: auto; 
-    margin-right: auto;
-    text-align: left; 
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  max-width: 900px;
+  padding: 40px;
+  margin: -30px auto 40px;
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  box-shadow: 0 2px 10px var(--shadow-color);
 }
 
-.privacy-intro .main-policy-title {
-    color: #ff6a00;
-    font-size: 2rem;
-    font-weight: 600;
-    padding-bottom: 10px;
-    border-bottom: 2px solid #eee;
-    margin-bottom: 20px;
+/* --- Section Titles --- */
+.privacy-section h3 {
+  color: var(--primary-orange);
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-top: 25px;
+  margin-bottom: 15px;
 }
 
-/* --- Section Styling (Matches Screenshot) --- */
-.section-title-highlight {
-    color: #ff6a00;
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-top: 30px; /* Space above each section */
-    margin-bottom: 15px;
+/* --- Paragraph --- */
+.privacy-main-content p {
+  color: var(--text-secondary);
+  line-height: 1.6;
 }
 
-/* --- List Styling (Bullet Points) --- */
-.privacy-list {
-    list-style: none;
-    padding-left: 0;
+/* --- Lists --- */
+.privacy-section ul {
+  list-style: none;
+  padding-left: 0;
 }
 
-.privacy-list li {
-    padding: 8px 0;
-    line-height: 1.6;
-    font-size: 1rem;
-    position: relative;
-    padding-left: 20px;
+.privacy-section li {
+  padding: 8px 0;
+  line-height: 1.6;
+  position: relative;
+  padding-left: 20px;
+  color: var(--text-secondary);
 }
 
-.privacy-list li::before {
-    content: "•";
-    color: #ff6a00;
-    font-weight: bold;
-    display: inline-block;
-    width: 1em;
-    margin-left: -1em;
-    position: absolute;
-    left: 0;
+.privacy-section li::before {
+  content: "•";
+  color: var(--primary-orange);
+  font-weight: bold;
+  position: absolute;
+  left: 0;
 }
 
-/* --- Help/Contact Box Styling --- */
-.help-box {
-    background-color: #ffe6e6; 
-    border: 1px solid #ff9999;
-    border-radius: 8px;
-    padding: 30px;
-    text-align: center;
-    margin-top: 40px;
-    animation: fadeIn 2s ease-out; 
-}
-
-.help-box h3 {
-    color: #ff6a00;
-    font-weight: 700;
-    margin-bottom: 15px;
-}
-
-.help-icon {
-    font-size: 3rem;
-    display: block;
-    margin: 0 auto 10px; /* Center the icon */
-    color: #ff6a00;
-}
-
-/* --- Button Styling --- */
-.help-btn-primary {
-    background-color: #ff6a00;
-    border-color: #ff6a00;
-    color: white; 
-    font-weight: 600; 
-    padding: 10px 20px; 
-    border-radius: 6px;
-    transition: background-color 0.3s, transform 0.2s;
-}
-
-.help-btn-primary:hover {
-    background-color: #cc5400;
-    border-color: #cc5400;
-    transform: scale(1.05);
-}
-
-.effective-date {
-    margin-top: 20px;
-    font-size: 0.9rem;
-    color: #666;
-}
-
-/* --- Scroll-to-Top Button --- */
+/* --- Scroll Button --- */
 .back-to-top-button {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background-color: #ff6a00;
-    color: white;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 1.5rem;
-    text-decoration: none;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: background-color 0.3s, transform 0.3s;
-    z-index: 1000;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: var(--primary-orange);
+  color: white;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
+  text-decoration: none;
+  box-shadow: 0 4px 8px var(--shadow-color);
 }
 
 .back-to-top-button:hover {
-    background-color: #cc5400;
-    transform: scale(1.1);
+  background-color: var(--secondary-orange);
+  transform: scale(1.1);
 }
 
-/* --- Animations --- */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
+/* --- Responsive --- */
+@media (max-width: 768px) {
+  .header-title {
+    font-size: 2rem;
+  }
 
-@keyframes bounceIn {
-    0% { transform: scale(0.5); opacity: 0; }
-    50% { transform: scale(1.1); opacity: 1; }
-    100% { transform: scale(1); }
+  .privacy-main-content {
+    padding: 25px;
+  }
 }
