@@ -31,6 +31,7 @@ import {
   setDoc
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
+import { getFunctions, httpsCallable } from "firebase/functions";
 
 const formatCurrency = (val) =>
   new Intl.NumberFormat("en-IN", {
@@ -51,6 +52,8 @@ function CancelOrderPage() {
   const [error, setError] = useState("");
   const [userId, setUserId] = useState(null);
   const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const functions = getFunctions();
+  const razorpayRefund = httpsCallable(functions, "razorpayRefund");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -61,7 +64,7 @@ function CancelOrderPage() {
 
   if (!order) return <Alert variant="danger">No Order Found</Alert>;
 
- const firestoreDocId = order.id || order.orderId;
+  const firestoreDocId = order.id || order.orderId;
   const orderIdNumber = order.orderId;
   const shiprocketOrderId = order.shiprocketOrderId;
   const shipmentId = order.shipmentId;
@@ -171,6 +174,21 @@ function CancelOrderPage() {
           throw new Error("Shiprocket cancellation failed");
         }
 
+        // 🔥 RAZORPAY REFUND (INGA ADD PANNU)
+        if (order.paymentMethod === "online" && order.paymentId) {
+          try {
+            await razorpayRefund({
+              paymentId: order.paymentId,
+              amount: Math.round(order.payableAmount * 100),
+            });
+
+            console.log("Refund success");
+
+          } catch (err) {
+            console.error("Refund failed", err);
+          }
+        }
+
       } catch (shipErr) {
         await addDoc(cancelRef, {
           cancelledBy: userId,
@@ -262,12 +280,12 @@ function CancelOrderPage() {
 
   return (
     <div
-  style={{
-    background: isDark ? "#0f172a" : "#ffffff",
-    minHeight: "100vh",
-    color: isDark ? "#ffffff" : "#212529"
-  }}
->
+      style={{
+        background: isDark ? "#0f172a" : "#ffffff",
+        minHeight: "100vh",
+        color: isDark ? "#ffffff" : "#212529"
+      }}
+    >
       <div
         style={{
           padding: "20px",
@@ -294,21 +312,21 @@ function CancelOrderPage() {
         </div>
 
         <Card
-  className="mb-4"
-  style={{
-    background: isDark ? "#1e293b" : "#ffffff",
-    color: isDark ? "#ffffff" : "#212529",
-    border: isDark ? "1px solid #334155" : "1px solid #e0e0e0"
-  }}
->
+          className="mb-4"
+          style={{
+            background: isDark ? "#1e293b" : "#ffffff",
+            color: isDark ? "#ffffff" : "#212529",
+            border: isDark ? "1px solid #334155" : "1px solid #e0e0e0"
+          }}
+        >
           <Card.Body>
             <h6>{product?.name}</h6>
 
             <div className="d-flex justify-content-between mt-3">
               <span>Subtotal</span>
               <strong>
-{formatCurrency(order.payableAmount || order.total || order.amount)}
-</strong>
+                {formatCurrency(order.payableAmount || order.total || order.amount)}
+              </strong>
             </div>
 
             <div className="text-center mt-3">

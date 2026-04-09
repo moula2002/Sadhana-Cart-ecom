@@ -70,7 +70,8 @@ const Footer = () => {
               <Link to="/return-policy">{t("return-Policy")}</Link><br />
               <Link to="/shipping-policy">{t("shipping-Policy")}</Link><br />
               <Link to="/terms-and-conditions">{t("term's")}</Link><br />
-              <Link to="/about-us">{t("aboutUs")}</Link>
+              <Link to="/about-us">{t("aboutUs")}</Link> <br />
+              <Link to="/privacy-policy">{t("privacyPolicy")}</Link>
               <li>
                 <a href="https://wa.me/919448810877" target="_blank" rel="noreferrer">
                   {t("chatWithUs")}

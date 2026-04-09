@@ -42,6 +42,7 @@ import TermsAndConditions from "./features/footer/TermsAndConditions";
 import AboutUs from "./features/footer/AboutUs";
 import Faqs from "./features/footer/Faqs";
 import ContactForm from "./features/footer/ContactSupport";
+import PrivacyPolicy from "./features/PrivacyPolicy";
 
 /* ===== User Pages ===== */
 import ProfilePage from "./pages/Profile";
@@ -105,6 +106,7 @@ const AppContent = () => {
           {/* 🔹 Footer Policy Pages */}
           <Route path="/return-policy" element={<ReturnPolicy />} />
           <Route path="/shipping-policy" element={<ShippingPolicy />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route
             path="/terms-and-conditions"
             element={<TermsAndConditions />}

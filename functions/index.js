@@ -883,6 +883,33 @@ app.post("/admin/health-check", (req, res) => {
   res.status(200).json({ success: true, message: "Admin access granted" });
 });
 
+
+// 🔥 RAZORPAY REFUND FUNCTION
+const Razorpay = require("razorpay");
+
+const razorpay = new Razorpay({
+  key_id: "rzp_live_SRuwxqek1NJhN6",
+  key_secret: "BqBBHF6z6q105tYnsuEPporm",
+});
+
+exports.razorpayRefund = onCall(
+  { region: "us-central1" },
+  async (request) => {
+    const { paymentId, amount } = request.data;
+
+    if (!paymentId) throw new Error("Payment ID required");
+
+    const refund = await razorpay.payments.refund(paymentId, {
+      amount,
+    });
+
+    return {
+      success: true,
+      refundId: refund.id,
+    };
+  }
+);
+
 // ======================================================
 // 🚀 EXPORT EXPRESS APP AS CLOUD FUNCTION
 // ======================================================
