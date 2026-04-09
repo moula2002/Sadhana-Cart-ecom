@@ -32,6 +32,8 @@ import {
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { getFunctions, httpsCallable } from "firebase/functions";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const formatCurrency = (val) =>
   new Intl.NumberFormat("en-IN", {
@@ -183,6 +185,8 @@ function CancelOrderPage() {
             });
 
             console.log("Refund success");
+            // 🔥 TOAST MESSAGE (INGA ADD PANNU)
+            toast.success("Your amount will be refunded in 5-7 days 💰");
 
           } catch (err) {
             console.error("Refund failed", err);
@@ -249,7 +253,7 @@ function CancelOrderPage() {
 
       setOrderStatus("Cancelled");
 
-      alert("Order Cancelled Successfully");
+      toast.success("Order cancelled successfully ✅");
       navigate("/orders");
 
     } catch (err) {
@@ -400,6 +404,7 @@ function CancelOrderPage() {
           </Button>
         </Modal.Footer>
       </Modal>
+      <ToastContainer position="top-center" autoClose={3000} />
     </div>
   );
 }

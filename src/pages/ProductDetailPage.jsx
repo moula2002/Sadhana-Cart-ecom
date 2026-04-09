@@ -163,10 +163,12 @@ function ProductDetailPage() {
             padding: "5px",
         },
         detailImg: {
-            maxHeight: "260px",
-            width: "auto",
+            maxHeight: "480px",
+            width: "100%",
             objectFit: "contain",
             transition: "transform 0.3s ease-in-out",
+            backgroundColor: "#fff",
+            borderRadius: "12px",
         },
         descriptionBox: {
             fontSize: "13px",
@@ -188,8 +190,11 @@ function ProductDetailPage() {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "flex-start",
-            padding: "10px",
-            backgroundColor: "#fafafa",
+            padding: "20px",
+            backgroundColor: "transparent",
+            position: "sticky",
+            top: "20px",
+            height: "fit-content",
         },
         productPrice: {
             fontSize: "2.5rem",
@@ -199,15 +204,16 @@ function ProductDetailPage() {
             marginBottom: "15px",
         },
         thumbnail: {
-            width: "55px",
-            height: "55px",
+            width: "60px",
+            height: "60px",
             objectFit: "contain",
             cursor: "pointer",
-            border: "2px solid #e9ecef",
-            margin: "0 4px",
-            padding: "3px",
-            transition: "all 0.2s",
-            borderRadius: "6px",
+            border: "1px solid #dee2e6",
+            margin: "0 6px",
+            padding: "2px",
+            transition: "all 0.3s ease",
+            borderRadius: "8px",
+            backgroundColor: "#fff",
         },
         activeThumbnail: {
             borderColor: "#3498db",
@@ -1632,7 +1638,7 @@ function ProductDetailPage() {
                 </Row>
             </Card>
 
-            <RazorpayOffers />
+            <RazorpayOffers hideApplyButton={true} />
 
             {/* Delivery & Terms Information Section */}
             {(hasDeliveryInfo || hasTermsInfo) && (
@@ -1708,84 +1714,127 @@ function ProductDetailPage() {
             <div className="mb-5">
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <h3 className="fw-bold mb-0">More from {product.category}</h3>
-                    <Link to={`/category/${product.category}`} className="text-decoration-none">
-                        View All <FaArrowRight size={14} />
-                    </Link>
                 </div>
 
-                <Row className="mb-4">
-                    <Col md={6}>
-                        <Form.Label className="fw-semibold">
-                            Max Price: <FaRupeeSign size={12} />{filterPrice.toLocaleString()}
-                        </Form.Label>
-                        <Form.Range
-                            min={0}
-                            max={100000}
-                            step={100}
-                            value={filterPrice}
-                            onChange={(e) => setFilterPrice(Number(e.target.value))}
-                        />
-                    </Col>
-                    <Col md={6}>
-                        <Form.Label className="fw-semibold">Sort By:</Form.Label>
-                        <Form.Select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-                            <option value="rating">Top Rated</option>
-                            <option value="price-asc">Price: Low to High</option>
-                            <option value="price-desc">Price: High to Low</option>
-                            <option value="name-asc">Name A-Z</option>
-                        </Form.Select>
-                    </Col>
-                </Row>
+                <div className="p-3 mb-4 rounded-4 shadow-sm border-0" style={{ background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)', border: '1px solid rgba(0,0,0,0.05)' }}>
+                    <Row className="align-items-center g-3">
+                        <Col lg={7}>
+                            <div className="d-flex flex-column flex-sm-row align-items-sm-center gap-3">
+                                <div className="d-flex align-items-center gap-2 mb-2 mb-sm-0">
+                                    <div className="p-2 rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style={{ width: '35px', height: '35px' }}>
+                                        <FaRupeeSign size={14} />
+                                    </div>
+                                    <span className="fw-bold text-dark no-wrap" style={{ fontSize: '0.9rem' }}>Budget Range</span>
+                                </div>
+                                <div className="flex-grow-1 px-2">
+                                    <div className="d-flex justify-content-between mb-1">
+                                        <span className="text-muted extra-small">₹0</span>
+                                        <span className="fw-bold text-primary small">Under ₹{filterPrice.toLocaleString()}</span>
+                                    </div>
+                                    <Form.Range
+                                        min={0}
+                                        max={100000}
+                                        step={100}
+                                        value={filterPrice}
+                                        onChange={(e) => setFilterPrice(Number(e.target.value))}
+                                        className="custom-premium-range"
+                                    />
+                                </div>
+                            </div>
+                        </Col>
+                        <Col lg={5}>
+                            <div className="d-flex align-items-center gap-3 ps-lg-4 border-start-lg">
+                                <div className="d-flex align-items-center gap-2">
+                                    <div className="p-2 rounded-circle bg-dark bg-opacity-5 text-dark d-flex align-items-center justify-content-center" style={{ width: '35px', height: '35px' }}>
+                                        <FaEdit size={14} className="opacity-75" />
+                                    </div>
+                                    <span className="fw-bold text-dark no-wrap" style={{ fontSize: '0.9rem' }}>Sort By</span>
+                                </div>
+                                <Form.Select 
+                                    value={sortBy} 
+                                    onChange={(e) => setSortBy(e.target.value)}
+                                    className="border-0 bg-white shadow-sm rounded-3 py-2 px-3 fw-semibold text-dark cursor-pointer"
+                                    style={{ fontSize: '0.85rem' }}
+                                >
+                                    <option value="rating">⭐ Top Rated</option>
+                                    <option value="price-asc">📉 Price: Low to High</option>
+                                    <option value="price-desc">📈 Price: High to Low</option>
+                                    <option value="name-asc">🔤 Name A-Z</option>
+                                </Form.Select>
+                            </div>
+                        </Col>
+                    </Row>
+                </div>
 
                 {catLoading ? (
                     <div className="text-center py-5">
                         <Spinner animation="border" variant="primary" />
                     </div>
                 ) : catError ? (
-                    <Alert variant="warning">{catError}</Alert>
+                    null
                 ) : filteredAndSortedCategory.length === 0 ? (
                     <Alert variant="info">No products found in this category.</Alert>
                 ) : (
-                    <Row xs={1} sm={2} lg={4} className="g-4">
+                    <div 
+                        className="d-flex overflow-auto pb-4 gap-4 custom-horizontal-scroller" 
+                        style={{ 
+                            scrollSnapType: 'x mandatory', 
+                            WebkitOverflowScrolling: 'touch',
+                            paddingLeft: '5px',
+                            paddingRight: '5px'
+                        }}
+                    >
                         {filteredAndSortedCategory.map((p) => (
-                            <Col key={p.id}>
-                                <Card className="h-100 border-0 shadow-sm hover-shadow">
+                            <div 
+                                key={p.id} 
+                                style={{ 
+                                    minWidth: '240px', 
+                                    maxWidth: '240px', 
+                                    flex: '0 0 auto', 
+                                    scrollSnapAlign: 'start' 
+                                }}
+                            >
+                                <Card className="h-100 border-0 shadow-sm hover-premium-card transition-all">
                                     <Link to={`/product/${p.id}`} className="text-decoration-none text-dark">
-                                        <div className="d-flex justify-content-center align-items-center p-4" style={{ height: "200px", backgroundColor: '#f8f9fa' }}>
+                                        <div className="d-flex justify-content-center align-items-center p-3 position-relative" style={{ height: "180px", backgroundColor: '#eff6ff', borderRadius: '16px 16px 0 0' }}>
+                                            <div className="position-absolute top-0 start-0 m-2">
+                                                <Badge bg="danger" className="rounded-pill px-2 py-1 shadow-sm" style={{ fontSize: '0.65rem', fontWeight: '800' }}>
+                                                    SALE
+                                                </Badge>
+                                            </div>
                                             <Card.Img
                                                 src={p.images || p.image || "https://via.placeholder.com/150"}
-                                                style={{ height: "150px", objectFit: "contain" }}
+                                                style={{ height: "140px", width: 'auto', objectFit: "contain", filter: 'drop-shadow(0 10px 10px rgba(0,0,0,0.1))' }}
                                             />
                                         </div>
-                                        <Card.Body>
-                                            <Card.Title className="fw-bold text-truncate">{p.name || p.title}</Card.Title>
-                                            <div className="d-flex align-items-center mb-2">
-                                                <span className="fw-bold me-2">
-                                                    {p.rating.rate.toFixed(1)}
-                                                </span>
-                                                {[...Array(5)].map((_, i) => (
-                                                    i < Math.round(p.rating.rate) ?
-                                                        <FaStar key={i} className="text-warning me-1" size={12} /> :
-                                                        <FaRegStar key={i} className="text-muted me-1" size={12} />
-                                                ))}
-                                                <span className="text-muted small ms-2">({p.rating.count})</span>
-                                            </div>
-                                            {p.sellerId && (
-                                                <div className="mb-2">
-                                                    <Badge bg="light" text="dark" className="small">
-                                                        <FaStore className="me-1" size={10} />
-                                                        {p.sellerId.substring(0, 8)}...
-                                                    </Badge>
+                                        <Card.Body className="p-3 bg-white" style={{ borderRadius: '0 0 16px 16px' }}>
+                                            <Card.Title className="fw-bold text-truncate mb-1 text-dark" style={{ fontSize: '0.95rem' }}>{p.name || p.title}</Card.Title>
+                                            <div className="d-flex align-items-center mb-3">
+                                                <div className="bg-success bg-opacity-10 px-2 py-0 rounded d-flex align-items-center me-2">
+                                                    <span className="fw-bold text-success small me-1">{p.rating.rate.toFixed(1)}</span>
+                                                    <FaStar className="text-success" size={10} />
                                                 </div>
-                                            )}
-                                            <div className="d-flex justify-content-between align-items-center mt-3">
-                                                <span className="fw-bold text-danger fs-5">
-                                                    <FaRupeeSign size={14} />{p.priceINR}
-                                                </span>
+                                                <span className="text-muted extra-small">({p.rating.count} reviews)</span>
+                                            </div>
+                                            
+                                            <div className="d-flex justify-content-between align-items-center">
+                                                <div className="d-flex flex-column">
+                                                    <div className="d-flex align-items-center gap-1">
+                                                        <span className="fw-bold text-primary fs-5" style={{ letterSpacing: '-0.5px' }}>
+                                                            <FaRupeeSign size={14} />{p.priceINR}
+                                                        </span>
+                                                    </div>
+                                                    <span className="extra-small text-success fw-bold">Special Price</span>
+                                                </div>
                                                 <Button
                                                     variant="warning"
                                                     size="sm"
-                                                    className="rounded-pill"
+                                                    className="rounded-3 shadow-sm px-3 fw-bold border-0 d-flex align-items-center justify-content-center"
+                                                    style={{ 
+                                                        background: 'linear-gradient(45deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%)',
+                                                        color: '#d63384',
+                                                        height: '35px'
+                                                    }}
                                                     onClick={(e) => {
                                                         e.preventDefault();
                                                         dispatch(addToCart({
@@ -1796,19 +1845,19 @@ function ProductDetailPage() {
                                                             quantity: 1,
                                                             sellerId: p.sellerId || "default_seller"
                                                         }));
-                                                        toast.success(`Added "${p.name || p.title}" to cart!`, { position: "top-right", autoClose: 2000 });
+                                                        toast.success(`Added to cart!`, { position: "bottom-right", autoClose: 2000 });
                                                     }}
                                                 >
-                                                    <FaShoppingCart className="me-1" size={12} />
+                                                    <FaShoppingCart size={13} className="me-1" />
                                                     Add
                                                 </Button>
                                             </div>
                                         </Card.Body>
                                     </Link>
                                 </Card>
-                            </Col>
+                            </div>
                         ))}
-                    </Row>
+                    </div>
                 )}
             </div>
 
@@ -2281,6 +2330,62 @@ function ProductDetailPage() {
         .hover-shadow:hover {
           transform: translateY(-5px);
           box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+        }
+        .hover-shadow-premium:hover {
+          transform: translateY(-8px);
+          box-shadow: 0 15px 35px rgba(0,0,0,0.12) !important;
+        }
+        .hover-premium-card:hover {
+          transform: translateY(-10px) scale(1.02);
+          box-shadow: 0 25px 50px -12px rgba(13, 110, 253, 0.25) !important;
+        }
+        .transition-all {
+          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .transition-transform {
+          transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        /* Custom horizontal scroller styling */
+        .custom-horizontal-scroller::-webkit-scrollbar {
+          height: 6px;
+        }
+        .custom-horizontal-scroller::-webkit-scrollbar-track {
+          background: #f1f1f1;
+          border-radius: 10px;
+        }
+        .custom-horizontal-scroller::-webkit-scrollbar-thumb {
+          background: #ccc;
+          border-radius: 10px;
+        }
+        .custom-horizontal-scroller::-webkit-scrollbar-thumb:hover {
+          background: #999;
+        }
+        .extra-small {
+          font-size: 0.7rem;
+        }
+        .no-wrap {
+          white-space: nowrap;
+        }
+        @media (min-width: 992px) {
+          .border-start-lg {
+            border-left: 1px solid rgba(0,0,0,0.1) !important;
+          }
+        }
+        .custom-premium-range {
+          cursor: pointer;
+        }
+        .custom-premium-range::-webkit-slider-thumb {
+          background: #0d6efd;
+          border: 2px solid white;
+          box-shadow: 0 0 10px rgba(13, 110, 253, 0.3);
+        }
+        .custom-premium-range::-moz-range-thumb {
+          background: #0d6efd;
+          border: 2px solid white;
+          box-shadow: 0 0 10px rgba(13, 110, 253, 0.3);
+        }
+        .cursor-pointer {
+          cursor: pointer;
         }
         .review-thumbnail:hover {
           transform: scale(1.05);

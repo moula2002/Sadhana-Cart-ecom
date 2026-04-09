@@ -88,11 +88,7 @@ function ProductSuggestions({ currentProductId, category }) {
   }
 
   if (error) {
-    return (
-      <Alert variant="warning" className="text-center">
-        {error}
-      </Alert>
-    );
+    return null;
   }
 
   return (

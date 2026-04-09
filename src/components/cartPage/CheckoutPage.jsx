@@ -270,6 +270,7 @@ const CheckoutPage = () => {
   const [appliedRazorpayOffer, setAppliedRazorpayOffer] = useState(null);
   const [razorpayDiscount, setRazorpayDiscount] = useState(0);
   const [hasHandledStateOffer, setHasHandledStateOffer] = useState(false);
+  const [hasHandledStateCoupon, setHasHandledStateCoupon] = useState(false);
 
   useEffect(() => {
     const fetchCoupons = async () => {
@@ -292,7 +293,7 @@ const CheckoutPage = () => {
     const found = coupons.find(
       (c) =>
         c.code?.toLowerCase() === inputCode.trim().toLowerCase() &&
-        c.status === "Enabled"
+        (c.status === "Enabled" || c.isActive !== false)
     );
 
     if (!found) {
@@ -305,7 +306,15 @@ const CheckoutPage = () => {
       return;
     }
 
-    const discountAmount = (totalPrice * Number(found.discountPercent)) / 100;
+    let discountAmount = 0;
+    const dType = found.discountType || "percentage";
+    const dValue = Number(found.discountValue || found.discountPercent || 0);
+
+    if (dType === "percentage" || !found.discountType) {
+      discountAmount = (totalPrice * dValue) / 100;
+    } else {
+      discountAmount = dValue;
+    }
 
     setCouponDiscount(discountAmount);
     setAppliedCoupon(found);
@@ -313,22 +322,33 @@ const CheckoutPage = () => {
     alert("✅ Coupon Applied Successfully");
   };
 
-  const appliedCouponCodeFromLocation = location.state?.appliedCouponCode;
+  const appliedCouponFromLocation = location.state?.appliedCoupon;
 
   useEffect(() => {
-    if (appliedCouponCodeFromLocation && coupons.length > 0 && totalPrice > 0 && !appliedCoupon) {
-      const found = coupons.find(
-        (c) => c.code?.toLowerCase() === appliedCouponCodeFromLocation.toLowerCase() && c.status === "Enabled"
-      );
-      if (found && totalPrice >= Number(found.minOrderAmount)) {
+    if (appliedCouponFromLocation && totalPrice > 0 && !hasHandledStateCoupon) {
+      const found = appliedCouponFromLocation;
+      if (totalPrice >= Number(found.minOrderAmount)) {
         setAppliedCoupon(found);
-        setCouponDiscount((totalPrice * Number(found.discountPercent)) / 100);
-        setInputCode(found.code);
-      } else if (found && totalPrice < Number(found.minOrderAmount)) {
+        setHasHandledStateCoupon(true);
+        
+        let discountAmount = 0;
+        const dType = found.discountType || "percentage";
+        const dValue = Number(found.discountValue || found.discountPercent || 0);
+
+        if (dType === "percentage" || !found.discountType) {
+          discountAmount = (totalPrice * dValue) / 100;
+        } else {
+          discountAmount = dValue;
+        }
+        
+        setCouponDiscount(discountAmount);
+        setInputCode(found.code || "");
+      } else {
         alert(`Minimum order ₹${found.minOrderAmount} required for coupon ${found.code}`);
+        setHasHandledStateCoupon(true); // Don't keep alerting
       }
     }
-  }, [appliedCouponCodeFromLocation, coupons, totalPrice, appliedCoupon]);
+  }, [appliedCouponFromLocation, totalPrice, hasHandledStateCoupon]);
 
   const removeCoupon = () => {
     setCouponDiscount(0);

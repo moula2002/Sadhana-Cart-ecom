@@ -4,7 +4,7 @@ import { collection, getDocs } from "firebase/firestore";
 import { Card, Badge, Spinner, Row, Col, Alert, Button } from "react-bootstrap";
 import { FaTag, FaUniversity, FaInfoCircle, FaGift, FaCopy } from "react-icons/fa";
 
-function RazorpayOffers() {
+function RazorpayOffers({ hideApplyButton = false }) {
   const [offers, setOffers] = useState([]);
   const [coupons, setCoupons] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -27,7 +27,7 @@ function RazorpayOffers() {
       }));
 
       const enabledOffers = offerList.filter(
-        (offer) => offer.status === "Enabled"
+        (offer) => offer.status === "Enabled" || offer.isActive !== false
       );
 
       const couponsSnapshot = await getDocs(collection(db, "coupons"));
@@ -37,7 +37,7 @@ function RazorpayOffers() {
       }));
 
       const enabledCoupons = couponList.filter(
-        (coupon) => coupon.status === "Enabled"
+        (coupon) => coupon.status === "Enabled" || coupon.isActive !== false
       );
 
       setOffers(enabledOffers);
@@ -66,35 +66,34 @@ function RazorpayOffers() {
 
   return (
     <Card
-      className="mb-5 border-0 shadow-lg"
+      className="mb-4 border-0 shadow-sm"
       style={{
-        borderRadius: "20px",
+        borderRadius: "15px",
         overflow: "hidden",
         backgroundColor: "#ffffff",
       }}
     >
       <Card.Header
-        className="border-bottom-0 pt-4 pb-3 px-4 px-md-5 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 bg-white"
+        className="border-bottom-0 pt-3 pb-2 px-3 px-md-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 bg-white"
       >
         <div>
-          <h3 className="fw-bold mb-1 d-flex align-items-center text-dark">
-            <span className="bg-danger bg-opacity-10 p-2 rounded-circle me-3 d-flex align-items-center justify-content-center">
-              <FaGift className="text-danger" size={24} />
+          <h5 className="fw-bold mb-0 d-flex align-items-center text-dark" style={{ fontSize: "1.2rem" }}>
+            <span className="bg-danger bg-opacity-10 p-2 rounded-circle me-2 d-flex align-items-center justify-content-center">
+              <FaGift className="text-danger" size={18} />
             </span>
             Exclusive Bank Offers
-          </h3>
-          <p className="small mt-2 mb-0 ms-0 ms-md-5 ps-md-3 py-1 text-muted" style={{ borderLeft: "3px solid #0d6efd" }}>
-            Maximize your savings with our verified partner banks. Apply these deals at checkout!
+          </h5>
+          <p className="small mt-1 mb-0 ms-0 ms-md-4 ps-md-2 py-0 text-muted" style={{ borderLeft: "2px solid #0d6efd", fontSize: "0.8rem" }}>
+            Maximize your savings with our verified partner banks.
           </p>
         </div>
       </Card.Header>
 
-      <Card.Body className="px-4 px-md-5 pb-5 pt-3 bg-white">
+      <Card.Body className="px-3 px-md-4 pb-4 pt-2 bg-white">
         {offers.length === 0 ? (
-          <Alert variant="info" className="border-0 rounded-4 text-center mt-3 shadow-sm py-5">
-            <FaInfoCircle size={36} className="mb-3 text-info opacity-75" /><br />
-            <span className="fw-semibold fs-5 text-dark">No offers available at the moment.</span>
-            <p className="small mt-2 mb-0 text-muted">Please check back later for exciting bank deals!</p>
+          <Alert variant="info" className="border-0 rounded-3 text-center mt-2 shadow-sm py-4">
+            <FaInfoCircle size={24} className="mb-2 text-info opacity-75" /><br />
+            <span className="fw-semibold text-dark" style={{ fontSize: "0.9rem" }}>No offers available at the moment.</span>
           </Alert>
         ) : (
           <Row className="g-4 mt-2">
@@ -110,31 +109,31 @@ function RazorpayOffers() {
                     borderTop: "5px solid #0d6efd",
                   }}
                 >
-                  <Card.Body className="p-4 d-flex flex-column z-1">
-                    <div className="d-flex justify-content-between align-items-start mb-4">
-                      <Badge bg="primary" className="px-3 py-2 rounded-pill fw-semibold shadow-sm text-uppercase tracking-wide" style={{ fontSize: "0.75rem", letterSpacing: "0.5px" }}>
+                  <Card.Body className="p-3 d-flex flex-column z-1">
+                    <div className="d-flex justify-content-between align-items-start mb-3">
+                      <Badge bg="primary" className="px-2 py-1 rounded-pill fw-semibold shadow-sm text-uppercase tracking-wide" style={{ fontSize: "0.65rem", letterSpacing: "0.5px" }}>
                         <FaTag className="me-1" /> {offer.offerName || "Special Deal"}
                       </Badge>
                     </div>
 
-                    <h4 className="fw-bold mb-4 d-flex align-items-center position-relative">
+                    <h6 className="fw-bold mb-3 d-flex align-items-center position-relative">
                       <span
-                        className="shadow-sm p-3 rounded-circle me-3 d-flex align-items-center justify-content-center theme-icon-wrapper bg-white"
-                        style={{ width: "55px", height: "55px" }}
+                        className="shadow-sm p-2 rounded-circle me-2 d-flex align-items-center justify-content-center bg-white"
+                        style={{ width: "40px", height: "40px" }}
                       >
-                        <FaUniversity className="text-primary" size={24} />
+                        <FaUniversity className="text-primary" size={18} />
                       </span>
-                      <span style={{ lineHeight: "1.3", fontSize: "1.2rem" }}>{offer.bankName || offer.bank_name || offer.bank || "Partner Bank"}</span>
-                    </h4>
+                      <span style={{ lineHeight: "1.3", fontSize: "0.95rem" }}>{offer.bankName || offer.bank_name || offer.bank || "Partner Bank"}</span>
+                    </h6>
 
                     <div
-                      className="mt-auto p-3 rounded-4 custom-scrollbar info-box d-flex justify-content-between align-items-center"
+                      className="mt-auto p-2 rounded-3 info-box d-flex justify-content-between align-items-center"
                       style={{
                         backgroundColor: "rgba(13, 110, 253, 0.04)",
                         border: "1px dashed rgba(13, 110, 253, 0.2)",
                       }}
                     >
-                      <p className="mb-0" style={{ fontSize: "0.95rem", lineHeight: "1.6", color: "#495057" }}>
+                      <p className="mb-0" style={{ fontSize: "0.85rem", lineHeight: "1.4", color: "#495057" }}>
                         <FaInfoCircle className="text-primary me-2 opacity-75" />
                         {offer.displayText1}
                       </p>
@@ -149,14 +148,16 @@ function RazorpayOffers() {
                     >
                       ID: {offer.id}
                     </Badge>
-                    <Button
-                      variant="outline-primary"
-                      size="sm"
-                      className="fw-bold px-3 rounded-pill"
-                      onClick={() => alert("Bank offers are automatically processed at the Razorpay Payment screen. Proceed to checkout to avail this deal!")}
-                    >
-                      APPLY OFFER
-                    </Button>
+                    {!hideApplyButton && (
+                      <Button
+                        variant="outline-primary"
+                        size="sm"
+                        className="fw-bold px-3 rounded-pill"
+                        onClick={() => alert("Bank offers are automatically processed at the Razorpay Payment screen. Proceed to checkout to avail this deal!")}
+                      >
+                        APPLY OFFER
+                      </Button>
+                    )}
                   </Card.Footer>
                 </Card>
               </Col>
@@ -167,26 +168,26 @@ function RazorpayOffers() {
 
       {/* Coupons Section */}
       <Card.Header
-        className="border-bottom-0 border-top pt-4 pb-3 px-4 px-md-5 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 bg-white"
+        className="border-bottom-0 border-top pt-3 pb-2 px-3 px-md-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 bg-white"
       >
         <div>
-          <h3 className="fw-bold mb-1 d-flex align-items-center text-dark">
-            <span className="bg-success bg-opacity-10 p-2 rounded-circle me-3 d-flex align-items-center justify-content-center">
-              <FaTag className="text-success" size={24} />
+          <h5 className="fw-bold mb-0 d-flex align-items-center text-dark" style={{ fontSize: "1.2rem" }}>
+            <span className="bg-success bg-opacity-10 p-2 rounded-circle me-2 d-flex align-items-center justify-content-center">
+              <FaTag className="text-success" size={18} />
             </span>
             Available Coupons
-          </h3>
-          <p className="small mt-2 mb-0 ms-0 ms-md-5 ps-md-3 py-1 text-muted" style={{ borderLeft: "3px solid #198754" }}>
-            Add these codes at checkout to get special discounts on your order!
+          </h5>
+          <p className="small mt-1 mb-0 ms-0 ms-md-4 ps-md-2 py-0 text-muted" style={{ borderLeft: "2px solid #198754", fontSize: "0.8rem" }}>
+            Get special discounts on your order!
           </p>
         </div>
       </Card.Header>
 
-      <Card.Body className="px-4 px-md-5 pb-5 pt-3 bg-white">
+      <Card.Body className="px-3 px-md-4 pb-4 pt-2 bg-white">
         {coupons.length === 0 ? (
-          <Alert variant="info" className="border-0 rounded-4 text-center mt-3 shadow-sm py-5">
-            <FaInfoCircle size={36} className="mb-3 text-info opacity-75" /><br />
-            <span className="fw-semibold fs-5 text-dark">No coupons available at the moment.</span>
+          <Alert variant="info" className="border-0 rounded-3 text-center mt-2 shadow-sm py-4">
+            <FaInfoCircle size={24} className="mb-2 text-info opacity-75" /><br />
+            <span className="fw-semibold text-dark" style={{ fontSize: "0.9rem" }}>No coupons available at the moment.</span>
           </Alert>
         ) : (
           <Row className="g-4 mt-2">
@@ -202,32 +203,34 @@ function RazorpayOffers() {
                     borderTop: "5px solid #198754",
                   }}
                 >
-                  <Card.Body className="p-4 d-flex flex-column z-1">
-                    <div className="d-flex justify-content-between align-items-start mb-4">
-                      <Badge bg="success" className="px-3 py-2 rounded-pill fw-semibold shadow-sm tracking-wide" style={{ fontSize: "0.85rem", letterSpacing: "1px", border: "1px dashed white" }}>
+                  <Card.Body className="p-3 d-flex flex-column z-1">
+                    <div className="d-flex justify-content-between align-items-start mb-3">
+                      <Badge bg="success" className="px-2 py-1 rounded-pill fw-semibold shadow-sm tracking-wide" style={{ fontSize: "0.7rem", letterSpacing: "1px", border: "1px dashed white" }}>
                         {coupon.code}
                       </Badge>
                     </div>
 
-                    <h4 className="fw-bold mb-4 d-flex align-items-center position-relative">
+                    <h6 className="fw-bold mb-3 d-flex align-items-center position-relative">
                       <span
-                        className="shadow-sm p-3 rounded-circle me-3 d-flex align-items-center justify-content-center bg-white"
-                        style={{ width: "55px", height: "55px" }}
+                        className="shadow-sm p-2 rounded-circle me-2 d-flex align-items-center justify-content-center bg-white"
+                        style={{ width: "40px", height: "40px" }}
                       >
-                        <span style={{ fontSize: "1.2rem", fontWeight: "900", color: "#198754" }}>{coupon.discountPercent}%</span>
+                        <span style={{ fontSize: "0.9rem", fontWeight: "900", color: "#198754" }}>
+                          {coupon.discountType === "flat" ? "₹" : ""}{coupon.discountValue || coupon.discountPercent || 0}{coupon.discountType !== "flat" ? "%" : ""}
+                        </span>
                       </span>
-                      <span style={{ lineHeight: "1.3", fontSize: "1.2rem" }}>{coupon.title || "Discount on your order"}</span>
-                    </h4>
+                      <span style={{ lineHeight: "1.3", fontSize: "0.95rem" }}>{coupon.title || coupon.description || "Discount on your order"}</span>
+                    </h6>
 
                     <div
-                      className="mt-auto p-3 rounded-4 d-flex justify-content-between align-items-center"
+                      className="mt-auto p-2 rounded-3 d-flex justify-content-between align-items-center"
                       style={{
                         backgroundColor: "rgba(25, 135, 84, 0.04)",
                         border: "1px solid rgba(25, 135, 84, 0.1)",
                       }}
                     >
-                      <p className="mb-0 flex-grow-1" style={{ fontSize: "0.95rem", lineHeight: "1.6", color: "#495057" }}>
-                        <strong className="text-success">₹{coupon.minOrderAmount}</strong> min. order
+                      <p className="mb-0 flex-grow-1" style={{ fontSize: "0.85rem", lineHeight: "1.4", color: "#495057" }}>
+                        <strong className="text-success">₹{coupon.minOrderAmount}</strong> min.
                       </p>
                       <Button
                         variant={copiedCode === coupon.code ? "success" : "outline-success"}
