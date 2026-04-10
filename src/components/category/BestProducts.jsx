@@ -30,7 +30,7 @@
       localStorage.getItem("theme") === "dark"
     );
 
-    const PAGE_SIZE = 8;
+    const PAGE_SIZE = 10;
 
     useEffect(() => {
       const handleStorageChange = () => {

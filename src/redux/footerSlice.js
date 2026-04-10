@@ -6,8 +6,6 @@ const initialState = {
     {
       title: "About Us",
       links: [
-        // The About Us section in the image has descriptive text and copyright,
-        // but no links. We can keep a placeholder or structure it as:
         "SadhanaCart is a multipurpose Ecommerce Platform...",
       ],
       // Add separate fields for contact details, as links are complex to manage in a simple array
