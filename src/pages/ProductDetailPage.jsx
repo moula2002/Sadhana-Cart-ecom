@@ -1178,8 +1178,8 @@ function ProductDetailPage() {
 
     // --- Render Checks ---
     if (loading || !isAuthReady) {
-  return <Loading />;
-}
+        return <Loading />;
+    }
     if (error) return (
         <Container className="py-5">
             <Alert variant="danger" className="text-center shadow-sm">
@@ -1750,8 +1750,8 @@ function ProductDetailPage() {
                                     </div>
                                     <span className="fw-bold text-dark no-wrap" style={{ fontSize: '0.9rem' }}>Sort By</span>
                                 </div>
-                                <Form.Select 
-                                    value={sortBy} 
+                                <Form.Select
+                                    value={sortBy}
                                     onChange={(e) => setSortBy(e.target.value)}
                                     className="border-0 bg-white shadow-sm rounded-3 py-2 px-3 fw-semibold text-dark cursor-pointer"
                                     style={{ fontSize: '0.85rem' }}
@@ -1775,23 +1775,23 @@ function ProductDetailPage() {
                 ) : filteredAndSortedCategory.length === 0 ? (
                     <Alert variant="info">No products found in this category.</Alert>
                 ) : (
-                    <div 
-                        className="d-flex overflow-auto pb-4 gap-4 custom-horizontal-scroller" 
-                        style={{ 
-                            scrollSnapType: 'x mandatory', 
+                    <div
+                        className="d-flex overflow-auto pb-4 gap-4 custom-horizontal-scroller"
+                        style={{
+                            scrollSnapType: 'x mandatory',
                             WebkitOverflowScrolling: 'touch',
                             paddingLeft: '5px',
                             paddingRight: '5px'
                         }}
                     >
                         {filteredAndSortedCategory.map((p) => (
-                            <div 
-                                key={p.id} 
-                                style={{ 
-                                    minWidth: '240px', 
-                                    maxWidth: '240px', 
-                                    flex: '0 0 auto', 
-                                    scrollSnapAlign: 'start' 
+                            <div
+                                key={p.id}
+                                style={{
+                                    minWidth: '240px',
+                                    maxWidth: '240px',
+                                    flex: '0 0 auto',
+                                    scrollSnapAlign: 'start'
                                 }}
                             >
                                 <Card className="h-100 border-0 shadow-sm hover-premium-card transition-all">
@@ -1816,7 +1816,7 @@ function ProductDetailPage() {
                                                 </div>
                                                 <span className="text-muted extra-small">({p.rating.count} reviews)</span>
                                             </div>
-                                            
+
                                             <div className="d-flex justify-content-between align-items-center">
                                                 <div className="d-flex flex-column">
                                                     <div className="d-flex align-items-center gap-1">
@@ -1830,7 +1830,7 @@ function ProductDetailPage() {
                                                     variant="warning"
                                                     size="sm"
                                                     className="rounded-3 shadow-sm px-3 fw-bold border-0 d-flex align-items-center justify-content-center"
-                                                    style={{ 
+                                                    style={{
                                                         background: 'linear-gradient(45deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%)',
                                                         color: '#d63384',
                                                         height: '35px'

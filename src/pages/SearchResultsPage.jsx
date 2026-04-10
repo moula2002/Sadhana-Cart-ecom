@@ -20,7 +20,8 @@ import {
   FaFilter, 
   FaShoppingBag,
   FaSearch,
-  FaBoxOpen 
+  FaBoxOpen,
+  FaFileImage 
 } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import "./SearchResultsPage.css";
@@ -111,6 +112,55 @@ const SearchResultsPage = () => {
     if (!cat) return "";
     if (typeof cat === "object" && cat.category) return cat.category;
     return cat;
+  };
+
+  const getFirstImage = (product) => {
+    if (!product) return "https://placehold.jp/300x300.png?text=No+Data";
+
+    const possibleFields = [
+      "images", "image", "imageUrl", "imgUrl", "image_url", "img_url",
+      "thumbnail", "thumb", "productImage", "product_image",
+      "mainImage", "main_image", "cover", "photo", "img", "pic", "picture"
+    ];
+
+    const isValidUrl = (url) => typeof url === "string" && url.trim().length > 0 && (url.startsWith("http") || url.startsWith("data:image"));
+
+    for (const field of possibleFields) {
+      const source = product[field];
+      if (!source) continue;
+
+      if (Array.isArray(source)) {
+        const flattened = source.flat(Infinity);
+        for (const item of flattened) {
+          if (!item) continue;
+          if (isValidUrl(item)) return item.trim();
+          if (typeof item === "object") {
+             const url = item.url || item.src || item.imageUrl || item.image || item.thumb || item.thumbnail;
+             if (isValidUrl(url)) return url.trim();
+             for (const k in item) if (isValidUrl(item[k])) return item[k].trim();
+          }
+        }
+      } 
+      else if (isValidUrl(source)) {
+        return source.trim();
+      } 
+      else if (typeof source === "object") {
+        const url = source.url || source.src || source.imageUrl || source.image || source.thumb || source.thumbnail;
+        if (isValidUrl(url)) return url.trim();
+        for (const k in source) if (isValidUrl(source[k])) return source[k].trim();
+      }
+    }
+
+    for (const key in product) {
+        if (isValidUrl(product[key])) {
+            const trimmed = product[key].trim();
+            if (trimmed.match(/\.(jpg|jpeg|png|gif|webp|avif|svg|bmp|emf)(\?.*)?$/i) || trimmed.startsWith("data:image")) {
+                return trimmed;
+            }
+        }
+    }
+
+    return "https://placehold.jp/300x300.png?text=Image+Missing";
   };
 
   if (loading) {
@@ -286,16 +336,32 @@ const SearchResultsPage = () => {
                     >
                       <Card className="product-card h-100 shadow-sm">
                         <div className="product-image-wrapper">
-                          <Card.Img
-                            variant="top"
-                            src={
-                              product.images?.[0] ||
-                              product.image ||
-                              "https://via.placeholder.com/300/ffffff?text=Product+Image"
-                            }
-                            height="280"
-                            className="product-image"
-                          />
+                          {getFirstImage(product).toLowerCase().includes(".emf") ? (
+                            <div className="emf-placeholder" style={{ 
+                              display: "flex", 
+                              flexDirection: "column", 
+                              alignItems: "center", 
+                              justifyContent: "center", 
+                              height: "280px", 
+                              background: "#f8fafc",
+                              padding: "10px",
+                              textAlign: "center"
+                            }}>
+                              <FaFileImage size={42} color="#2563eb" />
+                              <span style={{ fontSize: "11px", marginTop: "10px", color: "#1e293b", fontWeight: "700" }}>EMF VECTOR</span>
+                            </div>
+                          ) : (
+                            <Card.Img
+                              variant="top"
+                              src={getFirstImage(product)}
+                              height="280"
+                              className="product-image"
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = "https://placehold.jp/300x300.png?text=Format+Not+Supported";
+                              }}
+                            />
+                          )}
                           {product.discount && (
                             <Badge 
                               bg="danger" 
