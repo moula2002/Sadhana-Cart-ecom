@@ -555,3 +555,30 @@ font-size:13px;
 text-decoration:line-through;
 color:#999;
 }
+
+/* ================= SINGLE PRODUCT CONTAINER - AQUA BLUE BORDER ================= */
+.single-product-container {
+    border: 2px solid #00ffff;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px 0;
+    background: var(--bg-card);
+    transition: all 0.3s ease;
+}
+
+.single-product-container:hover {
+    border-color: #00e6e6;
+    box-shadow: 0 4px 15px rgba(0, 255, 255, 0.2);
+}
+
+/* Dark mode support for aqua border */
+.dark-theme .single-product-container,
+[data-bs-theme="dark"] .single-product-container {
+    border-color: #00ffff;
+}
+
+.dark-theme .single-product-container:hover,
+[data-bs-theme="dark"] .single-product-container:hover {
+    border-color: #00e6e6;
+    box-shadow: 0 4px 15px rgba(0, 255, 255, 0.3);
+}

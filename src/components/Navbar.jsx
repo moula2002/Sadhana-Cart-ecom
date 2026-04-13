@@ -509,18 +509,17 @@ navigate("/orders");
       onToggle={(isOpen) => setDropdownOpen(isOpen)}
     >
       <Dropdown.Toggle
-        variant="light"
+        variant="primary"
         className="d-flex align-items-center gap-2 px-3 py-2 border-0"
-        style={{ background: 'transparent' }}
       >
-        <i className="fas fa-user text-primary"></i>
-        <span className="d-none d-lg-inline text-dark fw-semibold theme-text">
+        <i className="fas fa-user-circle text-white shadow-sm" style={{ fontSize: '1.2rem' }}></i>
+        <span className="d-none d-lg-inline text-white fw-semibold">
           {currentUser
             ? (currentUser.displayName || currentUser.email?.split("@")[0] || "User")
             : t("login")
           }
         </span>
-        <i className="fas fa-chevron-down ms-1 small text-muted"></i>
+        <i className="fas fa-chevron-down ms-1 small text-white"></i>
       </Dropdown.Toggle>
 
       <Dropdown.Menu className="border-0 shadow-lg rounded-3 mt-2 py-3 theme-dropdown" style={{ minWidth: '320px' }}>
@@ -528,7 +527,7 @@ navigate("/orders");
           <>
             <div className="px-4 pt-3">
               <button
-                className="btn btn-outline-primary w-100 rounded-pill fw-bold mb-3"
+                className="btn btn-primary w-100 rounded-pill fw-bold mb-3"
                 onClick={() => {
                   setShowAuthModal(true);
                   setDropdownOpen(false);
@@ -799,23 +798,22 @@ export default function Header() {
               {/* MOBILE ACTIONS */}
               <div className="d-flex d-lg-none align-items-center gap-2 ms-auto">
                 {/* Search Toggle */}
-                <Button
-                  variant="outline-dark"
-                  size="sm"
-                  className="border-0 theme-button"
+                <div 
+                  className="navbar-action-item px-2 py-1" 
                   onClick={() => setMobileSearchActive(true)}
                 >
-                  <i className="fas fa-search"></i>
-                </Button>
+                  <i className="fas fa-search text-primary"></i>
+                  <span className="fw-bold extra-small">{t("search")}</span>
+                </div>
                 {/* Mobile Seller Button */}
-                <Button
-                  variant="outline-primary"
-                  size="sm"
-                  className="border-0 theme-button"
+                <div 
+                  className="navbar-action-item px-2 py-1" 
                   onClick={handleSellerClick}
+                  style={{ fontSize: '0.8rem' }}
                 >
-                  <i className="fas fa-store"></i>
-                </Button>
+                  <i className="fas fa-store text-primary"></i>
+                  <span className="fw-bold extra-small">{t("seller")}</span>
+                </div>
 
                 {/* Mobile Login Dropdown */}
                 <FlipkartLoginDropdown
@@ -829,15 +827,16 @@ export default function Header() {
                 <Button
                   variant="warning"
                   size="sm"
-                  className="position-relative rounded-pill px-3 theme-button"
+                  className="position-relative cart-btn-premium px-3"
                   onClick={goToCart}
+                  style={{ minWidth: "auto", padding: "6px 12px" }}
                 >
                   <i className="fas fa-shopping-cart"></i>
                   {cartCount > 0 && (
                     <Badge
                       bg="danger"
-                      className="position-absolute top-0 start-100 translate-middle rounded-pill"
-                      style={{ fontSize: "0.6rem", padding: "0.2rem 0.4rem" }}
+                      className="position-absolute top-0 start-100 translate-middle rounded-pill border border-white"
+                      style={{ fontSize: "0.55rem", padding: "0.2rem 0.35rem" }}
                     >
                       {cartCount}
                     </Badge>
@@ -881,11 +880,11 @@ export default function Header() {
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="d-flex flex-column align-items-center cursor-pointer"
+                className="navbar-action-item"
                 onClick={handleSellerClick}
               >
-                <i className="fas fa-store text-primary mb-1"></i>
-                <small className="text-dark fw-semibold theme-text">
+                <i className="fas fa-store text-primary"></i>
+                <small className="fw-bold theme-text">
                   {t("seller")}
                 </small>
               </motion.div>
@@ -900,15 +899,16 @@ export default function Header() {
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Button
                   variant="warning"
-                  className="position-relative px-4 theme-button"
+                  className="position-relative cart-btn-premium"
                   onClick={goToCart}
                 >
                   <i className="fas fa-shopping-cart me-2"></i>
-                  <span className="theme-text">{t("cartLabel")}</span>
+                  <span className="fw-bold">{t("cartLabel")}</span>
                   {cartCount > 0 && (
                     <Badge
                       bg="danger"
-                      className="position-absolute top-0 start-100 translate-middle rounded-pill"
+                      className="position-absolute top-0 start-100 translate-middle rounded-pill border border-white"
+                      style={{ fontSize: '0.7rem' }}
                     >
                       {cartCount}
                     </Badge>

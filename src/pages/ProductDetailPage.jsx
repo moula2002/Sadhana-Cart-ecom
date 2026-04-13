@@ -1354,17 +1354,15 @@ function ProductDetailPage() {
                                 You save <FaRupeeSign size={12} />{(calculatedOriginalPriceINR - calculatedPriceINR)} ({discountPercentage}% OFF)
                             </p>
                         </div>
-                        {/* OUT OF STOCK MESSAGE */}
-                        {isOutOfStock && (
-                            <div style={{
-                                color: "red",
-                                fontWeight: "bold",
-                                marginTop: "10px",
-                                fontSize: "18px"
-                            }}>
-                                ❌ Out of Stock
-                            </div>
-                        )}
+                        {/* Stock Information */}
+                        <div className="mb-4">
+                            {isOutOfStock ? (
+                                <div className="p-3 bg-danger bg-opacity-10 border border-danger border-opacity-25 rounded d-flex align-items-center">
+                                    <FaTimes className="text-danger me-2" />
+                                    <span className="text-danger fw-bold">Currently Out of Stock</span>
+                                </div>
+                            ) : null}
+                        </div>
 
 
                         {/* Description */}
@@ -1481,6 +1479,22 @@ function ProductDetailPage() {
                                             <Row className="mb-2">
                                                 <Col xs={6}><strong>Color :</strong></Col>
                                                 <Col xs={6}>{product.color}</Col>
+                                            </Row>
+                                        )}
+
+                                        <Row className="mb-2">
+                                            <Col xs={6}><strong>Current Stock :</strong></Col>
+                                            <Col xs={6}>
+                                                {productVariants.length > 0
+                                                    ? `${currentVariant?.stock || 0} (Size: ${selectedSize})`
+                                                    : (product?.stock || 0)}
+                                            </Col>
+                                        </Row>
+
+                                        {(product?.totalstock || product?.totalStock) && (
+                                            <Row className="mb-2">
+                                                <Col xs={6}><strong>Total Stock :</strong></Col>
+                                                <Col xs={6}>{product?.totalstock || product?.totalStock}</Col>
                                             </Row>
                                         )}
 

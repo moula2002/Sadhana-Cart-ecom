@@ -89,6 +89,18 @@ body {
     background-color: var(--bg-secondary) !important;
 }
 
+.extra-small {
+    font-size: 0.65rem !important;
+}
+
+@media (max-width: 991px) {
+    .flipkart-login-dropdown .dropdown-toggle {
+        padding: 6px 10px !important;
+        font-size: 0.8rem !important;
+        gap: 6px !important;
+    }
+}
+
 /* ==================== SECOND HEADER STYLES ==================== */
 .second-header-wrapper {
     width: 100%;
@@ -359,18 +371,29 @@ body {
 }
 
 .flipkart-login-dropdown .dropdown-toggle {
-    background: transparent !important;
+    background: linear-gradient(135deg, #0b1e6d 0%, #283593 100%) !important;
+    color: white !important;
     border: none !important;
     font-weight: 600 !important;
-    padding: 8px 12px !important;
-    border-radius: 6px !important;
-    transition: all 0.3s ease !important;
-    color: var(--text-primary) !important;
+    padding: 10px 22px !important;
+    border-radius: 12px !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    box-shadow: 0 4px 10px rgba(11, 30, 109, 0.2) !important;
 }
 
 .flipkart-login-dropdown .dropdown-toggle:hover {
-    background-color: var(--hover-bg) !important;
-    transform: translateY(-1px);
+    background: linear-gradient(135deg, #1a2b8f 0%, #3949ab 100%) !important;
+    color: white !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(11, 30, 109, 0.35) !important;
+}
+
+.flipkart-login-dropdown .dropdown-toggle i,
+.flipkart-login-dropdown .dropdown-toggle span {
+    color: white !important;
 }
 
 /* Dropdown menu */
@@ -630,23 +653,75 @@ body {
     text-decoration: none !important;
 }
 
-/* ==================== UPDATED SEARCH BAR STYLES ==================== */
+/* Search wrapper */
 .search-wrapper {
     display: flex;
     align-items: center;
-    background-color: var(--bg-secondary);
-    border: 2px solid var(--border-color);
-    border-radius: 50px;
-    transition: all 0.3s ease;
+    background-color: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 14px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
-    height: 48px;
+    height: 46px;
     width: 100%;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
 }
 
 .search-wrapper:focus-within {
-    border-color: var(--shopclues-red-orange);
-    box-shadow: 0 0 0 3px rgba(255, 110, 64, 0.2);
+    border-color: #f4a11a;
+    box-shadow: 0 4px 12px rgba(244, 161, 26, 0.15);
 }
+
+.dark-theme .search-wrapper {
+    background-color: #1a1a1a;
+    border-color: #333;
+}
+
+
+/* Premium Navbar Action Buttons */
+.navbar-action-item {
+    padding: 8px 16px;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 1px solid transparent;
+}
+
+.navbar-action-item:hover {
+    background-color: rgba(11, 30, 109, 0.05);
+    border-color: rgba(11, 30, 109, 0.1);
+}
+
+.navbar-action-item i {
+    font-size: 1.2rem !important;
+    margin-bottom: 2px;
+}
+
+/* Cart Button Gradient */
+.cart-btn-premium {
+    background: linear-gradient(135deg, #f4a11a 0%, #ff6e40 100%) !important;
+    border: none !important;
+    color: white !important;
+    font-weight: 700 !important;
+    padding: 10px 24px !important;
+    border-radius: 12px !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 10px rgba(244, 161, 26, 0.2) !important;
+}
+
+.cart-btn-premium:hover {
+    background: linear-gradient(135deg, #ff6e40 0%, #ff8a5c 100%) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(244, 161, 26, 0.35) !important;
+}
+
+.cart-btn-premium .theme-text {
+    color: white !important;
+}
+
 
 .search-icon-left {
     display: flex;
@@ -700,44 +775,58 @@ body {
 
 /* Filter Button */
 .filter-button {
-    background-color: transparent !important;
+    background: linear-gradient(to right, #ffffff 0%, #f8fafc 100%) !important;
     border: none !important;
-    border-left: 2px solid var(--border-color) !important;
-    color: var(--shopclues-red-orange) !important;
-    padding: 0 20px !important;
+    border-left: 1.5px solid #e2e8f0 !important;
+    color: #ff6e40 !important;
+    padding: 0 22px !important;
     height: 100%;
     display: flex !important;
     align-items: center !important;
-    gap: 6px !important;
-    font-weight: 600 !important;
-    font-size: 0.9rem !important;
+    gap: 8px !important;
+    font-weight: 700 !important;
+    font-size: 0.95rem !important;
     transition: all 0.3s ease !important;
-    border-radius: 0 50px 50px 0 !important;
     cursor: pointer;
     white-space: nowrap;
 }
 
 .filter-button:hover {
-    background-color: var(--shopclues-red-orange) !important;
+    background: linear-gradient(to right, #ff6e40 0%, #ff8a5c 100%) !important;
     color: white !important;
-    border-left-color: var(--shopclues-red-orange) !important;
+    border-left-color: transparent !important;
 }
 
 .filter-button i {
-    font-size: 1rem;
+    font-size: 1.1rem;
+    transition: transform 0.3s ease;
+}
+
+.filter-button:hover i {
+    transform: rotate(180deg);
 }
 
 /* Dark theme filter button */
 .dark-theme .filter-button {
-    border-left-color: var(--border-color) !important;
+    background: #2d2d2d !important;
+    border-left-color: #444 !important;
     color: #ff8a5c !important;
 }
 
 .dark-theme .filter-button:hover {
-    background-color: #ff8a5c !important;
+    background: #ff8a5c !important;
     color: #121212 !important;
-    border-left-color: #ff8a5c !important;
 }
+
+@media (max-width: 576px) {
+    .filter-text {
+        display: none;
+    }
+    .filter-button {
+        padding: 0 15px !important;
+    }
+}
+
 
 /* Suggestions Dropdown */
 .suggestions-dropdown {
