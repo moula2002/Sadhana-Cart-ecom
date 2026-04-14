@@ -774,15 +774,15 @@ export default function Header() {
                     src={logo}
                     alt="Sadhana Cart"
                     className="logo-img"
-                    style={{ width: "50px", height: "50px", objectFit: "contain" }}
+                    style={{ width: "40px", height: "40px", objectFit: "contain" }}
                   />
-                  <div className="ms-2">
+                  <div className="ms-1 ms-sm-2">
                     <div
                       className="brand-text"
                       style={{
                         color: "goldenrod",
                         fontWeight: "800",
-                        fontSize: "1.4rem",
+                        fontSize: "1.2rem",
                         lineHeight: "1.1"
                       }}
                     >
@@ -799,20 +799,19 @@ export default function Header() {
               <div className="d-flex d-lg-none align-items-center gap-2 ms-auto">
                 {/* Search Toggle */}
                 <div 
-                  className="navbar-action-item px-2 py-1" 
+                  className="navbar-action-item px-2" 
                   onClick={() => setMobileSearchActive(true)}
                 >
                   <i className="fas fa-search text-primary"></i>
-                  <span className="fw-bold extra-small">{t("search")}</span>
+                  <span className="fw-bold d-none d-sm-inline extra-small">{t("search")}</span>
                 </div>
                 {/* Mobile Seller Button */}
                 <div 
-                  className="navbar-action-item px-2 py-1" 
+                  className="navbar-action-item px-2" 
                   onClick={handleSellerClick}
-                  style={{ fontSize: '0.8rem' }}
                 >
                   <i className="fas fa-store text-primary"></i>
-                  <span className="fw-bold extra-small">{t("seller")}</span>
+                  <span className="fw-bold d-none d-sm-inline extra-small">{t("seller")}</span>
                 </div>
 
                 {/* Mobile Login Dropdown */}

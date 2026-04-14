@@ -627,6 +627,16 @@ body {
     font-size: 1.4rem;
     line-height: 1.1;
     transition: color 0.3s ease;
+    white-space: nowrap;
+}
+
+@media (max-width: 576px) {
+    .brand-text {
+        font-size: 1.1rem !important;
+        max-width: 110px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 }
 
 .dark-theme .brand-text {
@@ -680,14 +690,21 @@ body {
 
 /* Premium Navbar Action Buttons */
 .navbar-action-item {
-    padding: 8px 16px;
+    padding: 8px 12px;
     border-radius: 10px;
     transition: all 0.3s ease;
     cursor: pointer;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     border: 1px solid transparent;
+}
+
+@media (max-width: 576px) {
+    .navbar-action-item {
+        padding: 4px 6px;
+    }
 }
 
 .navbar-action-item:hover {
@@ -710,6 +727,13 @@ body {
     border-radius: 12px !important;
     transition: all 0.3s ease !important;
     box-shadow: 0 4px 10px rgba(244, 161, 26, 0.2) !important;
+}
+
+@media (max-width: 576px) {
+    .cart-btn-premium {
+        padding: 8px 12px !important;
+        font-size: 0.85rem !important;
+    }
 }
 
 .cart-btn-premium:hover {
