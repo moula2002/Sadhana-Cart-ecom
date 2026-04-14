@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useLocation, useNavigate, Link } from "react-router-dom";
 import { db, collection, getDocs, query, where } from "../../firebase";
 import "./CategoryProducts.css";
@@ -17,6 +17,40 @@ const CategoryProducts = () => {
   const [loading, setLoading] = useState(true);
   const [categoryName, setCategoryName] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [visibleCount, setVisibleCount] = useState(20);
+
+  /* ---------------- IMAGE WITH RETRY ---------------- */
+  const ProductImage = ({ src, alt }) => {
+    const [imgSrc, setImgSrc] = useState(src);
+    const [errorCount, setErrorCount] = useState(0);
+
+    useEffect(() => {
+      setImgSrc(src);
+      setErrorCount(0);
+    }, [src]);
+
+    const handleError = () => {
+      if (errorCount < 3) {
+        const backoff = (errorCount + 1) * 2000;
+        setTimeout(() => {
+          setImgSrc(`${src}${src.includes('?') ? '&' : '?'}retry=${Date.now()}`);
+          setErrorCount(prev => prev + 1);
+        }, backoff);
+      } else {
+        setImgSrc("https://placehold.jp/300x300.png?text=Connection+Issue");
+      }
+    };
+
+    return (
+      <img
+        src={imgSrc}
+        alt={alt}
+        className="product-image"
+        loading="lazy"
+        onError={handleError}
+      />
+    );
+  };
 
   /* ---------------- FETCH DATA ---------------- */
   const fetchData = useCallback(async () => {
@@ -69,12 +103,32 @@ const CategoryProducts = () => {
       console.error("Error fetching data:", err);
     } finally {
       setLoading(false);
+      setVisibleCount(20); // Reset visible count on new fetch/category change
     }
   }, [categoryId, location.state]);
 
   useEffect(() => {
     if (categoryId) fetchData();
   }, [categoryId, fetchData]);
+
+  /* ---------------- INFINITE SCROLL OBSERVER ---------------- */
+  const observerTarget = useRef(null);
+  useEffect(() => {
+    const currentTarget = observerTarget.current;
+    if (!currentTarget) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && visibleCount < filteredProducts.length) {
+          setVisibleCount((prev) => prev + 20);
+        }
+      },
+      { threshold: 0.1, rootMargin: "100px" } // Trigger early for smoother feel
+    );
+
+    observer.observe(currentTarget);
+    return () => observer.unobserve(currentTarget);
+  }, [visibleCount, filteredProducts.length]);
 
   /* ---------------- FILTER LOGIC ---------------- */
   const handleSubCategoryClick = (subName) => {
@@ -215,10 +269,11 @@ const CategoryProducts = () => {
       {loading ? (
   <Loading />
 ) : filteredProducts.length > 0 ? (
+        <>
 
         <div className="products-grid">
 
-          {filteredProducts.map((product) => {
+          {filteredProducts.slice(0, visibleCount).map((product) => {
 
             const price = product.price || 0;
             const offerprice = product.offerprice || price;
@@ -231,6 +286,15 @@ const CategoryProducts = () => {
                 className="product-card"
                 onClick={() => navigate(`/product/${product.id}`)}
               >
+                {/* Premium Badges */}
+                <div className="card-badges">
+                  <span className="badge-new">New</span>
+                  {price > offerprice && (
+                    <span className="badge-discount">
+                      -{Math.round(((price - offerprice) / price) * 100)}%
+                    </span>
+                  )}
+                </div>
 
                 <div className="image-wrapper">
                   {(() => {
@@ -273,16 +337,7 @@ const CategoryProducts = () => {
                     }
 
                     return (
-                      <img
-                        src={imageUrl}
-                        alt={product.name}
-                        className="product-image"
-                        loading="lazy"
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = "https://placehold.jp/300x300.png?text=Preview+Error";
-                        }}
-                      />
+                      <ProductImage src={imageUrl} alt={product.name} />
                     );
                   })()}
                 </div>
@@ -298,33 +353,42 @@ const CategoryProducts = () => {
                   </p>
 
                   {/* DESCRIPTION */}
-                  <p className="product-description">
-                    {description}
-                  </p>
-
-                  {/* PRICE */}
+                  <p className="product-description">{description}</p>
                   <div className="price-wrapper">
-
-                    <span className="offer-price">
-                      ₹{offerprice.toLocaleString()}
-                    </span>
-
-                    {price > offerprice && (
-                      <span className="original-price">
-                        ₹{price.toLocaleString()}
-                      </span>
-                    )}
-
+                    <span className="offer-price">₹{offerprice.toLocaleString()}</span>
+                    {price > offerprice && <span className="original-price">₹{price.toLocaleString()}</span>}
                   </div>
-
                 </div>
-
               </div>
 
             );
           })}
-
         </div>
+        {visibleCount < filteredProducts.length ? (
+          <div 
+            ref={observerTarget} 
+            className="load-more-trigger mt-5 text-center mb-5 pb-5 d-flex flex-column align-items-center"
+          >
+            <div className="spinner-border text-primary mb-3" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+            <p className="text-muted small">Loading more products...</p>
+            <p className="mt-2 text-muted extra-small">
+              Showing {Math.min(visibleCount, filteredProducts.length)} of {filteredProducts.length} items
+            </p>
+          </div>
+        ) : filteredProducts.length > 0 && (
+          <div className="text-center mt-5 mb-5 pb-5 border-top pt-4">
+            <p className="text-muted fw-bold">✨ You've reached the end of the collection</p>
+            <button 
+              className="btn btn-sm btn-link text-decoration-none"
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            >
+              Back to Top
+            </button>
+          </div>
+        )}
+        </>
 
       ) : (
 
