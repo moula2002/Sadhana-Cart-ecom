@@ -1,200 +1,341 @@
-import React, { useState, useEffect } from "react";
-import { Row, Col, Card, Spinner, Alert } from "react-bootstrap";
+import React, { useState, useEffect, useMemo } from "react";
+import { Row, Col, Card, Spinner, Alert, Badge, Form, Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { FaStar, FaShoppingCart, FaEye } from "react-icons/fa";
+import { FaStar, FaShoppingCart, FaEye, FaRupeeSign, FaEdit } from "react-icons/fa";
+import { db } from "../firebase";
+import { collection, query, where, limit, getDocs } from "firebase/firestore";
+import { toast } from "react-toastify";
+import { useDispatch } from "react-redux";
+import { addToCart } from "../redux/cartSlice";
 
-function ProductSuggestions({ currentProductId, category }) {
-  const [suggestions, setSuggestions] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [ratings, setRatings] = useState({});
-
-  useEffect(() => {
-    if (!category) return;
-
-    const fetchSuggestions = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        // Using FakeStoreAPI for fetching suggestions
-        const response = await fetch(`https://fakestoreapi.com/products/category/${category}`);
-        
-        if (!response.ok) throw new Error("Failed to fetch suggestions");
-        
-        const data = await response.json();
-        const exchangeRate = 1;
-
-        // Fetch ratings for each product
-        const ratingsData = {};
-        const productsWithRatings = await Promise.all(
-          data.map(async (product) => {
-            const ratingResponse = await fetch(`https://fakestoreapi.com/products/${product.id}`);
-            const productData = await ratingResponse.json();
-            ratingsData[product.id] = productData.rating;
-            return product;
-          })
-        );
-
-        setRatings(ratingsData);
-
-        const filteredSuggestions = productsWithRatings
-          .filter((product) => product.id !== currentProductId)
-          .slice(0, 4)
-          .map((product) => ({
-            id: product.id,
-            image: product.image,
-            title: product.title,
-            price: (product.price * exchangeRate).toFixed(0),
-            rating: ratingsData[product.id] || { rate: 0, count: 0 }
-          }));
-
-        setSuggestions(filteredSuggestions);
-      } catch (err) {
-        console.error(err);
-        setError("Could not load related products.");
-      } finally {
-        setLoading(false);
-      }
+// Helper to get the first valid image URL (consistent with CategoryProducts.jsx)
+const getFirstImage = (product) => {
+    if (!product) return "https://placehold.jp/300x300.png?text=No+Data";
+    const imageKeys = [
+        "images", "image", "imageUrl", "imgUrl", "image_url", "img_url",
+        "thumbnail", "thumb", "productImage", "product_image",
+        "mainImage", "main_image", "cover", "photo", "img", "pic", "picture",
+        "displayImage", "src", "url"
+    ];
+    const isValidUrl = (url) => typeof url === "string" && url.trim().length > 0 && 
+        (url.startsWith("http") || url.startsWith("https") || url.startsWith("data:image"));
+    const extract = (val, depth = 0) => {
+        if (depth > 4) return null;
+        if (typeof val === "string") return isValidUrl(val) ? val.trim() : null;
+        if (Array.isArray(val)) {
+            for (const item of val.flat(Infinity)) {
+                const res = extract(item, depth + 1);
+                if (res) return res;
+            }
+            return null;
+        }
+        if (typeof val === "object" && val !== null) {
+            for (const k of imageKeys) {
+                const res = extract(val[k], depth + 1);
+                if (res) return res;
+            }
+            for (const k in val) {
+                const res = extract(val[k], depth + 1);
+                if (res) return res;
+            }
+        }
+        return null;
     };
-
-    fetchSuggestions();
-  }, [category, currentProductId]);
-
-  const renderStars = (rating) => {
-    const stars = [];
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 >= 0.5;
-    
-    for (let i = 1; i <= 5; i++) {
-      if (i <= fullStars) {
-        stars.push(<FaStar key={i} className="text-yellow-500" />);
-      } else if (i === fullStars + 1 && hasHalfStar) {
-        stars.push(<FaStar key={i} className="text-yellow-500 opacity-70" />);
-      } else {
-        stars.push(<FaStar key={i} className="text-gray-300" />);
-      }
+    for (const key of imageKeys) {
+        const result = extract(product[key]);
+        if (result) return result;
     }
-    return stars;
-  };
+    const imageExtensions = /\.(jpg|jpeg|png|gif|webp|avif|svg|bmp|emf|wmf|eps|tiff|tif|heic|heif|psd|ai|pdf|ico)(\?.*)?$/i;
+    for (const key in product) {
+        const val = product[key];
+        if (typeof val === "string" && isValidUrl(val)) {
+            const trimmed = val.trim();
+            if (trimmed.match(imageExtensions) || trimmed.startsWith("data:image")) return trimmed;
+        }
+    }
+    return "https://placehold.jp/300x300.png?text=Empty";
+};
 
-  if (loading) {
-    return (
-      <div className="text-center py-10">
-        <Spinner animation="border" variant="primary" />
-        <p className="mt-3 text-gray-500">Loading suggestions...</p>
-      </div>
-    );
-  }
+function ProductSuggestions({ currentProductId, category, subcategory }) {
+    const dispatch = useDispatch();
+    const [suggestions, setSuggestions] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [filterPrice, setFilterPrice] = useState(50000);
+    const [sortBy, setSortBy] = useState("relevance");
 
-  if (error) {
-    return null;
-  }
+    const EXCHANGE_RATE = 1;
 
-  return (
-    <div className="mt-8 pt-8 bg-gradient-to-b from-gray-50 to-white px-4 py-8 rounded-2xl">
-      
-      {/* Products Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {suggestions.map((item) => (
-          <Link 
-            to={`/product/${item.id}`} 
-            key={item.id}
-            className="block h-full transition-transform duration-300 hover:-translate-y-1"
-            onClick={() => window.scrollTo(0, 0)}
-          >
-            {/* Product Card */}
-            <div className="h-full bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden group">
-              {/* Image Container */}
-              <div className="relative h-36 bg-white overflow-hidden">
+    useEffect(() => {
+        if (!category) return;
 
-                <img 
-                  src={item.image} 
-                  alt={item.title}
-                  className="w-full h-full object-contain p-4 transition-transform duration-500 group-hover:scale-105"
-                />
+        const fetchSuggestions = async () => {
+            try {
+                setLoading(true);
+                setError(null);
                 
-                {/* Overlay on Hover */}
-                <div className="absolute inset-0 bg-blue-600 bg-opacity-90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div className="text-white text-center transform translate-y-5 group-hover:translate-y-0 transition-transform duration-300">
-                    <FaEye className="inline-block text-xl mb-1" />
-                    <span className="ml-2">Quick View</span>
-                  </div>
-                </div>
+                // Fetch more to allow for filtering/sorting/prioritizing
+                const q = query(
+                    collection(db, "products"), 
+                    where("category", "==", category), 
+                    limit(40)
+                );
                 
-                {/* Discount Badge */}
-                <div className="absolute top-3 right-3 bg-gradient-to-r from-red-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
-                  {Math.floor(Math.random() * 50) + 10}% OFF
-                </div>
-              </div>
-              
-              {/* Card Content */}
-              <div className="p-4 flex flex-col h-[calc(100%-208px)]">
-                {/* Category */}
-                <span className="text-blue-600 uppercase font-semibold text-xs mb-1">
-                  {category}
-                </span>
-                
-                {/* Title */}
-                <h3 
-                  className="font-bold text-gray-800 mb-2 text-sm line-clamp-2 h-12"
-                  title={item.title}
-                >
-                  {item.title.length > 50 ? item.title.substring(0, 50) + "..." : item.title}
-                </h3>
-                
-                {/* Rating */}
-                <div className="flex items-center mb-3">
-                  <div className="flex mr-2">
-                    {renderStars(item.rating?.rate || 0)}
-                  </div>
-                  <span className="text-gray-500 text-xs">
-                    ({item.rating?.count || 0})
-                  </span>
-                </div>
-                
-                {/* Price and Actions */}
-                <div className="mt-auto">
-                  <div className="flex items-center justify-between">
-                    {/* Price */}
-                    <div>
-                      <p className="text-red-600 font-bold text-lg">
-                        ₹{item.price}
-                      </p>
-                      <p className="text-gray-400 text-sm line-through">
-                        ₹{(item.price * 1.2).toFixed(0)}
-                      </p>
-                    </div>
-                    
-                    {/* Add to Cart Button */}
-                    <button 
-                      className="w-9 h-9 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 text-white flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-lg hover:from-blue-600 hover:to-blue-700"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        console.log("Add to cart:", item.id);
-                      }}
-                    >
-                      <FaShoppingCart className="text-sm" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Footer */}
-              <div className="px-4 pb-4 pt-0">
-                <div className="flex items-center text-green-600 text-sm">
-                  <span className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
-                  In Stock • Free Shipping
-                </div>
-              </div>
+                const querySnapshot = await getDocs(q);
+                let data = querySnapshot.docs.map((d) => {
+                    const productData = d.data();
+                    const priceValue = (productData.price || 0) * EXCHANGE_RATE;
+                    return {
+                        id: d.id,
+                        ...productData,
+                        priceINR: priceValue.toFixed(0),
+                        priceValue,
+                        rating: productData.rating || { rate: 4.0, count: 100 },
+                    };
+                }).filter((p) => p.id !== currentProductId);
+
+                // Prioritize matching subcategory
+                if (subcategory) {
+                    const matching = data.filter(p => p.subcategory === subcategory);
+                    const others = data.filter(p => p.subcategory !== subcategory);
+                    data = [...matching, ...others];
+                }
+
+                setSuggestions(data);
+            } catch (err) {
+                console.error("🔥 Error fetching category products:", err);
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchSuggestions();
+    }, [category, currentProductId, subcategory]);
+
+    const filteredAndSorted = useMemo(() => {
+        let list = [...suggestions];
+        list = list.filter((p) => p.priceValue <= filterPrice);
+
+        switch (sortBy) {
+            case "relevance":
+                // Preserve the subcategory priority applied during fetch
+                break;
+            case "price-asc":
+                list.sort((a, b) => a.priceValue - b.priceValue);
+                break;
+            case "price-desc":
+                list.sort((a, b) => b.priceValue - a.priceValue);
+                break;
+            case "name-asc":
+                list.sort((a, b) => (a.name || a.title || "").localeCompare(b.name || b.title || ""));
+                break;
+            case "rating":
+                list.sort((a, b) => (b.rating?.rate || 0) - (a.rating?.rate || 0));
+                break;
+            default:
+                break;
+        }
+        return list.slice(0, 15);
+    }, [suggestions, sortBy, filterPrice]);
+
+    if (loading) {
+        return (
+            <div className="text-center py-5">
+                <Spinner animation="border" variant="primary" />
+                <p className="mt-3 text-muted">Finding similar products...</p>
             </div>
-          </Link>
-        ))}
-      </div>
-      
-    </div>
-  );
+        );
+    }
+
+    if (error || suggestions.length === 0) {
+        return null;
+    }
+
+    return (
+        <div className="mt-5 mb-5 similar-products-container">
+            <div className="d-flex justify-content-between align-items-center mb-4">
+                <h3 className="fw-bold mb-0">More from {category}</h3>
+            </div>
+
+            {/* Premium Filter Bar */}
+            <div className="p-3 mb-4 rounded-4 shadow-sm border-0" style={{ background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)', border: '1px solid rgba(0,0,0,0.05)' }}>
+                <Row className="align-items-center g-3">
+                    <Col lg={7}>
+                        <div className="d-flex flex-column flex-sm-row align-items-sm-center gap-3">
+                            <div className="d-flex align-items-center gap-2 mb-2 mb-sm-0">
+                                <div className="p-2 rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style={{ width: '35px', height: '35px' }}>
+                                    <FaRupeeSign size={14} />
+                                </div>
+                                <span className="fw-bold text-dark no-wrap" style={{ fontSize: '0.9rem' }}>Budget Range</span>
+                            </div>
+                            <div className="flex-grow-1 px-2">
+                                <div className="d-flex justify-content-between mb-1">
+                                    <span className="text-muted small">₹0</span>
+                                    <span className="fw-bold text-primary small">Under ₹{filterPrice.toLocaleString()}</span>
+                                </div>
+                                <Form.Range
+                                    min={0}
+                                    max={100000}
+                                    step={500}
+                                    value={filterPrice}
+                                    onChange={(e) => setFilterPrice(Number(e.target.value))}
+                                    className="custom-premium-range"
+                                />
+                            </div>
+                        </div>
+                    </Col>
+                    <Col lg={5}>
+                        <div className="d-flex align-items-center gap-3 ps-lg-4 border-start-lg">
+                            <div className="d-flex align-items-center gap-2">
+                                <div className="p-2 rounded-circle bg-dark bg-opacity-5 text-dark d-flex align-items-center justify-content-center" style={{ width: '35px', height: '35px' }}>
+                                    <FaEdit size={14} className="opacity-75" />
+                                </div>
+                                <span className="fw-bold text-dark no-wrap" style={{ fontSize: '0.9rem' }}>Sort By</span>
+                            </div>
+                            <Form.Select
+                                value={sortBy}
+                                onChange={(e) => setSortBy(e.target.value)}
+                                className="border-0 bg-white shadow-sm rounded-3 py-2 px-3 fw-semibold text-dark cursor-pointer"
+                                style={{ fontSize: '0.85rem' }}
+                            >
+                                <option value="relevance">🎯 Relevance</option>
+                                <option value="rating">⭐ Top Rated</option>
+                                <option value="price-asc">📉 Price: Low to High</option>
+                                <option value="price-desc">📈 Price: High to Low</option>
+                                <option value="name-asc">🔤 Name A-Z</option>
+                            </Form.Select>
+                        </div>
+                    </Col>
+                </Row>
+            </div>
+
+            {filteredAndSorted.length === 0 ? (
+                <Alert variant="info" className="rounded-3 border-0 shadow-sm">
+                    No products found matching your current filters in this category.
+                </Alert>
+            ) : (
+                <div 
+                    className="d-flex overflow-auto pb-4 gap-4 custom-horizontal-scroller" 
+                    style={{ 
+                        scrollSnapType: 'x mandatory',
+                        WebkitOverflowScrolling: 'touch',
+                        paddingLeft: '5px',
+                        paddingRight: '5px'
+                    }}
+                >
+                    {filteredAndSorted.map((p) => (
+                        <div 
+                            key={p.id} 
+                            className="similar-product-card-wrapper"
+                            style={{ 
+                                minWidth: '240px', 
+                                maxWidth: '240px', 
+                                flex: '0 0 auto', 
+                                scrollSnapAlign: 'start' 
+                            }}
+                        >
+                            <Card className="h-100 border-0 shadow-sm hover-premium-card transition-all" style={{ borderRadius: '16px' }}>
+                                <Link to={`/product/${p.id}`} className="text-decoration-none text-dark" onClick={() => window.scrollTo(0, 0)}>
+                                    <div className="d-flex justify-content-center align-items-center p-3 position-relative" style={{ height: "180px", backgroundColor: '#f0f7ff', borderRadius: '16px 16px 0 0' }}>
+                                        <div className="position-absolute top-0 start-0 m-2">
+                                            <Badge bg="danger" className="rounded-pill px-2 py-1 shadow-sm" style={{ fontSize: '0.65rem', fontWeight: '800' }}>
+                                                {p.offerprice ? 'OFFER' : 'NEW'}
+                                            </Badge>
+                                        </div>
+                                        <Card.Img
+                                            src={getFirstImage(p)}
+                                            style={{ height: "140px", width: 'auto', objectFit: "contain", filter: 'drop-shadow(0 10px 10px rgba(0,0,0,0.05))' }}
+                                        />
+                                    </div>
+                                    <Card.Body className="p-3 bg-white" style={{ borderRadius: '0 0 16px 16px' }}>
+                                        <Card.Title className="fw-bold text-truncate mb-1 text-dark" style={{ fontSize: '0.95rem' }}>
+                                            {p.name || p.title}
+                                        </Card.Title>
+                                        
+                                        <div className="d-flex align-items-center mb-2">
+                                            <div className="bg-success bg-opacity-10 px-2 py-0 rounded d-flex align-items-center me-2">
+                                                <span className="fw-bold text-success small me-1">{p.rating?.rate?.toFixed(1) || '4.0'}</span>
+                                                <FaStar className="text-success" size={10} />
+                                            </div>
+                                            <span className="text-muted" style={{ fontSize: '0.7rem' }}>({p.rating?.count || 0})</span>
+                                        </div>
+
+                                        <div className="d-flex justify-content-between align-items-center mt-3">
+                                            <div className="d-flex flex-column">
+                                                <span className="fw-bold text-primary fs-5">
+                                                    <FaRupeeSign size={14} />{p.priceINR}
+                                                </span>
+                                                <span className="text-success fw-bold" style={{ fontSize: '0.65rem' }}>Special Price</span>
+                                            </div>
+                                            <Button
+                                                variant="warning"
+                                                size="sm"
+                                                className="rounded-3 shadow-sm px-3 fw-bold border-0 d-flex align-items-center justify-content-center"
+                                                style={{ 
+                                                    background: 'linear-gradient(45deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%)',
+                                                    color: '#d63384',
+                                                    height: '35px'
+                                                }}
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    dispatch(addToCart({
+                                                        id: p.id,
+                                                        title: p.name || p.title,
+                                                        price: p.priceValue,
+                                                        image: getFirstImage(p),
+                                                        quantity: 1,
+                                                        sellerId: p.sellerId || "default_seller"
+                                                    }));
+                                                    toast.success(`Added ${p.name || p.title} to cart!`, { position: "bottom-right", autoClose: 2000 });
+                                                }}
+                                            >
+                                                <FaShoppingCart size={13} className="me-1" />
+                                                Add
+                                            </Button>
+                                        </div>
+                                    </Card.Body>
+                                </Link>
+                            </Card>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            <style jsx>{`
+                .custom-horizontal-scroller::-webkit-scrollbar {
+                    height: 6px;
+                }
+                .custom-horizontal-scroller::-webkit-scrollbar-track {
+                    background: #f1f1f1;
+                    border-radius: 10px;
+                }
+                .custom-horizontal-scroller::-webkit-scrollbar-thumb {
+                    background: #ccc;
+                    border-radius: 10px;
+                }
+                .custom-horizontal-scroller::-webkit-scrollbar-thumb:hover {
+                    background: #999;
+                }
+                .hover-premium-card:hover {
+                    transform: translateY(-10px) scale(1.02);
+                    box-shadow: 0 25px 50px -12px rgba(13, 110, 253, 0.25) !important;
+                }
+                .transition-all {
+                    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                }
+                .no-wrap {
+                    white-space: nowrap;
+                }
+                @media (min-width: 992px) {
+                    .border-start-lg {
+                        border-left: 1px solid rgba(0,0,0,0.1) !important;
+                    }
+                }
+            `}</style>
+        </div>
+    );
 }
 
 export default ProductSuggestions;

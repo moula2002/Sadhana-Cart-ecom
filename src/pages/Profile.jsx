@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { auth, storage, db } from "../firebase";
 import { updateProfile, onAuthStateChanged } from "firebase/auth";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -24,10 +25,12 @@ import {
   FaArrowRight,
   FaVenusMars,
   FaCheckCircle,
+  FaArrowLeft,
 } from "react-icons/fa";
 import "./Profile.css";
 
 function Profile() {
+  const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
 
@@ -172,7 +175,10 @@ function Profile() {
           transition={{ duration: 0.3 }}
           className="denied-card"
         >
-          <div className="denied-icon">
+          <button className="back-button denied-back" onClick={() => navigate(-1)} title="Go Back">
+          <FaArrowLeft />
+        </button>
+        <div className="denied-icon">
             <FaLock />
           </div>
           <h2>Access Restricted</h2>
@@ -213,6 +219,9 @@ function Profile() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
+        <button className="back-button" onClick={() => navigate(-1)} title="Go Back">
+          <FaArrowLeft />
+        </button>
         <div className="profile-header">
           <div className="avatar-section">
             <div className="avatar-wrapper">

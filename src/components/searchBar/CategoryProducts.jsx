@@ -102,56 +102,74 @@ const CategoryProducts = () => {
     setFilteredProducts(filtered);
   };
 
+  // Function to get the first valid image URL from any product structure
   const getFirstImage = (product) => {
     if (!product) return "https://placehold.jp/300x300.png?text=No+Data";
 
-    const possibleFields = [
+    // Priority keys that are known to contain images
+    const imageKeys = [
       "images", "image", "imageUrl", "imgUrl", "image_url", "img_url",
       "thumbnail", "thumb", "productImage", "product_image",
-      "mainImage", "main_image", "cover", "photo", "img", "pic", "picture"
+      "mainImage", "main_image", "cover", "photo", "img", "pic", "picture",
+      "displayImage", "src", "url"
     ];
 
-    const isValidUrl = (url) => typeof url === "string" && url.trim().length > 0 && (url.startsWith("http") || url.startsWith("data:image"));
+    const isValidUrl = (url) => 
+      typeof url === "string" && 
+      url.trim().length > 0 && 
+      (url.startsWith("http") || url.startsWith("https") || url.startsWith("data:image"));
 
-    for (const field of possibleFields) {
-      const source = product[field];
-      if (!source) continue;
-
-      if (Array.isArray(source)) {
-        const flattened = source.flat(Infinity);
-        for (const item of flattened) {
-          if (!item) continue;
-          if (isValidUrl(item)) return item.trim();
-          if (typeof item === "object") {
-             const url = item.url || item.src || item.imageUrl || item.image || item.thumb || item.thumbnail;
-             if (isValidUrl(url)) return url.trim();
-             // Scan object values
-             for (const k in item) if (isValidUrl(item[k])) return item[k].trim();
-          }
+    // Internal helper to extract URL from various types (recursive)
+    const extract = (val, depth = 0) => {
+      if (depth > 4) return null; // Prevent deep recursion
+      
+      if (typeof val === "string") {
+        return isValidUrl(val) ? val.trim() : null;
+      }
+      
+      if (Array.isArray(val)) {
+        for (const item of val.flat(Infinity)) {
+          const res = extract(item, depth + 1);
+          if (res) return res;
         }
-      } 
-      else if (isValidUrl(source)) {
-        return source.trim();
-      } 
-      else if (typeof source === "object") {
-        const url = source.url || source.src || source.imageUrl || source.image || source.thumb || source.thumbnail;
-        if (isValidUrl(url)) return url.trim();
-        // Scan object values
-        for (const k in source) if (isValidUrl(source[k])) return source[k].trim();
+        return null;
+      }
+
+      if (typeof val === "object" && val !== null) {
+        // 1. Try priority keys within the object first
+        for (const k of imageKeys) {
+          const res = extract(val[k], depth + 1);
+          if (res) return res;
+        }
+        // 2. Scan all keys for ANY URL
+        for (const k in val) {
+          const res = extract(val[k], depth + 1);
+          if (res) return res;
+        }
+      }
+      return null;
+    };
+
+    // Phase 1: Check known image keys in the product
+    for (const key of imageKeys) {
+      const result = extract(product[key]);
+      if (result) return result;
+    }
+
+    // Phase 2: Final scan of ALL keys for something that looks like an image URL
+    // Expanded list of formats including vectors and professional formats
+    const imageExtensions = /\.(jpg|jpeg|png|gif|webp|avif|svg|bmp|emf|wmf|eps|tiff|tif|heic|heif|psd|ai|pdf|ico)(\?.*)?$/i;
+    for (const key in product) {
+      const val = product[key];
+      if (typeof val === "string" && isValidUrl(val)) {
+        const trimmed = val.trim();
+        if (trimmed.match(imageExtensions) || trimmed.startsWith("data:image")) {
+          return trimmed;
+        }
       }
     }
 
-    // Last-ditch: scan all product keys
-    for (const key in product) {
-        if (isValidUrl(product[key])) {
-            const trimmed = product[key].trim();
-            if (trimmed.match(/\.(jpg|jpeg|png|gif|webp|avif|svg|bmp|emf)(\?.*)?$/i) || trimmed.startsWith("data:image")) {
-                return trimmed;
-            }
-        }
-    }
-
-    return "https://placehold.jp/300x300.png?text=Image+Missing";
+    return "https://placehold.jp/300x300.png?text=Empty";
   };
 
   return (
@@ -215,36 +233,58 @@ const CategoryProducts = () => {
               >
 
                 <div className="image-wrapper">
-                  {getFirstImage(product).toLowerCase().includes(".emf") ? (
-                    <div className="emf-placeholder" style={{ 
-                      display: "flex", 
-                      flexDirection: "column", 
-                      alignItems: "center", 
-                      justifyContent: "center", 
-                      height: "100%", 
-                      background: "#f8fafc",
-                      padding: "10px",
-                      textAlign: "center",
-                      position: "absolute",
-                      width: "100%",
-                      top: 0,
-                      left: 0
-                    }}>
-                      <FaFileImage size={42} color="#2563eb" />
-                      <span style={{ fontSize: "11px", marginTop: "10px", color: "#1e293b", fontWeight: "700" }}>EMF VECTOR</span>
-                      <span style={{ fontSize: "9px", color: "#64748b" }}>Format not supported by browser</span>
-                    </div>
-                  ) : (
-                    <img
-                      src={getFirstImage(product)}
-                      alt={product.name}
-                      className="product-image"
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = "https://placehold.jp/300x300.png?text=Format+Not+Supported";
-                      }}
-                    />
-                  )}
+                  {(() => {
+                    const imageUrl = getFirstImage(product);
+                    const lowerUrl = imageUrl.toLowerCase();
+                    
+                    // Formats that browsers usually can't render natively in <img> metadata
+                    const unsupportedFormats = [
+                      { ext: ".emf", label: "EMF VECTOR" },
+                      { ext: ".wmf", label: "WMF VECTOR" },
+                      { ext: ".eps", label: "EPS VECTOR" },
+                      { ext: ".ai", label: "ADOBE AI" },
+                      { ext: ".psd", label: "PHOTOSHOP" },
+                      { ext: ".tiff", label: "TIFF IMAGE" },
+                      { ext: ".tif", label: "TIFF IMAGE" },
+                      { ext: ".heic", label: "HEIC IMAGE" },
+                      { ext: ".heif", label: "HEIF IMAGE" },
+                      { ext: ".pdf", label: "PDF DOCUMENT" },
+                    ];
+
+                    const unsupported = unsupportedFormats.find(f => lowerUrl.includes(f.ext));
+
+                    if (unsupported) {
+                      return (
+                        <div className="unsupported-format-box">
+                          <FaFileImage className="unsupported-icon" size={42} />
+                          <span className="unsupported-label">{unsupported.label}</span>
+                          <span className="unsupported-note">Browser Preview Unavailable</span>
+                          <a 
+                            href={imageUrl} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="unsupported-view-btn"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            Open File
+                          </a>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <img
+                        src={imageUrl}
+                        alt={product.name}
+                        className="product-image"
+                        loading="lazy"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = "https://placehold.jp/300x300.png?text=Preview+Error";
+                        }}
+                      />
+                    );
+                  })()}
                 </div>
 
                 <div className="card-content">

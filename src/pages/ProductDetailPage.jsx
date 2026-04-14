@@ -41,19 +41,11 @@ function ProductDetailPage() {
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [categoryProducts, setCategoryProducts] = useState([]);
-    const [catLoading, setCatLoading] = useState(true);
-    const [catError, setCatError] = useState(null);
 
     // Image gallery
     const [mainImage, setMainImage] = useState(null);
     const [productImages, setProductImages] = useState([]);
 
-    // Filter/sort
-    const [sortBy, setSortBy] = useState("rating");
-    const [filterPrice, setFilterPrice] = useState(50000);
-
-    // Quantity state
     const [quantity, setQuantity] = useState(1);
     const [showFullDescription, setShowFullDescription] = useState(false);
 
@@ -147,9 +139,6 @@ function ProductDetailPage() {
         resetProductStates();
         setLoading(true);
         setError(null);
-        setCategoryProducts([]);
-        setCatLoading(true);
-        setCatError(null);
     }, [id, resetProductStates]);
 
     // Professional styles object
@@ -711,36 +700,6 @@ function ProductDetailPage() {
         fetchProductAndReviews();
     }, [id]);
 
-    // --- Fetch Similar Products ---
-    useEffect(() => {
-        if (!product?.category) return;
-        const fetchCategoryProducts = async () => {
-            try {
-                setCatLoading(true);
-                const q = query(collection(db, "products"), where("category", "==", product.category), limit(10));
-                const querySnapshot = await getDocs(q);
-                const fetched = querySnapshot.docs.map((d) => {
-                    const data = d.data();
-                    const priceValue = (data.price || 0) * EXCHANGE_RATE;
-                    return {
-                        id: d.id,
-                        ...data,
-                        priceINR: priceValue.toFixed(0),
-                        priceValue,
-                        rating: data.rating || { rate: 4.0, count: 100 },
-                    };
-                });
-                setCategoryProducts(fetched.filter((p) => p.id !== product.id));
-            } catch (err) {
-                console.error("🔥 Error fetching category products:", err);
-                setCatError(err.message);
-            } finally {
-                setCatLoading(false);
-            }
-        };
-        fetchCategoryProducts();
-    }, [product]);
-
     const currentVariant = useMemo(() => {
         if (productVariants.length === 0 || !selectedSize || selectedSize === "N/A") return null;
         return productVariants.find(v => v.size === selectedSize) || null;
@@ -1120,24 +1079,8 @@ function ProductDetailPage() {
     };
 
     const filteredAndSortedCategory = useMemo(() => {
-        let list = [...categoryProducts];
-        list = list.filter((p) => p.priceValue <= filterPrice);
-
-        switch (sortBy) {
-            case "price-asc":
-                list.sort((a, b) => a.priceValue - b.priceValue);
-                break;
-            case "price-desc":
-                list.sort((a, b) => b.priceValue - a.priceValue);
-                break;
-            case "name-asc":
-                list.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
-                break;
-            default:
-                list.sort((a, b) => (b.rating?.rate || 0) - (a.rating?.rate || 0));
-        }
-        return list;
-    }, [categoryProducts, sortBy, filterPrice]);
+        return [];
+    }, []);
 
     // Helper function to format delivery date info
     const formatDeliveryInfo = (deliveryDate) => {
@@ -1725,155 +1668,13 @@ function ProductDetailPage() {
             )}
 
             {/* Similar Products */}
-            <div className="mb-5">
-                <div className="d-flex justify-content-between align-items-center mb-4">
-                    <h3 className="fw-bold mb-0">More from {product.category}</h3>
-                </div>
-
-                <div className="p-3 mb-4 rounded-4 shadow-sm border-0" style={{ background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)', border: '1px solid rgba(0,0,0,0.05)' }}>
-                    <Row className="align-items-center g-3">
-                        <Col lg={7}>
-                            <div className="d-flex flex-column flex-sm-row align-items-sm-center gap-3">
-                                <div className="d-flex align-items-center gap-2 mb-2 mb-sm-0">
-                                    <div className="p-2 rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style={{ width: '35px', height: '35px' }}>
-                                        <FaRupeeSign size={14} />
-                                    </div>
-                                    <span className="fw-bold text-dark no-wrap" style={{ fontSize: '0.9rem' }}>Budget Range</span>
-                                </div>
-                                <div className="flex-grow-1 px-2">
-                                    <div className="d-flex justify-content-between mb-1">
-                                        <span className="text-muted extra-small">₹0</span>
-                                        <span className="fw-bold text-primary small">Under ₹{filterPrice.toLocaleString()}</span>
-                                    </div>
-                                    <Form.Range
-                                        min={0}
-                                        max={100000}
-                                        step={100}
-                                        value={filterPrice}
-                                        onChange={(e) => setFilterPrice(Number(e.target.value))}
-                                        className="custom-premium-range"
-                                    />
-                                </div>
-                            </div>
-                        </Col>
-                        <Col lg={5}>
-                            <div className="d-flex align-items-center gap-3 ps-lg-4 border-start-lg">
-                                <div className="d-flex align-items-center gap-2">
-                                    <div className="p-2 rounded-circle bg-dark bg-opacity-5 text-dark d-flex align-items-center justify-content-center" style={{ width: '35px', height: '35px' }}>
-                                        <FaEdit size={14} className="opacity-75" />
-                                    </div>
-                                    <span className="fw-bold text-dark no-wrap" style={{ fontSize: '0.9rem' }}>Sort By</span>
-                                </div>
-                                <Form.Select
-                                    value={sortBy}
-                                    onChange={(e) => setSortBy(e.target.value)}
-                                    className="border-0 bg-white shadow-sm rounded-3 py-2 px-3 fw-semibold text-dark cursor-pointer"
-                                    style={{ fontSize: '0.85rem' }}
-                                >
-                                    <option value="rating">⭐ Top Rated</option>
-                                    <option value="price-asc">📉 Price: Low to High</option>
-                                    <option value="price-desc">📈 Price: High to Low</option>
-                                    <option value="name-asc">🔤 Name A-Z</option>
-                                </Form.Select>
-                            </div>
-                        </Col>
-                    </Row>
-                </div>
-
-                {catLoading ? (
-                    <div className="text-center py-5">
-                        <Spinner animation="border" variant="primary" />
-                    </div>
-                ) : catError ? (
-                    null
-                ) : filteredAndSortedCategory.length === 0 ? (
-                    <Alert variant="info">No products found in this category.</Alert>
-                ) : (
-                    <div
-                        className="d-flex overflow-auto pb-4 gap-4 custom-horizontal-scroller"
-                        style={{
-                            scrollSnapType: 'x mandatory',
-                            WebkitOverflowScrolling: 'touch',
-                            paddingLeft: '5px',
-                            paddingRight: '5px'
-                        }}
-                    >
-                        {filteredAndSortedCategory.map((p) => (
-                            <div
-                                key={p.id}
-                                style={{
-                                    minWidth: '240px',
-                                    maxWidth: '240px',
-                                    flex: '0 0 auto',
-                                    scrollSnapAlign: 'start'
-                                }}
-                            >
-                                <Card className="h-100 border-0 shadow-sm hover-premium-card transition-all">
-                                    <Link to={`/product/${p.id}`} className="text-decoration-none text-dark">
-                                        <div className="d-flex justify-content-center align-items-center p-3 position-relative" style={{ height: "180px", backgroundColor: '#eff6ff', borderRadius: '16px 16px 0 0' }}>
-                                            <div className="position-absolute top-0 start-0 m-2">
-                                                <Badge bg="danger" className="rounded-pill px-2 py-1 shadow-sm" style={{ fontSize: '0.65rem', fontWeight: '800' }}>
-                                                    SALE
-                                                </Badge>
-                                            </div>
-                                            <Card.Img
-                                                src={p.images || p.image || "https://via.placeholder.com/150"}
-                                                style={{ height: "140px", width: 'auto', objectFit: "contain", filter: 'drop-shadow(0 10px 10px rgba(0,0,0,0.1))' }}
-                                            />
-                                        </div>
-                                        <Card.Body className="p-3 bg-white" style={{ borderRadius: '0 0 16px 16px' }}>
-                                            <Card.Title className="fw-bold text-truncate mb-1 text-dark" style={{ fontSize: '0.95rem' }}>{p.name || p.title}</Card.Title>
-                                            <div className="d-flex align-items-center mb-3">
-                                                <div className="bg-success bg-opacity-10 px-2 py-0 rounded d-flex align-items-center me-2">
-                                                    <span className="fw-bold text-success small me-1">{p.rating.rate.toFixed(1)}</span>
-                                                    <FaStar className="text-success" size={10} />
-                                                </div>
-                                                <span className="text-muted extra-small">({p.rating.count} reviews)</span>
-                                            </div>
-
-                                            <div className="d-flex justify-content-between align-items-center">
-                                                <div className="d-flex flex-column">
-                                                    <div className="d-flex align-items-center gap-1">
-                                                        <span className="fw-bold text-primary fs-5" style={{ letterSpacing: '-0.5px' }}>
-                                                            <FaRupeeSign size={14} />{p.priceINR}
-                                                        </span>
-                                                    </div>
-                                                    <span className="extra-small text-success fw-bold">Special Price</span>
-                                                </div>
-                                                <Button
-                                                    variant="warning"
-                                                    size="sm"
-                                                    className="rounded-3 shadow-sm px-3 fw-bold border-0 d-flex align-items-center justify-content-center"
-                                                    style={{
-                                                        background: 'linear-gradient(45deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%)',
-                                                        color: '#d63384',
-                                                        height: '35px'
-                                                    }}
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        dispatch(addToCart({
-                                                            id: p.id,
-                                                            title: p.name || p.title,
-                                                            price: p.priceValue,
-                                                            image: p.images || p.image,
-                                                            quantity: 1,
-                                                            sellerId: p.sellerId || "default_seller"
-                                                        }));
-                                                        toast.success(`Added to cart!`, { position: "bottom-right", autoClose: 2000 });
-                                                    }}
-                                                >
-                                                    <FaShoppingCart size={13} className="me-1" />
-                                                    Add
-                                                </Button>
-                                            </div>
-                                        </Card.Body>
-                                    </Link>
-                                </Card>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
+            {product && (
+                <ProductSuggestions 
+                    currentProductId={product.id} 
+                    category={product.category} 
+                    subcategory={product.subcategory}
+                />
+            )}
 
             {/* Reviews Section */}
             <Card className="border-0 shadow-sm">
@@ -2333,8 +2134,6 @@ function ProductDetailPage() {
                 </Modal.Body>
             </Modal>
 
-            {/* Product Suggestions */}
-            {product && <ProductSuggestions currentProductId={product.id} category={product.category} />}
 
             {/* Custom CSS for hover effects */}
             <style jsx>{`

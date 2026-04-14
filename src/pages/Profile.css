@@ -173,6 +173,54 @@ body {
   overflow: hidden;
 }
 
+/* Back Button */
+.back-button {
+  position: absolute;
+  top: var(--space-lg);
+  left: var(--space-lg);
+  z-index: 10;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  backdrop-filter: blur(4px);
+}
+
+.back-button:hover {
+  background: white;
+  color: var(--primary);
+  transform: translateX(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.dark-theme .back-button {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.dark-theme .back-button:hover {
+  background: white;
+  color: var(--primary-dark);
+}
+
+.denied-back {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border-color: var(--border-color);
+}
+
+.denied-back:hover {
+  background: var(--primary);
+  color: white;
+}
+
 /* Profile Header */
 .profile-header {
   background: var(--primary-gradient);
@@ -506,6 +554,7 @@ body {
 }
 
 .denied-card {
+  position: relative;
   background: var(--bg-card);
   border-radius: var(--radius-lg);
   padding: var(--space-xl);
