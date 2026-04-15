@@ -649,7 +649,11 @@ function ProductDetailPage() {
                 distribution: distribution,
                 reviews: fetchedReviews.map(review => ({
                     ...review,
-                    date: review.createdAT?.toDate ? review.createdAT.toDate().toISOString() : new Date().toISOString()
+                    date: review.createdAt?.toDate
+                        ? review.createdAt.toDate().toISOString()
+                        : review.createdAT?.toDate
+                            ? review.createdAT.toDate().toISOString()
+                            : new Date().toISOString()
                 }))
             });
         } catch (err) {
@@ -968,7 +972,7 @@ function ProductDetailPage() {
                 productId: product.id,
                 userId: auth.currentUser.uid,
                 userName: auth.currentUser.displayName || auth.currentUser.email || 'Customer',
-                createdAT: serverTimestamp(),
+                createdAt: serverTimestamp(),
                 images: reviewImages,
                 image: reviewImages.length > 0 ? reviewImages[0] : ""
             };
@@ -1669,9 +1673,9 @@ function ProductDetailPage() {
 
             {/* Similar Products */}
             {product && (
-                <ProductSuggestions 
-                    currentProductId={product.id} 
-                    category={product.category} 
+                <ProductSuggestions
+                    currentProductId={product.id}
+                    category={product.category}
                     subcategory={product.subcategory}
                 />
             )}
