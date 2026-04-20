@@ -67,33 +67,102 @@ const CategoryProducts = () => {
 
       setCategoryName(currentCategory);
 
+      // --- 1. Robust Category Name Fetching ---
+      if (!currentCategory) {
+        const catRef = collection(db, "category");
+        // Try by ID first
+        const catQById = query(catRef, where("__name__", "==", categoryId));
+        const snapById = await getDocs(catQById);
+        
+        if (!snapById.empty) {
+          currentCategory = snapById.docs[0].data().name;
+        } else {
+          // If ID fetch fails, try matching the name (maybe categoryId is actually a slug/name)
+          const nameToTry = categoryId.replace(/-/g, ' ');
+          // Case-insensitive matching is hard in Firestore, so we try exact and common patterns
+          const catQByName = query(catRef, where("name", "==", nameToTry));
+          const snapByName = await getDocs(catQByName);
+          if (!snapByName.empty) {
+            currentCategory = snapByName.docs[0].data().name;
+          }
+        }
+        setCategoryName(currentCategory);
+      }
+
+      // --- 2. Fetch Subcategories (More Flexible) ---
       if (currentCategory) {
         const subCatRef = collection(db, "subcategory");
         const subCatQ = query(subCatRef, where("category", "==", currentCategory));
         const subSnap = await getDocs(subCatQ);
-        const subList = subSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        let subList = subSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        // Fallback for special characters (like &)
+        if (subList.length === 0 && currentCategory.includes("&")) {
+          const altName = currentCategory.replace("&", "and");
+          const altSubCatQ = query(subCatRef, where("category", "==", altName));
+          const altSubSnap = await getDocs(altSubCatQ);
+          const altSubList = altSubSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          subList = [...subList, ...altSubList];
+        }
+        
         setSubcategories(subList);
       }
 
+      // --- 3. Fetch Products (Merged Strategy) ---
       const prodRef = collection(db, "products");
+      
+      // Strategy A: By categoryId
       const q1 = query(prodRef, where("categoryId", "==", categoryId));
       const s1 = await getDocs(q1);
+      let list = s1.docs.map((d) => ({ id: d.id, ...d.data() }));
 
-      let list = s1.docs.map((d) => ({
-        id: d.id,
-        ...d.data(),
-      }));
-
-      if (list.length === 0 && currentCategory) {
+      // Strategy B: By currentCategory Name
+      if (currentCategory) {
         const q2 = query(prodRef, where("category", "==", currentCategory));
         const s2 = await getDocs(q2);
-        list = s2.docs.map((d) => ({
-          id: d.id,
-          ...d.data(),
-        }));
+        const listByName = s2.docs.map((d) => ({ id: d.id, ...d.data() }));
+        
+        // Merge listByName into list
+        const existingIds = new Set(list.map(p => p.id));
+        listByName.forEach(p => {
+          if (!existingIds.has(p.id)) list.push(p);
+        });
+
+        // Strategy C: Handle variations for special categories (like & vs and, or apostrophes)
+        if (/[&']/.test(currentCategory)) {
+          const variations = new Set();
+          
+          // Variation: & -> and
+          if (currentCategory.includes("&")) {
+            variations.add(currentCategory.replace("&", "and"));
+            variations.add(currentCategory.replace("&", "")); // Just remove it
+          }
+          
+          // Variation: ' -> remove
+          if (currentCategory.includes("'")) {
+            variations.add(currentCategory.replace("'", ""));
+          }
+
+          // Variation: Normalize all (remove special chars)
+          const normalized = currentCategory.replace(/[^a-zA-Z0-9 ]/g, "").replace(/\s+/g, ' ').trim();
+          variations.add(normalized);
+          
+          for (const variant of variations) {
+            if (variant === currentCategory) continue;
+            
+            const qVar = query(prodRef, where("category", "==", variant));
+            const sVar = await getDocs(qVar);
+            const listVar = sVar.docs.map((d) => ({ id: d.id, ...d.data() }));
+            
+            const currentIds = new Set(list.map(p => p.id));
+            listVar.forEach(p => {
+              if (!currentIds.has(p.id)) list.push(p);
+            });
+          }
+        }
       }
 
-      // ✅ IMPORTANT FIX (stock 0 irundhalum show aagum)
+      // Final Filter: Only active products
       list = list.filter((p) => p.isActive !== false);
 
       setProducts(list);
@@ -103,7 +172,7 @@ const CategoryProducts = () => {
       console.error("Error fetching data:", err);
     } finally {
       setLoading(false);
-      setVisibleCount(20); // Reset visible count on new fetch/category change
+      setVisibleCount(20);
     }
   }, [categoryId, location.state]);
 
