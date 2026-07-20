@@ -1,31 +1,24 @@
 import React, { useState, useEffect } from "react";
-import { Container, Form, Button, Card } from "react-bootstrap";
-import { FaHome, FaBriefcase, FaMapMarkerAlt, FaCrosshairs, FaUser, FaPhone, FaEnvelope, FaCity, FaGlobe, FaMapPin } from "react-icons/fa";
+import { Form, Button, Row, Col, Spinner } from "react-bootstrap";
+import { 
+  FaUser, FaShoppingBag, FaHeart, FaMapMarkerAlt, FaGift, FaCreditCard, FaCog, FaSignOutAlt,
+  FaHome, FaBriefcase
+} from "react-icons/fa";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import Loading from "../pages/Loading";
-import {
-  collection,
-  addDoc,
-  doc,
-  updateDoc,
-  getDocs,
-  serverTimestamp,
-} from "firebase/firestore";
+import { collection, addDoc, doc, updateDoc, getDocs, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebase";
 import { useNavigate, useLocation } from "react-router-dom";
-import "./SaveAddress.css"; // Create this CSS file for enhanced styles
+import "./Profile.css"; // Reuse dashboard layout styles
 
 function SaveAddress() {
   const navigate = useNavigate();
   const location = useLocation();
-
   const existingAddress = location.state?.address || null;
 
   const [userId, setUserId] = useState(null);
   const [addressType, setAddressType] = useState("Home");
   const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState(1); // For multi-step form animation
-  const [focusedField, setFocusedField] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -40,25 +33,22 @@ function SaveAddress() {
     zip: "",
   });
 
-  // 🔐 Get Logged User
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setUserId(user.uid);
-        // Pre-fill email if available
-        if (user.email) {
+        if (user.email && !existingAddress) {
           setFormData(prev => ({ ...prev, email: user.email }));
         }
       } else {
         navigate("/login");
       }
+      setAuthLoading(false);
     });
-
     return () => unsubscribe();
-  }, [navigate]);
+  }, [navigate, existingAddress]);
 
-  // 📝 If Editing
   useEffect(() => {
     if (existingAddress) {
       setFormData({
@@ -73,10 +63,17 @@ function SaveAddress() {
         country: existingAddress.country || "India",
         zip: existingAddress.zip || "",
       });
-
       setAddressType(existingAddress.addressType || "Home");
     }
   }, [existingAddress]);
+
+  const handlePhoneChange = (e) => {
+    const val = e.target.value;
+    // Allow empty string or exactly digits
+    if (val === "" || /^[0-9]+$/.test(val)) {
+      setFormData({ ...formData, phone: val });
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -85,27 +82,16 @@ function SaveAddress() {
     });
   };
 
-  const handleFocus = (fieldName) => {
-    setFocusedField(fieldName);
-  };
-
-  const handleBlur = () => {
-    setFocusedField(null);
-  };
-
-  // Get current location (simulated)
-  const getCurrentLocation = () => {
-    // This would use geolocation API in a real app
-    alert("Location feature would use browser geolocation");
-  };
-
-  // 💾 SAVE FUNCTION
   const handleSave = async (e) => {
     e.preventDefault();
     if (!userId) return;
 
-    setLoading(true);
+    if (formData.phone.length !== 10) {
+      alert("Please enter a valid 10-digit phone number.");
+      return;
+    }
 
+    setLoading(true);
     try {
       const addressData = {
         ...formData,
@@ -114,390 +100,315 @@ function SaveAddress() {
       };
 
       if (existingAddress?.id) {
-        // 🔄 UPDATE
-        const addressRef = doc(
-          db,
-          "users",
-          userId,
-          "addresses",
-          existingAddress.id
-        );
-
+        const addressRef = doc(db, "users", userId, "addresses", existingAddress.id);
         await updateDoc(addressRef, addressData);
       } else {
-        // ➕ ADD NEW
-        const addressCollection = collection(
-          db,
-          "users",
-          userId,
-          "addresses"
-        );
-
-        // 🔥 Check if first address
+        const addressCollection = collection(db, "users", userId, "addresses");
         const snap = await getDocs(addressCollection);
-
         await addDoc(addressCollection, {
           ...addressData,
           createdAt: serverTimestamp(),
-          isDefault: snap.empty ? true : false, // First address = default
+          isDefault: snap.empty ? true : false,
         });
       }
-
-      // Show success message
-      alert("Address Saved Successfully ✅");
-
-      // 🔥 Go to Address List page
       navigate("/save-address");
-
     } catch (error) {
       console.error("Error saving address:", error);
-      alert("Failed to save address ❌");
+      alert("Failed to save address");
     }
-
     setLoading(false);
   };
 
-  if (!userId) {
-    return <Loading />;
+  const handleLogoutClick = () => {
+    const auth = getAuth();
+    auth.signOut().then(() => navigate("/login"));
+  };
+
+  if (authLoading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center vh-100">
+        <Spinner animation="border" variant="primary" />
+      </div>
+    );
   }
 
   return (
-    <div className="save-address-page">
-      {/* Background decoration */}
-      <div className="address-bg-decoration">
-        <div className="circle circle-1"></div>
-        <div className="circle circle-2"></div>
-        <div className="circle circle-3"></div>
-      </div>
+    <div className="profile-dashboard-wrapper" style={{ background: "#f8f9fa", padding: "20px" }}>
+      <div className="profile-dashboard-container" style={{ maxWidth: "1200px", margin: "0 auto", border: "1px solid #e0e0e0", borderRadius: "10px", overflow: "hidden", background: "white" }}>
+        
+        {/* Title */}
+        <div className="profile-title-header d-flex align-items-center" style={{ gap: "12px", background: "#0a45bd", color: "white", padding: "16px 24px", margin: 0, borderRadius: '10px 10px 0 0' }}>
 
-      <Container className="py-5" style={{ maxWidth: "600px" }}>
-        {/* Header Card */}
-        <Card className="address-header-card border-0 shadow-lg mb-4">
-          <Card.Body className="p-4 text-center">
-            <div className="address-icon-wrapper mb-3">
-              <FaMapMarkerAlt className="address-main-icon" />
+          <h2 style={{ color: "white", margin: 0, fontSize: "20px", fontWeight: "bold" }}>Address Management Page</h2>
+        </div>
+
+        {/* Outer Dashboard Grid */}
+        <div className="dashboard-grid-layout" style={{ margin: 0, borderRadius: "0 0 10px 10px", background: "white", gap: 0 }}>
+          
+          {/* Sidebar Menu */}
+          <div className="dashboard-sidebar" style={{ borderRight: "1px solid #e0e0e0", padding: "24px 16px", minHeight: "600px", borderRadius: 0, marginTop: 0 }}>
+            <h6 style={{ fontWeight: '700', color: '#1a202c', marginBottom: '20px', paddingLeft: '12px', fontSize: '15px' }}>My Account</h6>
+            <ul className="sidebar-menu-list" style={{ marginTop: "0" }}>
+              <li className="sidebar-menu-item" onClick={() => navigate("/profile")}>
+                <FaUser className="menu-icon" />
+                <span>My Profile</span>
+              </li>
+              <li className="sidebar-menu-item" onClick={() => navigate("/orders")}>
+                <FaShoppingBag className="menu-icon" />
+                <span>My Orders</span>
+              </li>
+              <li className="sidebar-menu-item" onClick={() => navigate("/wishlist")}>
+                <FaHeart className="menu-icon" />
+                <span>Wishlist</span>
+              </li>
+              <li className="sidebar-menu-item active" onClick={() => navigate("/save-address")} style={{ background: "#e8f0fe", color: "#0a45bd", borderRadius: "6px" }}>
+                <FaMapMarkerAlt className="menu-icon" style={{ color: "#0a45bd" }} />
+                <span style={{ fontWeight: "bold" }}>My Addresses</span>
+              </li>
+              <li className="sidebar-menu-item">
+                <FaGift className="menu-icon" />
+                <span>Sadhana Rewards</span>
+              </li>
+              <li className="sidebar-menu-item">
+                <FaCreditCard className="menu-icon" />
+                <span>Payment Methods</span>
+              </li>
+              <li className="sidebar-menu-item">
+                <FaCog className="menu-icon" />
+                <span>Account Settings</span>
+              </li>
+              <li className="sidebar-menu-item logout-item" onClick={handleLogoutClick} style={{ marginTop: "40px" }}>
+                <FaSignOutAlt className="menu-icon" />
+                <span>Logout</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* Main Dashboard Section */}
+          <div className="dashboard-main-content" style={{ padding: "32px", display: "block", width: "100%" }}>
+            
+            <div className="mb-4">
+              <h4 className="fw-bold m-0" style={{ fontSize: "18px", color: '#111827' }}>
+                {existingAddress ? "Edit Address" : "Add New Address"}
+              </h4>
             </div>
-            <h2 className="fw-bold mb-2 gradient-text">
-              {existingAddress ? "✏️ Edit Address" : "📍 Add New Address"}
-            </h2>
-            <p className="text-muted mb-0">
-              {existingAddress
-                ? "Update your delivery address details"
-                : "Fill in your address details for seamless delivery"}
-            </p>
-          </Card.Body>
-        </Card>
 
-        {/* Address Type Selection */}
-        <Card className="address-type-card border-0 shadow-sm mb-4">
-          <Card.Body className="p-4">
-            <h6 className="fw-bold mb-3 text-uppercase small text-primary">
-              <FaMapMarkerAlt className="me-2" /> Address Type
-            </h6>
-            <div className="d-flex justify-content-between gap-3">
-              {["Home", "Work", "Other"].map((type) => (
-                <Card
-                  key={type}
-                  onClick={() => setAddressType(type)}
-                  className={`address-type-option flex-fill ${addressType === type ? "active" : ""
-                    }`}
-                >
-                  <Card.Body className="text-center p-3">
-                    <div className="type-icon mb-2">
-                      {type === "Home" && <FaHome size={24} className={addressType === type ? "text-white" : "text-primary"} />}
-                      {type === "Work" && <FaBriefcase size={24} className={addressType === type ? "text-white" : "text-primary"} />}
-                      {type === "Other" && <FaMapMarkerAlt size={24} className={addressType === type ? "text-white" : "text-primary"} />}
-                    </div>
-                    <div className={`fw-semibold ${addressType === type ? "text-white" : "text-dark"}`}>
+            <Form onSubmit={handleSave} style={{ maxWidth: '800px' }}>
+              
+              <div className="mb-4">
+                <label style={{ fontSize: "14px", fontWeight: "600", color: "#4b5563", marginBottom: "12px", display: "block" }}>Address Type</label>
+                <div className="d-flex gap-3 flex-wrap">
+                  {["Home", "Work", "Other"].map((type) => (
+                    <div
+                      key={type}
+                      onClick={() => setAddressType(type)}
+                      style={{
+                        padding: "10px 24px",
+                        border: addressType === type ? "1px solid #0a45bd" : "1px solid #e5e7eb",
+                        borderRadius: "8px",
+                        cursor: "pointer",
+                        backgroundColor: addressType === type ? "#eff4ff" : "white",
+                        color: addressType === type ? "#0a45bd" : "#4b5563",
+                        fontWeight: "600",
+                        fontSize: "14px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        transition: "all 0.2s"
+                      }}
+                    >
+                      {type === "Home" && <FaHome />}
+                      {type === "Work" && <FaBriefcase />}
+                      {type === "Other" && <FaMapMarkerAlt />}
                       {type}
                     </div>
-                  </Card.Body>
-                </Card>
-              ))}
-            </div>
-          </Card.Body>
-        </Card>
-
-        {/* Address Form */}
-        <Card className="address-form-card border-0 shadow">
-          <Card.Body className="p-4">
-            <Form onSubmit={handleSave}>
-              {/* Progress Steps */}
-              <div className="form-progress mb-4">
-                <div className={`progress-step ${step >= 1 ? 'active' : ''}`}>
-                  <span className="step-number">1</span>
-                  <span className="step-label">Contact</span>
-                </div>
-                <div className={`progress-line ${step >= 2 ? 'active' : ''}`}></div>
-                <div className={`progress-step ${step >= 2 ? 'active' : ''}`}>
-                  <span className="step-number">2</span>
-                  <span className="step-label">Address</span>
-                </div>
-                <div className={`progress-line ${step >= 3 ? 'active' : ''}`}></div>
-                <div className={`progress-step ${step >= 3 ? 'active' : ''}`}>
-                  <span className="step-number">3</span>
-                  <span className="step-label">Location</span>
+                  ))}
                 </div>
               </div>
 
-              {/* Step 1: Contact Information */}
-              <div className={`form-step ${step === 1 ? 'active' : ''}`}>
-                <h6 className="fw-bold mb-3">Contact Information</h6>
-
-                <Form.Group className="mb-3 floating-label-group">
-                  <div className={`floating-input-wrapper ${focusedField === 'fullName' || formData.fullName ? 'focused' : ''}`}>
-                    <FaUser className="input-icon" />
+              <Row>
+                <Col md={6} className="mb-3">
+                  <Form.Group>
+                    <Form.Label style={{ fontSize: "13px", fontWeight: "600", color: "#4b5563" }}>Full Name *</Form.Label>
                     <Form.Control
                       type="text"
                       name="fullName"
                       value={formData.fullName}
                       onChange={handleChange}
-                      onFocus={() => handleFocus('fullName')}
-                      onBlur={handleBlur}
                       required
-                      className="floating-input"
+                      placeholder="e.g. John Doe"
+                      style={{ padding: "10px 14px", borderRadius: "6px", fontSize: "14px" }}
                     />
-                    <label className={`floating-label ${formData.fullName ? 'filled' : ''}`}>
-                      Full Name *
-                    </label>
-                  </div>
-                </Form.Group>
+                  </Form.Group>
+                </Col>
+                <Col md={6} className="mb-3">
+                  <Form.Group>
+                    <Form.Label style={{ fontSize: "13px", fontWeight: "600", color: "#4b5563" }}>Phone Number (10 digits) *</Form.Label>
+                    <div className="d-flex align-items-center">
+                      <span style={{ padding: "9px 14px", background: "#f3f4f6", border: "1px solid #ced4da", borderRight: "none", borderRadius: "6px 0 0 6px", fontSize: "14px", color: "#4b5563", fontWeight: "500" }}>
+                        +91
+                      </span>
+                      <Form.Control
+                        type="text"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handlePhoneChange}
+                        maxLength={10}
+                        required
+                        placeholder="Mobile Number"
+                        style={{ padding: "10px 14px", borderRadius: "0 6px 6px 0", fontSize: "14px" }}
+                      />
+                    </div>
+                  </Form.Group>
+                </Col>
+              </Row>
 
-                <Form.Group className="mb-3 floating-label-group">
-                  <div className={`floating-input-wrapper ${focusedField === 'phone' || formData.phone ? 'focused' : ''}`}>
-                    <FaPhone className="input-icon" />
-                    <Form.Control
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      onFocus={() => handleFocus('phone')}
-                      onBlur={handleBlur}
-                      required
-                      className="floating-input"
-                    />
-                    <label className={`floating-label ${formData.phone ? 'filled' : ''}`}>
-                      Phone Number *
-                    </label>
-                  </div>
-                </Form.Group>
-
-                <Form.Group className="mb-3 floating-label-group">
-                  <div className={`floating-input-wrapper ${focusedField === 'email' || formData.email ? 'focused' : ''}`}>
-                    <FaEnvelope className="input-icon" />
+              <Row>
+                <Col md={6} className="mb-3">
+                  <Form.Group>
+                    <Form.Label style={{ fontSize: "13px", fontWeight: "600", color: "#4b5563" }}>Email (Optional)</Form.Label>
                     <Form.Control
                       type="email"
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
-                      onFocus={() => handleFocus('email')}
-                      onBlur={handleBlur}
-                      className="floating-input"
+                      placeholder="e.g. email@example.com"
+                      style={{ padding: "10px 14px", borderRadius: "6px", fontSize: "14px" }}
                     />
-                    <label className={`floating-label ${formData.email ? 'filled' : ''}`}>
-                      Email (Optional)
-                    </label>
-                  </div>
-                </Form.Group>
-
-                <div className="step-navigation mt-4">
-                  <Button
-                    variant="primary"
-                    className="next-step-btn"
-                    onClick={() => setStep(2)}
-                  >
-                    Next Step <i className="fas fa-arrow-right ms-2"></i>
-                  </Button>
-                </div>
-              </div>
-
-              {/* Step 2: Address Details */}
-              <div className={`form-step ${step === 2 ? 'active' : ''}`}>
-                <h6 className="fw-bold mb-3">Address Details</h6>
-
-                <Form.Group className="mb-3 floating-label-group">
-                  <div className={`floating-input-wrapper ${focusedField === 'street' || formData.street ? 'focused' : ''}`}>
-                    <FaMapMarkerAlt className="input-icon" />
+                  </Form.Group>
+                </Col>
+                <Col md={6} className="mb-3">
+                  <Form.Group>
+                    <Form.Label style={{ fontSize: "13px", fontWeight: "600", color: "#4b5563" }}>Street Address *</Form.Label>
                     <Form.Control
                       type="text"
                       name="street"
                       value={formData.street}
                       onChange={handleChange}
-                      onFocus={() => handleFocus('street')}
-                      onBlur={handleBlur}
                       required
-                      className="floating-input"
+                      placeholder="House No, Building, Street Area"
+                      style={{ padding: "10px 14px", borderRadius: "6px", fontSize: "14px" }}
                     />
-                    <label className={`floating-label ${formData.street ? 'filled' : ''}`}>
-                      Street Address *
-                    </label>
-                    <FaCrosshairs
-                      className="location-icon"
-                      onClick={getCurrentLocation}
-                      title="Use current location"
-                    />
-                  </div>
-                </Form.Group>
+                  </Form.Group>
+                </Col>
+              </Row>
 
-                <Form.Group className="mb-3 floating-label-group">
-                  <div className={`floating-input-wrapper ${focusedField === 'apartment' || formData.apartment ? 'focused' : ''}`}>
-                    <FaHome className="input-icon" />
+              <Row>
+                <Col md={6} className="mb-3">
+                  <Form.Group>
+                    <Form.Label style={{ fontSize: "13px", fontWeight: "600", color: "#4b5563" }}>Apartment, Suite, etc (Optional)</Form.Label>
                     <Form.Control
                       type="text"
                       name="apartment"
                       value={formData.apartment}
                       onChange={handleChange}
-                      onFocus={() => handleFocus('apartment')}
-                      onBlur={handleBlur}
-                      className="floating-input"
+                      placeholder="Apartment or Suite number"
+                      style={{ padding: "10px 14px", borderRadius: "6px", fontSize: "14px" }}
                     />
-                    <label className={`floating-label ${formData.apartment ? 'filled' : ''}`}>
-                      Apartment, Suite, etc (Optional)
-                    </label>
-                  </div>
-                </Form.Group>
-
-                <Form.Group className="mb-3 floating-label-group">
-                  <div className={`floating-input-wrapper ${focusedField === 'landmark' || formData.landmark ? 'focused' : ''}`}>
-                    <FaMapPin className="input-icon" />
+                  </Form.Group>
+                </Col>
+                <Col md={6} className="mb-3">
+                  <Form.Group>
+                    <Form.Label style={{ fontSize: "13px", fontWeight: "600", color: "#4b5563" }}>Landmark (Optional)</Form.Label>
                     <Form.Control
                       type="text"
                       name="landmark"
                       value={formData.landmark}
                       onChange={handleChange}
-                      onFocus={() => handleFocus('landmark')}
-                      onBlur={handleBlur}
-                      className="floating-input"
+                      placeholder="E.g. near Apollo Hospital"
+                      style={{ padding: "10px 14px", borderRadius: "6px", fontSize: "14px" }}
                     />
-                    <label className={`floating-label ${formData.landmark ? 'filled' : ''}`}>
-                      Landmark (Optional)
-                    </label>
-                  </div>
-                </Form.Group>
+                  </Form.Group>
+                </Col>
+              </Row>
 
-                <div className="step-navigation d-flex justify-content-between mt-4">
-                  <Button
-                    variant="outline-secondary"
-                    onClick={() => setStep(1)}
-                  >
-                    <i className="fas fa-arrow-left me-2"></i> Back
-                  </Button>
-                  <Button
-                    variant="primary"
-                    className="next-step-btn"
-                    onClick={() => setStep(3)}
-                  >
-                    Next Step <i className="fas fa-arrow-right ms-2"></i>
-                  </Button>
-                </div>
-              </div>
-
-              {/* Step 3: Location & Save */}
-              <div className={`form-step ${step === 3 ? 'active' : ''}`}>
-                <h6 className="fw-bold mb-3">Location Details</h6>
-
-                <Form.Group className="mb-3 floating-label-group">
-                  <div className={`floating-input-wrapper ${focusedField === 'city' || formData.city ? 'focused' : ''}`}>
-                    <FaCity className="input-icon" />
+              <Row>
+                <Col md={6} className="mb-3">
+                  <Form.Group>
+                    <Form.Label style={{ fontSize: "13px", fontWeight: "600", color: "#4b5563" }}>City *</Form.Label>
                     <Form.Control
                       type="text"
                       name="city"
                       value={formData.city}
                       onChange={handleChange}
-                      onFocus={() => handleFocus('city')}
-                      onBlur={handleBlur}
                       required
-                      className="floating-input"
+                      placeholder="City Name"
+                      style={{ padding: "10px 14px", borderRadius: "6px", fontSize: "14px" }}
                     />
-                    <label className={`floating-label ${formData.city ? 'filled' : ''}`}>
-                      City *
-                    </label>
-                  </div>
-                </Form.Group>
-
-                <Form.Group className="mb-3 floating-label-group">
-                  <div className={`floating-input-wrapper ${focusedField === 'state' || formData.state ? 'focused' : ''}`}>
-                    <FaMapMarkerAlt className="input-icon" />
+                  </Form.Group>
+                </Col>
+                <Col md={6} className="mb-3">
+                  <Form.Group>
+                    <Form.Label style={{ fontSize: "13px", fontWeight: "600", color: "#4b5563" }}>State *</Form.Label>
                     <Form.Control
                       type="text"
                       name="state"
                       value={formData.state}
                       onChange={handleChange}
-                      onFocus={() => handleFocus('state')}
-                      onBlur={handleBlur}
                       required
-                      className="floating-input"
+                      placeholder="State Name"
+                      style={{ padding: "10px 14px", borderRadius: "6px", fontSize: "14px" }}
                     />
-                    <label className={`floating-label ${formData.state ? 'filled' : ''}`}>
-                      State *
-                    </label>
-                  </div>
-                </Form.Group>
+                  </Form.Group>
+                </Col>
+              </Row>
 
-                <Form.Group className="mb-3">
-                  <div className="country-select-wrapper">
-                    <FaGlobe className="select-icon" />
+              <Row>
+                <Col md={6} className="mb-4">
+                  <Form.Group>
+                    <Form.Label style={{ fontSize: "13px", fontWeight: "600", color: "#4b5563" }}>Country *</Form.Label>
                     <Form.Select
                       name="country"
                       value={formData.country}
                       onChange={handleChange}
-                      className="styled-select"
+                      required
+                      style={{ padding: "10px 14px", borderRadius: "6px", fontSize: "14px" }}
                     >
-                      <option>India</option>
-                      <option>USA</option>
-                      <option>UK</option>
-                      <option>Canada</option>
-                      <option>Australia</option>
+                      <option value="India">India</option>
                     </Form.Select>
-                  </div>
-                </Form.Group>
-
-                <Form.Group className="mb-4 floating-label-group">
-                  <div className={`floating-input-wrapper ${focusedField === 'zip' || formData.zip ? 'focused' : ''}`}>
-                    <FaMapPin className="input-icon" />
+                  </Form.Group>
+                </Col>
+                <Col md={6} className="mb-4">
+                  <Form.Group>
+                    <Form.Label style={{ fontSize: "13px", fontWeight: "600", color: "#4b5563" }}>ZIP / PIN Code *</Form.Label>
                     <Form.Control
                       type="text"
                       name="zip"
                       value={formData.zip}
                       onChange={handleChange}
-                      onFocus={() => handleFocus('zip')}
-                      onBlur={handleBlur}
                       required
-                      className="floating-input"
+                      placeholder="e.g. 560038"
+                      style={{ padding: "10px 14px", borderRadius: "6px", fontSize: "14px" }}
                     />
-                    <label className={`floating-label ${formData.zip ? 'filled' : ''}`}>
-                      ZIP / Postcode *
-                    </label>
-                  </div>
-                </Form.Group>
+                  </Form.Group>
+                </Col>
+              </Row>
 
-                <div className="step-navigation d-flex justify-content-between mt-4">
-                  <Button
-                    variant="outline-secondary"
-                    onClick={() => setStep(2)}
-                  >
-                    <i className="fas fa-arrow-left me-2"></i> Back
-                  </Button>
-                  <Button
-                    type="submit"
-                    className="save-address-btn"
-                    disabled={loading}
-                  >
-                    {loading ? (
-                      "Saving..."
-                    ) : (
-                      <>
-                        <i className="fas fa-check-circle me-2"></i>
-                        {existingAddress ? "Update Address" : "Save Address"}
-                      </>
-                    )}
-                  </Button>
-                </div>
+              <div className="d-flex gap-3 pt-4 mt-2 border-top">
+                <Button 
+                  variant="outline-secondary" 
+                  onClick={() => navigate("/save-address")}
+                  style={{ fontWeight: "600", padding: "10px 24px", borderRadius: "6px" }}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  variant="primary" 
+                  disabled={loading}
+                  style={{ fontWeight: "600", padding: "10px 32px", borderRadius: "6px", backgroundColor: "#0a45bd", borderColor: "#0a45bd" }}
+                >
+                  {loading ? (
+                    <Spinner size="sm" animation="border" />
+                  ) : existingAddress ? "Update Address" : "Save Address"}
+                </Button>
               </div>
+
             </Form>
-          </Card.Body>
-        </Card>
-      </Container>
+
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

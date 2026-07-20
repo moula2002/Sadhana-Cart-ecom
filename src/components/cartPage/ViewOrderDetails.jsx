@@ -18,11 +18,20 @@ import {
   FaBoxOpen,
   FaUndo,
   FaCheckDouble,
-  FaMoneyBillWave
+  FaMoneyBillWave,
+  FaUser,
+  FaShoppingBag,
+  FaHeart,
+  FaMapMarkerAlt,
+  FaGift,
+  FaCreditCard,
+  FaCog,
+  FaSignOutAlt
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db } from "../../firebase";
+import "../../pages/Profile.css";
 import { collection, query, orderBy, getDocs } from "firebase/firestore";
 
 const formatCurrency = (val) =>
@@ -81,7 +90,7 @@ const getStatusBadgeStyle = (status) => {
   // Regular order status styling
   switch (statusLower) {
     case "pending":
-      return { background: "#fff3cd", color: "#856404" };
+      return { background: "#0d6efd", color: "#ffffff" }; // Blue background, white text for Order Placed
     case "processing":
       return { background: "#cfe2ff", color: "#084298" };
     case "shipped":
@@ -91,7 +100,7 @@ const getStatusBadgeStyle = (status) => {
     case "cancelled":
       return { background: "#f8d7da", color: "#842029" };
     default:
-      return { background: "#f8f9fa", color: "#666" };
+      return { background: "#0d6efd", color: "#ffffff" };
   }
 };
 
@@ -304,160 +313,188 @@ function ViewOrderDetails() {
     );
   }
 
-  return (
-    <div style={{ background: "#fff", minHeight: "100vh" }}>
-      <div
-        style={{
-          padding: "20px 16px",
-          borderBottom: "1px solid #e0e0e0",
-          display: "flex",
-          alignItems: "center",
-          gap: "16px"
-        }}
-      >
-        <FaArrowLeft
-          style={{ fontSize: "20px", cursor: "pointer", color: "#333" }}
-          onClick={() => navigate(-1)}
-        />
-        <h1 style={{ fontSize: "20px", fontWeight: "600", margin: 0 }}>
-          My Orders
-        </h1>
-      </div>
+  const handleLogoutClick = () => {
+    const auth = getAuth();
+    auth.signOut().then(() => navigate("/login"));
+  };
 
-      <Container className="py-3" style={{ maxWidth: "720px" }}>
-        <div
-          style={{
-            display: "flex",
-            gap: "16px",
-            marginBottom: "24px",
-            borderBottom: "2px solid #f0f0f0",
-            paddingBottom: "8px",
-            overflowX: "auto",
-            whiteSpace: "nowrap"
-          }}
-        >
-          {statusTabs.map((tab) => (
-            <span
-              key={tab}
-              onClick={() => setSelectedTab(tab)}
-              style={{
-                fontSize: "15px",
-                fontWeight: selectedTab === tab ? "600" : "400",
-                color: selectedTab === tab ? "#4050b5" : "#666",
-                cursor: "pointer",
-                paddingBottom: "8px",
-                borderBottom: selectedTab === tab ? "3px solid #4050b5" : "none",
-              }}
-            >
-              {tab}
-            </span>
-          ))}
+  return (
+    <div className="profile-dashboard-wrapper" style={{ background: "#f8f9fa", padding: "20px" }}>
+      <div className="profile-dashboard-container" style={{ maxWidth: "1200px", margin: "0 auto", border: "1px solid #e0e0e0", borderRadius: "10px", overflow: "hidden", background: "white" }}>
+        
+        {/* Title */}
+        <div className="profile-title-header d-flex align-items-center" style={{ gap: "12px", background: "#0a45bd", color: "white", padding: "16px 24px", margin: 0, borderRadius: 0 }}>
+          <h2 style={{ color: "white", margin: 0, fontSize: "20px", fontWeight: "bold" }}>My Orders Page</h2>
         </div>
 
-        {filteredOrders.length === 0 ? (
-          <Alert variant="light" className="text-center py-5">
-            No {selectedTab !== "All" ? selectedTab.toLowerCase() : ""} orders found
-          </Alert>
-        ) : (
-          filteredOrders.map((order) => (
-            <Card
-              key={order.id}
-              className="mb-4"
-              style={{
-                border: "1px solid #e0e0e0",
-                borderRadius: "12px",
-                boxShadow: "none"
-              }}
-            >
-              <Card.Body style={{ padding: "16px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <span style={{ color: "#4050b5", fontSize: "14px" }}>
-                    Order #{order.orderId}
-                  </span>
-                  <span style={{ fontSize: "14px", color: "#666" }}>
-                    {order.date}
-                  </span>
-                </div>
+        {/* Outer Dashboard Grid */}
+        <div className="dashboard-grid-layout" style={{ margin: 0, borderRadius: "0 0 10px 10px", background: "white", gap: 0 }}>
+          
+          {/* Sidebar Menu */}
+          <div className="dashboard-sidebar" style={{ borderRight: "1px solid #e0e0e0", padding: "24px 16px", minHeight: "600px", borderRadius: 0, marginTop: 0 }}>
+            <ul className="sidebar-menu-list" style={{ marginTop: "10px" }}>
+              <li className="sidebar-menu-item" onClick={() => navigate("/profile")}>
+                <FaUser className="menu-icon" />
+                <span>My Profile</span>
+              </li>
+              <li className="sidebar-menu-item active" onClick={() => navigate("/orders")} style={{ background: "#e8f0fe", color: "#0a45bd", borderRadius: "6px" }}>
+                <FaShoppingBag className="menu-icon" style={{ color: "#0a45bd" }} />
+                <span style={{ fontWeight: "bold" }}>My Orders</span>
+              </li>
+              <li className="sidebar-menu-item" onClick={() => navigate("/wishlist")}>
+                <FaHeart className="menu-icon" />
+                <span>Wishlist</span>
+              </li>
+              <li className="sidebar-menu-item" onClick={() => navigate("/save-address")}>
+                <FaMapMarkerAlt className="menu-icon" />
+                <span>My Addresses</span>
+              </li>
+              <li className="sidebar-menu-item">
+                <FaGift className="menu-icon" />
+                <span>Sadhana Rewards</span>
+              </li>
+              <li className="sidebar-menu-item">
+                <FaCreditCard className="menu-icon" />
+                <span>Payment Methods</span>
+              </li>
+              <li className="sidebar-menu-item">
+                <FaCog className="menu-icon" />
+                <span>Account Settings</span>
+              </li>
+              <li className="sidebar-menu-item logout-item" onClick={handleLogoutClick} style={{ marginTop: "40px" }}>
+                <FaSignOutAlt className="menu-icon" />
+                <span>Logout</span>
+              </li>
+            </ul>
+          </div>
 
-                <hr />
+          {/* Main Dashboard Section */}
+          <div className="dashboard-main-content" style={{ padding: "32px", display: "block" }}>
+            <h4 className="fw-bold mb-4 text-dark" style={{ fontSize: "18px" }}>My Orders</h4>
+            
+            <div className="d-flex gap-4 mb-4 border-bottom" style={{ borderColor: "#eee" }}>
+              {statusTabs.slice(0, 5).map((tab) => (
+                <span
+                  key={tab}
+                  onClick={() => setSelectedTab(tab)}
+                  style={{
+                    fontSize: "14px",
+                    fontWeight: selectedTab === tab ? "bold" : "500",
+                    color: selectedTab === tab ? "#0a45bd" : "#666",
+                    cursor: "pointer",
+                    paddingBottom: "12px",
+                    borderBottom: selectedTab === tab ? "2px solid #0a45bd" : "2px solid transparent",
+                    marginBottom: "-2px"
+                  }}
+                >
+                  {tab}
+                </span>
+              ))}
+            </div>
 
-                {order.products.map((product, index) => (
-                  <Row key={index} className={index > 0 ? "mt-3" : ""}>
-                    <Col xs={4}>
-                      <Image
-                        src={product.image}
-                        fluid
-                        style={{
-                          height: "100px",
-                          width: "100%",
-                          objectFit: "cover",
-                          borderRadius: "8px",
-                          backgroundColor: "#f8f9fa"
-                        }}
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = "https://via.placeholder.com/400x500?text=Product";
-                        }}
-                      />
-                    </Col>
-
-                    <Col xs={8}>
-                      <div style={{ fontSize: "14px", fontWeight: "500" }}>
-                        {product.name}
+            {filteredOrders.length === 0 ? (
+              <Alert variant="light" className="text-center py-5" style={{ background: "#f9f9f9" }}>
+                No {selectedTab !== "All" ? selectedTab.toLowerCase() : ""} orders found
+              </Alert>
+            ) : (
+              filteredOrders.map((order) => (
+                <Card
+                  key={order.id}
+                  className="mb-4"
+                  style={{ border: "1px solid #f0f0f0", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.03)" }}
+                >
+                  <Card.Body className="p-4 d-flex justify-content-between align-items-center">
+                    {/* Left Column: ID and Images */}
+                    <div style={{ flex: "1" }}>
+                      <div className="text-dark fw-bold mb-3" style={{ fontSize: "14px" }}>
+                        Order ID: <span className="text-dark">#{order.orderId}</span>
                       </div>
-                      <div style={{ fontSize: "14px", color: "#666" }}>
-                        Qty: {product.quantity}
+                      <div className="d-flex flex-wrap gap-2">
+                        {order.products.map((product, index) => (
+                          <div key={index} style={{ width: "65px", height: "85px", overflow: "hidden", borderRadius: "6px", backgroundColor: "#f8f9fa", border: "1px solid #eee" }}>
+                            <Image
+                              src={product.image}
+                              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = "https://via.placeholder.com/400x500?text=Product";
+                              }}
+                            />
+                          </div>
+                        ))}
                       </div>
-                      <div style={{ fontWeight: "600", marginTop: "4px" }}>
-                        {formatCurrency(product.price * product.quantity)}
+                    </div>
+
+                    {/* Middle Column: Date and Items count */}
+                    <div style={{ flex: "1", textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "space-between", height: "125px" }}>
+                      <div className="text-muted" style={{ fontSize: "14px", marginTop: "2px" }}>
+                        {order.date}
                       </div>
-                    </Col>
-                  </Row>
-                ))}
+                      <div className="text-dark fw-bold" style={{ fontSize: "14px", marginTop: "auto" }}>
+                        {order.products.reduce((acc, p) => acc + (p.quantity || 1), 0)} items
+                      </div>
+                    </div>
 
-                <hr />
-
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <Badge
-                    style={{
-                      ...getStatusBadgeStyle(order.status),
-                      borderRadius: "20px",
-                      padding: "6px 16px",
-                      display: "flex",
-                      alignItems: "center"
-                    }}
-                  >
-                    {getStatusIcon(order.status)}
-                    {getStatusDisplayText(order.status)}
-                  </Badge>
-
-                  <div>
-                    <span style={{ fontSize: "14px", color: "#666", marginRight: "10px" }}>
-                      Total: {formatCurrency(order.total)}
-                    </span>
-                    <Button
-                      variant="link"
-                      style={{ color: "#4050b5", textDecoration: "none" }}
-                      onClick={() =>
-                        navigate("/order-details", {
-                          state: {
-                            ...order,
-                            userId: userId,   // ✅ use state variable
-                            orderId: order.orderId || order.id,
-                            items: order.products
-                          }
-                        })
-                      }
-                    >
-                      Details
-                    </Button>
-                  </div>
-                </div>
-              </Card.Body>
-            </Card>
-          ))
-        )}
-      </Container>
+                    {/* Right Column: Status and Details link */}
+                    <div style={{ flex: "1", textAlign: "right", display: "flex", flexDirection: "column", justifyContent: "space-between", alignItems: "flex-end", height: "125px" }}>
+                      <div>
+                        <Badge
+                          style={{
+                            ...getStatusBadgeStyle(order.status),
+                            padding: "8px 16px",
+                            borderRadius: "6px",
+                            fontWeight: "600",
+                            fontSize: "12px",
+                            letterSpacing: "0.3px",
+                            border: order.status.toLowerCase() === 'delivered' ? '1px solid #c3e6cb' : 
+                                    order.status.toLowerCase() === 'shipped' ? '1px solid #b8daff' : 
+                                    order.status.toLowerCase() === 'processing' ? '1px solid #ffeeba' : 'none',
+                            background: order.status.toLowerCase() === 'delivered' ? '#e2f5ec' : 
+                                        order.status.toLowerCase() === 'shipped' ? '#e6f0ff' : 
+                                        order.status.toLowerCase() === 'processing' ? '#fff6e0' : 
+                                        order.status.toLowerCase() === 'pending' || order.status.toLowerCase() === 'order placed' ? '#0d6efd' : getStatusBadgeStyle(order.status).background,
+                            color: order.status.toLowerCase() === 'delivered' ? '#22a061' : 
+                                   order.status.toLowerCase() === 'shipped' ? '#0a45bd' : 
+                                   order.status.toLowerCase() === 'processing' ? '#e59223' : 
+                                   order.status.toLowerCase() === 'pending' || order.status.toLowerCase() === 'order placed' ? '#ffffff' : getStatusBadgeStyle(order.status).color
+                          }}
+                        >
+                          {getStatusDisplayText(order.status)}
+                        </Badge>
+                      </div>
+                      <Button
+                        variant="link"
+                        className="p-0 fw-bold"
+                        style={{ color: "#0a45bd", textDecoration: "none", fontSize: "15px", marginTop: "auto" }}
+                        onClick={() =>
+                          navigate("/order-details", {
+                            state: {
+                              ...order,
+                              userId: userId,
+                              orderId: order.orderId || order.id,
+                              items: order.products
+                            }
+                          })
+                        }
+                      >
+                        View Details
+                      </Button>
+                    </div>
+                  </Card.Body>
+                </Card>
+              ))
+            )}
+            
+            {filteredOrders.length > 0 && (
+              <div className="mt-4">
+                <Button variant="link" className="p-0 fw-bold" style={{ color: "#0a45bd", textDecoration: "none", fontSize: "15px" }} onClick={() => setSelectedTab("All")}>
+                  View All Orders
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

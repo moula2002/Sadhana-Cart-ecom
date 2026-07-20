@@ -1,0 +1,148 @@
+/* ========================================== */
+/* HAMBURGER MENU OFFCANVAS STYLES           */
+/* ========================================== */
+.hamburger-offcanvas {
+  width: 320px !important;
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 20px;
+  overflow: hidden;
+}
+
+.login-offcanvas {
+  width: 320px !important;
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+  overflow: hidden;
+}
+
+.hamburger-header {
+  padding: 30px 20px 20px 20px;
+  border-bottom: none;
+  background-color: #fff;
+}
+
+.hamburger-avatar {
+  width: 60px;
+  height: 60px;
+  background-color: #e6e6e6;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  color: #1a1a1a;
+  flex-shrink: 0;
+}
+
+.hamburger-welcome h5 {
+  color: #1a1a1a;
+  margin-bottom: 8px;
+  font-size: 1.15rem;
+}
+
+.hamburger-login-btn {
+  border-radius: 8px;
+  padding: 6px 18px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  background-color: #1565c0;
+  border: none;
+  color: white;
+  white-space: nowrap;
+}
+
+.hamburger-signup-btn {
+  border-radius: 20px;
+  padding: 6px 18px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: 1px solid #1a1a1a;
+  color: #1a1a1a;
+  background-color: transparent;
+  white-space: nowrap;
+}
+
+.hamburger-signup-btn:hover {
+  background-color: #f1f1f1;
+}
+
+.hamburger-menu-list {
+  padding: 10px 0 20px 0;
+  background-color: #fff;
+}
+
+.hamburger-menu-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 24px;
+  text-decoration: none !important;
+  color: #1a1a1a;
+  transition: background-color 0.2s ease;
+}
+
+.hamburger-menu-item:hover {
+  background-color: #f8f9fa;
+  color: #1a1a1a;
+  text-decoration: none !important;
+}
+
+.hamburger-menu-item i:first-child {
+  width: 28px;
+  font-size: 1.2rem;
+  color: #1565c0 !important;
+  text-align: center;
+  margin-right: 15px;
+}
+
+.hamburger-menu-item span {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.menu-chevron {
+  font-size: 0.8rem !important;
+  color: #8a8a8a !important;
+  margin-right: 0 !important;
+  width: auto !important;
+}
+
+.hamburger-divider {
+  margin: 10px 24px;
+  border-color: #e0e0e0;
+  opacity: 1;
+}
+
+/* Dark mode overrides for hamburger menu */
+.dark-theme .hamburger-offcanvas,
+.dark-theme .hamburger-header,
+.dark-theme .hamburger-menu-list {
+  background-color: #1e1e1e;
+}
+
+.dark-theme .hamburger-avatar {
+  background-color: #333;
+  color: #f5f5f5;
+}
+
+.dark-theme .hamburger-welcome h5,
+.dark-theme .hamburger-menu-item,
+.dark-theme .hamburger-menu-item:hover {
+  color: #f5f5f5;
+}
+
+.dark-theme .hamburger-signup-btn {
+  border-color: #f5f5f5;
+  color: #f5f5f5;
+}
+
+.dark-theme .hamburger-signup-btn:hover {
+  background-color: #333;
+}
+
+.dark-theme .menu-chevron {
+  color: #777 !important;
+}
+
+.dark-theme .hamburger-divider {
+  border-color: #333;
+}

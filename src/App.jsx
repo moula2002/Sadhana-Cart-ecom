@@ -11,18 +11,28 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 
+import "./pages/Home.css";
+
 /* ===== Common Components ===== */
 import Header from "./components/Navbar";
 import Footer from "./features/footer/Footer";
+
+/* ===== Sticky Header ===== */
+import StickyHeader from "./components/StickyHeader";
 
 /* ===== Pages ===== */
 import HomePage from "./pages/Home";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import CustomerSupportCenter from "./pages/CustomerService";
+import RewardPage from "./pages/RewardPage";
+import OffersPage from "./pages/OffersPage";
 import AuthPage from "./pages/LoginPage";
-import CategoryProducts from "./components/searchBar/CategoryProducts";
+import ProductListingPage from "./pages/Productlistingpage";
 import AdvancedSearchPage from "./pages/AdvancedSearchPage";
 import SearchResultsPage from "./pages/SearchResultsPage";
+import BrowseCategory from "./pages/BrowseCategory";
+import BestProductsPage from "./pages/BestProductsPage";
+import NewArrivalsPage from "./pages/NewArrivalsPage";
 
 /* ===== Cart & Checkout ===== */
 import CartPage from "./components/cartPage/CartPage";
@@ -51,8 +61,10 @@ import ReferCode from "./pages/ReferCode";
 import Wallet from "./pages/Wallet";
 import Theme from "./pages/Theme";
 import SaveAddress from "./pages/SaveAddress";
+import BrandDetails from "./pages/BrandDetails";
 import AddressList from "./pages/AddressList";
 import Coupens from "./pages/Coupens";
+import RecentlyViewed from "./pages/RecentlyViewed";
 
 /* ================= APP CONTENT ================= */
 const AppContent = () => {
@@ -60,9 +72,11 @@ const AppContent = () => {
 
   // Hide Header & Footer only on Login page
   const hideLayout = location.pathname === "/login";
+  const isHomePage = location.pathname === "/";
 
   return (
     <>
+      {isHomePage && <StickyHeader />}
       {!hideLayout && <Header />}
 
       <main>
@@ -89,24 +103,31 @@ const AppContent = () => {
           <Route path="/refercode" element={<ReferCode />} />
           <Route path="/wallet" element={<Wallet />} />
           <Route path="/theme" element={<Theme />} />
+          <Route path="/recently-viewed" element={<RecentlyViewed />} />
 
           {/* 🔹 Search */}
           <Route path="/advanced-search" element={<AdvancedSearchPage />} />
           <Route path="/search-results" element={<SearchResultsPage />} />
 
+          {/* 🔹 Browse Category */}
+          <Route path="/browse-categories" element={<BrowseCategory />} />
+
           {/* 🔹 Product */}
           <Route path="/product/:id" element={<ProductDetailPage />} />
+
+          {/* 🔹 Brand */}
+          <Route path="/brand/:id" element={<BrandDetails />} />
 
           {/* 🔹 Dynamic Category */}
           <Route
             path="/category/:categoryId"
-            element={<CategoryProducts />}
+            element={<ProductListingPage />}
           />
 
           {/* 🔹 Footer Policy Pages */}
           <Route path="/return-policy" element={<ReturnPolicy />} />
           <Route path="/shipping-policy" element={<ShippingPolicy />} />
-            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route
             path="/terms-and-conditions"
             element={<TermsAndConditions />}
@@ -114,7 +135,7 @@ const AppContent = () => {
           <Route path="/about-us" element={<AboutUs />} />
           <Route path="/faqs" element={<Faqs />} />
           <Route path="/contact" element={<ContactForm />} />
-           <Route path="/coupens" element={<Coupens/>} />
+          <Route path="/coupens" element={<Coupens />} />
 
           {/* 🔹 404 */}
           <Route
@@ -128,6 +149,10 @@ const AppContent = () => {
               </div>
             }
           />
+          <Route path="/rewards" element={<RewardPage />} />
+          <Route path="/offers" element={<OffersPage />} />
+          <Route path="/best-sellers" element={<BestProductsPage />} />
+          <Route path="/new-arrivals" element={<NewArrivalsPage />} />
         </Routes>
       </main>
 

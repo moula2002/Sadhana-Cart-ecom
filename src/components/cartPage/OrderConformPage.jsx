@@ -47,6 +47,7 @@ function OrderConformPage() {
         city: billingDetails.city || defaultBillingDetails.city,
         pincode: billingDetails.pincode || defaultBillingDetails.pincode,
         phone: billingDetails.phone || defaultBillingDetails.phone,
+        email: billingDetails.email || "",
       }
     : defaultBillingDetails;
 
@@ -134,111 +135,97 @@ function OrderConformPage() {
   }
 
   return (
-    <Container className="py-5">
-      <Row className="justify-content-center">
-        <Col lg={9}>
-          {/* Success Modal */}
-          <Modal show={showModal} onHide={() => setShowModal(false)} centered backdrop="static" size="md" className="text-center">
-            <Modal.Body>
-              <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.4 }}>
-                <i className="fas fa-check-circle mb-3" style={{ fontSize: "4rem", color: "#28a745" }} />
-                <h4 className="fw-bold text-success">
-  {t("orderConfirm.success")}
-</h4>
-                <p className="text-muted mb-3">
-                  {coinEquivalent > 0 && (
-                    <>
-                      <Badge bg="warning" className="fs-6 mb-2">
-                        {formatCoinValue(coinEquivalent)} credited
-                      </Badge>
-                      <br />
-                    </>
-                  )}
-                  {t("orderConfirm.thankYou")}
-                </p>
-                <div className="d-flex justify-content-center">
-                  <Button
-                    variant="success"
-                    className="me-2"
-                    onClick={() => {
-                      setShowModal(false);
-                      navigate("/orders");
-                    }}
-                  >
-                    {t("orderConfirm.viewOrders")}
-                  </Button>
-                  <Button
-                    variant="outline-dark"
-                    onClick={() => {
-                      setShowModal(false);
-                      navigate("/");
-                    }}
-                  >
-                    {t("orderConfirm.continueShopping")}
-                  </Button>
-                </div>
-              </motion.div>
-            </Modal.Body>
-          </Modal>
+    <Container className="py-2 d-flex justify-content-center">
+      <Card className="shadow-sm border-0" style={{ maxWidth: '500px', width: '100%', borderRadius: '15px' }}>
+        <div className="bg-primary text-white p-2 text-center" style={{ borderTopLeftRadius: '15px', borderTopRightRadius: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+           <span className="fw-bold fs-6">Order Success Page</span>
+        </div>
+        
+        <Card.Body className="p-3 text-center">
+          <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.4 }}>
+            
+            <div className="position-relative d-inline-block mb-3 mt-1">
+               {/* Confetti decoration bits */}
+               <div className="position-absolute" style={{ top: '-10px', left: '-20px', color: '#ffd700', fontSize: '10px' }}>▼</div>
+               <div className="position-absolute" style={{ top: '20px', right: '-30px', color: '#00d2ff', fontSize: '14px', transform: 'rotate(45deg)' }}>▮</div>
+               <div className="position-absolute" style={{ bottom: '-10px', left: '0px', color: '#ff6b6b', fontSize: '12px' }}>●</div>
+               <div className="position-absolute" style={{ bottom: '10px', right: '-15px', color: '#32cd32', fontSize: '14px' }}>▲</div>
+               
+               <div className="bg-success text-white rounded-circle d-flex justify-content-center align-items-center mx-auto shadow-sm" style={{ width: '65px', height: '65px' }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" fill="currentColor" className="bi bi-check-lg" viewBox="0 0 16 16">
+                    <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z"/>
+                  </svg>
+               </div>
+            </div>
 
-          {/* Order Summary Card */}
-          <motion.div initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.4 }}>
-            <Card className="shadow-lg mb-4 border-success">
-              <Card.Header className="bg-light py-3 border-success">
-                <div className="d-flex align-items-center">
-                  <i className="fas fa-check-circle me-3" style={{ color: "#28a745", fontSize: "1.8rem" }} />
-                  <div>
-                    <h4 className="mb-0 text-success fw-bold">{t("orderConfirm.title")}</h4>
-                    <small className="text-muted">{t("orderConfirm.subtitle")}</small>
-                  </div>
-                </div>
-              </Card.Header>
-              <Card.Body>
-                <Row className="text-center mb-3">
-                  <Col md={4} className="border-end">
-                    <p className="mb-1 fw-semibold text-secondary">{t("orderConfirm.orderId")}</p>
-                    <h5 className="fw-bold text-dark">{orderInfo.orderId}</h5>
-                  </Col>
-                  <Col md={4} className="border-end">
-                    <p className="mb-1 fw-semibold text-secondary">{t("orderConfirm.totalAmount")}</p>
-                    <h5 className="fw-bold text-danger">{formatCurrency(total)}</h5>
-                  </Col>
-                  <Col md={4}>
-                    <p className="mb-1 fw-semibold text-secondary">{t("orderConfirm.paymentMode")}</p>
-                    <h5 className="fw-bold text-primary">{paymentMethod}</h5>
-                  </Col>
-                </Row>
-                
-                {/* Coin Price Section */}
-                {coinEquivalent > 0 && (
-                  <Card className="border-warning mb-0">
-                    <Card.Body className="py-2 bg-warning bg-opacity-10">
-                      <Row className="align-items-center">
-                        <Col md={6}>
-                          <p className="mb-0 fw-bold">
-                            <i className="fas fa-coins me-2 text-warning" />
-                            {t("orderConfirm.coinEquivalent")}
-                          </p>
-                        </Col>
-                        <Col md={6} className="text-end">
-                          <Badge bg="warning" className="fs-5">
-                            {formatCoinValue(coinEquivalent)}
-                          </Badge>
-                          <small className="text-muted d-block">
-                            @ {formatCurrency(coinPrice)} per coin
-                          </small>
-                        </Col>
-                      </Row>
-                    </Card.Body>
-                  </Card>
-                )}
-              </Card.Body>
-            </Card>
+            <h2 className="fw-bold text-dark mb-1" style={{ color: '#002060', fontSize: '1.4rem' }}>Thank You!</h2>
+            <p className="text-muted mb-2" style={{ fontSize: '0.9rem' }}>Your order has been placed successfully.</p>
+            
+            <p className="fw-bold mb-2" style={{ fontSize: '1rem' }}>
+              Order ID: <span className="text-success">{orderInfo.orderId}</span>
+            </p>
 
-          
+            <p className="text-muted mb-3" style={{ fontSize: '0.85rem' }}>
+              We have sent the order details to<br/>
+              <span className="text-primary fw-medium">{initialBillingDetails.email || "your registered email"}</span>
+            </p>
+
+            <div className="d-flex flex-column align-items-center gap-2 mb-0">
+              <Button 
+                variant="primary" 
+                className="w-100 py-1 fw-bold" 
+                style={{ maxWidth: '280px', backgroundColor: '#0047b3', border: 'none', fontSize: '0.9rem' }}
+                onClick={() => navigate("/orders")}
+              >
+                View Order Details
+              </Button>
+              <Button 
+                variant="outline-primary" 
+                className="w-100 py-1 fw-bold bg-white" 
+                style={{ maxWidth: '280px', color: '#0047b3', borderColor: '#0047b3', fontSize: '0.9rem' }}
+                onClick={() => navigate("/")}
+              >
+                Continue Shopping
+              </Button>
+            </div>
+            
+            {coinEquivalent > 0 && (
+              <div className="mt-2">
+                <Badge bg="warning" className="fs-6 px-3 py-1 text-dark shadow-sm">
+                  <i className="fas fa-coins me-2" />
+                  {formatCoinValue(coinEquivalent)} credited
+                </Badge>
+              </div>
+            )}
           </motion.div>
-        </Col>
-      </Row>
+        </Card.Body>
+        
+        <div className="bg-light p-3" style={{ borderBottomLeftRadius: '15px', borderBottomRightRadius: '15px', borderTop: '1px solid #eaeaea' }}>
+           <Row className="text-center align-items-center">
+             <Col xs={4} className="d-flex flex-column align-items-center px-1">
+                <div className="text-primary mb-1 bg-white rounded-circle shadow-sm d-flex align-items-center justify-content-center" style={{ width: '30px', height: '30px', fontSize: '0.8rem' }}>
+                  <i className="fas fa-truck"></i>
+                </div>
+                <span className="fw-bold" style={{ fontSize: '0.8rem', color: '#1a1a2e', lineHeight: '1.2' }}>Free Delivery</span>
+                <span className="text-muted" style={{ fontSize: '0.7rem', lineHeight: '1.2', marginTop: '2px' }}>On orders above ₹5000</span>
+             </Col>
+             <Col xs={4} className="d-flex flex-column align-items-center px-1 border-start border-end">
+                <div className="text-primary mb-1 bg-white rounded-circle shadow-sm d-flex align-items-center justify-content-center" style={{ width: '30px', height: '30px', fontSize: '0.8rem' }}>
+                  <i className="fas fa-undo"></i>
+                </div>
+                <span className="fw-bold" style={{ fontSize: '0.8rem', color: '#1a1a2e', lineHeight: '1.2' }}>Easy Returns</span>
+                <span className="text-muted" style={{ fontSize: '0.7rem', lineHeight: '1.2', marginTop: '2px' }}>Return within 7 days</span>
+             </Col>
+             <Col xs={4} className="d-flex flex-column align-items-center px-1">
+                <div className="text-primary mb-1 bg-white rounded-circle shadow-sm d-flex align-items-center justify-content-center" style={{ width: '30px', height: '30px', fontSize: '0.8rem' }}>
+                  <i className="fas fa-headset"></i>
+                </div>
+                <span className="fw-bold" style={{ fontSize: '0.8rem', color: '#1a1a2e', lineHeight: '1.2' }}>Support</span>
+                <span className="text-muted" style={{ fontSize: '0.7rem', lineHeight: '1.2', marginTop: '2px' }}>We are here to help</span>
+             </Col>
+           </Row>
+        </div>
+      </Card>
     </Container>
   );
 }

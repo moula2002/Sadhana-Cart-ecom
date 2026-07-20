@@ -206,7 +206,7 @@
   "cancel": "Cancel"
 },
 "orders": {
-  "title": "Your Orders",
+  "title": "My Orders",
   "orderId": "Order ID",
   "orderDate": "Order Date",
   "total": "Total",

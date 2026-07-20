@@ -1,0 +1,13 @@
+﻿      <Dropdown.Toggle
+        variant="primary"
+        className="d-flex align-items-center gap-2 px-3 py-2 border-0"
+      >
+        <i className="fas fa-user-circle text-white shadow-sm" style={{ fontSize: '1.2rem' }}></i>
+        <span className="d-none d-lg-inline text-white fw-semibold">
+          {currentUser
+            ? (currentUser.displayName || currentUser.email?.split("@")[0] || "User")
+            : t("login")
+          }
+        </span>
+        <i className="fas fa-chevron-down ms-1 small text-white"></i>
+      </Dropdown.Toggle>

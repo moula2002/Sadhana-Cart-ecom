@@ -10,7 +10,7 @@ function Loading() {
         <span className="dot dot4"></span>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .loading-container {
           min-height: 300px;
           width: 100%;

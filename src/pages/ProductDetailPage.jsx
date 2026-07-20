@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useCallback } from "react";
+import React, { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Container, Row, Col, Spinner, Alert, Card, Button, Form, InputGroup, Modal, Badge, Accordion, Image } from "react-bootstrap";
 import { useDispatch } from "react-redux";
@@ -10,7 +10,7 @@ import {
     FaStar, FaRegStar, FaTruck, FaFileContract, FaCalendarAlt,
     FaShieldAlt, FaHeart, FaRegHeart, FaEdit, FaTrash, FaCamera,
     FaTimes, FaExpand, FaCheck, FaStore, FaBox, FaRupeeSign,
-    FaArrowLeft, FaArrowRight, FaShoppingCart, FaBolt,
+    FaArrowLeft, FaArrowRight, FaShoppingCart, FaBolt, FaTag,
     FaChevronLeft, FaChevronRight, FaImage, FaUser
 } from 'react-icons/fa';
 import { db, storage } from "../firebase";
@@ -48,6 +48,44 @@ function ProductDetailPage() {
 
     const [quantity, setQuantity] = useState(1);
     const [showFullDescription, setShowFullDescription] = useState(false);
+    const [descExpanded, setDescExpanded] = useState(true);
+    const [detailsExpanded, setDetailsExpanded] = useState(true);
+    const [showCompareModal, setShowCompareModal] = useState(false);
+    const [compareProducts, setCompareProducts] = useState([]);
+    const [compareLoading, setCompareLoading] = useState(false);
+    const [showShareModal, setShowShareModal] = useState(false);
+    const [availOffers, setAvailOffers] = useState([]);
+
+    // Recently Viewed & Explore More states
+    const [recentlyViewed, setRecentlyViewed] = useState([]);
+    const rvSliderRef = useRef(null);
+    const scrollRvLeft = () => { if (rvSliderRef.current) rvSliderRef.current.scrollBy({ left: -264, behavior: 'smooth' }); };
+    const scrollRvRight = () => { if (rvSliderRef.current) rvSliderRef.current.scrollBy({ left: 264, behavior: 'smooth' }); };
+
+    const [exploreProducts, setExploreProducts] = useState([]);
+    const [exploreFilter, setExploreFilter] = useState("value"); // "value" | "trends" | "rated"
+
+    const sortedExploreProducts = useMemo(() => {
+        let list = [...exploreProducts];
+        if (exploreFilter === "value") {
+            list.sort((a, b) => {
+                const finalA = Number(a.offerprice || a.price || 0);
+                const originalA = a.price && a.offerprice ? Number(a.price) : finalA * 1.5;
+                const discA = ((originalA - finalA) / originalA);
+
+                const finalB = Number(b.offerprice || b.price || 0);
+                const originalB = b.price && b.offerprice ? Number(b.price) : finalB * 1.5;
+                const discB = ((originalB - finalB) / originalB);
+
+                return discB - discA;
+            });
+        } else if (exploreFilter === "trends") {
+            list.sort((a, b) => (b.rating?.count || 0) - (a.rating?.count || 0));
+        } else if (exploreFilter === "rated") {
+            list.sort((a, b) => (b.rating?.rate || 0) - (a.rating?.rate || 0));
+        }
+        return list;
+    }, [exploreProducts, exploreFilter]);
 
     // Variant (Size/Stock) states
     const [productVariants, setProductVariants] = useState([]);
@@ -510,6 +548,98 @@ function ProductDetailPage() {
         }
     };
 
+    const handleShare = () => {
+        setShowShareModal(true);
+    };
+
+    const shareToWhatsApp = () => {
+        const text = `Check out this amazing product: ${product?.name || product?.title} - ${window.location.href}`;
+        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
+    };
+
+    const shareToFacebook = () => {
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, "_blank");
+    };
+
+    const shareToMessenger = () => {
+        window.open(`https://www.facebook.com/dialog/send?link=${encodeURIComponent(window.location.href)}&app_id=291494419107518&redirect_uri=${encodeURIComponent(window.location.href)}`, "_blank");
+    };
+
+    const shareToGmail = () => {
+        window.open(`mailto:?subject=${encodeURIComponent(product?.name || product?.title)}&body=${encodeURIComponent("Check this out: " + window.location.href)}`, "_blank");
+    };
+
+    const shareToSMS = () => {
+        window.open(`sms:?body=${encodeURIComponent("Check this out: " + window.location.href)}`, "_blank");
+    };
+
+    const shareToLinkedIn = () => {
+        window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`, "_blank");
+    };
+
+    const shareToHangouts = () => {
+        window.open(`https://plus.google.com/share?url=${encodeURIComponent(window.location.href)}`, "_blank");
+    };
+
+    const copyToClipboard = async () => {
+        try {
+            await navigator.clipboard.writeText(window.location.href);
+            toast.success("Product link copied to clipboard!");
+        } catch (err) {
+            console.error("Failed to copy link:", err);
+            toast.error("Failed to copy link.");
+        }
+    };
+
+    const shareNative = async () => {
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: product?.name || product?.title,
+                    text: `Check out this amazing product: ${product?.name || product?.title}`,
+                    url: window.location.href
+                });
+            } catch (err) {
+                console.error("Error with native share", err);
+            }
+        } else {
+            copyToClipboard();
+        }
+    };
+
+    const handleCompare = async () => {
+        if (!product) return;
+        setShowCompareModal(true);
+        setCompareLoading(true);
+        try {
+            const conditions = [
+                where("category", "==", product.category)
+            ];
+            const subcat = product.subcategory || product.subCategory || product.sub_category;
+            if (subcat) {
+                conditions.push(where("subcategory", "==", subcat));
+            }
+
+            const q = query(
+                collection(db, "products"),
+                ...conditions,
+                limit(10)
+            );
+            const querySnapshot = await getDocs(q);
+            const list = querySnapshot.docs
+                .map(doc => ({ id: doc.id, ...doc.data() }))
+                .filter(p => p.id !== product.id)
+                .slice(0, 3);
+
+            setCompareProducts([product, ...list]);
+        } catch (error) {
+            console.error("Error fetching compare products:", error);
+            toast.error("Failed to load similar products for comparison.");
+        } finally {
+            setCompareLoading(false);
+        }
+    };
+
     // Function to fetch seller information
     const fetchSellerInfo = async (productData) => {
         try {
@@ -675,9 +805,59 @@ function ProductDetailPage() {
                 const data = { id: productSnap.id, ...productSnap.data() };
                 setProduct(data);
 
+                // Add to Recently Viewed
+                try {
+                    const rvStr = localStorage.getItem("recentlyViewed");
+                    let rvList = rvStr ? JSON.parse(rvStr) : [];
+                    rvList = rvList.filter(p => p.id !== data.id);
+                    rvList.unshift(data);
+                    if (rvList.length > 20) rvList = rvList.slice(0, 20);
+                    localStorage.setItem("recentlyViewed", JSON.stringify(rvList));
+                    setRecentlyViewed(rvList.filter(p => p.id !== id));
+                } catch (e) {
+                    console.error("Error saving/loading recently viewed", e);
+                }
+
+                // Fetch Explore More products
+                try {
+                    const exploreQ = query(
+                        collection(db, "products"),
+                        where("category", "==", data.category),
+                        limit(35)
+                    );
+                    const exploreSnap = await getDocs(exploreQ);
+                    const exploreList = exploreSnap.docs.map(doc => {
+                        const pData = doc.data();
+                        const priceValue = (pData.price || 0) * EXCHANGE_RATE;
+                        return {
+                            id: doc.id,
+                            ...pData,
+                            priceINR: priceValue.toFixed(0),
+                            priceValue,
+                            rating: pData.rating || { rate: 4.0, count: 100 }
+                        };
+                    }).filter(p => p.id !== id);
+                    setExploreProducts(exploreList.slice(0, 30));
+                } catch (exploreErr) {
+                    console.error("Error fetching explore products:", exploreErr);
+                }
+
                 await fetchSellerInfo(data);
                 await fetchDeliveryTerms(id);
                 await fetchReviews(id);
+                try {
+                    const querySnapshot = await getDocs(collection(db, "razorpay_offers"));
+                    const offerList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), type: 'offer' }));
+                    const enabledOffers = offerList.filter(o => o.status === "Enabled" || o.isActive !== false);
+
+                    const couponsSnapshot = await getDocs(collection(db, "coupons"));
+                    const couponList = couponsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), type: 'coupon' }));
+                    const enabledCoupons = couponList.filter(c => c.status === "Enabled" || c.isActive !== false);
+
+                    setAvailOffers([...enabledOffers, ...enabledCoupons]);
+                } catch (offerErr) {
+                    console.error("Error fetching offers:", offerErr);
+                }
                 const fetchedVariants = Array.isArray(data.sizevariants) ? data.sizevariants : [];
                 setProductVariants(fetchedVariants);
 
@@ -757,13 +937,17 @@ function ProductDetailPage() {
 
     // Function to handle quantity increment
     const handleIncrementQuantity = () => {
-        const maxStock = productVariants.length > 0 ? (currentVariant?.stock || Infinity) : (product?.stock || Infinity);
+        const maxStock = productVariants.length > 0 ? (currentVariant?.stock ?? 0) : (product?.stock ?? 0);
 
         if (quantity >= maxStock) {
-            toast.info(`Maximum stock achieved! Only ${maxStock} units available.`, {
-                position: "top-right",
-                autoClose: 3000
-            });
+            toast.error(
+                `Sorry! You can't increase the quantity any further. Only ${maxStock} items are currently available in stock.`,
+                {
+                    position: "top-center",
+                    autoClose: 3500,
+                    theme: "colored"
+                }
+            );
             return;
         }
 
@@ -773,13 +957,17 @@ function ProductDetailPage() {
     // Function to handle quantity input change
     const handleQuantityChange = (e) => {
         const value = Math.max(1, parseInt(e.target.value) || 1);
-        const maxStock = productVariants.length > 0 ? (currentVariant?.stock || Infinity) : (product?.stock || Infinity);
+        const maxStock = productVariants.length > 0 ? (currentVariant?.stock ?? 0) : (product?.stock ?? 0);
 
         if (value > maxStock) {
-            toast.info(`Maximum stock achieved! Only ${maxStock} units available.`, {
-                position: "top-right",
-                autoClose: 3000
-            });
+            toast.error(
+                `Sorry! You can't increase the quantity any further. Only ${maxStock} items are currently available in stock.`,
+                {
+                    position: "top-center",
+                    autoClose: 3500,
+                    theme: "colored"
+                }
+            );
             setQuantity(maxStock);
         } else {
             setQuantity(value);
@@ -1119,6 +1307,12 @@ function ProductDetailPage() {
         return lines;
     };
 
+    const hasValue = (val) => {
+        if (val === undefined || val === null) return false;
+        const str = String(val).trim();
+        return str !== "" && str.toUpperCase() !== "N/A";
+    };
+
     // Check if delivery or terms info exists
     const hasDeliveryInfo = deliveryTerms.deliveryDate && deliveryTerms.deliveryDate.trim() !== "";
     const hasTermsInfo = deliveryTerms.termsConditions && deliveryTerms.termsConditions.trim() !== "";
@@ -1182,424 +1376,399 @@ function ProductDetailPage() {
             </nav>
 
             {/* Main Product Card */}
-            <Card style={styles.productDetailContainer} className="mb-5">
-                <Row className="g-0">
-                    <Col md={5} style={styles.productImageCol}>
-                        <div className="position-relative">
-                            <img
-                                src={mainImage}
-                                alt={product.name}
-                                className="img-fluid mb-3"
-                                style={styles.detailImg}
-                            />
-                            {discountPercentage > 0 && (
-                                <Badge
-                                    bg="danger"
-                                    className="position-absolute top-0 start-0 m-3"
-                                    style={{ fontSize: '1rem', padding: '8px 12px' }}
-                                >
-                                    {discountPercentage}% OFF
-                                </Badge>
-                            )}
-                            {isOutOfStock && (
-                                <Badge
-                                    bg="dark"
-                                    className="position-absolute top-0 end-0 m-3"
-                                    style={{ fontSize: '0.9rem', padding: '6px 10px' }}
-                                >
-                                    Out of Stock
-                                </Badge>
-                            )}
-                        </div>
-                        <div className="d-flex justify-content-center flex-wrap mt-3 mb-3">
-                            {productImages.map((img, i) => (
-                                <img
-                                    key={i}
-                                    src={img}
-                                    alt={`Thumbnail ${i + 1}`}
-                                    onClick={() => setMainImage(img)}
-                                    style={{
-                                        ...styles.thumbnail,
-                                        ...(mainImage === img ? styles.activeThumbnail : {}),
-                                    }}
-                                />
-                            ))}
-                        </div>
-                    </Col>
-
-                    <Col md={7} className="p-4">
-                        <div className="d-flex justify-content-between align-items-start mb-3">
-                            <div>
-                                <h1 className="fw-bold h2 mb-2">{product.name || product.title}</h1>
-                                <Badge bg="light" text="dark" className="text-uppercase px-3 py-2">
-                                    <FaStore className="me-2" />
-                                    {product.category}
-                                </Badge>
+            <Card style={{ border: 'none', background: 'transparent' }} className="mb-5">
+                <Row className="g-4">
+                    {/* LEFT COLUMN: Gallery, Delivery & Product Details */}
+                    <Col lg={6} md={12}>
+                        {/* Image Gallery */}
+                        <div className="d-flex gap-3 mb-4">
+                            {/* Vertical Thumbnail List */}
+                            <div className="d-flex flex-column gap-2" style={{ width: '60px', flexShrink: 0 }}>
+                                {productImages.map((img, i) => (
+                                    <img
+                                        key={i}
+                                        src={img}
+                                        alt={`Thumbnail ${i + 1}`}
+                                        onClick={() => setMainImage(img)}
+                                        style={{
+                                            width: '60px',
+                                            height: '60px',
+                                            objectFit: 'cover',
+                                            cursor: 'pointer',
+                                            border: mainImage === img ? '2px solid #2874f0' : '1px solid #e2e8f0',
+                                            borderRadius: '6px',
+                                            padding: '2px',
+                                            backgroundColor: '#fff',
+                                            transition: 'all 0.15s ease'
+                                        }}
+                                    />
+                                ))}
                             </div>
 
-                            {/* Wishlist Heart Button */}
-                            <button
-                                onClick={toggleWishlist}
-                                disabled={wishlistLoading}
-                                style={styles.wishlistButton}
-                                className="wishlist-heart-btn"
-                                title={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
-                            >
-                                {wishlistLoading ? (
-                                    <Spinner animation="border" size="sm" variant="danger" />
-                                ) : isInWishlist ? (
-                                    <FaHeart className="text-danger" />
-                                ) : (
-                                    <FaRegHeart className="text-secondary" />
+                            {/* Main Product Image Container */}
+                            <div className="position-relative flex-grow-1 d-flex align-items-center justify-content-center bg-light border" style={{ borderRadius: '12px', minHeight: '380px', maxHeight: '480px', overflow: 'hidden' }}>
+                                <img
+                                    src={mainImage}
+                                    alt={product.name}
+                                    className="img-fluid"
+                                    style={{ maxWidth: '100%', maxHeight: '460px', objectFit: 'contain' }}
+                                />
+                                {discountPercentage > 0 && (
+                                    <Badge
+                                        bg="danger"
+                                        className="position-absolute top-0 start-0 m-3"
+                                        style={{ fontSize: '0.9rem', padding: '6px 10px' }}
+                                    >
+                                        {discountPercentage}% OFF
+                                    </Badge>
                                 )}
-                            </button>
-                        </div>
-
-                        {/* Seller Information */}
-                        {sellerInfo.currentProductSeller && (
-                            <div className="mb-3 d-flex align-items-center">
-                                <div className="bg-light rounded-circle p-2 me-2">
-                                    <FaUser className="text-secondary" />
-                                </div>
-                                <span className="fw-semibold me-2">{sellerInfo.currentProductSeller.name}</span>
-                                {sellerInfo.currentProductSeller.rating > 0 && (
-                                    <Badge bg="warning" text="dark" className="px-2 py-1">
-                                        <FaStar className="me-1" size={12} /> {sellerInfo.currentProductSeller.rating.toFixed(1)}
+                                {isOutOfStock && (
+                                    <Badge
+                                        bg="dark"
+                                        className="position-absolute top-0 end-0 m-3"
+                                        style={{ fontSize: '0.85rem', padding: '6px 10px' }}
+                                    >
+                                        Out of Stock
                                     </Badge>
                                 )}
                             </div>
-                        )}
-
-                        {/* Rating */}
-                        <div className="product-rating mb-3">
-                            <span className="fw-bold me-2" style={{ fontSize: '1.2rem' }}>
-                                {rating.rate.toFixed(1)}
-                            </span>
-                            {[...Array(5)].map((_, i) => (
-                                i < Math.round(rating.rate) ?
-                                    <FaStar key={i} className="text-warning me-1" size={16} /> :
-                                    <FaRegStar key={i} className="text-muted me-1" size={16} />
-                            ))}
-                            <span className="text-muted ms-2">({rating.count} reviews)</span>
                         </div>
 
-                        <hr />
 
-                        {/* Price */}
-                        <div className="mb-4">
-                            <div className="d-flex align-items-baseline">
-                                <h2 style={styles.productPrice} className="mb-0">
-                                    <FaRupeeSign size={24} className="me-1" />
-                                    {calculatedPriceINR}
-                                </h2>
-                                <span className="text-muted ms-3 fs-5 text-decoration-line-through">
-                                    <FaRupeeSign size={16} />{calculatedOriginalPriceINR}
+
+                    </Col>
+                    {/* RIGHT COLUMN: Product Metadata, Options, CTAs */}
+                    <Col lg={6} md={12} className="ps-lg-4">
+                        <div className="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h1 className="fw-bold mb-2" style={{ fontSize: '24px', color: '#111' }}>{product.name || product.title}</h1>
+                                <span className="text-uppercase text-muted" style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '0.8px' }}>
+                                    Category: {product.category}
                                 </span>
                             </div>
-                            <p className="text-success mt-2 mb-0">
-                                <FaCheck className="me-2" />
-                                You save <FaRupeeSign size={12} />{(calculatedOriginalPriceINR - calculatedPriceINR)} ({discountPercentage}% OFF)
-                            </p>
                         </div>
-                        {/* Stock Information */}
+
+                        {/* Rating Row */}
+                        <div className="d-flex align-items-center gap-2 mb-3" style={{ fontSize: '14px' }}>
+                            <div className="d-flex align-items-center gap-1" style={{ color: '#eab308' }}>
+                                <FaStar />
+                                <FaStar />
+                                <FaStar />
+                                <FaStar />
+                                <FaStar />
+                            </div>
+                            <span style={{ color: '#4a5568', fontWeight: '600' }}>
+                                {rating.rate.toFixed(1)} ({rating.count} Reviews)
+                            </span>
+                        </div>
+
+                        {/* Price Block */}
                         <div className="mb-4">
-                            {isOutOfStock ? (
-                                <div className="p-3 bg-danger bg-opacity-10 border border-danger border-opacity-25 rounded d-flex align-items-center">
-                                    <FaTimes className="text-danger me-2" />
-                                    <span className="text-danger fw-bold">Currently Out of Stock</span>
-                                </div>
-                            ) : null}
+                            <div className="d-flex align-items-center gap-2">
+                                <h2 style={{ fontSize: '32px', fontWeight: '800', color: '#111', margin: 0 }}>
+                                    ₹{calculatedPriceINR}
+                                </h2>
+                                <span className="text-muted text-decoration-line-through" style={{ fontSize: '18px' }}>
+                                    ₹{calculatedOriginalPriceINR}
+                                </span>
+                                {discountPercentage > 0 && (
+                                    <span style={{ backgroundColor: '#e6fffa', color: '#0d9488', fontSize: '13px', fontWeight: '700', padding: '4px 8px', borderRadius: '4px' }}>
+                                        {discountPercentage}% OFF
+                                    </span>
+                                )}
+                            </div>
+                            <span style={{ fontSize: '12px', color: '#718096', display: 'block', marginTop: '4px' }}>Inclusive of all taxes</span>
                         </div>
-
-
-                        {/* Description */}
-                        <div className="mb-2">
-
-                            <p
-                                className="text-muted"
-                                style={showFullDescription ? styles.descriptionBoxExpanded : styles.descriptionBox}
-                            >
-                                {product.description || "No description available."}
-                            </p>
-
-                            {product.description && product.description.length > 120 && (
-                                <Button
-                                    variant="link"
-                                    className="p-0"
-                                    style={{ fontSize: "13px", textDecoration: "none" }}
-                                    onClick={() => setShowFullDescription(!showFullDescription)}
-                                >
-                                    {showFullDescription ? "Show Less" : "Read More"}
-                                </Button>
-                            )}
-
-                        </div>
-
-                        {/* Product Details Accordion */}
-                        {product && (
-                            <Accordion className="mt-1 mb-1">
-                                <Accordion.Item eventKey="0">
-                                    <Accordion.Header>
-                                        <strong>Details</strong>
-                                    </Accordion.Header>
-
-                                    <Accordion.Body>
-
-                                        {product.material && (
-                                            <Row className="mb-2">
-                                                <Col xs={6}><strong>Material :</strong></Col>
-                                                <Col xs={6}>{product.material}</Col>
-                                            </Row>
-                                        )}
-
-                                        {product.pattern && (
-                                            <Row className="mb-2">
-                                                <Col xs={6}><strong>Pattern :</strong></Col>
-                                                <Col xs={6}>{product.pattern}</Col>
-                                            </Row>
-                                        )}
-
-                                        {product.sleevetype && (
-                                            <Row className="mb-2">
-                                                <Col xs={6}><strong>Sleeve Type :</strong></Col>
-                                                <Col xs={6}>{product.sleevetype}</Col>
-                                            </Row>
-                                        )}
-
-                                        {product.hsncode && (
-                                            <Row className="mb-2">
-                                                <Col xs={6}><strong>HSN Code :</strong></Col>
-                                                <Col xs={6}>{product.hsncode}</Col>
-                                            </Row>
-                                        )}
-
-                                        {product.fittype && (
-                                            <Row className="mb-2">
-                                                <Col xs={6}><strong>Fit Type :</strong></Col>
-                                                <Col xs={6}>{product.fittype}</Col>
-                                            </Row>
-                                        )}
-
-                                        {product.gender && (
-                                            <Row className="mb-2">
-                                                <Col xs={6}><strong>Gender :</strong></Col>
-                                                <Col xs={6}>{product.gender}</Col>
-                                            </Row>
-                                        )}
-
-                                        {product.necktype && (
-                                            <Row className="mb-2">
-                                                <Col xs={6}><strong>Neck Type :</strong></Col>
-                                                <Col xs={6}>{product.necktype}</Col>
-                                            </Row>
-                                        )}
-
-                                        {product.occasion && (
-                                            <Row className="mb-2">
-                                                <Col xs={6}><strong>Occasion :</strong></Col>
-                                                <Col xs={6}>{product.occasion}</Col>
-                                            </Row>
-                                        )}
-
-                                        {product.stitchtype && (
-                                            <Row className="mb-2">
-                                                <Col xs={6}><strong>Stitch Type :</strong></Col>
-                                                <Col xs={6}>{product.stitchtype}</Col>
-                                            </Row>
-                                        )}
-
-                                        {product.lining && (
-                                            <Row className="mb-2">
-                                                <Col xs={6}><strong>Lining :</strong></Col>
-                                                <Col xs={6}>{product.lining}</Col>
-                                            </Row>
-                                        )}
-
-                                        {product.slittype && (
-                                            <Row className="mb-2">
-                                                <Col xs={6}><strong>Slit Type :</strong></Col>
-                                                <Col xs={6}>{product.slittype}</Col>
-                                            </Row>
-                                        )}
-
-                                        {product.color && (
-                                            <Row className="mb-2">
-                                                <Col xs={6}><strong>Color :</strong></Col>
-                                                <Col xs={6}>{product.color}</Col>
-                                            </Row>
-                                        )}
-
-                                        <Row className="mb-2">
-                                            <Col xs={6}><strong>Current Stock :</strong></Col>
-                                            <Col xs={6}>
-                                                {productVariants.length > 0
-                                                    ? `${currentVariant?.stock || 0} (Size: ${selectedSize})`
-                                                    : (product?.stock || 0)}
-                                            </Col>
-                                        </Row>
-
-                                        {(product?.totalstock || product?.totalStock) && (
-                                            <Row className="mb-2">
-                                                <Col xs={6}><strong>Total Stock :</strong></Col>
-                                                <Col xs={6}>{product?.totalstock || product?.totalStock}</Col>
-                                            </Row>
-                                        )}
-
-                                    </Accordion.Body>
-                                </Accordion.Item>
-                            </Accordion>
-                        )}
 
                         {/* Size Selector */}
                         {sortedVariants.length > 0 && (
-                            <div className="mt-2 mb-3">
-                                <Form.Label className="fw-bold mb-2">
-                                    <FaBox className="me-2" />
-                                    Select Size
-                                </Form.Label>
-                                <div className="d-flex flex-wrap mt-1">
+                            <div className="mb-4">
+                                <label className="fw-bold mb-2" style={{ fontSize: '14px', color: '#333' }}>Select Size</label>
+                                <div className="d-flex flex-wrap gap-2">
                                     {sortedVariants.map((variant) => (
-                                        <Button
+                                        <button
                                             key={variant.size}
+                                            type="button"
                                             onClick={() => handleSizeSelect(variant.size)}
-                                            variant="light"
                                             style={{
-                                                ...styles.sizeButton,
-                                                ...(selectedSize === variant.size ? styles.activeSizeButton : {}),
-                                                ...((variant.stock || 0) === 0 ? styles.outOfStock : {}),
+                                                border: selectedSize === variant.size ? '2px solid #2874f0' : '1px solid #cbd5e0',
+                                                backgroundColor: selectedSize === variant.size ? '#f0f7ff' : '#ffffff',
+                                                color: selectedSize === variant.size ? '#2874f0' : '#2d3748',
+                                                padding: '8px 16px',
+                                                borderRadius: '6px',
+                                                fontSize: '13px',
+                                                fontWeight: '600',
+                                                cursor: (variant.stock || 0) === 0 ? 'not-allowed' : 'pointer',
+                                                textDecoration: (variant.stock || 0) === 0 ? 'line-through' : 'none',
+                                                opacity: (variant.stock || 0) === 0 ? 0.5 : 1
                                             }}
                                             disabled={(variant.stock || 0) === 0}
                                         >
                                             {variant.size}
-
-                                        </Button>
+                                        </button>
                                     ))}
                                 </div>
                             </div>
                         )}
 
-                        {/* Attractive Quantity Selector */}
-                        <div className="mb-4">
-                            <Form.Label className="fw-bold mb-3 fs-5">Quantity</Form.Label>
 
-                            <div
-                                className="d-flex align-items-center justify-content-between px-3 py-2"
-                                style={{
-                                    width: "220px",
-                                    borderRadius: "12px",
-                                    border: "2px solid #f0f0f0",
-                                    background: "#fafafa",
-                                    boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-                                }}
-                            >
-                                <Button
+
+                        {/* Quantity Selector */}
+                        <div className="mb-4">
+                            <label className="fw-bold mb-2" style={{ fontSize: '14px', color: '#333' }}>Quantity</label>
+                            <div className="d-flex align-items-center border" style={{ width: '120px', height: '38px', borderRadius: '6px', overflow: 'hidden', backgroundColor: '#fcfcfc' }}>
+                                <button
+                                    type="button"
                                     onClick={() => setQuantity(q => Math.max(1, q - 1))}
                                     disabled={isOutOfStock}
-                                    style={{
-                                        borderRadius: "10px",
-                                        width: "40px",
-                                        height: "40px",
-                                        fontSize: "20px",
-                                        fontWeight: "bold",
-                                    }}
-                                    variant="light"
+                                    style={{ flex: 1, height: '100%', border: 'none', background: 'transparent', fontSize: '18px', fontWeight: 'bold' }}
                                 >
                                     -
-                                </Button>
-
-                                <span
-                                    style={{
-                                        fontSize: "20px",
-                                        fontWeight: "600",
-                                        minWidth: "40px",
-                                        textAlign: "center",
-                                    }}
-                                >
+                                </button>
+                                <span style={{ flex: 1, textAlign: 'center', fontWeight: '600', fontSize: '14px' }}>
                                     {quantity}
                                 </span>
-
-                                <Button
+                                <button
+                                    type="button"
                                     onClick={handleIncrementQuantity}
                                     disabled={isOutOfStock}
-                                    style={{
-                                        borderRadius: "10px",
-                                        width: "40px",
-                                        height: "40px",
-                                        fontSize: "20px",
-                                        fontWeight: "bold",
-                                    }}
-                                    variant="warning"
+                                    style={{ flex: 1, height: '100%', border: 'none', background: 'transparent', fontSize: '18px', fontWeight: 'bold' }}
                                 >
                                     +
-                                </Button>
+                                </button>
                             </div>
-
                         </div>
 
-
-                        {/* Delivery Information */}
-                        <div className="mb-4 p-3 bg-light rounded">
-                            {hasDeliveryInfo ? (
-                                <div className="d-flex align-items-center">
-                                    <div className="bg-success bg-opacity-10 p-2 rounded-circle me-3">
-                                        <FaTruck className="text-success" />
-                                    </div>
-                                    <div>
-                                        <span className="fw-bold text-success d-block">
-                                            {formatDeliveryInfo(deliveryTerms.deliveryDate)}
-                                        </span>
-                                        <small className="text-muted">
-                                            <FaCalendarAlt className="me-1" size={12} />
-                                            Estimated delivery date
-                                        </small>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="d-flex align-items-center">
-                                    <div className="bg-secondary bg-opacity-10 p-2 rounded-circle me-3">
-                                        <FaTruck className="text-secondary" />
-                                    </div>
-                                    <div>
-                                        <span className="fw-bold d-block">Standard delivery</span>
-                                        <small className="text-muted">5-7 Business Days</small>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        <hr />
-
-                        {/* Action Buttons */}
-                        <div className="d-flex gap-3 pt-3">
+                        {/* Call to Action Buttons */}
+                        <div className="d-flex gap-3 mb-4">
                             <Button
                                 size="lg"
-                                className="flex-grow-1 fw-bold py-3"
+                                className="fw-bold"
                                 style={{
-                                    backgroundColor: "#0a0a8f",
-                                    border: "none",
-                                    color: "#fff"
+                                    flex: 1,
+                                    height: '50px',
+                                    border: '2px solid #2874f0',
+                                    backgroundColor: 'transparent',
+                                    color: '#2874f0',
+                                    borderRadius: '8px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '8px'
                                 }}
                                 onClick={handleAddToCart}
                                 disabled={isCartBuyDisabled}
                             >
-                                <FaShoppingCart className="me-2" />
+                                <FaShoppingCart />
                                 {t("addToCart")}
                             </Button>
 
                             <Button
                                 size="lg"
-                                className="flex-grow-1 fw-bold py-3 buy-now-btn"
+                                className="fw-bold"
+                                style={{
+                                    flex: 1,
+                                    height: '50px',
+                                    backgroundColor: '#fb641b',
+                                    border: 'none',
+                                    color: '#ffffff',
+                                    borderRadius: '8px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                }}
                                 onClick={handleBuyNow}
                                 disabled={isCartBuyDisabled}
                             >
                                 Buy Now
                             </Button>
                         </div>
-                    </Col>
+
+                        {/* Action Links Footer */}
+                        <div className="d-flex align-items-center gap-4 pt-2 border-top" style={{ fontSize: '13px', color: '#4a5568' }}>
+                            <div className="d-flex align-items-center gap-2" style={{ cursor: 'pointer' }} onClick={toggleWishlist}>
+                                {isInWishlist ? (
+                                    <FaHeart className="text-danger" />
+                                ) : (
+                                    <FaRegHeart />
+                                )}
+                                <span>Wishlist</span>
+                            </div>
+                            <div className="d-flex align-items-center gap-2" style={{ cursor: 'pointer' }} onClick={handleCompare}>
+                                <i className="fas fa-exchange-alt"></i>
+                                <span>Compare</span>
+                            </div>
+                            <div className="d-flex align-items-center gap-2" style={{ cursor: 'pointer' }} onClick={handleShare}>
+                                <i className="fas fa-share-alt"></i>
+                                <span>Share</span>
+                            </div>
+                        </div>         </Col>
                 </Row>
             </Card>
 
-            <RazorpayOffers hideApplyButton={true} />
+            {/* Description & Details Accordions */}
+            <Row className="g-4 mb-5">
+                {/* Description Card */}
+                <Col md={6} xs={12}>
+                    <Card className="border shadow-sm border-0" style={{ borderRadius: '12px', overflow: 'hidden' }}>
+                        <div
+                            className="d-flex align-items-center justify-content-between p-3"
+                            style={{ cursor: 'pointer', backgroundColor: '#fff', borderBottom: descExpanded ? '1px solid #f0f0f0' : 'none' }}
+                            onClick={() => setDescExpanded(!descExpanded)}
+                        >
+                            <h3 className="mb-0 fw-bold" style={{ fontSize: '18px', color: '#111' }}>Description</h3>
+                            <i className={`fas ${descExpanded ? 'fa-chevron-up' : 'fa-chevron-down'}`} style={{ color: '#2874f0', transition: 'transform 0.2s' }}></i>
+                        </div>
+                        {descExpanded && (
+                            <Card.Body className="p-3" style={{ fontSize: '14px', lineHeight: '1.6', color: '#4a5568' }}>
+                                {product.description || "No description available."}
+                            </Card.Body>
+                        )}
+                    </Card>
+                </Col>
+
+                {/* Details Card */}
+                <Col md={6} xs={12}>
+                    <Card className="border shadow-sm border-0" style={{ borderRadius: '12px', overflow: 'hidden' }}>
+                        <div
+                            className="d-flex align-items-center justify-content-between p-3"
+                            style={{ cursor: 'pointer', backgroundColor: '#fff', borderBottom: detailsExpanded ? '1px solid #f0f0f0' : 'none' }}
+                            onClick={() => setDetailsExpanded(!detailsExpanded)}
+                        >
+                            <h3 className="mb-0 fw-bold" style={{ fontSize: '18px', color: '#111' }}>Details</h3>
+                            <i className={`fas ${detailsExpanded ? 'fa-chevron-up' : 'fa-chevron-down'}`} style={{ color: '#2874f0', transition: 'transform 0.2s' }}></i>
+                        </div>
+                        {detailsExpanded && (
+                            <Card.Body className="p-3">
+                                <div className="d-flex flex-column gap-3" style={{ fontSize: '14px', color: '#333' }}>
+                                    {hasValue(product.brand) && (
+                                        <div className="d-flex justify-content-between align-items-center border-bottom pb-2">
+                                            <span className="fw-bold text-secondary">brand :</span>
+                                            <span>{product.brand}</span>
+                                        </div>
+                                    )}
+                                    {(hasValue(product.material) || hasValue(product.fabric)) && (
+                                        <div className="d-flex justify-content-between align-items-center border-bottom pb-2">
+                                            <span className="fw-bold text-secondary">material :</span>
+                                            <span>{product.material || product.fabric}</span>
+                                        </div>
+                                    )}
+                                    {hasValue(product.pattern) && (
+                                        <div className="d-flex justify-content-between align-items-center border-bottom pb-2">
+                                            <span className="fw-bold text-secondary">pattern :</span>
+                                            <span>{product.pattern}</span>
+                                        </div>
+                                    )}
+                                    {hasValue(product.hsncode) && (
+                                        <div className="d-flex justify-content-between align-items-center border-bottom pb-2">
+                                            <span className="fw-bold text-secondary">hsncode :</span>
+                                            <span>{product.hsncode}</span>
+                                        </div>
+                                    )}
+                                    {hasValue(product.gender) && (
+                                        <div className="d-flex justify-content-between align-items-center border-bottom pb-2">
+                                            <span className="fw-bold text-secondary">gender :</span>
+                                            <span>{product.gender}</span>
+                                        </div>
+                                    )}
+                                    {hasValue(product.closuretype) && (
+                                        <div className="d-flex justify-content-between align-items-center border-bottom pb-2">
+                                            <span className="fw-bold text-secondary">closuretype :</span>
+                                            <span>{product.closuretype}</span>
+                                        </div>
+                                    )}
+                                    {hasValue(product.color) && (
+                                        <div className="d-flex justify-content-between align-items-center border-bottom pb-2">
+                                            <span className="fw-bold text-secondary">color :</span>
+                                            <span>{product.color}</span>
+                                        </div>
+                                    )}
+                                    <div className="d-flex justify-content-between align-items-center border-bottom pb-2">
+                                        <span className="fw-bold text-secondary">rating :</span>
+                                        <span>{rating.rate.toFixed(1)}</span>
+                                    </div>
+                                    {discountPercentage > 0 && (
+                                        <div className="d-flex justify-content-between align-items-center border-bottom pb-2">
+                                            <span className="fw-bold text-secondary">discount :</span>
+                                            <span>{discountPercentage}%</span>
+                                        </div>
+                                    )}
+                                </div>
+                            </Card.Body>
+                        )}
+                    </Card>
+                </Col>
+            </Row>
+
+            {/* Available Offers & Delivery Section */}
+            <div className="mb-5 mt-4 p-4 border" style={{ borderRadius: '12px', backgroundColor: '#ffffff' }}>
+                <h5 className="fw-bold mb-3 d-flex align-items-center gap-2" style={{ color: '#111', fontSize: '18px' }}>
+                    <FaTag style={{ color: '#2874f0' }} />
+                    Available Offers
+                </h5>
+
+                {/* Horizontal Scrolling Offers */}
+                <div className="d-flex gap-3 overflow-auto pb-3 custom-horizontal-scroller" style={{ scrollbarWidth: 'thin' }}>
+                    {availOffers.length === 0 ? (
+                        <div className="p-3 border rounded text-muted" style={{ minWidth: '280px', backgroundColor: '#fff' }}>
+                            No active offers available
+                        </div>
+                    ) : (
+                        availOffers.map((offer) => (
+                            <div
+                                key={offer.id}
+                                className="p-3 border rounded position-relative d-inline-block"
+                                style={{
+                                    minWidth: '280px',
+                                    maxWidth: '280px',
+                                    backgroundColor: '#fff',
+                                    borderRadius: '12px',
+                                    border: '1.5px solid #e2e8f0',
+                                    boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
+                                }}
+                            >
+                                <div className="d-flex align-items-center justify-content-between mb-2">
+                                    <span style={{ backgroundColor: '#e0f2fe', color: '#0369a1', fontSize: '11px', fontWeight: '700', padding: '3px 8px', borderRadius: '4px' }}>
+                                        {offer.code || offer.offerName || "OFFER"}
+                                    </span>
+                                    <div className="d-flex align-items-center gap-2" style={{ fontSize: '14px' }}>
+                                        <i className="fas fa-bolt text-warning"></i>
+                                        <i className="fas fa-university text-secondary"></i>
+                                    </div>
+                                </div>
+                                <h6 className="fw-bold mb-1 text-dark" style={{ fontSize: '14px', whiteSpace: 'normal', lineHeight: '1.4' }}>
+                                    {offer.title || offer.bankName || offer.displayText1 || "Special Discount"}
+                                </h6>
+                                {offer.minOrderAmount && (
+                                    <div className="text-danger mt-1" style={{ fontSize: '11px', fontWeight: '500' }}>
+                                        Min order ₹{offer.minOrderAmount}
+                                    </div>
+                                )}
+                            </div>
+                        ))
+                    )}
+                </div>
+
+                {/* Green Delivery Banner */}
+                <div
+                    className="d-flex align-items-center gap-3 p-3 mt-4"
+                    style={{
+                        backgroundColor: '#f0fdf4',
+                        border: '1.5px solid #bbf7d0',
+                        borderRadius: '12px'
+                    }}
+                >
+                    <div
+                        className="d-flex align-items-center justify-content-center rounded-circle"
+                        style={{ width: '40px', height: '40px', backgroundColor: '#dcfce7' }}
+                    >
+                        <FaTruck style={{ color: '#15803d', fontSize: '18px' }} />
+                    </div>
+                    <span className="fw-bold" style={{ color: '#15803d', fontSize: '15px' }}>
+                        {hasDeliveryInfo ? `Delivery: ${formatDeliveryInfo(deliveryTerms.deliveryDate)}` : "Delivery in 5-7 business days"}
+                    </span>
+                </div>
+            </div>
 
             {/* Delivery & Terms Information Section */}
             {(hasDeliveryInfo || hasTermsInfo) && (
@@ -1671,17 +1840,8 @@ function ProductDetailPage() {
                 </Card>
             )}
 
-            {/* Similar Products */}
-            {product && (
-                <ProductSuggestions
-                    currentProductId={product.id}
-                    category={product.category}
-                    subcategory={product.subcategory}
-                />
-            )}
-
             {/* Reviews Section */}
-            <Card className="border-0 shadow-sm">
+            <Card className="border-0 shadow-sm mb-5">
                 <Card.Body className="p-4">
                     <Row>
                         <Col md={4} className="border-end">
@@ -1826,6 +1986,131 @@ function ProductDetailPage() {
                     </Row>
                 </Card.Body>
             </Card>
+
+            {/* Similar Products */}
+            {product && (
+                <ProductSuggestions
+                    currentProductId={product.id}
+                    category={product.category}
+                    subcategory={product.subcategory}
+                />
+            )}
+
+
+
+            {/* Explore more like this */}
+            {exploreProducts.length > 0 && (
+                <div className="mt-5 mb-5 explore-more-container">
+                    <h3 className="fw-bold mb-3">Explore more like this</h3>
+                    
+                    {/* Filter Pills */}
+                    <div className="d-flex gap-3 mb-4 flex-wrap">
+                        <button 
+                            onClick={() => setExploreFilter("value")}
+                            type="button"
+                            className="btn btn-light d-flex align-items-center gap-2 px-3 py-2 rounded shadow-sm border"
+                            style={{ 
+                                backgroundColor: exploreFilter === "value" ? "#eff6ff" : "#fff",
+                                borderColor: exploreFilter === "value" ? "#3b82f6" : "#e5e7eb",
+                                color: exploreFilter === "value" ? "#1e40af" : "#4b5563",
+                                fontSize: '13px',
+                                fontWeight: '600'
+                            }}
+                        >
+                            <i className="fas fa-th-large" style={{ color: '#3b82f6' }}></i>
+                            Value 365
+                        </button>
+
+                        <button 
+                            onClick={() => setExploreFilter("trends")}
+                            type="button"
+                            className="btn btn-light d-flex align-items-center gap-2 px-3 py-2 rounded shadow-sm border"
+                            style={{ 
+                                backgroundColor: exploreFilter === "trends" ? "#faf5ff" : "#fff",
+                                borderColor: exploreFilter === "trends" ? "#a855f7" : "#e5e7eb",
+                                color: exploreFilter === "trends" ? "#6b21a8" : "#4b5563",
+                                fontSize: '13px',
+                                fontWeight: '600'
+                            }}
+                        >
+                            <i className="fas fa-fire" style={{ color: '#a855f7' }}></i>
+                            Latest Trends
+                        </button>
+
+                        <button 
+                            onClick={() => setExploreFilter("rated")}
+                            type="button"
+                            className="btn btn-light d-flex align-items-center gap-2 px-3 py-2 rounded shadow-sm border"
+                            style={{ 
+                                backgroundColor: exploreFilter === "rated" ? "#fefcbf" : "#fff",
+                                borderColor: exploreFilter === "rated" ? "#eab308" : "#e5e7eb",
+                                color: exploreFilter === "rated" ? "#854d0e" : "#4b5563",
+                                fontSize: '13px',
+                                fontWeight: '600'
+                            }}
+                        >
+                            <i className="fas fa-star" style={{ color: '#eab308' }}></i>
+                            Top Rated
+                        </button>
+                    </div>
+
+                    {/* Grid Layout of 5 columns */}
+                    <div className="row g-4 row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5">
+                        {sortedExploreProducts.map((p) => {
+                            const finalPrice = Number(p.offerprice || p.price || 0);
+                            const originalPrice = p.price && p.offerprice ? Number(p.price) : Math.round(finalPrice * 1.5);
+                            const discountPercent = Math.round(((originalPrice - finalPrice) / originalPrice) * 100);
+
+                            const getExploreImage = (item) => {
+                                if (!item) return "https://via.placeholder.com/200";
+                                if (Array.isArray(item.images) && item.images.length > 0) return item.images[0];
+                                if (item.image) return item.image;
+                                return "https://via.placeholder.com/200";
+                            };
+
+                            return (
+                                <div key={p.id} className="col">
+                                    <Card className="h-100 border-0 shadow-sm" style={{ borderRadius: '16px', overflow: 'hidden' }}>
+                                        <Link to={`/product/${p.id}`} className="text-decoration-none text-dark" onClick={() => window.scrollTo(0, 0)}>
+                                            {/* Image container */}
+                                            <div className="d-flex justify-content-center align-items-center p-3" style={{ height: "180px", backgroundColor: '#f3f4f6' }}>
+                                                <Card.Img
+                                                    src={getExploreImage(p)}
+                                                    style={{ height: "140px", width: 'auto', objectFit: "contain" }}
+                                                />
+                                            </div>
+
+                                            {/* Card body */}
+                                            <Card.Body className="p-3 bg-white">
+                                                <Card.Title className="fw-semibold text-truncate mb-1 text-dark" style={{ fontSize: '0.85rem', color: '#333' }}>
+                                                    {p.name || p.title}
+                                                </Card.Title>
+                                                
+                                                <div className="d-flex align-items-center gap-2 mt-2">
+                                                    {/* Down arrow icon and discount percentage */}
+                                                    <span className="fw-bold text-success" style={{ fontSize: '12px' }}>
+                                                        ↓{discountPercent}%
+                                                    </span>
+                                                    
+                                                    {/* Original struck price */}
+                                                    <span className="text-muted text-decoration-line-through" style={{ fontSize: '11px' }}>
+                                                        ₹{originalPrice.toLocaleString()}
+                                                    </span>
+                                                    
+                                                    {/* Bold final price */}
+                                                    <span className="fw-bold text-dark" style={{ fontSize: '13px' }}>
+                                                        ₹{finalPrice.toLocaleString()}
+                                                    </span>
+                                                </div>
+                                            </Card.Body>
+                                        </Link>
+                                    </Card>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
 
             {/* Image Viewer Modal */}
             <Modal
@@ -2135,6 +2420,245 @@ function ProductDetailPage() {
                             </Button>
                         </div>
                     </Form>
+                </Modal.Body>
+            </Modal>
+
+            {/* Compare Modal */}
+            <Modal show={showCompareModal} onHide={() => setShowCompareModal(false)} centered size="lg">
+                <Modal.Header closeButton className="border-0">
+                    <Modal.Title className="fw-bold">Compare Products</Modal.Title>
+                </Modal.Header>
+                <Modal.Body className="p-4">
+                    {compareLoading ? (
+                        <div className="text-center py-5">
+                            <Spinner animation="border" variant="primary" />
+                            <p className="mt-3 text-muted">Loading product comparison...</p>
+                        </div>
+                    ) : compareProducts.length === 0 ? (
+                        <p className="text-center text-muted">No similar products found to compare.</p>
+                    ) : (
+                        <div className="table-responsive">
+                            <table className="table table-bordered align-middle text-center" style={{ fontSize: '13px' }}>
+                                <thead>
+                                    <tr className="bg-light">
+                                        <th style={{ width: '150px' }}>Feature</th>
+                                        {compareProducts.map((p, index) => (
+                                            <th key={p.id} style={{ minWidth: '150px' }}>
+                                                {index === 0 ? (
+                                                    <span className="badge bg-primary mb-2 d-block">Current Item</span>
+                                                ) : (
+                                                    <span className="badge bg-secondary mb-2 d-block">Similar Product</span>
+                                                )}
+                                                <img
+                                                    src={p.images?.[0] || p.image || "https://via.placeholder.com/100"}
+                                                    alt={p.name}
+                                                    style={{ width: '80px', height: '80px', objectFit: 'contain', display: 'block', margin: '0 auto 8px' }}
+                                                />
+                                                <div className="text-truncate fw-bold" style={{ maxWidth: '160px' }}>{p.name || p.title}</div>
+                                            </th>
+                                        ))}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td className="fw-bold text-secondary text-start ps-3">Price</td>
+                                        {compareProducts.map(p => (
+                                            <td key={p.id} className="fw-bold text-dark fs-6">
+                                                ₹{p.offerprice || p.price}
+                                            </td>
+                                        ))}
+                                    </tr>
+                                    <tr>
+                                        <td className="fw-bold text-secondary text-start ps-3">Brand</td>
+                                        {compareProducts.map(p => (
+                                            <td key={p.id}>{p.brand || "Generic"}</td>
+                                        ))}
+                                    </tr>
+                                    <tr>
+                                        <td className="fw-bold text-secondary text-start ps-3">Material</td>
+                                        {compareProducts.map(p => (
+                                            <td key={p.id}>{p.material || p.fabric || "N/A"}</td>
+                                        ))}
+                                    </tr>
+                                    <tr>
+                                        <td className="fw-bold text-secondary text-start ps-3">Pattern</td>
+                                        {compareProducts.map(p => (
+                                            <td key={p.id}>{p.pattern || "N/A"}</td>
+                                        ))}
+                                    </tr>
+                                    <tr>
+                                        <td className="fw-bold text-secondary text-start ps-3">Fit Type</td>
+                                        {compareProducts.map(p => (
+                                            <td key={p.id}>{p.fittype || "N/A"}</td>
+                                        ))}
+                                    </tr>
+                                    <tr>
+                                        <td className="fw-bold text-secondary text-start ps-3">Action</td>
+                                        {compareProducts.map((p, idx) => (
+                                            <td key={p.id}>
+                                                {idx === 0 ? (
+                                                    <span className="text-muted small">Viewing</span>
+                                                ) : (
+                                                    <Link
+                                                        to={`/product/${p.id}`}
+                                                        className="btn btn-sm btn-outline-primary rounded-pill fw-bold"
+                                                        onClick={() => setShowCompareModal(false)}
+                                                    >
+                                                        View Product
+                                                    </Link>
+                                                )}
+                                            </td>
+                                        ))}
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </Modal.Body>
+            </Modal>
+
+            {/* Share Modal */}
+            <Modal show={showShareModal} onHide={() => setShowShareModal(false)} centered size="md">
+                <Modal.Header closeButton className="border-0">
+                    <Modal.Title className="fw-bold" style={{ fontSize: '18px' }}>Share</Modal.Title>
+                </Modal.Header>
+                <Modal.Body className="pt-0">
+                    {product && (
+                        <div className="d-flex align-items-center gap-3 p-3 bg-light rounded mb-4" style={{ border: '1px solid #e2e8f0' }}>
+                            <img
+                                src={mainImage || product.image || "https://via.placeholder.com/60"}
+                                alt={product.name}
+                                style={{ width: '50px', height: '50px', objectFit: 'contain', borderRadius: '4px', backgroundColor: '#fff', border: '1px solid #e2e8f0' }}
+                            />
+                            <div className="overflow-hidden">
+                                <div className="fw-bold text-truncate" style={{ fontSize: '14px', color: '#111' }}>
+                                    {product.name || product.title}
+                                </div>
+                                <div className="text-muted text-truncate" style={{ fontSize: '12px' }}>
+                                    {product.category}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="row g-4 text-center">
+                        <div className="col-4">
+                            <div
+                                onClick={copyToClipboard}
+                                className="d-flex align-items-center justify-content-center mx-auto rounded-circle cursor-pointer"
+                                style={{ width: '50px', height: '50px', backgroundColor: '#2874f0', color: '#fff', fontSize: '20px', transition: 'all 0.2s' }}
+                                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.08)'}
+                                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                            >
+                                <i className="fas fa-link"></i>
+                            </div>
+                            <span className="d-block mt-2 text-muted" style={{ fontSize: '12px', fontWeight: '500' }}>Copy Link</span>
+                        </div>
+
+                        <div className="col-4">
+                            <div
+                                onClick={shareToWhatsApp}
+                                className="d-flex align-items-center justify-content-center mx-auto rounded-circle cursor-pointer"
+                                style={{ width: '50px', height: '50px', backgroundColor: '#25d366', color: '#fff', fontSize: '22px', transition: 'all 0.2s' }}
+                                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.08)'}
+                                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                            >
+                                <i className="fab fa-whatsapp"></i>
+                            </div>
+                            <span className="d-block mt-2 text-muted" style={{ fontSize: '12px', fontWeight: '500' }}>Whatsapp</span>
+                        </div>
+
+                        <div className="col-4">
+                            <div
+                                onClick={shareToFacebook}
+                                className="d-flex align-items-center justify-content-center mx-auto rounded-circle cursor-pointer"
+                                style={{ width: '50px', height: '50px', backgroundColor: '#1877f2', color: '#fff', fontSize: '20px', transition: 'all 0.2s' }}
+                                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.08)'}
+                                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                            >
+                                <i className="fab fa-facebook-f"></i>
+                            </div>
+                            <span className="d-block mt-2 text-muted" style={{ fontSize: '12px', fontWeight: '500' }}>Facebook</span>
+                        </div>
+
+                        <div className="col-4">
+                            <div
+                                onClick={shareToMessenger}
+                                className="d-flex align-items-center justify-content-center mx-auto rounded-circle cursor-pointer"
+                                style={{ width: '50px', height: '50px', backgroundColor: '#0084ff', color: '#fff', fontSize: '20px', transition: 'all 0.2s' }}
+                                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.08)'}
+                                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                            >
+                                <i className="fab fa-facebook-messenger"></i>
+                            </div>
+                            <span className="d-block mt-2 text-muted" style={{ fontSize: '12px', fontWeight: '500' }}>Facebook messenger</span>
+                        </div>
+
+                        <div className="col-4">
+                            <div
+                                onClick={shareToGmail}
+                                className="d-flex align-items-center justify-content-center mx-auto rounded-circle cursor-pointer"
+                                style={{ width: '50px', height: '50px', backgroundColor: '#ea4335', color: '#fff', fontSize: '18px', transition: 'all 0.2s' }}
+                                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.08)'}
+                                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                            >
+                                <i className="far fa-envelope"></i>
+                            </div>
+                            <span className="d-block mt-2 text-muted" style={{ fontSize: '12px', fontWeight: '500' }}>Gmail</span>
+                        </div>
+
+                        <div className="col-4">
+                            <div
+                                onClick={shareToSMS}
+                                className="d-flex align-items-center justify-content-center mx-auto rounded-circle cursor-pointer"
+                                style={{ width: '50px', height: '50px', backgroundColor: '#4f46e5', color: '#fff', fontSize: '20px', transition: 'all 0.2s' }}
+                                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.08)'}
+                                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                            >
+                                <i className="fas fa-comment-alt"></i>
+                            </div>
+                            <span className="d-block mt-2 text-muted" style={{ fontSize: '12px', fontWeight: '500' }}>SMS</span>
+                        </div>
+
+                        <div className="col-4">
+                            <div
+                                onClick={shareToLinkedIn}
+                                className="d-flex align-items-center justify-content-center mx-auto rounded-circle cursor-pointer"
+                                style={{ width: '50px', height: '50px', backgroundColor: '#0077b5', color: '#fff', fontSize: '20px', transition: 'all 0.2s' }}
+                                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.08)'}
+                                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                            >
+                                <i className="fab fa-linkedin-in"></i>
+                            </div>
+                            <span className="d-block mt-2 text-muted" style={{ fontSize: '12px', fontWeight: '500' }}>LinkedIn</span>
+                        </div>
+
+                        <div className="col-4">
+                            <div
+                                onClick={shareToHangouts}
+                                className="d-flex align-items-center justify-content-center mx-auto rounded-circle cursor-pointer"
+                                style={{ width: '50px', height: '50px', backgroundColor: '#0f9d58', color: '#fff', fontSize: '20px', transition: 'all 0.2s' }}
+                                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.08)'}
+                                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                            >
+                                <i className="fab fa-google"></i>
+                            </div>
+                            <span className="d-block mt-2 text-muted" style={{ fontSize: '12px', fontWeight: '500' }}>Hangouts</span>
+                        </div>
+
+                        <div className="col-4">
+                            <div
+                                onClick={shareNative}
+                                className="d-flex align-items-center justify-content-center mx-auto rounded-circle cursor-pointer"
+                                style={{ width: '50px', height: '50px', backgroundColor: '#e2e8f0', color: '#4a5568', fontSize: '20px', transition: 'all 0.2s' }}
+                                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.08)'}
+                                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                            >
+                                <i className="fas fa-ellipsis-h"></i>
+                            </div>
+                            <span className="d-block mt-2 text-muted" style={{ fontSize: '12px', fontWeight: '500' }}>More Apps</span>
+                        </div>
+                    </div>
                 </Modal.Body>
             </Modal>
 

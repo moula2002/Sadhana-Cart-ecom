@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { Row, Col, Card, Spinner, Alert, Badge, Form, Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { FaStar, FaShoppingCart, FaEye, FaRupeeSign, FaEdit } from "react-icons/fa";
@@ -17,7 +17,7 @@ const getFirstImage = (product) => {
         "mainImage", "main_image", "cover", "photo", "img", "pic", "picture",
         "displayImage", "src", "url"
     ];
-    const isValidUrl = (url) => typeof url === "string" && url.trim().length > 0 && 
+    const isValidUrl = (url) => typeof url === "string" && url.trim().length > 0 &&
         (url.startsWith("http") || url.startsWith("https") || url.startsWith("data:image"));
     const extract = (val, depth = 0) => {
         if (depth > 4) return null;
@@ -58,6 +58,20 @@ const getFirstImage = (product) => {
 
 function ProductSuggestions({ currentProductId, category, subcategory }) {
     const dispatch = useDispatch();
+    const sliderRef = useRef(null);
+
+    const scrollLeft = () => {
+        if (sliderRef.current) {
+            sliderRef.current.scrollBy({ left: -264, behavior: 'smooth' });
+        }
+    };
+
+    const scrollRight = () => {
+        if (sliderRef.current) {
+            sliderRef.current.scrollBy({ left: 264, behavior: 'smooth' });
+        }
+    };
+
     const [suggestions, setSuggestions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -73,14 +87,14 @@ function ProductSuggestions({ currentProductId, category, subcategory }) {
             try {
                 setLoading(true);
                 setError(null);
-                
+
                 // Fetch more to allow for filtering/sorting/prioritizing
                 const q = query(
-                    collection(db, "products"), 
-                    where("category", "==", category), 
+                    collection(db, "products"),
+                    where("category", "==", category),
                     limit(40)
                 );
-                
+
                 const querySnapshot = await getDocs(q);
                 let data = querySnapshot.docs.map((d) => {
                     const productData = d.data();
@@ -96,9 +110,13 @@ function ProductSuggestions({ currentProductId, category, subcategory }) {
 
                 // Prioritize matching subcategory
                 if (subcategory) {
-                    const matching = data.filter(p => p.subcategory === subcategory);
-                    const others = data.filter(p => p.subcategory !== subcategory);
-                    data = [...matching, ...others];
+                    const matching = data.filter(p => p.subcategory === subcategory || p.subCategory === subcategory || p.sub_category === subcategory);
+                    const others = data.filter(p => p.subcategory !== subcategory && p.subCategory !== subcategory && p.sub_category !== subcategory);
+                    if (matching.length >= 3) {
+                        data = matching;
+                    } else {
+                        data = [...matching, ...others];
+                    }
                 }
 
                 setSuggestions(data);
@@ -155,59 +173,7 @@ function ProductSuggestions({ currentProductId, category, subcategory }) {
     return (
         <div className="mt-5 mb-5 similar-products-container">
             <div className="d-flex justify-content-between align-items-center mb-4">
-                <h3 className="fw-bold mb-0">More from {category}</h3>
-            </div>
-
-            {/* Premium Filter Bar */}
-            <div className="p-3 mb-4 rounded-4 shadow-sm border-0" style={{ background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)', border: '1px solid rgba(0,0,0,0.05)' }}>
-                <Row className="align-items-center g-3">
-                    <Col lg={7}>
-                        <div className="d-flex flex-column flex-sm-row align-items-sm-center gap-3">
-                            <div className="d-flex align-items-center gap-2 mb-2 mb-sm-0">
-                                <div className="p-2 rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style={{ width: '35px', height: '35px' }}>
-                                    <FaRupeeSign size={14} />
-                                </div>
-                                <span className="fw-bold text-dark no-wrap" style={{ fontSize: '0.9rem' }}>Budget Range</span>
-                            </div>
-                            <div className="flex-grow-1 px-2">
-                                <div className="d-flex justify-content-between mb-1">
-                                    <span className="text-muted small">₹0</span>
-                                    <span className="fw-bold text-primary small">Under ₹{filterPrice.toLocaleString()}</span>
-                                </div>
-                                <Form.Range
-                                    min={0}
-                                    max={100000}
-                                    step={500}
-                                    value={filterPrice}
-                                    onChange={(e) => setFilterPrice(Number(e.target.value))}
-                                    className="custom-premium-range"
-                                />
-                            </div>
-                        </div>
-                    </Col>
-                    <Col lg={5}>
-                        <div className="d-flex align-items-center gap-3 ps-lg-4 border-start-lg">
-                            <div className="d-flex align-items-center gap-2">
-                                <div className="p-2 rounded-circle bg-dark bg-opacity-5 text-dark d-flex align-items-center justify-content-center" style={{ width: '35px', height: '35px' }}>
-                                    <FaEdit size={14} className="opacity-75" />
-                                </div>
-                                <span className="fw-bold text-dark no-wrap" style={{ fontSize: '0.9rem' }}>Sort By</span>
-                            </div>
-                            <Form.Select
-                                value={sortBy}
-                                onChange={(e) => setSortBy(e.target.value)}
-                                className="border-0 bg-white shadow-sm rounded-3 py-2 px-3 fw-semibold text-dark cursor-pointer"
-                                style={{ fontSize: '0.85rem' }}
-                            >
-                                <option value="relevance">🎯 Relevance</option>
-                                <option value="rating">⭐ Top Rated</option>
-                                <option value="price-asc">📉 Price: Low to High</option>
-                                <option value="price-desc">📈 Price: High to Low</option>
-                                <option value="name-asc">🔤 Name A-Z</option>
-                            </Form.Select>
-                        </div>
-                    </Col>
-                </Row>
+                <h3 className="fw-bold mb-0">Similar Products</h3>
             </div>
 
             {filteredAndSorted.length === 0 ? (
@@ -215,108 +181,134 @@ function ProductSuggestions({ currentProductId, category, subcategory }) {
                     No products found matching your current filters in this category.
                 </Alert>
             ) : (
-                <div 
-                    className="d-flex overflow-auto pb-4 gap-4 custom-horizontal-scroller" 
-                    style={{ 
-                        scrollSnapType: 'x mandatory',
-                        WebkitOverflowScrolling: 'touch',
-                        paddingLeft: '5px',
-                        paddingRight: '5px'
-                    }}
-                >
-                    {filteredAndSorted.map((p) => (
-                        <div 
-                            key={p.id} 
-                            className="similar-product-card-wrapper"
-                            style={{ 
-                                minWidth: '240px', 
-                                maxWidth: '240px', 
-                                flex: '0 0 auto', 
-                                scrollSnapAlign: 'start' 
-                            }}
-                        >
-                            <Card className="h-100 border-0 shadow-sm hover-premium-card transition-all" style={{ borderRadius: '16px' }}>
-                                <Link to={`/product/${p.id}`} className="text-decoration-none text-dark" onClick={() => window.scrollTo(0, 0)}>
-                                    <div className="d-flex justify-content-center align-items-center p-3 position-relative" style={{ height: "180px", backgroundColor: '#f0f7ff', borderRadius: '16px 16px 0 0' }}>
-                                        <div className="position-absolute top-0 start-0 m-2">
-                                            <Badge bg="danger" className="rounded-pill px-2 py-1 shadow-sm" style={{ fontSize: '0.65rem', fontWeight: '800' }}>
-                                                {p.offerprice ? 'OFFER' : 'NEW'}
-                                            </Badge>
-                                        </div>
-                                        <Card.Img
-                                            src={getFirstImage(p)}
-                                            style={{ height: "140px", width: 'auto', objectFit: "contain", filter: 'drop-shadow(0 10px 10px rgba(0,0,0,0.05))' }}
-                                        />
-                                    </div>
-                                    <Card.Body className="p-3 bg-white" style={{ borderRadius: '0 0 16px 16px' }}>
-                                        <Card.Title className="fw-bold text-truncate mb-1 text-dark" style={{ fontSize: '0.95rem' }}>
-                                            {p.name || p.title}
-                                        </Card.Title>
-                                        
-                                        <div className="d-flex align-items-center mb-2">
-                                            <div className="bg-success bg-opacity-10 px-2 py-0 rounded d-flex align-items-center me-2">
-                                                <span className="fw-bold text-success small me-1">{p.rating?.rate?.toFixed(1) || '4.0'}</span>
-                                                <FaStar className="text-success" size={10} />
-                                            </div>
-                                            <span className="text-muted" style={{ fontSize: '0.7rem' }}>({p.rating?.count || 0})</span>
-                                        </div>
+                <div className="position-relative">
+                    {/* Left Scroll Arrow */}
+                    <button
+                        onClick={scrollLeft}
+                        type="button"
+                        className="btn btn-light rounded-circle shadow-sm border position-absolute start-0 top-50 translate-middle-y d-flex align-items-center justify-content-center"
+                        style={{ width: '40px', height: '40px', zIndex: 10, left: '-20px' }}
+                    >
+                        <i className="fas fa-chevron-left" style={{ fontSize: '14px', color: '#333' }}></i>
+                    </button>
 
-                                        <div className="d-flex justify-content-between align-items-center mt-3">
-                                            <div className="d-flex flex-column">
-                                                <span className="fw-bold text-primary fs-5">
-                                                    <FaRupeeSign size={14} />{p.priceINR}
-                                                </span>
-                                                <span className="text-success fw-bold" style={{ fontSize: '0.65rem' }}>Special Price</span>
+                    {/* Right Scroll Arrow */}
+                    <button
+                        onClick={scrollRight}
+                        type="button"
+                        className="btn btn-light rounded-circle shadow-sm border position-absolute end-0 top-50 translate-middle-y d-flex align-items-center justify-content-center"
+                        style={{ width: '40px', height: '40px', zIndex: 10, right: '-20px' }}
+                    >
+                        <i className="fas fa-chevron-right" style={{ fontSize: '14px', color: '#333' }}></i>
+                    </button>
+
+                    <div
+                        ref={sliderRef}
+                        className="d-flex overflow-auto pb-4 gap-4 custom-horizontal-scroller"
+                        style={{
+                            scrollSnapType: 'x mandatory',
+                            WebkitOverflowScrolling: 'touch',
+                            paddingLeft: '5px',
+                            paddingRight: '5px'
+                        }}
+                    >
+                        {filteredAndSorted.map((p, idx) => {
+                            const finalPrice = Number(p.offerprice || p.price || 0);
+                            const originalPrice = p.price && p.offerprice ? Number(p.price) : Math.round(finalPrice * 1.5);
+                            const discountPercent = Math.round(((originalPrice - finalPrice) / originalPrice) * 100);
+
+                            // Randomize promotional tags to match mockup
+                            let promoText = "";
+                            let promoColor = "";
+                            if (idx % 3 === 0) {
+                                promoText = "Lowest price in the year";
+                                promoColor = "#15803d"; // Green
+                            } else if (idx % 3 === 1) {
+                                promoText = "Hot Deal";
+                                promoColor = "#b91c1c"; // Red
+                            } else {
+                                const offersCount = (idx % 2) + 2;
+                                const discountAmt = Math.round(finalPrice * 0.1);
+                                promoText = `₹${discountAmt} with ${offersCount} offers`;
+                                promoColor = "#1d4ed8"; // Blue
+                            }
+
+                            return (
+                                <div
+                                    key={p.id}
+                                    className="similar-product-card-wrapper"
+                                    style={{
+                                        minWidth: '240px',
+                                        maxWidth: '240px',
+                                        flex: '0 0 auto',
+                                        scrollSnapAlign: 'start'
+                                    }}
+                                >
+                                    <Card className="h-100 border-0 shadow-sm" style={{ borderRadius: '16px', overflow: 'hidden' }}>
+                                        <Link to={`/product/${p.id}`} className="text-decoration-none text-dark" onClick={() => window.scrollTo(0, 0)}>
+                                            {/* Image Container with Badges */}
+                                            <div className="d-flex justify-content-center align-items-center p-3 position-relative" style={{ height: "200px", backgroundColor: '#f3f4f6' }}>
+                                                {/* Bestseller Badge */}
+                                                {p.rating?.rate >= 4.0 && (
+                                                    <Badge bg="primary" className="position-absolute top-0 start-0 m-2 px-2 py-1 rounded" style={{ fontSize: '0.65rem', fontWeight: '800' }}>
+                                                        Bestseller
+                                                    </Badge>
+                                                )}
+                                                {/* Circular/Square Rating Badge at bottom-left */}
+                                                <div className="position-absolute bottom-0 start-0 m-2 px-2 py-0.5 rounded bg-white border d-flex align-items-center gap-1 shadow-sm" style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>
+                                                    <span>{(p.rating?.rate || 4.1).toFixed(1)}</span>
+                                                    <FaStar className="text-success" size={10} />
+                                                </div>
+                                                <Card.Img
+                                                    src={getFirstImage(p)}
+                                                    style={{ height: "160px", width: 'auto', objectFit: "contain" }}
+                                                />
                                             </div>
-                                            <Button
-                                                variant="warning"
-                                                size="sm"
-                                                className="rounded-3 shadow-sm px-3 fw-bold border-0 d-flex align-items-center justify-content-center"
-                                                style={{ 
-                                                    background: 'linear-gradient(45deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%)',
-                                                    color: '#d63384',
-                                                    height: '35px'
-                                                }}
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    e.stopPropagation();
-                                                    dispatch(addToCart({
-                                                        id: p.id,
-                                                        title: p.name || p.title,
-                                                        price: p.priceValue,
-                                                        image: getFirstImage(p),
-                                                        quantity: 1,
-                                                        sellerId: p.sellerId || "default_seller"
-                                                    }));
-                                                    toast.success(`Added ${p.name || p.title} to cart!`, { position: "bottom-right", autoClose: 2000 });
-                                                }}
-                                            >
-                                                <FaShoppingCart size={13} className="me-1" />
-                                                Add
-                                            </Button>
-                                        </div>
-                                    </Card.Body>
-                                </Link>
-                            </Card>
-                        </div>
-                    ))}
+
+                                            {/* Card Details */}
+                                            <Card.Body className="p-3 bg-white">
+                                                <Card.Title className="fw-semibold text-truncate mb-1 text-dark" style={{ fontSize: '0.9rem', color: '#333' }}>
+                                                    {p.name || p.title}
+                                                </Card.Title>
+
+                                                <div className="d-flex flex-column mb-2">
+                                                    {/* Discount percentage */}
+                                                    <span className="fw-bold text-success" style={{ fontSize: '13px' }}>
+                                                        {discountPercent}% OFF
+                                                    </span>
+
+                                                    {/* Pricing row */}
+                                                    <div className="d-flex align-items-center gap-2">
+                                                        <span className="text-muted text-decoration-line-through" style={{ fontSize: '13px' }}>
+                                                            ₹{originalPrice.toLocaleString()}
+                                                        </span>
+                                                        <span className="fw-bold text-dark" style={{ fontSize: '15px' }}>
+                                                            ₹{finalPrice.toLocaleString()}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                {/* Highlight offer promo text */}
+                                                <div className="fw-bold" style={{ fontSize: '12px', color: promoColor }}>
+                                                    {promoText}
+                                                </div>
+                                            </Card.Body>
+                                        </Link>
+                                    </Card>
+                                </div>
+                            );
+                        })}
+                    </div>
                 </div>
             )}
 
             <style jsx>{`
                 .custom-horizontal-scroller::-webkit-scrollbar {
-                    height: 6px;
+                    display: none;
                 }
-                .custom-horizontal-scroller::-webkit-scrollbar-track {
-                    background: #f1f1f1;
-                    border-radius: 10px;
-                }
-                .custom-horizontal-scroller::-webkit-scrollbar-thumb {
-                    background: #ccc;
-                    border-radius: 10px;
-                }
-                .custom-horizontal-scroller::-webkit-scrollbar-thumb:hover {
-                    background: #999;
+                .custom-horizontal-scroller {
+                    -ms-overflow-style: none;
+                    scrollbar-width: none;
                 }
                 .hover-premium-card:hover {
                     transform: translateY(-10px) scale(1.02);

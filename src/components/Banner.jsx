@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { collection, getDocs, query, where, limit } from "firebase/firestore";
 import { db } from "../firebase";
 import "./Banner.css";
-import Loading from "../pages/Loading"; // path correct pannunga
+import Loading from "../pages/Loading";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
 const Banner = () => {

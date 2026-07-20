@@ -2,20 +2,29 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
-import { Navbar, Nav, Container, Button, Modal, Badge, Dropdown } from "react-bootstrap";
+import { Navbar, Nav, Container, Button, Modal, Badge, Dropdown, Offcanvas } from "react-bootstrap";
 import { motion, AnimatePresence } from "framer-motion";
 
 import AuthPage from "../pages/LoginPage";
 
 
+import {
+  FiUser, FiMapPin, FiPackage, FiHeart, FiCreditCard,
+  FiGrid, FiTag, FiStar, FiHelpCircle, FiMessageCircle,
+  FiPhone, FiInfo, FiShield, FiFileText, FiRefreshCcw,
+  FiMoon, FiSun, FiInstagram, FiFacebook, FiYoutube, FiLogOut
+} from "react-icons/fi";
+
 import "./Navbar.css";
+import "./HamburgerMenu.css";
 import logo from "../Images/Sadhanacart1.png";
+import cartGif from "../Images/shopping-cart icon.gif";
 import LanguageSwitcher from "../language/LanguageSwitcher";
 import { useTranslation } from "react-i18next";
 
 // Firebase
 import { db } from "../firebase";
-import { collection, query, getDocs, orderBy, limit, where, doc, getDoc } from "firebase/firestore";
+import { collection, query, getDocs, orderBy, limit, where, doc, getDoc, onSnapshot } from "firebase/firestore";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 
 const auth = getAuth();
@@ -82,6 +91,54 @@ const LogoutConfirmationModal = ({ show, onClose }) => {
         )}
       </AnimatePresence>
     </Modal>
+  );
+};
+
+/* ---------------- HOVER CART ICON COMPONENT ---------------- */
+const HoverCartIcon = ({ src, alt, style }) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    const img = new Image();
+    img.src = src;
+    img.onload = () => {
+      if (canvas && ctx) {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0, img.width, img.height);
+      }
+    };
+  }, [src]);
+
+  return (
+    <div
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{ ...style, position: "relative", display: "inline-block", verticalAlign: "middle" }}
+    >
+      <canvas
+        ref={canvasRef}
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: style?.objectFit || "contain",
+          display: isHovered ? "none" : "block",
+        }}
+      />
+      <img
+        src={src}
+        alt={alt}
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: style?.objectFit || "contain",
+          display: isHovered ? "block" : "none",
+        }}
+      />
+    </div>
   );
 };
 
@@ -322,7 +379,7 @@ const SearchBar = () => {
                       {highlightText(p.pattern || p.name, searchTerm)}
                     </div>
                     <div className="suggestion-category">
-                      {p.category} • {p.subcategory || ""}
+                      {p.category} â€¢ {p.subcategory || ""}
                     </div>
                   </div>
                   {p.mrp && p.offerprice && (
@@ -334,7 +391,7 @@ const SearchBar = () => {
               ))
             ) : (
               <div className="no-results-item">
-                <i className="fas fa-box-open"></i>
+                <i className="FiPackage-open"></i>
                 <p>No products found for "{searchTerm}"</p>
               </div>
             )
@@ -393,7 +450,7 @@ const SearchBar = () => {
 };
 
 /* ---------------- FLIPKART STYLE DROPDOWN COMPONENT ---------------- */
-const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal }) => {
+const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal, setAuthMode }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [walletBalance, setWalletBalance] = useState(0);
@@ -401,6 +458,7 @@ const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal }) 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [theme, setTheme] = useState('light');
   const [savedAddresses, setSavedAddresses] = useState([]);
+  const [profileImage, setProfileImage] = useState(null);
 
   // Initialize theme from localStorage or system preference
   useEffect(() => {
@@ -435,30 +493,31 @@ const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal }) 
     applyTheme(newTheme);
   };
 
-  // Fetch wallet balance when dropdown opens
+  // Listen to user data in real-time
   useEffect(() => {
-    const fetchWalletData = async () => {
-      if (currentUser && dropdownOpen) {
-        try {
-          const userDoc = await getDoc(doc(db, "users", currentUser.uid));
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            setWalletBalance(userData.walletBalance || 0);
-            setWalletCoins(userData.walletCoins || 0);
+    if (!currentUser) return;
+    const unsub = onSnapshot(
+      doc(db, "users", currentUser.uid),
+      (docSnap) => {
+        if (docSnap.exists()) {
+          const userData = docSnap.data();
+          setWalletBalance(userData.walletBalance || 0);
+          setWalletCoins(userData.walletCoins || 0);
+          setProfileImage(userData.profileImage || null);
 
-            // Fetch saved addresses
-            if (userData.addresses) {
-              setSavedAddresses(userData.addresses);
-            }
+          // Fetch saved addresses
+          if (userData.addresses) {
+            setSavedAddresses(userData.addresses);
           }
-        } catch (error) {
-          console.error("Error fetching wallet data:", error);
         }
+      },
+      (error) => {
+        console.error("Error listening to user data:", error);
       }
-    };
+    );
 
-    fetchWalletData();
-  }, [currentUser, dropdownOpen]);
+    return () => unsub();
+  }, [currentUser]);
 
   const handleProfileClick = () => {
     navigate("/profile");
@@ -467,19 +526,19 @@ const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal }) 
 
   const handleAddressClick = () => {
     if (!currentUser) {
-  setShowAuthModal(true);
-  return;
-}
-navigate("/save-address");
+      setShowAuthModal(true);
+      return;
+    }
+    navigate("/save-address");
     setDropdownOpen(false);
   };
 
   const handleWishlistClick = () => {
     if (!currentUser) {
-  setShowAuthModal(true);
-  return;
-}
-navigate("/wishlist"); 
+      setShowAuthModal(true);
+      return;
+    }
+    navigate("/wishlist");
     setDropdownOpen(false);
   };
 
@@ -489,197 +548,322 @@ navigate("/wishlist");
   };
 
   const handleWalletClick = () => {
-    navigate("/wallet");
+    navigate("/rewards");
     setDropdownOpen(false);
   };
 
   const handleOrdersClick = () => {
     if (!currentUser) {
-  setShowAuthModal(true);
-  return;
-}
-navigate("/orders");
+      setShowAuthModal(true);
+      return;
+    }
+    navigate("/orders");
     setDropdownOpen(false);
   };
-
   return (
-    <Dropdown
-      className="flipkart-login-dropdown"
-      show={dropdownOpen}
-      onToggle={(isOpen) => setDropdownOpen(isOpen)}
-    >
-      <Dropdown.Toggle
-        variant="primary"
-        className="d-flex align-items-center gap-2 px-3 py-2 border-0"
+    <>
+      <div
+        className="ref-account-toggle account-pill-btn d-flex align-items-center gap-2"
+        onClick={() => setDropdownOpen(true)}
+        style={{ cursor: 'pointer' }}
       >
-        <i className="fas fa-user-circle text-white shadow-sm" style={{ fontSize: '1.2rem' }}></i>
-        <span className="d-none d-lg-inline text-white fw-semibold">
-          {currentUser
-            ? (currentUser.displayName || currentUser.email?.split("@")[0] || "User")
-            : t("login")
-          }
-        </span>
-        <i className="fas fa-chevron-down ms-1 small text-white"></i>
-      </Dropdown.Toggle>
+        {currentUser && (profileImage || currentUser.photoURL) ? (
+          <img
+            src={profileImage || currentUser.photoURL}
+            alt="Profile"
+            className="rounded-circle"
+            style={{ width: '38px', height: '38px', objectFit: 'cover', border: '1px solid #e0e0e0' }}
+            referrerPolicy="no-referrer"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = "https://ui-avatars.com/api/?name=" + (currentUser.displayName || 'U') + "&background=0d6efd&color=fff";
+            }}
+          />
+        ) : (
+          <motion.div 
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            className="rounded-circle d-flex align-items-center justify-content-center text-white shadow-sm" 
+            style={{ 
+              width: '38px', 
+              height: '38px', 
+              background: 'linear-gradient(135deg, #f97316 0%, #fbbf24 100%)',
+              border: '2px solid rgba(255, 255, 255, 0.8)'
+            }}
+          >
+            <i className="far fa-user ref-icon" style={{ fontSize: '1.1rem' }}></i>
+          </motion.div>
+        )}
+        <div className="ref-account-text d-none d-lg-flex flex-column align-items-start">
+          {currentUser ? (
+            <>
+              <span style={{ fontSize: '0.8rem', color: '#888', lineHeight: '1.2' }}>
+                {currentUser.displayName || currentUser.email?.split("@")[0] || "User"}
+              </span>
+              <div className="d-flex align-items-center">
+                <span style={{ fontSize: '0.9rem', fontWeight: '700', color: '#212121', lineHeight: '1.2' }}>
+                  My Account
+                </span>
+                <i className="fas fa-chevron-down ms-2" style={{ fontSize: '0.7rem', color: '#888' }}></i>
+              </div>
+            </>
+          ) : (
+            <>
+              <span style={{ fontSize: '0.8rem', color: '#888', lineHeight: '1.2' }}>Login / Sign up</span>
+              <div className="d-flex align-items-center">
+                <span style={{ fontSize: '0.9rem', fontWeight: '700', color: '#212121', lineHeight: '1.2' }}>
+                  My Account
+                </span>
+                <i className="fas fa-chevron-down ms-2" style={{ fontSize: '0.7rem', color: '#888' }}></i>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
 
-      <Dropdown.Menu className="border-0 shadow-lg rounded-3 mt-2 py-3 theme-dropdown" style={{ minWidth: '320px' }}>
-        {!currentUser ? (
-          <>
-            <div className="px-4 pt-3">
+      <Offcanvas show={dropdownOpen} onHide={() => setDropdownOpen(false)} placement="end" className="login-offcanvas">
+        <Offcanvas.Header closeButton className="hamburger-header">
+          <div className="d-flex align-items-center gap-3">
+            <img src={logo} alt="SadhanaCart" style={{ height: '35px' }} />
+            <Offcanvas.Title className="theme-text fw-bold mb-0">
+              {currentUser ? "My Account" : "Welcome to Sadhana Cart"}
+            </Offcanvas.Title>
+          </div>
+        </Offcanvas.Header>
+        <Offcanvas.Body className="p-0">
+          {!currentUser ? (
+            <div className="px-4 py-4 border-bottom text-center">
+              <h6 className="fw-bold text-dark mb-2">🔒 Login Required</h6>
+              <p className="text-muted mb-3" style={{ fontSize: '0.85rem' }}>
+                Please sign in or create an account to access your cart.
+              </p>
               <button
-                className="btn btn-primary w-100 rounded-pill fw-bold mb-3"
+                className="btn btn-primary text-white w-100 rounded-pill fw-bold"
                 onClick={() => {
+                  setAuthMode("login");
                   setShowAuthModal(true);
                   setDropdownOpen(false);
                 }}
               >
                 {t("login")}
               </button>
+              <p className="text-center mt-3 mb-0 text-muted" style={{ fontSize: '0.85rem' }}>
+                New to SadhanaCart? <span style={{ cursor: 'pointer', color: 'var(--bs-primary)' }} onClick={() => { setAuthMode("signup"); setShowAuthModal(true); setDropdownOpen(false); }}>Sign Up</span>
+              </p>
             </div>
-          </>
-        ) : (
-          <div className="px-4 pb-3 border-bottom">
-            <div className="d-flex align-items-center gap-3 mb-3">
-              <div className="bg-primary bg-gradient text-white rounded-circle d-flex align-items-center justify-content-center"
-                style={{ width: '50px', height: '50px', fontSize: '1.2rem' }}>
-                {currentUser.displayName?.[0]?.toUpperCase() ||
-                  currentUser.email?.[0]?.toUpperCase() ||
-                  <i className="fas fa-user"></i>}
+          ) : (
+            <div className="px-4 py-4 border-bottom bg-light">
+              <div className="d-flex align-items-center gap-3">
+                {currentUser && (profileImage || currentUser.photoURL) ? (
+                  <img
+                    src={profileImage || currentUser.photoURL}
+                    alt="Profile"
+                    className="rounded-circle"
+                    style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "https://ui-avatars.com/api/?name=" + (currentUser.displayName || 'U') + "&background=0d6efd&color=fff";
+                    }}
+                  />
+                ) : (
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    className="rounded-circle d-flex align-items-center justify-content-center text-white shadow"
+                    style={{ width: '50px', height: '50px', fontSize: '1.4rem', background: 'linear-gradient(135deg, #f97316 0%, #fbbf24 100%)', border: '3px solid #fff' }}
+                  >
+                    <i className="far fa-user"></i>
+                  </motion.div>
+                )}
+                <div>
+                  <h6 className="mb-0 fw-bold text-dark">{currentUser.displayName || currentUser.email?.split("@")[0] || "User"}</h6>
+                  <small className="text-muted">{currentUser.email}</small>
+                </div>
               </div>
-              <div>
-                <h6 className="mb-0 fw-bold theme-text">{currentUser.displayName || currentUser.email?.split("@")[0] || "User"}</h6>
-                <small className="text-muted theme-text-secondary">{currentUser.email}</small>
-              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        <div className="px-2">
-          <Dropdown.Item
-            className="py-3 px-3 d-flex align-items-center gap-3 theme-dropdown-item"
-            onClick={handleProfileClick}
-          >
-            <i className="fas fa-user-circle text-primary"></i>
-            <div>
-              <div className="fw-semibold theme-text">{t("myProfile")}</div>
-            </div>
-          </Dropdown.Item>
+          <div className="hamburger-menu-list px-0 pb-3">
+            {currentUser && (
+              <>
+                <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); handleProfileClick(); }}>
+                  <FiUser className="menu-icon-svg text-primary" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
+                  <span className="fw-bold text-dark">{t("myProfile")}</span>
+                  <i className="fas fa-chevron-right ms-auto menu-chevron"></i>
+                </a>
 
-          <Dropdown.Item
-            className="py-3 px-3 d-flex align-items-center gap-3 theme-dropdown-item"
-            onClick={handleAddressClick}
-          >
-            <i className="fas fa-map-marker-alt text-warning"></i>
-            <div>
-              <div className="fw-semibold theme-text">{t("address")}</div>
-              {savedAddresses.length > 0 && (
-                <small className="text-muted theme-text-secondary">
-                  {savedAddresses.length}{" "}
-                  {savedAddresses.length === 1
-                    ? t("saved_address")
-                    : t("saved_addresses")}
-                </small>
-              )}
-            </div>
-          </Dropdown.Item>
+                <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); handleAddressClick(); }}>
+                  <FiMapPin className="menu-icon-svg text-danger" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
+                  <span className="fw-bold text-dark">{t("address")}</span>
+                  <i className="fas fa-chevron-right ms-auto menu-chevron"></i>
+                </a>
 
-          <Dropdown.Item
-            className="py-3 px-3 d-flex align-items-center gap-3 theme-dropdown-item"
-            onClick={handleOrdersClick}
-          >
-            <i className="fas fa-box text-success"></i>
-            <div>
-              <div className="fw-semibold theme-text">{t("orders.title")}</div>
-            </div>
-          </Dropdown.Item>
+                <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); handleOrdersClick(); }}>
+                  <FiPackage className="menu-icon-svg text-success" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
+                  <span className="fw-bold text-dark">{t("orders.title")}</span>
+                  <i className="fas fa-chevron-right ms-auto menu-chevron"></i>
+                </a>
 
-          <Dropdown.Item
-            className="py-3 px-3 d-flex align-items-center gap-3 theme-dropdown-item"
-            onClick={handleWishlistClick}
-          >
-            <i className="fas fa-heart text-danger"></i>
-            <div>
-              <div className="fw-semibold theme-text">{t("wishList")}</div>
-            </div>
-          </Dropdown.Item>
+                <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); handleWishlistClick(); }}>
+                  <FiHeart className="menu-icon-svg text-danger" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
+                  <span className="fw-bold text-dark">{t("wishList")}</span>
+                  <i className="fas fa-chevron-right ms-auto menu-chevron"></i>
+                </a>
 
-          <Dropdown.Item
-            className="py-3 px-3 d-flex align-items-center gap-3 theme-dropdown-item"
-            onClick={handleWalletClick}
-          >
-            <div className="position-relative">
-              <i className="fas fa-wallet text-success"></i>
-              {walletBalance > 0 && (
-                <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style={{ fontSize: '0.5rem' }}>
-                  ₹{walletBalance}
-                </span>
-              )}
-            </div>
-            <div>
-              <div className="fw-semibold theme-text">{t("walletRewards")}</div>
-            </div>
-          </Dropdown.Item>
+                <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); navigate("/cart"); setDropdownOpen(false); }}>
+                  <HoverCartIcon src={cartGif} alt="Cart" style={{ width: '20px', height: '20px', objectFit: 'contain', marginRight: '8px' }} />
+                  <span className="fw-bold text-dark">Cart</span>
+                  <i className="fas fa-chevron-right ms-auto menu-chevron"></i>
+                </a>
 
-          <Dropdown.Item
-            className="py-3 px-3 d-flex align-items-center gap-3 theme-dropdown-item"
-            onClick={handleGiftCardsClick}
-          >
-            <i className="fas fa-credit-card text-info"></i>
-            <div>
-              <div className="fw-semibold theme-text">{t("referEarn")}</div>
-            </div>
-          </Dropdown.Item>
+                <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); handleWalletClick(); }}>
+                  <FiCreditCard className="menu-icon-svg text-success" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
+                  <span className="fw-bold text-dark">{t("walletRewards")}</span>
+                  {walletBalance > 0 && (
+                    <span className="badge rounded-pill bg-danger ms-2" style={{ fontSize: '0.6rem' }}>
+                      ₹{walletBalance}
+                    </span>
+                  )}
+                  <i className="fas fa-chevron-right ms-auto menu-chevron"></i>
+                </a>
 
-          {/* 🌍 LANGUAGE SWITCHER */}
-          <hr className="my-2" />
-          <div className="px-3">
-            <small className="text-muted fw-semibold">
-              {t("language")}
-            </small>
-            <LanguageSwitcher />
-          </div>
+                <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); handleGiftCardsClick(); }}>
+                  <FiCreditCard className="menu-icon-svg text-info" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
+                  <span className="fw-bold text-dark">{t("referEarn")}</span>
+                  <i className="fas fa-chevron-right ms-auto menu-chevron"></i>
+                </a>
 
-          {/* THEME TOGGLE BUTTON */}
-          <hr className="my-2" />
-          <Dropdown.Item
-            className="py-3 px-3 d-flex align-items-center gap-3 theme-dropdown-item"
-            onClick={toggleTheme}
-          >
-            <div className="position-relative">
-              {theme === 'light' ? (
-                <i className="fas fa-moon text-warning"></i>
-              ) : (
-                <i className="fas fa-sun text-warning"></i>
-              )}
-            </div>
-            <div>
-              <div className="fw-semibold theme-text">{t("theme")}</div>
-              <small className="text-muted theme-text-secondary">
-                {theme === "light" ? t("darkMode") : t("lightMode")}
+                <hr className="hamburger-divider" />
+              </>
+            )}
+
+            <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); navigate("/categories"); setDropdownOpen(false); }}>
+              <FiGrid className="menu-icon-svg text-primary" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
+              <span className="fw-bold text-dark">Browse Categories</span>
+              <i className="fas fa-chevron-right ms-auto menu-chevron"></i>
+            </a>
+
+            <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); navigate("/offers"); setDropdownOpen(false); }}>
+              <FiTag className="menu-icon-svg text-warning" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
+              <span className="fw-bold text-dark">Offers & Deals</span>
+              <i className="fas fa-chevron-right ms-auto menu-chevron"></i>
+            </a>
+
+            <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); navigate("/new-arrivals"); setDropdownOpen(false); }}>
+              <FiStar className="menu-icon-svg text-success" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
+              <span className="fw-bold text-dark">New Arrivals</span>
+              <i className="fas fa-chevron-right ms-auto menu-chevron"></i>
+            </a>
+
+            <hr className="hamburger-divider" />
+
+            <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); navigate("/support"); setDropdownOpen(false); }}>
+              <FiHelpCircle className="menu-icon-svg text-info" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
+              <span className="fw-bold text-dark">Help & Support</span>
+              <i className="fas fa-chevron-right ms-auto menu-chevron"></i>
+            </a>
+
+            <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); navigate("/faqs"); setDropdownOpen(false); }}>
+              <FiMessageCircle className="menu-icon-svg text-primary" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
+              <span className="fw-bold text-dark">FAQs</span>
+              <i className="fas fa-chevron-right ms-auto menu-chevron"></i>
+            </a>
+
+            <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); navigate("/contact"); setDropdownOpen(false); }}>
+              <FiPhone className="menu-icon-svg text-success" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
+              <span className="fw-bold text-dark">Contact Us</span>
+              <i className="fas fa-chevron-right ms-auto menu-chevron"></i>
+            </a>
+
+            <hr className="hamburger-divider" />
+
+            <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); navigate("/about"); setDropdownOpen(false); }}>
+              <FiInfo className="menu-icon-svg text-primary" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
+              <span className="fw-bold text-dark">About Us</span>
+              <i className="fas fa-chevron-right ms-auto menu-chevron"></i>
+            </a>
+
+            <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); navigate("/policies"); setDropdownOpen(false); }}>
+              <FiShield className="menu-icon-svg text-secondary" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
+              <span className="fw-bold text-dark">Store Policies</span>
+              <i className="fas fa-chevron-right ms-auto menu-chevron"></i>
+            </a>
+
+            <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); navigate("/privacy"); setDropdownOpen(false); }}>
+              <FiShield className="menu-icon-svg text-success" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
+              <span className="fw-bold text-dark">Privacy Policy</span>
+              <i className="fas fa-chevron-right ms-auto menu-chevron"></i>
+            </a>
+
+            <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); navigate("/terms"); setDropdownOpen(false); }}>
+              <FiFileText className="menu-icon-svg text-secondary" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
+              <span className="fw-bold text-dark">Terms & Conditions</span>
+              <i className="fas fa-chevron-right ms-auto menu-chevron"></i>
+            </a>
+
+            <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); navigate("/returns"); setDropdownOpen(false); }}>
+              <FiRefreshCcw className="menu-icon-svg text-warning" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
+              <span className="fw-bold text-dark">Return & Refund Policy</span>
+              <i className="fas fa-chevron-right ms-auto menu-chevron"></i>
+            </a>
+
+            {/* 🌍 LANGUAGE SWITCHER */}
+            <hr className="hamburger-divider" />
+            <div className="px-4 py-2">
+              <small className="text-muted fw-bold d-block mb-2">
+                {t("language")}
               </small>
+              <LanguageSwitcher />
             </div>
-            <div className="ms-auto">
-              <div className={`theme-toggle-switch ${theme}`}>
+
+            {/* THEME TOGGLE BUTTON */}
+            <hr className="hamburger-divider" />
+            <div className="hamburger-menu-item d-flex align-items-center justify-content-between" style={{ paddingRight: '20px' }}>
+              <div className="d-flex align-items-center gap-3">
+                {theme === 'light' ? (
+                  <FiMoon className="menu-icon-svg text-dark" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
+                ) : (
+                  <FiSun className="menu-icon-svg text-dark" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
+                )}
+                <span className="fw-bold text-dark">{t("theme")}</span>
+              </div>
+              <div className={`theme-toggle-switch ${theme}`} onClick={toggleTheme}>
                 <div className="theme-toggle-slider"></div>
               </div>
             </div>
-          </Dropdown.Item>
 
-          {currentUser && (
-            <>
-              <hr className="my-2" />
-              <Dropdown.Item
-                className="py-3 px-3 d-flex align-items-center gap-3 text-danger theme-dropdown-item"
-                onClick={handleLogout}
-              >
-                <i className="fas fa-sign-out-alt"></i>
-                <div className="fw-semibold theme-text">{t("logout")}</div>
-              </Dropdown.Item>
-            </>
-          )}
-        </div>
-      </Dropdown.Menu>
-    </Dropdown>
+            {/* FOLLOW US */}
+            <div className="px-4 py-3">
+              <small className="text-muted fw-bold d-block mb-3">FOLLOW US</small>
+              <div className="d-flex align-items-center gap-3">
+                <a href="#" style={{ background: 'radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%)', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', transition: 'transform 0.2s' }} onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-3px)'} onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
+                  <FiInstagram color="white" size={22} />
+                </a>
+                <a href="#" style={{ backgroundColor: '#1877F2', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', transition: 'transform 0.2s' }} onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-3px)'} onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
+                  <FiFacebook color="white" size={22} />
+                </a>
+                <a href="#" style={{ backgroundColor: '#FF0000', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', transition: 'transform 0.2s' }} onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-3px)'} onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
+                  <FiYoutube color="white" size={22} />
+                </a>
+              </div>
+            </div>
+
+            {currentUser && (
+              <>
+                <hr className="hamburger-divider" />
+                <a href="#" className="hamburger-menu-item text-danger" onClick={(e) => { e.preventDefault(); handleLogout(); }}>
+                  <FiLogOut className="menu-icon-svg text-danger" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
+                  <span className="fw-bold">{t("logout")}</span>
+                  <i className="fas fa-chevron-right ms-auto menu-chevron"></i>
+                </a>
+              </>
+            )}
+          </div>
+        </Offcanvas.Body>
+      </Offcanvas>
+    </>
   );
 };
 
@@ -689,7 +873,7 @@ export default function Header() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // 🔥 MEMOIZED SELECTORS - Fix Redux warning
+  // ðŸ”¥ MEMOIZED SELECTORS - Fix Redux warning
   const { location } = useSelector((state) => state.header);
 
   // Memoized cart items selector
@@ -703,19 +887,42 @@ export default function Header() {
   // Local State
   const [currentUser, setCurrentUser] = useState(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMode, setAuthMode] = useState("login");
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showLogoutConfirmModal, setShowLogoutConfirmModal] = useState(false);
   const [loggedInUserName, setLoggedInUserName] = useState("");
   const [mobileSearchActive, setMobileSearchActive] = useState(false);
+  const [wishlistCount, setWishlistCount] = useState(0);
+
+  // Categories Dropdown State
+  const [categories, setCategories] = useState([]);
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
 
   // Check theme on component mount
+  const [theme, setTheme] = useState('light');
+
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') || 'light';
+    setTheme(savedTheme);
     if (savedTheme === 'dark') {
       document.documentElement.setAttribute('data-bs-theme', 'dark');
       document.body.classList.add('dark-theme');
     }
   }, []);
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
+    if (newTheme === 'dark') {
+      document.documentElement.setAttribute('data-bs-theme', 'dark');
+      document.body.classList.add('dark-theme');
+    } else {
+      document.documentElement.removeAttribute('data-bs-theme');
+      document.body.classList.remove('dark-theme');
+    }
+  };
 
   // Auth State Listener
   useEffect(() => {
@@ -723,6 +930,35 @@ export default function Header() {
       setCurrentUser(user);
     });
     return () => unsubscribe();
+  }, []);
+
+  // Wishlist Listener
+  useEffect(() => {
+    if (!currentUser) {
+      setWishlistCount(0);
+      return;
+    }
+    const q = collection(db, "users", currentUser.uid, "favorites");
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setWishlistCount(snapshot.docs.length);
+    });
+    return () => unsubscribe();
+  }, [currentUser]);
+
+  // Fetch Categories for Dropdown
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const catRef = collection(db, "category");
+        const snap = await getDocs(catRef);
+        const catList = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        catList.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+        setCategories(catList);
+      } catch (err) {
+        console.error("Error fetching categories:", err);
+      }
+    };
+    fetchCategories();
   }, []);
 
   /* ---------------- HANDLERS ---------------- */
@@ -734,8 +970,14 @@ export default function Header() {
     setTimeout(() => setShowLoginModal(false), 2000);
   };
 
-  const handleLogout = async () => {
+  const handleLogout = (e) => {
+    if (e) e.preventDefault();
+    setShowLogoutConfirmModal(true);
+  };
+
+  const handleConfirmLogoutAction = async () => {
     try {
+      setShowLogoutConfirmModal(false);
       await signOut(auth);
       setShowLogoutModal(true);
       setTimeout(() => {
@@ -757,188 +999,199 @@ export default function Header() {
   return (
     <>
       {/* =================== MAIN NAVBAR =================== */}
-      <Navbar expand="lg" className="navbar-custom shadow-sm sticky-top" variant="light">
-        <Container fluid className="px-3 px-lg-4">
+      <div className="navbar-custom sticky-top">
+        <div className="navbar-main-row">
 
-          {/* MOBILE VIEW */}
-          {!mobileSearchActive && (
-            <>
-              {/* LOGO */}
-              <Navbar.Brand href="/" className="d-flex align-items-center">
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="d-flex align-items-center"
-                >
-                  <img
-                    src={logo}
-                    alt="Sadhana Cart"
-                    className="logo-img"
-                    style={{ width: "40px", height: "40px", objectFit: "contain" }}
-                  />
-                  <div className="ms-1 ms-sm-2">
-                    <div
-                      className="brand-text"
-                      style={{
-                        color: "goldenrod",
-                        fontWeight: "800",
-                        fontSize: "1.2rem",
-                        lineHeight: "1.1"
-                      }}
-                    >
-                      {t("brandName")}
-                      <span className="brand-text-part" style={{ color: "navy" }}>
-                        {t("brandSuffix")}
-                      </span>
-                    </div>
-                  </div>
-                </motion.div>
-              </Navbar.Brand>
+          {/* LOGO */}
+          <div className="navbar-left-group">
+            <a href="/" className="navbar-brand-link">
+              <img src={logo} alt="Sadhana Cart" className="logo-img" />
+              <div className="brand-text-wrap">
+                <span className="brand-name-gold">Sadhana</span>
+                <span className="brand-name-navy">Cart</span>
+              </div>
+            </a>
+          </div>
 
-              {/* MOBILE ACTIONS */}
-              <div className="d-flex d-lg-none align-items-center gap-2 ms-auto">
-                {/* Search Toggle */}
-                <div 
-                  className="navbar-action-item px-2" 
-                  onClick={() => setMobileSearchActive(true)}
-                >
+          {/* SEARCH BAR — Desktop */}
+          <div className="navbar-search-wrap d-none d-xl-flex">
+            <div className="ref-search-bar">
+              <input
+                type="text"
+                className="ref-search-input"
+                placeholder="Search for products, brands and more..."
+                onClick={() => navigate('/advanced-search')}
+                readOnly
+              />
+              <div className="ref-search-divider" />
+              <select className="ref-category-select">
+                <option>All Categories</option>
+              </select>
+              <button className="ref-search-btn" onClick={() => navigate('/advanced-search')}>
+                <i className="fas fa-search"></i>
+              </button>
+            </div>
+          </div>
+
+          {/* RIGHT ACTIONS — Desktop */}
+          <div className="navbar-right-group d-none d-xl-flex">
+
+            {/* Language Switcher */}
+            <div className="ref-deliver-wrap d-flex align-items-center">
+              <LanguageSwitcher />
+            </div>
+
+            {/* Wishlist */}
+            <div className="ref-icon-btn" onClick={() => {
+              if (!currentUser) { setShowAuthModal(true); return; }
+              navigate('/wishlist');
+            }}>
+              <div className="ref-cart-icon-wrap">
+                <FiHeart className="ref-icon" />
+                {wishlistCount > 0 && (
+                  <span className="ref-cart-badge">{wishlistCount}</span>
+                )}
+              </div>
+              <span className="ref-icon-label">Wishlist</span>
+            </div>
+
+            {/* Cart */}
+            <div className="ref-icon-btn ref-cart-btn" onClick={goToCart}>
+              <div className="ref-cart-icon-wrap">
+                <HoverCartIcon src={cartGif} alt="Cart" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
+                {cartCount > 0 && (
+                  <span className="ref-cart-badge">{cartCount}</span>
+                )}
+              </div>
+              <span className="ref-icon-label">Cart</span>
+            </div>
+
+            {/* Account */}
+            <FlipkartLoginDropdown
+              currentUser={currentUser}
+              handleLogout={handleLogout}
+              setShowAuthModal={setShowAuthModal}
+              setAuthMode={setAuthMode}
+            />
+          </div>
+
+          {/* MOBILE ACTIONS */}
+          <div className="d-flex d-xl-none align-items-center gap-2 ms-auto">
+            {!mobileSearchActive && (
+              <>
+                <div className="navbar-action-item px-2" onClick={() => setMobileSearchActive(true)}>
                   <i className="fas fa-search text-primary"></i>
-                  <span className="fw-bold d-none d-sm-inline extra-small">{t("search")}</span>
                 </div>
-                {/* Mobile Seller Button */}
-                <div 
-                  className="navbar-action-item px-2" 
-                  onClick={handleSellerClick}
-                >
-                  <i className="fas fa-store text-primary"></i>
-                  <span className="fw-bold d-none d-sm-inline extra-small">{t("seller")}</span>
-                </div>
-
-                {/* Mobile Login Dropdown */}
                 <FlipkartLoginDropdown
                   currentUser={currentUser}
                   handleLogout={handleLogout}
                   setShowAuthModal={setShowAuthModal}
+                  setAuthMode={setAuthMode}
                 />
-
-
-                {/* Cart with Badge */}
-                <Button
-                  variant="warning"
-                  size="sm"
-                  className="position-relative cart-btn-premium px-3"
-                  onClick={goToCart}
-                  style={{ minWidth: "auto", padding: "6px 12px" }}
+                <div className="ref-icon-btn ref-cart-btn" onClick={() => {
+                  if (!currentUser) { setShowAuthModal(true); return; }
+                  navigate('/wishlist');
+                }}>
+                  <div className="ref-cart-icon-wrap">
+                    <FiHeart className="ref-icon" />
+                    {wishlistCount > 0 && (
+                      <span className="ref-cart-badge">{wishlistCount}</span>
+                    )}
+                  </div>
+                </div>
+                <div className="ref-icon-btn ref-cart-btn" onClick={goToCart}>
+                  <div className="ref-cart-icon-wrap">
+                    <HoverCartIcon src={cartGif} alt="Cart" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
+                    {cartCount > 0 && (
+                      <span className="ref-cart-badge">{cartCount}</span>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+            {mobileSearchActive && (
+              <div className="d-flex align-items-center w-100 gap-2">
+                <button
+                  className="btn btn-link text-dark p-0"
+                  onClick={() => setMobileSearchActive(false)}
                 >
-                  <i className="fas fa-shopping-cart"></i>
-                  {cartCount > 0 && (
-                    <Badge
-                      bg="danger"
-                      className="position-absolute top-0 start-100 translate-middle rounded-pill border border-white"
-                      style={{ fontSize: "0.55rem", padding: "0.2rem 0.35rem" }}
-                    >
-                      {cartCount}
-                    </Badge>
-                  )}
-                </Button>
+                  <i className="fas fa-arrow-left"></i>
+                </button>
+                <SearchBar />
               </div>
-            </>
-          )}
+            )}
+          </div>
+        </div>
 
-          {/* MOBILE SEARCH VIEW */}
-          {mobileSearchActive && (
-            <div className="d-flex d-lg-none align-items-center w-100">
-              <Button
-                variant="link"
-                className="me-2 text-dark theme-text"
-                onClick={() => setMobileSearchActive(false)}
-              >
-                <i className="fas fa-arrow-left"></i>
-              </Button>
-              <SearchBar />
+        {/* =================== SUB-NAVBAR MENU ROW =================== */}
+        <div className="sub-navbar-row">
+          <div className="sub-navbar-inner">
+            <div
+              className="sub-nav-all-cat"
+              onMouseEnter={() => setShowCategoryDropdown(true)}
+              onMouseLeave={() => setShowCategoryDropdown(false)}
+            >
+              <i className="fas fa-th sub-nav-grid-icon"></i>
+              <span>All Categories</span>
+              <i className={`fas fa-chevron-${showCategoryDropdown ? 'up' : 'down'} sub-nav-chev`}></i>
+
+              {/* Mega Menu Dropdown */}
+              {showCategoryDropdown && (
+                <div className="all-categories-dropdown">
+                  {categories.length > 0 ? (
+                    categories.map(cat => (
+                      <div
+                        key={cat.id}
+                        className="cat-dropdown-item"
+                        onClick={() => navigate('/browse-categories', { state: { selectedCategory: cat.name } })}
+                      >
+                        {cat.image ? (
+                          <img src={cat.image} alt={cat.name} className="cat-dropdown-img" />
+                        ) : cat.imageUrl ? (
+                          <img src={cat.imageUrl} alt={cat.name} className="cat-dropdown-img" />
+                        ) : (
+                          <div className="cat-dropdown-icon-placeholder">
+                            {cat.name ? cat.name.charAt(0) : "C"}
+                          </div>
+                        )}
+                        <span className="cat-dropdown-name">{cat.name}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="cat-dropdown-item text-center py-3 text-muted">
+                      <i className="fas fa-spinner fa-spin me-2"></i> Loading...
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
-          )}
-
-          {/* DESKTOP VIEW */}
-          <Navbar.Collapse id="navbar-collapse" className="d-none d-lg-flex">
-
-            {/* Search Bar with Filter Button */}
-            <Nav className="flex-grow-1 mx-4" style={{ maxWidth: "650px" }}>
-              <SearchBar />
-            </Nav>
-
-            {/* Right Actions */}
-            <Nav className="align-items-center gap-4">
-
-              {/* 🌍 Language Switcher - Desktop Only */}
-              <div className="d-none d-lg-block">
-                <LanguageSwitcher />
-              </div>
-
-              {/* Seller */}
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="navbar-action-item"
-                onClick={handleSellerClick}
-              >
-                <i className="fas fa-store text-primary"></i>
-                <small className="fw-bold theme-text">
-                  {t("seller")}
-                </small>
-              </motion.div>
-
-              <FlipkartLoginDropdown
-                currentUser={currentUser}
-                handleLogout={handleLogout}
-                setShowAuthModal={setShowAuthModal}
-              />
-
-              {/* Cart with Badge */}
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button
-                  variant="warning"
-                  className="position-relative cart-btn-premium"
-                  onClick={goToCart}
-                >
-                  <i className="fas fa-shopping-cart me-2"></i>
-                  <span className="fw-bold">{t("cartLabel")}</span>
-                  {cartCount > 0 && (
-                    <Badge
-                      bg="danger"
-                      className="position-absolute top-0 start-100 translate-middle rounded-pill border border-white"
-                      style={{ fontSize: '0.7rem' }}
-                    >
-                      {cartCount}
-                    </Badge>
-                  )}
-                </Button>
-              </motion.div>
-            </Nav>
-          </Navbar.Collapse>
-        </Container>
-      </Navbar>
-
-      
+            <nav className="sub-nav-links">
+              <a href="/" className="sub-nav-link sub-nav-active">Home</a>
+              <a href="#" className="sub-nav-link" onClick={(e) => { e.preventDefault(); navigate("/browse-categories"); }}>Browse Category</a>
+              <a href="#" className="sub-nav-link" onClick={(e) => { e.preventDefault(); navigate("/best-sellers"); }}>Best Sellers</a>
+              <a href="#" className="sub-nav-link" onClick={(e) => { e.preventDefault(); navigate("/new-arrivals"); }}>New Arrivals</a>
+              <a href="#" className="sub-nav-link" onClick={(e) => { e.preventDefault(); navigate("/rewards"); }}>
+                Sadhana Rewards <span className="sub-nav-badge sub-nav-badge-new">New</span>
+              </a>
+              <a href="#" className="sub-nav-link" onClick={(e) => { e.preventDefault(); navigate("/offers"); }}>Offers Zone</a>
+              <a href="/track-order" className="sub-nav-link">Track Order</a>
+              <a href="#" className="sub-nav-link" onClick={(e) => { e.preventDefault(); handleSellerClick(); }}>
+                Become a Seller
+              </a>
+              <a href="/support" className="sub-nav-link">Help &amp; Support</a>
+            </nav>
+          </div>
+        </div>
+      </div>
 
       {/* MODALS */}
       <AnimatePresence>
-        {/* Auth Modal */}
-        <Modal
-          show={showAuthModal}
-          onHide={() => setShowAuthModal(false)}
-          centered
-          size="lg"
-        >
+        <Modal show={showAuthModal} onHide={() => setShowAuthModal(false)} centered size="lg">
           <Modal.Body className="p-0">
-            <AuthPage
-              onClose={() => setShowAuthModal(false)}
-              onLoginSuccess={handleLoginSuccess}
-            />
+            <AuthPage onClose={() => setShowAuthModal(false)} initialMode={authMode} onLoginSuccess={handleLoginSuccess} />
           </Modal.Body>
         </Modal>
 
-        {/* Login Success Modal */}
         {showLoginModal && (
           <LoginConfirmationModal
             show={showLoginModal}
@@ -947,13 +1200,45 @@ export default function Header() {
           />
         )}
 
-        {/* Logout Success Modal */}
         {showLogoutModal && (
           <LogoutConfirmationModal
             show={showLogoutModal}
             onClose={() => setShowLogoutModal(false)}
           />
         )}
+
+        {/* Logout Confirmation Modal */}
+        <Modal show={showLogoutConfirmModal} onHide={() => setShowLogoutConfirmModal(false)} centered>
+          <Modal.Header closeButton className="border-0 pb-0">
+            <Modal.Title className="fw-bold" style={{ fontSize: '1.25rem' }}>Confirm Log Out</Modal.Title>
+          </Modal.Header>
+          <Modal.Body className="pt-2">
+            <h4 className="fw-bold mb-2 text-dark" style={{ fontSize: '18px' }}>
+              Are you sure you want to log out?
+            </h4>
+            <p className="text-muted" style={{ fontSize: '14px', lineHeight: '1.6' }}>
+              You'll be signed out of your account and will need to log in again to access your profile, bookings, and other personalized features.
+            </p>
+            <div className="d-flex gap-3 mt-4">
+              <button 
+                type="button" 
+                className="btn text-white w-100 fw-bold rounded" 
+                style={{ backgroundColor: '#e53e3e', height: '42px' }}
+                onClick={handleConfirmLogoutAction}
+              >
+                Log Out
+              </button>
+              <button 
+                type="button" 
+                className="btn text-white w-100 fw-bold rounded" 
+                style={{ backgroundColor: '#38a169', height: '42px' }}
+                onClick={() => setShowLogoutConfirmModal(false)}
+              >
+                Stay Signed In
+              </button>
+            </div>
+          </Modal.Body>
+        </Modal>
       </AnimatePresence>
     </>
   );

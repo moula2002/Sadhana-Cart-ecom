@@ -13,7 +13,7 @@ const CategoryProducts = () => {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
-  const [selectedSubCat, setSelectedSubCat] = useState("All");
+  const [selectedSubCat, setSelectedSubCat] = useState(location.state?.subcategory || "All");
   const [loading, setLoading] = useState(true);
   const [categoryName, setCategoryName] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -166,7 +166,12 @@ const CategoryProducts = () => {
       list = list.filter((p) => p.isActive !== false);
 
       setProducts(list);
-      setFilteredProducts(list);
+      const initialSubcat = location.state?.subcategory || "All";
+      if (initialSubcat !== "All") {
+        setFilteredProducts(list.filter(p => p.subcategory === initialSubcat));
+      } else {
+        setFilteredProducts(list);
+      }
 
     } catch (err) {
       console.error("Error fetching data:", err);

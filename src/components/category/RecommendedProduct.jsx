@@ -1,67 +1,27 @@
 import React, { useEffect, useRef, useState } from "react";
+import { Heart, ShoppingCart } from "lucide-react";
+import { useWishlist } from "../../hooks/useWishlist";
+import { useRatings } from "../../hooks/useRatings";
 import { db } from "../../firebase";
 import {
-  collection,
-  query,
-  orderBy,
-  limit,
-  startAfter,
-  getDocs,
+  collection, query, orderBy, limit, startAfter, getDocs,
 } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { addToCart } from "../../redux/cartSlice";
 
-function RecommendedProduct() {
+function RecommendedProduct({ showCart = true }) {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [products, setProducts] = useState([]);
   const [lastDoc, setLastDoc] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [hoveredCard, setHoveredCard] = useState(null);
-  const [showScrollHint, setShowScrollHint] = useState(true);
+  const { wishlisted, toggleWishlist } = useWishlist();
+  const ratings = useRatings();
 
   const scrollRef = useRef(null);
-
-  // 🌙 THEME STATE (Synced with Navbar/LocalStorage)
-  const [darkMode, setDarkMode] = useState(
-    localStorage.getItem("theme") === "dark"
-  );
-
-  const PAGE_SIZE = 5;
-
-  // Sync with Navbar's theme changes
-  useEffect(() => {
-    const handleStorageChange = () => {
-      setDarkMode(localStorage.getItem("theme") === "dark");
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-    
-    const observer = new MutationObserver(() => {
-        const isDark = document.documentElement.getAttribute("data-bs-theme") === "dark" || 
-                       document.body.classList.contains("dark-theme");
-        setDarkMode(isDark);
-    });
-
-    observer.observe(document.documentElement, { attributes: true });
-    observer.observe(document.body, { attributes: true });
-
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-      observer.disconnect();
-    };
-  }, []);
-
-  // Theme Colors Configuration
-  const themeColors = {
-    containerBg: darkMode 
-      ? "linear-gradient(135deg, #2d1b4e 0%, #1a1a2e 100%)" 
-      : "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-    cardBg: darkMode ? "#1e1e1e" : "white",
-    titleColor: darkMode ? "#ffffff" : "#333",
-    descColor: darkMode ? "#bbb" : "#666",
-    priceColor: darkMode ? "#fff" : "#2c3e50",
-    shadow: darkMode ? "0 8px 25px rgba(0,0,0,0.5)" : "0 8px 20px rgba(0,0,0,0.1)"
-  };
+  const PAGE_SIZE = 8;
 
   const fetchProducts = async () => {
     try {
@@ -72,244 +32,197 @@ function RecommendedProduct() {
         limit(PAGE_SIZE)
       );
       const snapshot = await getDocs(q);
-      const list = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      const list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
       setProducts(list);
       setLastDoc(snapshot.docs[snapshot.docs.length - 1]);
+    } catch (err) {
+      console.error(err);
+    } finally {
       setLoading(false);
-    } catch (error) {
-      console.error(error);
     }
   };
 
   const loadMore = async () => {
     if (!lastDoc || loading) return;
     setLoading(true);
-    const q = query(
-      collection(db, "products"),
-      orderBy("productid"),
-      startAfter(lastDoc),
-      limit(PAGE_SIZE)
-    );
-    const snapshot = await getDocs(q);
-    const list = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-    setProducts((prev) => [...prev, ...list]);
-    setLastDoc(snapshot.docs[snapshot.docs.length - 1]);
-    setLoading(false);
+    try {
+      const q = query(
+        collection(db, "products"),
+        orderBy("productid"),
+        startAfter(lastDoc),
+        limit(PAGE_SIZE)
+      );
+      const snapshot = await getDocs(q);
+      const list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      setProducts((prev) => [...prev, ...list]);
+      setLastDoc(snapshot.docs[snapshot.docs.length - 1]);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
+  useEffect(() => { fetchProducts(); }, []);
 
   const handleScroll = () => {
     const el = scrollRef.current;
-    if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 50 && !loading) {
+    if (!el) return;
+    if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 60 && !loading) {
       loadMore();
     }
-    if (el.scrollLeft > 0 && showScrollHint) {
-      setShowScrollHint(false);
+  };
+
+  const scroll = (dir) => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: dir === "left" ? -360 : 360, behavior: "smooth" });
     }
   };
 
   const calculateDiscount = (price, offerprice) => {
-    if (!price || !offerprice) return 0;
+    if (!price || !offerprice || offerprice >= price) return 0;
     return Math.round(((price - offerprice) / price) * 100);
   };
 
+  const handleAddToCart = (e, product) => {
+    e.stopPropagation();
+    dispatch(
+      addToCart({
+        id: product.id,
+        title: product.name || "Product",
+        price: product.offerprice || product.price || 0,
+        image: product.images?.[0] || "",
+        quantity: 1,
+      })
+    );
+  };
+
+
+  if (products.length === 0 && !loading) return null;
+
   return (
-    <div
-      style={{
-        padding: "40px 30px",
-        background: themeColors.containerBg,
-        borderRadius: "30px",
-        marginTop: "40px",
-        boxShadow: "0 20px 40px rgba(0,0,0,0.15)",
-        transition: "background 0.5s ease"
-      }}
-    >
-      <style>
-        {`
-        .recommended-scroll::-webkit-scrollbar {
-          display: none;
-        }
-        `}
-      </style>
-
-      {/* HEADER */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "30px",
-        }}
+    <div style={{ position: "relative" }}>
+      {/* Left scroll */}
+      <button
+        onClick={() => scroll("left")}
+        style={scrollBtnStyle("left")}
+        aria-label="Scroll left"
       >
-        <h2 style={{ color: "white", fontWeight: "800" }}>
-          Recommended For You
-        </h2>
-      </div>
+        ‹
+      </button>
 
-      {/* PRODUCT LIST */}
-      <div
-        ref={scrollRef}
-        onScroll={handleScroll}
-        className="recommended-scroll"
-        style={{
-          display: "flex",
-          gap: "20px",
-          overflowX: "auto",
-          paddingBottom: "20px",
-          scrollbarWidth: "none",
-          msOverflowStyle: "none",
-          alignItems: "flex-start",
-        }}
-      >
+      <div ref={scrollRef} onScroll={handleScroll} className="sc-products-row">
         {products.map((product) => {
-          const image =
-            product.images?.[0] ||
-            product.image ||
-            "https://via.placeholder.com/260x180";
-
-          const name = product.name || "Product";
-          const description = product.description || "";
+          const rawName = product.name || "Product";
+          const name = rawName.length > 45 ? rawName.substring(0, 45) + "..." : rawName;
           const price = product.price || 0;
           const offerprice = product.offerprice || price;
           const discount = calculateDiscount(price, offerprice);
+          const image = product.images?.[0] || product.image || "";
 
           return (
             <div
               key={product.id}
+              className="sc-product-card"
               onClick={() => navigate(`/product/${product.id}`)}
-              onMouseEnter={() => setHoveredCard(product.id)}
-              onMouseLeave={() => setHoveredCard(null)}
-              style={{
-                minWidth: "260px",
-                maxWidth: "260px",
-                height: "320px",
-                background: themeColors.cardBg,
-                borderRadius: "15px",
-                padding: "15px",
-                position: "relative",
-                flexShrink: 0,
-                boxShadow: themeColors.shadow,
-                cursor: "pointer",
-                display: "flex",
-                flexDirection: "column",
-                transform: hoveredCard === product.id ? "translateY(-8px)" : "none",
-                transition: "all 0.3s ease",
-              }}
             >
-              {/* DISCOUNT */}
+              {/* Wishlist */}
+              <button
+                className="wishlist-btn"
+                onClick={(e) => toggleWishlist(e, product)}
+                aria-label="Wishlist"
+              >
+                {wishlisted[product.id] ? <Heart size={20} fill="#ff4081" color="#ff4081" /> : <Heart size={20} strokeWidth={2.5} color="#555" />}
+              </button>
+
+              {/* Discount tag */}
               {discount > 0 && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "10px",
-                    left: "10px",
-                    background: "#ff4757",
-                    color: "white",
-                    padding: "5px 8px",
-                    borderRadius: "15px",
-                    fontWeight: "600",
-                    fontSize: "12px",
-                    zIndex: 2
-                  }}
-                >
-                  {discount}% OFF
+                <span className="sc-discount-tag">{discount}% OFF</span>
+              )}
+
+              {/* Image */}
+              <div className="img-box">
+                <img src={image} alt={name} loading="lazy" />
+              </div>
+
+              {/* Name */}
+              <div className="sc-name">{name}</div>
+
+              {/* Rating */}
+              {ratings[product.id] && (
+                <div className="sc-rating-badge-container">
+                  <span className="sc-rating-badge">
+                    {ratings[product.id].average} <span className="star-icon">★</span>
+                  </span>
+                  <span className="sc-rating-count">({ratings[product.id].count})</span>
                 </div>
               )}
 
-              {/* IMAGE */}
-              <div
-                style={{
-                  width: "100%",
-                  height: "150px",
-                  overflow: "hidden",
-                  borderRadius: "10px",
-                  background: darkMode ? "#2a2a2a" : "transparent"
-                }}
-              >
-                <img
-                  src={image}
-                  alt={name}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "contain",
-                    transition: "transform 0.5s ease",
-                    transform: hoveredCard === product.id ? "scale(1.08)" : "scale(1)"
-                  }}
-                />
+              {/* Price */}
+              <div className="sc-price-row">
+                <span className="sc-offer">₹{offerprice.toLocaleString()}</span>
+                {price !== offerprice && (
+                  <span className="sc-mrp">₹{price.toLocaleString()}</span>
+                )}
+                {discount > 0 && (
+                  <span className="sc-off">{discount}% off</span>
+                )}
               </div>
 
-              {/* NAME */}
-              <h4
-                style={{
-                  fontSize: "0.95rem",
-                  marginTop: "12px",
-                  color: themeColors.titleColor,
-                  fontWeight: "700"
-                }}
-              >
-                {name}
-              </h4>
-
-              {/* DESCRIPTION */}
-              <p
-                style={{
-                  fontSize: "0.85rem",
-                  color: themeColors.descColor,
-                  marginTop: "6px",
-                  display: "-webkit-box",
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: "vertical",
-                  overflow: "hidden",
-                }}
-              >
-                {description}
-              </p>
-
-              {/* PRICE */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  marginTop: "auto",
-                }}
-              >
-                <span
-                  style={{
-                    fontWeight: "800",
-                    fontSize: "1.2rem",
-                    color: themeColors.priceColor,
-                  }}
+              {/* Add to Cart */}
+              {showCart && (
+                <button
+                  className="sc-add-btn"
+                  onClick={(e) => handleAddToCart(e, product)}
                 >
-                  ₹{offerprice.toLocaleString()}
-                </span>
-
-                <span
-                  style={{
-                    textDecoration: "line-through",
-                    color: "#999",
-                    fontSize: "0.9rem",
-                  }}
-                >
-                  ₹{price.toLocaleString()}
-                </span>
-              </div>
+                  <ShoppingCart size={15} color="#94a3b8" /> Add to Cart
+                </button>
+              )}
             </div>
           );
         })}
+
+        {loading && (
+          <div
+            className="sc-product-card"
+            style={{ alignItems: "center", justifyContent: "center", minWidth: 100 }}
+          >
+            <div className="spinner-border spinner-border-sm text-secondary" />
+          </div>
+        )}
       </div>
+
+      {/* Right scroll */}
+      <button
+        onClick={() => scroll("right")}
+        style={scrollBtnStyle("right")}
+        aria-label="Scroll right"
+      >
+        ›
+      </button>
     </div>
   );
 }
+
+const scrollBtnStyle = (side) => ({
+  position: "absolute",
+  top: "50%",
+  transform: "translateY(-50%)",
+  [side === "left" ? "left" : "right"]: "-14px",
+  zIndex: 10,
+  width: "28px",
+  height: "60px",
+  background: "rgba(255,255,255,0.95)",
+  border: "1px solid #e0e0e0",
+  borderRadius: "4px",
+  cursor: "pointer",
+  fontSize: "1.2rem",
+  color: "#555",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+  transition: "background 0.2s",
+});
 
 export default RecommendedProduct;

@@ -1,0 +1,343 @@
+.browse-category-page-wrapper {
+  background-color: #f0f8ff;
+  /* Light blue background as in screenshot */
+  font-family: 'Inter', sans-serif;
+  height: calc(100vh - 65px);
+  /* Leave room for header/footer */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Mobile Header */
+.mobile-browse-header {
+  background-color: #1976d2;
+  /* Standard blue header */
+  color: #fff;
+  display: flex;
+  align-items: center;
+  padding: 15px 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.2rem;
+  padding: 0;
+  margin-right: 20px;
+  cursor: pointer;
+}
+
+.header-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  flex: 1;
+  text-align: center;
+  padding-right: 20px;
+  /* Balance the back button */
+}
+
+/* Main Content Area */
+.browse-content-container {
+  display: flex;
+  flex: 1;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  background-color: transparent;
+  overflow: hidden;
+}
+
+/* Left Sidebar - Categories */
+.category-sidebar-scroll {
+  width: 90px;
+  /* Narrow vertical column */
+  background-color: #e3f2fd;
+  /* Slightly darker light blue for the sidebar */
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 15px;
+  border-radius: 12px 0 0 12px;
+}
+
+/* Hide scrollbar for sidebar */
+.category-sidebar-scroll::-webkit-scrollbar {
+  width: 0px;
+}
+
+.sidebar-cat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 25px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.cat-img-wrapper {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: #fff;
+  margin-bottom: 6px;
+  border: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.sidebar-cat-item.active .cat-img-wrapper {
+  border: 2px solid #1976d2;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.4);
+}
+
+.cat-img-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cat-name {
+  font-size: 0.7rem;
+  text-align: center;
+  color: #555;
+  font-weight: 500;
+  max-width: 80px;
+  line-height: 1.2;
+}
+
+.sidebar-cat-item.active .cat-name {
+  color: #1976d2;
+  font-weight: 700;
+}
+
+/* Right Content - Products & Chips */
+.products-main-area {
+  flex: 1;
+  background-color: #f0f8ff;
+  /* Matches main layout */
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Keeps filters at top */
+}
+
+/* Subcategory Chips */
+.subcat-chips-container {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  overflow-x: auto;
+  padding-bottom: 5px;
+  /* For scrollbar if visible */
+}
+
+.subcat-chips-container::-webkit-scrollbar {
+  height: 0px;
+}
+
+.subcat-chip {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  color: #333;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s;
+}
+
+.subcat-chip.active {
+  background-color: #ffc107;
+  /* Yellow active state */
+  border-color: #ffc107;
+  color: #000;
+}
+
+.subcat-chip i {
+  font-size: 0.75rem;
+}
+
+/* Products Grid */
+.browse-products-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  /* 2 columns on mobile */
+  gap: 12px;
+  flex: 1;
+  align-content: start;
+  overflow-y: auto;
+  padding-bottom: 30px;
+}
+/* Hide scrollbar for products grid for a cleaner look */
+.browse-products-grid::-webkit-scrollbar {
+  width: 0px;
+}
+
+.browse-prod-card {
+  background-color: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  padding-bottom: 10px;
+  transition: transform 0.2s;
+  height: max-content;
+}
+
+.browse-prod-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.prod-img-box {
+  width: 100%;
+  height: 200px;
+  min-height: 200px;
+  flex-shrink: 0;
+  background-color: #f9f9f9;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  position: relative; /* For wishlist button */
+}
+
+.prod-img-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 10px;
+}
+
+.prod-info-box {
+  padding: 8px 10px;
+}
+
+.prod-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 5px 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+.prod-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.prod-offer-price {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1976d2;
+}
+
+.prod-original-price {
+  font-size: 0.75rem;
+  color: #888;
+  text-decoration: line-through;
+}
+
+.browse-wishlist-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #fff;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  color: #ccc;
+  cursor: pointer;
+  transition: all 0.2s;
+  z-index: 2;
+}
+
+.browse-wishlist-btn:hover {
+  color: #ff4757;
+  transform: scale(1.1);
+}
+
+.loading-prods-wrapper {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+.no-prods-found {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: #777;
+  padding: 40px 0;
+  font-size: 0.9rem;
+}
+
+/* Responsive Desktop Tweaks */
+@media (min-width: 768px) {
+  .browse-category-page-wrapper {
+    background-color: #f8f9fa;
+    /* standard page bg */
+  }
+
+  .browse-content-container {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    height: calc(100vh - 140px);
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .category-sidebar-scroll {
+    width: 160px;
+    /* Wider sidebar on desktop */
+    border-radius: 12px 0 0 12px;
+    border-right: 1px solid #eee;
+  }
+
+  .products-main-area {
+    background-color: #fff;
+    padding: 25px;
+  }
+
+  .browse-products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 20px;
+  }
+
+  .cat-img-wrapper {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 10px;
+  }
+
+  .cat-name {
+    font-size: 0.85rem;
+    max-width: 120px;
+  }
+}

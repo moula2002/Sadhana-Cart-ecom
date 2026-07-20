@@ -1,294 +1,164 @@
 import React, { useEffect, useRef, useState } from "react";
+import { Heart, ShoppingCart } from "lucide-react";
+import { useWishlist } from "../../hooks/useWishlist";
+import { useRatings } from "../../hooks/useRatings";
 import { db } from "../../firebase";
 import { collection, getDocs } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 
-function FeatureProducts() {
+function FeatureProducts({ showCart = false }) {
   const [products, setProducts] = useState([]);
-  const [hoveredId, setHoveredId] = useState(null);
+  const { wishlisted, toggleWishlist } = useWishlist();
+  const ratings = useRatings();
   const scrollRef = useRef(null);
   const navigate = useNavigate();
 
-  // 🌙 THEME STATE (Navbar-oda sync aagum)
-  const [darkMode, setDarkMode] = useState(
-    localStorage.getItem("theme") === "dark"
-  );
-
-  // Sync logic for theme changes
   useEffect(() => {
-    const checkTheme = () => {
-      const currentTheme = localStorage.getItem("theme") === "dark" || 
-                           document.documentElement.getAttribute("data-bs-theme") === "dark";
-      setDarkMode(currentTheme);
+    const fetchProducts = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "featuredProducts"));
+        const list = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setProducts(list);
+      } catch (error) {
+        console.error("Error fetching featured products:", error);
+      }
     };
-
-    // Navbar toggle pannumpothu storage event trigger aagum
-    window.addEventListener("storage", checkTheme);
-
-    // Attribute changes-ah track panna observer
-    const observer = new MutationObserver(checkTheme);
-    observer.observe(document.documentElement, { attributes: true });
-
-    return () => {
-      window.removeEventListener("storage", checkTheme);
-      observer.disconnect();
-    };
-  }, []);
-
-  // Theme-based Styles
-  const themeStyles = {
-    containerBg: darkMode 
-      ? "linear-gradient(135deg, #1a1a1a 0%, #333333 100%)" 
-      : "linear-gradient(135deg, #0f52ba 0%, #4169e1 100%)",
-    cardBg: darkMode ? "#252525" : "white",
-    titleColor: darkMode ? "#ffffff" : "#333",
-    descColor: darkMode ? "#bbb" : "#666",
-    priceColor: darkMode ? "#5d64ff" : "#2c3e50",
-    shadow: darkMode ? "0 10px 30px rgba(0,0,0,0.5)" : "0 20px 40px rgba(0,0,0,0.1)",
-  };
-
-  const fetchProducts = async () => {
-    try {
-      const querySnapshot = await getDocs(collection(db, "featuredProducts"));
-      const list = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setProducts(list);
-    } catch (error) {
-      console.error("Error fetching featured products:", error);
-    }
-  };
-
-  useEffect(() => {
     fetchProducts();
   }, []);
 
   const calculateDiscount = (price, oldPrice) => {
-    if (!price || !oldPrice) return 0;
+    if (!price || !oldPrice || oldPrice <= price) return 0;
     return Math.round(((oldPrice - price) / oldPrice) * 100);
   };
 
-  const scroll = (direction) => {
-    const { current } = scrollRef;
-    if (direction === "left") {
-      current.scrollBy({ left: -300, behavior: "smooth" });
-    } else {
-      current.scrollBy({ left: 300, behavior: "smooth" });
+  const scroll = (dir) => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: dir === "left" ? -360 : 360, behavior: "smooth" });
     }
   };
 
-  const goToProduct = (productId) => {
-    navigate(`/product/${productId}`);
-  };
+
+  if (products.length === 0) return null;
 
   return (
-    <div
-      style={{
-        padding: "40px 30px",
-        background: themeStyles.containerBg,
-        borderRadius: "30px",
-        marginTop: "40px",
-        boxShadow: themeStyles.shadow,
-        transition: "all 0.5s ease", // Smooth background transition
-      }}
-    >
-      <style>
-        {`
-        .featured-scroll::-webkit-scrollbar {
-          display: none;
-        }
-        `}
-      </style>
-
-      {/* HEADER */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "30px",
-        }}
+    <div style={{ position: "relative" }}>
+      {/* Scroll buttons */}
+      <button
+        onClick={() => scroll("left")}
+        style={scrollBtnStyle("left")}
+        aria-label="Scroll left"
       >
-        <h2 style={{ color: "white", fontWeight: "800" }}>
-          Featured Deals
-        </h2>
+        ‹
+      </button>
 
-        <div style={{ display: "flex", gap: "10px" }}>
-          <button onClick={() => scroll("left")} style={navButtonStyle}>
-            ❮
-          </button>
-
-          <button onClick={() => scroll("right")} style={navButtonStyle}>
-            ❯
-          </button>
-        </div>
-      </div>
-
-      {/* PRODUCT LIST */}
-      <div
-        ref={scrollRef}
-        className="featured-scroll"
-        style={{
-          display: "flex",
-          gap: "20px",
-          overflowX: "auto",
-          paddingBottom: "20px",
-          scrollbarWidth: "none",
-          msOverflowStyle: "none",
-          alignItems: "flex-start",
-        }}
-      >
+      <div ref={scrollRef} className="sc-products-row">
         {products.map((product) => {
           const info = product.featuredProductInfo || {};
+          const name = info.title || product.name || "Product";
           const price = product.price || 0;
           const oldPrice = product.oldPrice || 0;
           const discount = calculateDiscount(price, oldPrice);
           const image = product.images?.[0] || "";
-          const isHovered = hoveredId === product.id;
 
           return (
             <div
               key={product.id}
-              onClick={() => goToProduct(product.id)}
-              onMouseEnter={() => setHoveredId(product.id)}
-              onMouseLeave={() => setHoveredId(null)}
-              style={{
-                minWidth: "260px",
-                maxWidth: "260px",
-                height: "320px",
-                background: themeStyles.cardBg,
-                borderRadius: "15px",
-                padding: "15px",
-                position: "relative",
-                flexShrink: 0,
-                boxShadow: isHovered ? "0 12px 25px rgba(0,0,0,0.2)" : "0 8px 20px rgba(0,0,0,0.1)",
-                cursor: "pointer",
-                display: "flex",
-                flexDirection: "column",
-                transform: isHovered ? "translateY(-8px)" : "none",
-                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-              }}
+              className="sc-product-card"
+              onClick={() => navigate(`/product/${product.id}`)}
             >
-              {/* DISCOUNT */}
+              {/* Wishlist */}
+              <button
+                className="wishlist-btn"
+                onClick={(e) => toggleWishlist(e, product)}
+                aria-label="Wishlist"
+              >
+                {wishlisted[product.id] ? <Heart size={20} fill="#ff4081" color="#ff4081" /> : <Heart size={20} strokeWidth={2.5} color="#555" />}
+              </button>
+
+              {/* Discount tag */}
               {discount > 0 && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "10px",
-                    left: "10px",
-                    background: "#ff4757",
-                    color: "white",
-                    padding: "5px 8px",
-                    borderRadius: "15px",
-                    fontWeight: "600",
-                    fontSize: "12px",
-                    zIndex: 2,
-                  }}
-                >
-                  {discount}% OFF
+                <span className="sc-discount-tag">{discount}% OFF</span>
+              )}
+
+              {/* Image */}
+              <div className="img-box">
+                <img src={image} alt={name} loading="lazy" />
+              </div>
+
+              {/* Name */}
+              <div className="sc-name">{name}</div>
+
+              {/* Rating */}
+              {ratings[product.id] && (
+                <div className="sc-rating-badge-container">
+                  <span className="sc-rating-badge">
+                    {ratings[product.id].average} <span className="star-icon">★</span>
+                  </span>
+                  <span className="sc-rating-count">({ratings[product.id].count})</span>
                 </div>
               )}
 
-              {/* IMAGE */}
-              <div
-                style={{
-                  width: "100%",
-                  height: "150px",
-                  overflow: "hidden",
-                  borderRadius: "10px",
-                  background: darkMode ? "#1a1a1a" : "#f9f9f9",
-                }}
-              >
-                <img
-                  src={image}
-                  alt={info.title}
-                  loading="lazy"
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "contain",
-                    transform: isHovered ? "scale(1.1)" : "scale(1)",
-                    transition: "transform 0.4s ease",
-                  }}
-                />
+              {/* Price */}
+              <div className="sc-price-row">
+                <span className="sc-offer">₹{price.toLocaleString()}</span>
+                {oldPrice > price && (
+                  <span className="sc-mrp">₹{oldPrice.toLocaleString()}</span>
+                )}
+                {discount > 0 && (
+                  <span className="sc-off">{discount}% off</span>
+                )}
               </div>
 
-              {/* NAME */}
-              <h4
-                style={{
-                  fontSize: "0.95rem",
-                  marginTop: "12px",
-                  color: themeStyles.titleColor,
-                  fontWeight: "600",
-                  transition: "color 0.3s ease",
-                }}
-              >
-                {info.title}
-              </h4>
-
-              {/* DESCRIPTION */}
-              <p
-                style={{
-                  fontSize: "0.85rem",
-                  color: themeStyles.descColor,
-                  marginTop: "6px",
-                  display: "-webkit-box",
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: "vertical",
-                  overflow: "hidden",
-                }}
-              >
-                Limited Offer
-              </p>
-
-              {/* PRICE */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  marginTop: "auto",
-                }}
-              >
-                <span
-                  style={{
-                    fontWeight: "700",
-                    fontSize: "1.1rem",
-                    color: themeStyles.priceColor,
+              {/* Add to Cart — only if showCart=true */}
+              {showCart && (
+                <button
+                  className="sc-add-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // dispatch handled in parent or can add here
                   }}
                 >
-                  ₹{price.toLocaleString()}
-                </span>
-
-                <span
-                  style={{
-                    textDecoration: "line-through",
-                    color: "#999",
-                    fontSize: "0.9rem",
-                  }}
-                >
-                  ₹{oldPrice.toLocaleString()}
-                </span>
-              </div>
+                  <ShoppingCart size={15} color="#94a3b8" /> Add to Cart
+                </button>
+              )}
             </div>
           );
         })}
       </div>
+
+      <button
+        onClick={() => scroll("right")}
+        style={scrollBtnStyle("right")}
+        aria-label="Scroll right"
+      >
+        ›
+      </button>
     </div>
   );
 }
 
-const navButtonStyle = {
-  width: "40px",
-  height: "40px",
-  borderRadius: "50%",
-  border: "none",
-  background: "rgba(255,255,255,0.25)",
-  color: "white",
-  fontSize: "16px",
+const scrollBtnStyle = (side) => ({
+  position: "absolute",
+  top: "50%",
+  transform: "translateY(-50%)",
+  [side === "left" ? "left" : "right"]: "-14px",
+  zIndex: 10,
+  width: "28px",
+  height: "60px",
+  background: "rgba(255,255,255,0.95)",
+  border: "1px solid #e0e0e0",
+  borderRadius: "4px",
   cursor: "pointer",
-  transition: "background 0.3s ease",
-};
+  fontSize: "1.2rem",
+  color: "#555",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+  transition: "background 0.2s",
+});
 
 export default FeatureProducts;

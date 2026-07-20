@@ -1,396 +1,230 @@
-  import React, { useEffect, useState } from "react";
-  import { db } from "../../firebase";
-  import {
-    collection,
-    query,
-    orderBy,
-    limit,
-    startAfter,
-    getDocs,
-  } from "firebase/firestore";
-  import { useNavigate } from "react-router-dom";
-  import { useDispatch } from "react-redux";
-  import { addToCart } from "../../redux/cartSlice";
-  import { Toast, ToastContainer } from "react-bootstrap";
-  import Loading from "../../pages/Loading";
+import React, { useEffect, useState } from "react";
+import { Heart, ShoppingCart } from "lucide-react";
+import { useWishlist } from "../../hooks/useWishlist";
+import { useRatings } from "../../hooks/useRatings";
+import { db } from "../../firebase";
+import {
+  collection, query, orderBy, limit, startAfter, getDocs,
+} from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { addToCart } from "../../redux/cartSlice";
+import { Toast, ToastContainer } from "react-bootstrap";
+import Loading from "../../pages/Loading";
 
-  function BestProducts() {
-    const navigate = useNavigate();
-    const dispatch = useDispatch();
+function BestProducts() {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-    const [products, setProducts] = useState([]);
-    const [lastDoc, setLastDoc] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [hoveredProduct, setHoveredProduct] = useState(null);
+  const [products, setProducts] = useState([]);
+  const { wishlisted, toggleWishlist } = useWishlist();
+  const ratings = useRatings();
+  const [lastDoc, setLastDoc] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMsg, setToastMsg] = useState("");
+  const [darkMode, setDarkMode] = useState(
+    localStorage.getItem("theme") === "dark"
+  );
 
-    const [showToast, setShowToast] = useState(false);
-    const [toastMsg, setToastMsg] = useState("");
+  const PAGE_SIZE = 24;
 
-    const [darkMode, setDarkMode] = useState(
-      localStorage.getItem("theme") === "dark"
-    );
-
-    const PAGE_SIZE = 10;
-
-    useEffect(() => {
-      const handleStorageChange = () => {
-        setDarkMode(localStorage.getItem("theme") === "dark");
-      };
-
-      window.addEventListener("storage", handleStorageChange);
-
-      const observer = new MutationObserver(() => {
-        const isDark =
-          document.documentElement.getAttribute("data-bs-theme") === "dark" ||
-          document.body.classList.contains("dark-theme");
-        setDarkMode(isDark);
-      });
-
-      observer.observe(document.documentElement, { attributes: true });
-      observer.observe(document.body, { attributes: true });
-
-      return () => {
-        window.removeEventListener("storage", handleStorageChange);
-        observer.disconnect();
-      };
-    }, []);
-
-    const colors = {
-      bg: darkMode ? "#121212" : "#fafafa",
-      card: darkMode ? "#1e1e1e" : "white",
-      text: darkMode ? "#ffffff" : "#333",
-      subText: darkMode ? "#aaa" : "#999",
-      shadow: darkMode ? "rgba(0,0,0,0.5)" : "rgba(0,0,0,0.08)",
-      border: darkMode ? "#333" : "#eee",
-    };
-
-    // 🔀 Better shuffle
-    const shuffleArray = (array) => {
-      const newArr = [...array];
-      for (let i = newArr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
-      }
-      return newArr;
-    };
-
-    // 🔹 FIRST LOAD
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-
-        const q = query(
-          collection(db, "products"),
-          orderBy("productid"),
-          limit(PAGE_SIZE)
-        );
-
-        const snapshot = await getDocs(q);
-
-        const list = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-
-        setProducts(shuffleArray(list));
-
-        setLastDoc(snapshot.docs[snapshot.docs.length - 1]);
-
-        setLoading(false);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    // 🔹 LOAD MORE
-    const loadMoreProducts = async () => {
-      if (!lastDoc || loading) return;
-
-      try {
-        setLoading(true);
-
-        const q = query(
-          collection(db, "products"),
-          orderBy("productid"),
-          startAfter(lastDoc),
-          limit(PAGE_SIZE)
-        );
-
-        const snapshot = await getDocs(q);
-
-        const list = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-
-        setProducts((prev) => {
-          const combined = [...prev, ...list];
-
-          // remove duplicates
-          const unique = Array.from(
-            new Map(combined.map((item) => [item.id, item])).values()
-          );
-
-          return shuffleArray(unique);
-        });
-
-        setLastDoc(snapshot.docs[snapshot.docs.length - 1]);
-
-        setLoading(false);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    useEffect(() => {
-      fetchProducts();
-    }, []);
-
-    useEffect(() => {
-      const handleScroll = () => {
-        if (loading) return;
-
-        if (
-          window.innerHeight + document.documentElement.scrollTop >=
-          document.documentElement.offsetHeight - 200
-        ) {
-          loadMoreProducts();
-        }
-      };
-
-      window.addEventListener("scroll", handleScroll);
-
-      return () => window.removeEventListener("scroll", handleScroll);
-    }, [lastDoc, loading]);
-
-    const calculateDiscount = (price, offerprice) => {
-      if (!price || !offerprice) return 0;
-      return Math.round(((price - offerprice) / price) * 100);
-    };
-
-    const handleAddToCart = (product) => {
-      dispatch(
-        addToCart({
-          id: product.id,
-          title: product.name || "Product",
-          price: product.offerprice || product.price || 0,
-          image: product.images?.[0] || "",
-          quantity: 1,
-        })
+  /* ─ theme sync ─ */
+  useEffect(() => {
+    const onStorage = () => setDarkMode(localStorage.getItem("theme") === "dark");
+    window.addEventListener("storage", onStorage);
+    const obs = new MutationObserver(() => {
+      setDarkMode(
+        document.documentElement.getAttribute("data-bs-theme") === "dark" ||
+        document.body.classList.contains("dark-theme")
       );
+    });
+    obs.observe(document.documentElement, { attributes: true });
+    obs.observe(document.body, { attributes: true });
+    return () => { window.removeEventListener("storage", onStorage); obs.disconnect(); };
+  }, []);
 
-      setToastMsg(`${product.name} added to cart`);
-      setShowToast(true);
-    };
+  /* ─ shuffle ─ */
+  const shuffle = (arr) => {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  };
 
-    return (
-      <div
-        style={{
-          padding: "30px",
-          background: colors.bg,
-          minHeight: "100vh",
-          transition: "background 0.3s ease",
-        }}
-      >
-        <h2
-          style={{
-            fontWeight: "800",
-            marginBottom: "25px",
-            fontSize: "1.8rem",
-            color: colors.text,
-          }}
-        >
-          Best Products
-        </h2>
+  /* ─ fetch ─ */
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const q = query(collection(db, "products"), orderBy("productid"), limit(PAGE_SIZE));
+      const snap = await getDocs(q);
+      const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      setProducts(shuffle(list));
+      setLastDoc(snap.docs[snap.docs.length - 1]);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  <div
-    style={{
-      display: "grid",
-      gridTemplateColumns:
-        window.innerWidth < 768
-          ? "repeat(2,1fr)"
-          : "repeat(auto-fill,minmax(200px,1fr))",
-      gap: "25px",
-      maxWidth: "100%",
-    }}
-  >
-    {loading && products.length > 0 && <Loading />}
-          {products.map((product) => {
-            const image =
-              product.images?.[0] ||
-              product.image ||
-              "https://via.placeholder.com/300";
+  const loadMore = async () => {
+    if (!lastDoc || loading) return;
+    try {
+      setLoading(true);
+      const q = query(
+        collection(db, "products"), orderBy("productid"),
+        startAfter(lastDoc), limit(PAGE_SIZE)
+      );
+      const snap = await getDocs(q);
+      const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      setProducts((prev) => {
+        const combined = [...prev, ...list];
+        const unique = Array.from(new Map(combined.map((i) => [i.id, i])).values());
+        return shuffle(unique);
+      });
+      setLastDoc(snap.docs[snap.docs.length - 1]);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-            const name = product.name || "Product";
-            const price = product.price || 0;
-            const offerprice = product.offerprice || price;
-            const discount = calculateDiscount(price, offerprice);
+  useEffect(() => { fetchProducts(); }, []);
 
-            return (
-              <div
-                key={product.id}
-                onMouseEnter={() => setHoveredProduct(product.id)}
-                onMouseLeave={() => setHoveredProduct(null)}
-                style={{
-                  background: colors.card,
-                  borderRadius: "12px",
-                  overflow: "hidden",
-                  boxShadow: `0 8px 20px ${colors.shadow}`,
-                  transition: "all 0.3s ease",
-                  position: "relative",
-                  transform:
-                    hoveredProduct === product.id
-                      ? "translateY(-5px)"
-                      : "translateY(0)",
-                }}
+  // Infinite scroll removed in favor of 'View More' button
+
+  const calcDiscount = (p, op) => {
+    if (!p || !op || op >= p) return 0;
+    return Math.round(((p - op) / p) * 100);
+  };
+
+  const handleAddToCart = (e, product) => {
+    e.stopPropagation();
+    dispatch(addToCart({
+      id: product.id,
+      title: product.name || "Product",
+      price: product.offerprice || product.price || 0,
+      image: product.images?.[0] || "",
+      quantity: 1,
+    }));
+    setToastMsg(`${product.name || "Product"} added to cart ✓`);
+    setShowToast(true);
+  };
+
+
+  return (
+    <div>
+      <div className="best-sellers-grid">
+        {products.map((product) => {
+          const image = product.images?.[0] || product.image || "https://via.placeholder.com/300";
+          const name = product.name || "Product";
+          const price = product.price || 0;
+          const offerprice = product.offerprice || price;
+          const discount = calcDiscount(price, offerprice);
+          const rating = product.rating || 4.2;
+          const reviews = product.reviewCount || Math.floor(Math.random() * 3000 + 100);
+
+          return (
+            <div
+              key={product.id}
+              className="bs-card"
+              onClick={() => navigate(`/product/${product.id}`)}
+            >
+              <button
+                className="wishlist-btn"
+                onClick={(e) => toggleWishlist(e, product)}
+                aria-label="Wishlist"
               >
-                {discount > 0 && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: "10px",
-                      left: "10px",
-                      background: "#ff3b30",
-                      color: "white",
-                      fontSize: "0.75rem",
-                      padding: "4px 7px",
-                      borderRadius: "5px",
-                      fontWeight: "600",
-                      zIndex: 10,
-                    }}
-                  >
-                    {discount}% OFF
-                  </div>
-                )}
+                {wishlisted[product.id] ? <Heart size={20} fill="#ff4081" color="#ff4081" /> : <Heart size={20} strokeWidth={2.5} color="#555" />}
+              </button>
+              {discount > 0 && <span className="bs-discount-tag">{discount}% OFF</span>}
 
-                <div
-                  style={{
-                    height: "220px",
-                    overflow: "hidden",
-                    background: darkMode ? "#252525" : "#f5f5f5",
-                  }}
-                >
-                  <img
-                    src={image}
-                    alt={name}
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                      transition: "transform 0.4s",
-                      transform:
-                        hoveredProduct === product.id
-                          ? "scale(1.05)"
-                          : "scale(1)",
-                    }}
-                  />
-                </div>
-
-                <div style={{ padding: "14px" }}>
-                  <h4
-                    style={{
-                      fontSize: "0.95rem",
-                      marginBottom: "8px",
-                      minHeight: "42px",
-                      fontWeight: "600",
-                      color: colors.text,
-                    }}
-                  >
-                    {name}
-                  </h4>
-
-                  <div>
-                    <span
-                      style={{
-                        fontWeight: "700",
-                        fontSize: "1.05rem",
-                        color: colors.text,
-                      }}
-                    >
-                      ₹{offerprice.toLocaleString()}
-                    </span>
-
-                    <span
-                      style={{
-                        textDecoration: "line-through",
-                        marginLeft: "8px",
-                        color: colors.subText,
-                        fontSize: "0.9rem",
-                      }}
-                    >
-                      ₹{price.toLocaleString()}
-                    </span>
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: hoveredProduct === product.id ? "0" : "-120px",
-                    left: "0",
-                    width: "100%",
-                    background: colors.card,
-                    padding: "12px",
-                    transition: "0.35s",
-                    boxShadow: `0 -5px 12px ${colors.shadow}`,
-                  }}
-                >
-                  <button
-                    onClick={() => handleAddToCart(product)}
-                    style={{
-                      width: "100%",
-                      background: "linear-gradient(135deg,#0a0f8f,#1d23ff)",
-                      color: "white",
-                      border: "none",
-                      padding: "10px",
-                      borderRadius: "7px",
-                      fontWeight: "600",
-                      marginBottom: "8px",
-                      cursor: "pointer",
-                      fontSize: "0.9rem",
-                    }}
-                  >
-                    Add to cart
-                  </button>
-
-                  <button
-                    onClick={() => navigate(`/product/${product.id}`)}
-                    style={{
-                      width: "100%",
-                      background: "transparent",
-                      border: `2px solid #1d23ff`,
-                      color: darkMode ? "#5d64ff" : "#0a0f8f",
-                      padding: "10px",
-                      borderRadius: "7px",
-                      fontWeight: "600",
-                      cursor: "pointer",
-                      fontSize: "0.9rem",
-                    }}
-                  >
-                    Quick View
-                  </button>
-                </div>
+              <div className="bs-img-wrap">
+                <img src={image} alt={name} loading="lazy" />
               </div>
-            );
-          })}
-        </div>
-        {loading && <Loading />}
 
-        <ToastContainer position="bottom-end" className="p-3">
-          <Toast
-            show={showToast}
-            onClose={() => setShowToast(false)}
-            delay={3000}
-            autohide
-            bg={darkMode ? "dark" : "light"}
-          >
-            <Toast.Body style={{ color: darkMode ? "white" : "black" }}>
-              {toastMsg}
-            </Toast.Body>
-          </Toast>
-        </ToastContainer>
+              {/* Name */}
+              <div className="bs-name">{name}</div>
+
+              {/* Rating */}
+              {ratings[product.id] && (
+                <div className="sc-rating-badge-container">
+                  <span className="sc-rating-badge">
+                    {ratings[product.id].average} <span className="star-icon">★</span>
+                  </span>
+                  <span className="sc-rating-count">({ratings[product.id].count})</span>
+                </div>
+              )}
+
+              {/* Price Info */}
+              <div className="bs-price-row">
+                <span className="bs-offer">₹{offerprice.toLocaleString()}</span>
+                {price !== offerprice && (
+                  <span className="bs-mrp">₹{price.toLocaleString()}</span>
+                )}
+              </div>
+
+              <button
+                className="bs-add-btn"
+                onClick={(e) => handleAddToCart(e, product)}
+              >
+                <ShoppingCart size={15} color="#94a3b8" /> Add to Cart
+              </button>
+            </div>
+          );
+        })}
       </div>
-    );
-  }
 
-  export default BestProducts;
+      {loading && products.length === 0 && <Loading />}
+      {loading && products.length > 0 && (
+        <div style={{ textAlign: "center", padding: "16px" }}>
+          <div className="spinner-border spinner-border-sm text-secondary" />
+        </div>
+      )}
+
+      {!loading && lastDoc && (
+        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "4px", paddingBottom: "8px", paddingRight: "16px" }}>
+          <button 
+            onClick={loadMore} 
+            style={{ 
+              background: "none", 
+              color: "#2874f0", 
+              border: "none", 
+              fontWeight: "600",
+              fontSize: "0.95rem",
+              cursor: "pointer",
+              padding: "8px 16px",
+              display: "flex",
+              alignItems: "center",
+              gap: "4px"
+            }}
+            onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
+            onMouseOut={(e) => e.target.style.textDecoration = 'none'}
+          >
+            View More &rarr;
+          </button>
+        </div>
+      )}
+
+      <ToastContainer position="bottom-end" className="p-3">
+        <Toast
+          show={showToast}
+          onClose={() => setShowToast(false)}
+          delay={3000}
+          autohide
+          bg={darkMode ? "dark" : "light"}
+        >
+          <Toast.Body style={{ color: darkMode ? "white" : "black" }}>
+            {toastMsg}
+          </Toast.Body>
+        </Toast>
+      </ToastContainer>
+    </div>
+  );
+}
+
+export default BestProducts;

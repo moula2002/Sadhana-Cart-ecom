@@ -40,11 +40,11 @@ import {
 } from "firebase/firestore";
 import { auth, db, googleProvider } from "../firebase";
 
-export default function LoginPage({ onClose }) {
+export default function LoginPage({ onClose, initialMode = "login" }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const recaptchaRef = useRef(null);
-  const [isLogin, setIsLogin] = useState(true);
+  const [isLogin, setIsLogin] = useState(initialMode === "login");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -489,11 +489,17 @@ export default function LoginPage({ onClose }) {
                 }
               </p>
               {!isLogin && (
-                <div className="referral-benefit">
+                <motion.div 
+                  className="referral-benefit"
+                  initial={{ opacity: 0, y: 15, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 25, delay: 0.1 }}
+                  whileHover={{ scale: 1.02 }}
+                >
                   <small>
                     <strong>🎁 {t("auth.referralBonus")}:</strong> {t("auth.referralText")}
                   </small>
-                </div>
+                </motion.div>
               )}
             </div>
             <img

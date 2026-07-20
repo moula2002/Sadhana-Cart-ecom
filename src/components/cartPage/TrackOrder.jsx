@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Container, Card, Spinner, Button } from "react-bootstrap";
+import { Container, Spinner, Button, Row, Col } from "react-bootstrap";
 import {
   FaArrowLeft,
+  FaCheck,
+  FaBox,
   FaTruck,
-  FaCheckCircle,
-  FaCircle,
+  FaTruckLoading,
   FaMapMarkerAlt,
   FaExclamationTriangle,
 } from "react-icons/fa";
@@ -22,9 +23,7 @@ const formatDate = (date) => {
     return new Date(date).toLocaleString("en-IN", {
       day: "2-digit",
       month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
+      year: "numeric"
     });
   } catch {
     return date;
@@ -72,11 +71,11 @@ function TrackOrder() {
   }, [order]);
 
   /* ===============================
-      Loading
+      Loading & Error
   ================================= */
   if (loading) {
     return (
-      <div className="bg-body" style={{ minHeight: "100vh" }}>
+      <div className="bg-light" style={{ minHeight: "100vh" }}>
         <Header navigate={navigate} />
         <Container className="text-center py-5">
           <Spinner animation="border" variant="primary" />
@@ -86,12 +85,9 @@ function TrackOrder() {
     );
   }
 
-  /* ===============================
-      Error
-  ================================= */
   if (error) {
     return (
-      <div className="bg-body" style={{ minHeight: "100vh" }}>
+      <div className="bg-light" style={{ minHeight: "100vh" }}>
         <Header navigate={navigate} />
         <Container className="text-center py-5">
           <FaExclamationTriangle size={50} color="red" />
@@ -107,12 +103,10 @@ function TrackOrder() {
 
   const tracking = trackingData?.tracking_data;
   const shipment = tracking?.shipment_track?.[0];
-  const activities =
-    tracking?.shipment_track_activities || [];
 
   if (!shipment) {
     return (
-      <div className="bg-body" style={{ minHeight: "100vh" }}>
+      <div className="bg-light" style={{ minHeight: "100vh" }}>
         <Header navigate={navigate} />
         <Container className="text-center py-5">
           <FaTruck size={60} className="text-secondary" />
@@ -127,172 +121,220 @@ function TrackOrder() {
   const status = shipment.current_status || "Order Placed";
   const awb = shipment.awb_code || "--";
   const eta = tracking?.etd;
+  const courier = shipment.courier_name || "Delhivery";
+
+  // Order Details
+  const orderDate = order?.orderDate ? formatDate(order.orderDate) : formatDate(new Date());
+  
+  // Address info
+  const address = order?.shippingAddress || order?.address || {};
+  const name = address.fullName || address.name || order?.userName || "John Doe";
+  const line1 = address.addressLine1 || address.street || address.address || "Address details not found";
+  const city = address.city || "";
+  const state = address.state || "";
+  const pinCode = address.pinCode || address.pincode || address.zipCode || "";
+  const phone = address.phone || address.mobile || "";
 
   return (
-    <div className="bg-body" style={{ minHeight: "100vh" }}>
-      <Header navigate={navigate} />
+    <div style={{ minHeight: "100vh", backgroundColor: '#f8f9fa', fontFamily: "'Inter', sans-serif" }}>
+      {/* Top Banner */}
+      <div style={{ backgroundColor: '#1a56db', padding: '15px 20px', color: 'white', display: 'flex', alignItems: 'center', gap: '15px' }}>
+        <div style={{ cursor: "pointer" }} onClick={() => navigate(-1)}>
+            <FaArrowLeft />
+        </div>
 
-      <Container style={{ maxWidth: "650px" }} className="py-4">
-        {/* ================= STATUS CARD ================= */}
-        <Card className="mb-3 shadow-sm bg-body border">
-          <Card.Body>
-            <div className="d-flex justify-content-between align-items-center">
-              <div>
-                <h5 style={{ color: "#6366f1" }}>
-                  {status}
-                </h5>
-                {eta && (
-                  <p className="mb-1 text-body">
-                    Delivery by {formatDate(eta)}
-                  </p>
-                )}
-              </div>
-              <span className="text-secondary" style={{ fontSize: "13px" }}>
-                Order #{order?.shiprocketOrderId}
-              </span>
+        <h5 style={{ margin: 0, fontWeight: '600', fontSize: '1.15rem' }}>Order Tracking Page</h5>
+      </div>
+
+      <Container style={{ maxWidth: "850px" }} className="py-4 mt-3">
+        <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '30px', boxShadow: '0 4px 15px rgba(0,0,0,0.03)' }}>
+          {/* ================= HEADER CARD ================= */}
+          <div className="d-flex justify-content-between align-items-start mb-4">
+            <div>
+              <h5 style={{ fontWeight: '700', fontSize: '1.05rem', color: '#111827', marginBottom: '8px' }}>
+                Order ID: #{order?.orderId || order?.shiprocketOrderId || 'SC12345678'}
+              </h5>
+              <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: 0 }}>
+                Placed on {orderDate}
+              </p>
             </div>
-
-            <div className="mt-3">
-              <span className="badge bg-secondary-subtle text-secondary-emphasis me-2">
-                AWB: {awb}
+            <div className="text-end">
+              <span style={{ backgroundColor: '#fef3c7', color: '#d97706', padding: '6px 14px', borderRadius: '8px', fontSize: '0.9rem', fontWeight: '600' }}>
+                {status}
               </span>
               {eta && (
-                <span className="badge bg-secondary-subtle text-secondary-emphasis">
-                  ETA: {formatDate(eta)}
-                </span>
+                <p style={{ fontSize: '0.9rem', color: '#111827', fontWeight: '600', margin: 0, marginTop: '12px' }}>
+                  Expected Delivery: {formatDate(eta)}
+                </p>
               )}
             </div>
-          </Card.Body>
-        </Card>
+          </div>
 
-        {/* ================= PROGRESS STEPPER ================= */}
-        <Card className="mb-3 shadow-sm bg-body border">
-          <Card.Body>
-            <h6 className="mb-3 text-body">Delivery Progress</h6>
-            <Stepper status={status} />
-          </Card.Body>
-        </Card>
+          <hr style={{ borderColor: '#f3f4f6', margin: '30px 0' }} />
 
-        {/* ================= HISTORY ================= */}
-        {activities.length > 0 && (
-          <Card className="shadow-sm bg-body border">
-            <Card.Body>
-              <h6 className="mb-3 text-body">Tracking History</h6>
-              {activities.map((a, i) => (
-                <div key={i} className="mb-3">
-                  <div className="d-flex gap-2">
-                    <FaMapMarkerAlt color="#6366f1" />
-                    <div>
-                      <div
-                        className="text-body"
-                        style={{
-                          fontWeight: 500,
-                          fontSize: "14px",
-                        }}
-                      >
-                        {a.activity}
-                      </div>
-                      <div
-                        className="text-secondary"
-                        style={{
-                          fontSize: "12px",
-                        }}
-                      >
-                        {a.location}
-                      </div>
-                      <div
-                        className="text-secondary-emphasis"
-                        style={{
-                          fontSize: "11px",
-                          opacity: 0.7
-                        }}
-                      >
-                        {formatDate(a.date)}
-                      </div>
-                    </div>
-                  </div>
-                  {i !== activities.length - 1 && <hr className="text-secondary" />}
+          {/* ================= PROGRESS STEPPER ================= */}
+          <Stepper status={status} tracking={tracking} orderDate={orderDate} />
+
+        </div>
+
+        {/* ================= BOTTOM CARDS ================= */}
+        <Row className="mt-4 g-4">
+          <Col md={6}>
+            <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '24px', height: '100%', boxShadow: '0 4px 15px rgba(0,0,0,0.03)' }}>
+              <h6 style={{ fontWeight: '700', color: '#111827', marginBottom: '24px', fontSize: '1rem' }}>Delivery Details</h6>
+              
+              <div style={{ marginBottom: '20px' }}>
+                <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: 0, marginBottom: '4px' }}>Delivery Partner</p>
+                <p style={{ fontWeight: '700', color: '#111827', margin: 0, fontSize: '0.95rem' }}>{courier}</p>
+              </div>
+
+              <div>
+                <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: 0, marginBottom: '4px' }}>Tracking ID</p>
+                <div className="d-flex align-items-center justify-content-between">
+                  <p style={{ fontWeight: '700', color: '#111827', margin: 0, fontSize: '0.95rem' }}>{awb}</p>
+                  <a href={`https://www.delhivery.com/track/package/${awb}`} target="_blank" rel="noreferrer" style={{ color: '#1a56db', fontSize: '0.85rem', fontWeight: '700', textDecoration: 'none' }}>
+                    Track on {courier}
+                  </a>
                 </div>
-              ))}
-            </Card.Body>
-          </Card>
-        )}
+              </div>
+            </div>
+          </Col>
+          <Col md={6}>
+            <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '24px', height: '100%', boxShadow: '0 4px 15px rgba(0,0,0,0.03)' }}>
+              <h6 style={{ fontWeight: '700', color: '#111827', marginBottom: '24px', fontSize: '1rem' }}>Shipping Address</h6>
+              
+              <p style={{ fontWeight: '600', color: '#111827', margin: 0, marginBottom: '10px', fontSize: '0.95rem' }}>{name}</p>
+              <p style={{ fontSize: '0.85rem', color: '#4b5563', margin: 0, lineHeight: '1.7' }}>
+                {line1},<br />
+                {city && `${city},`} {state} - {pinCode}<br />
+                {phone && `+91 ${phone}`}
+              </p>
+            </div>
+          </Col>
+        </Row>
       </Container>
     </div>
   );
 }
 
 /* ===============================
-    Header
+    Header Component (Fallback)
 ================================ */
 
 const Header = ({ navigate }) => (
   <div
-    className="border-bottom"
     style={{
-      padding: "16px",
+      padding: "16px 20px",
       display: "flex",
       alignItems: "center",
       gap: "10px",
-      backgroundColor: "var(--bs-body-bg)"
+      backgroundColor: "#1a56db",
+      color: "white"
     }}
   >
     <FaArrowLeft
-      className="text-body"
       style={{ cursor: "pointer" }}
       onClick={() => navigate(-1)}
     />
-    <h5 className="text-body" style={{ margin: 0 }}>Track Order</h5>
+    <h5 style={{ margin: 0, fontWeight: '600' }}>Track Order</h5>
   </div>
 );
 
 /* ===============================
-    Stepper
+    Stepper (Horizontal)
 ================================ */
 
-const Stepper = ({ status }) => {
+const Stepper = ({ status, tracking, orderDate }) => {
   const steps = [
-    "Confirmed",
-    "Shipped",
-    "In Transit",
-    "Out for Delivery",
-    "Delivered",
+    { title: "Order Confirmed", icon: <FaCheck />, date: orderDate },
+    { title: "Packed", icon: <FaBox />, date: "" },
+    { title: "Shipped", icon: <FaTruckLoading />, date: "" },
+    { title: "In Transit", icon: <FaTruck />, date: "" },
+    { title: "Delivered", icon: <FaMapMarkerAlt />, date: "" },
   ];
 
   const getCurrentStep = () => {
     const s = (status || "").toUpperCase();
     if (s.includes("DELIVERED")) return 4;
     if (s.includes("OUT")) return 3;
-    if (s.includes("TRANSIT")) return 2;
-    if (s.includes("SHIP") || s.includes("PICK")) return 1;
-    return 0;
+    if (s.includes("TRANSIT")) return 3; // using 3 to show truck active
+    if (s.includes("SHIP")) return 2;
+    if (s.includes("PACK")) return 1;
+    return 0; // Confirmed
   };
 
   const current = getCurrentStep();
 
   return (
-    <>
-      {steps.map((step, i) => {
-        const active = i <= current;
-        return (
-          <div
-            key={i}
-            className="d-flex align-items-start mb-3"
-          >
-            <div className="me-2">
-              {active ? (
-                <FaCheckCircle color="#6366f1" />
-              ) : (
-                <FaCircle className="text-secondary" style={{ opacity: 0.3 }} />
+    <div style={{ padding: '10px 0 20px', position: 'relative' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', position: 'relative', zIndex: 2 }}>
+        {steps.map((step, i) => {
+          const isCompleted = i < current;
+          const isActive = i === current;
+          
+          let bgColor = '#f3f4f6'; // default grey
+          let iconColor = '#9ca3af';
+          let textColor = '#9ca3af';
+
+          if (isCompleted) {
+            bgColor = '#10b981'; // Green
+            iconColor = 'white';
+            textColor = '#111827';
+          } else if (isActive) {
+            bgColor = '#1a56db'; // Blue
+            iconColor = 'white';
+            textColor = '#1a56db';
+          }
+
+          return (
+            <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '20%', position: 'relative' }}>
+              
+              {/* Line connector */}
+              {i !== steps.length - 1 && (
+                <div style={{
+                  position: 'absolute',
+                  top: '20px',
+                  left: '50%',
+                  width: '100%',
+                  height: '3px',
+                  backgroundColor: isCompleted ? '#10b981' : (isActive ? '#1a56db' : '#f3f4f6'),
+                  zIndex: -1
+                }}></div>
+              )}
+
+              <div style={{
+                width: '42px',
+                height: '42px',
+                borderRadius: '50%',
+                backgroundColor: bgColor,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: iconColor,
+                marginBottom: '12px',
+                fontSize: '1.1rem'
+              }}>
+                {step.icon}
+              </div>
+              <div style={{
+                fontSize: '0.8rem',
+                fontWeight: isActive ? '700' : '600',
+                color: textColor,
+                textAlign: 'center'
+              }}>
+                {step.title}
+              </div>
+              {/* Date below text for completed steps */}
+              {(isCompleted || isActive) && step.date && (
+                 <div style={{ fontSize: '0.75rem', color: '#1a56db', marginTop: '4px', fontWeight: '600' }}>
+                   {step.date}
+                 </div>
               )}
             </div>
-            <div className={active ? "text-body" : "text-secondary"} style={{ fontSize: "14px" }}>
-              {step}
-            </div>
-          </div>
-        );
-      })}
-    </>
+          );
+        })}
+      </div>
+    </div>
   );
 };
 

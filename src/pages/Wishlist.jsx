@@ -1,285 +1,548 @@
 // Wishlist.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { Container, Row, Col, Card, Button, Spinner, Alert, Badge } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { addToCart } from "../redux/cartSlice";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { FaHeart, FaShoppingCart, FaTrash, FaStar, FaTag } from 'react-icons/fa';
+import { toast } from "react-toastify";
+import {
+    FaHeart,
+    FaShoppingCart,
+    FaTrash,
+    FaUser,
+    FaShoppingBag,
+    FaMapMarkerAlt,
+    FaGift,
+    FaCreditCard,
+    FaCog,
+    FaSignOutAlt,
+    FaChevronLeft,
+    FaChevronRight
+} from 'react-icons/fa';
 import { db } from "../firebase";
-import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
-import { useTranslation } from "react-i18next";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { collection, getDocs, deleteDoc, doc, setDoc } from "firebase/firestore";
+import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 
 const auth = getAuth();
 
 function Wishlist() {
-  const { t } = useTranslation();
+    const [favorites, setFavorites] = useState([]);
+    const [suggestions, setSuggestions] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [currentUser, setCurrentUser] = useState(null);
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
 
-  const [favorites, setFavorites] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [currentUser, setCurrentUser] = useState(null);
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+    const sliderRef = useRef(null);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
-      if (!user) {
-        navigate('/login', { state: { from: '/wishlist' } });
-      }
-    });
-    return () => unsubscribe();
-  }, [navigate]);
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            setCurrentUser(user);
+            if (!user) {
+                navigate('/login', { state: { from: '/wishlist' } });
+            }
+        });
+        return () => unsubscribe();
+    }, [navigate]);
 
-  useEffect(() => {
-    if (!currentUser) return;
+    // Fetch Wishlist Items & Suggestions
+    useEffect(() => {
+        if (!currentUser) return;
 
-    const fetchFavorites = async () => {
-      try {
-        setLoading(true);
-        const snapshot = await getDocs(
-          collection(db, "users", currentUser.uid, "favorites")
-        );
+        const fetchData = async () => {
+            try {
+                setLoading(true);
 
-        const data = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+                // Fetch Favorites
+                const snapshot = await getDocs(
+                    collection(db, "users", currentUser.uid, "favorites")
+                );
+                const favData = snapshot.docs.map((doc) => ({
+                    id: doc.id,
+                    ...doc.data(),
+                }));
+                setFavorites(favData);
 
-        setFavorites(data);
-      } catch (error) {
-        console.error("Error fetching favorites:", error);
-        toast.error("Failed to load wishlist", { position: "top-right" });
-      } finally {
-        setLoading(false);
-      }
+                // Fetch Suggestions (popular products from database)
+                const prodRef = collection(db, "products");
+                const prodSnap = await getDocs(prodRef);
+                const prodList = prodSnap.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                })).filter(p => p.isActive !== false);
+
+                // Filter out items already in wishlist
+                const favProductIds = new Set(favData.map(f => f.productId));
+                const filteredSuggestions = prodList.filter(p => !favProductIds.has(p.id));
+
+                // If suggestions are empty, load standard dummy items
+                if (filteredSuggestions.length === 0) {
+                    setSuggestions(getDummySuggestions());
+                } else {
+                    setSuggestions(filteredSuggestions.slice(0, 10));
+                }
+
+            } catch (error) {
+                console.error("Error fetching wishlist data:", error);
+                toast.error("Failed to load wishlist items");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [currentUser]);
+
+    const removeFromWishlist = async (favId, productName) => {
+        try {
+            await deleteDoc(doc(db, "users", currentUser.uid, "favorites", favId));
+            setFavorites(favorites.filter((item) => item.id !== favId));
+            toast.success(`Removed "${productName}" from wishlist`, { position: "bottom-right", autoClose: 2000 });
+        } catch (error) {
+            console.error("Error removing from wishlist:", error);
+            toast.error("Failed to remove item");
+        }
     };
 
-    fetchFavorites();
-  }, [currentUser]);
+    const addToWishlist = async (product) => {
+        if (!currentUser) {
+            toast.info("Please login to add items to wishlist");
+            navigate('/login', { state: { from: '/wishlist' } });
+            return;
+        }
 
-  const removeFromWishlist = async (favId, productName) => {
-    try {
-      await deleteDoc(doc(db, "users", currentUser.uid, "favorites", favId));
-      setFavorites(favorites.filter((item) => item.id !== favId));
-      toast.success(`"${productName}" removed from wishlist`, { position: "top-right", autoClose: 2000 });
-    } catch (error) {
-      console.error("Error removing from wishlist:", error);
-      toast.error("Failed to remove from wishlist", { position: "top-right" });
+        try {
+            const newFav = {
+                productId: product.id,
+                name: product.name || product.title,
+                price: product.offerprice || product.price || 0,
+                originalPrice: product.price || 0,
+                image: (Array.isArray(product.images) && product.images[0]) || product.image || "https://via.placeholder.com/150",
+                addedAt: new Date().toISOString()
+            };
+
+            await setDoc(doc(db, "users", currentUser.uid, "favorites", product.id), newFav);
+            
+            // Remove from suggestions and add to favorites list locally to update UI immediately
+            setSuggestions(suggestions.filter(s => s.id !== product.id));
+            setFavorites([...favorites, { id: product.id, ...newFav }]);
+            
+            toast.success(`Added "${product.name || product.title}" to wishlist!`, { position: "bottom-right", autoClose: 2000 });
+        } catch (error) {
+            console.error("Error adding to wishlist:", error);
+            toast.error("Failed to add to wishlist");
+        }
+    };
+
+    const handleAddToCart = (item) => {
+        dispatch(
+            addToCart({
+                id: item.productId || item.id,
+                title: item.name || item.title,
+                price: Number(item.price || item.offerprice || 0),
+                image: item.image || (Array.isArray(item.images) && item.images[0]) || "https://via.placeholder.com/150",
+                quantity: 1,
+                size: item.size || null,
+                sellerId: item.sellerId || "default_seller"
+            })
+        );
+        toast.success(`Added "${item.name || item.title}" to cart!`, { position: "bottom-right", autoClose: 2000 });
+    };
+
+    const handleMoveAllToCart = () => {
+        if (favorites.length === 0) return;
+        favorites.forEach(item => {
+            dispatch(
+                addToCart({
+                    id: item.productId,
+                    title: item.name,
+                    price: Number(item.price),
+                    image: item.image,
+                    quantity: 1,
+                    size: item.size || null,
+                    sellerId: item.sellerId || "default_seller"
+                })
+            );
+        });
+        toast.success(`Moved all ${favorites.length} items to cart!`, { position: "bottom-right", autoClose: 3000 });
+    };
+
+    const handleClearWishlist = async () => {
+        if (favorites.length === 0) return;
+        try {
+            for (const item of favorites) {
+                await deleteDoc(doc(db, "users", currentUser.uid, "favorites", item.id));
+            }
+            setFavorites([]);
+            toast.success("Wishlist cleared successfully", { position: "bottom-right", autoClose: 2000 });
+        } catch (error) {
+            console.error("Error clearing wishlist:", error);
+            toast.error("Failed to clear wishlist");
+        }
+    };
+
+    const handleLogout = async () => {
+        try {
+            await signOut(auth);
+            toast.success("Logged out successfully");
+            navigate("/login");
+        } catch (error) {
+            console.error("Error signing out:", error);
+        }
+    };
+
+    // Scroll suggestions slider
+    const scrollSuggestions = (direction) => {
+        if (sliderRef.current) {
+            const scrollAmount = 300;
+            sliderRef.current.scrollBy({
+                left: direction === "left" ? -scrollAmount : scrollAmount,
+                behavior: "smooth"
+            });
+        }
+    };
+
+    if (loading) {
+        return (
+            <Container className="py-5 text-center">
+                <Spinner animation="border" variant="primary" />
+                <p className="mt-3 text-muted">Loading your wishlist...</p>
+            </Container>
+        );
     }
-  };
 
-  const addToCartFromWishlist = (item) => {
-    dispatch(
-      addToCart({
-        id: item.productId,
-        title: item.name,
-        price: item.price,
-        image: item.image,
-        quantity: 1,
-        size: item.size || null,
-        sellerId: item.sellerId || "default_seller"
-      })
-    );
-    toast.success(`"${item.name}" added to cart!`, { position: "top-right", autoClose: 2000 });
-  };
-
-  const moveAllToCart = () => {
-    favorites.forEach(item => {
-      dispatch(
-        addToCart({
-          id: item.productId,
-          title: item.name,
-          price: item.price,
-          image: item.image,
-          quantity: 1,
-          size: item.size || null,
-          sellerId: item.sellerId || "default_seller"
-        })
-      );
-    });
-    toast.success(`All ${favorites.length} items added to cart!`, { position: "top-right", autoClose: 3000 });
-  };
-
-  const clearWishlist = async () => {
-    if (favorites.length === 0) return;
-
-    try {
-      for (const item of favorites) {
-        await deleteDoc(doc(db, "users", currentUser.uid, "favorites", item.id));
-      }
-      setFavorites([]);
-      toast.success("Wishlist cleared", { position: "top-right", autoClose: 2000 });
-    } catch (error) {
-      console.error("Error clearing wishlist:", error);
-      toast.error("Failed to clear wishlist", { position: "top-right" });
-    }
-  };
-
-  const calculateDiscount = (price, originalPrice) => {
-    if (!originalPrice || originalPrice <= price) return 0;
-    return Math.round(((originalPrice - price) / originalPrice) * 100);
-  };
-
-  if (loading) {
     return (
-      <Container className="py-5 text-center">
-        <Spinner animation="border" variant="primary" />
-        <p className="mt-3">{t("wishlist.loading")}</p>
-      </Container>
-    );
-  }
-
-  return (
-    <Container className="py-5">
-      <ToastContainer />
-
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <div>
-          <h1 className="fw-bold">
-            <FaHeart className="text-danger me-2" />
-            {t("wishlist.title")}
-          </h1>
-          <p className="text-muted">
-            {t("wishlist.itemsSaved", { count: favorites.length })}
-          </p>
-        </div>
-
-        {favorites.length > 0 && (
-          <div>
-            <Button
-              variant="outline-primary"
-              className="me-2"
-              onClick={moveAllToCart}
-            >
-              <FaShoppingCart className="me-2" />
-              {t("wishlist.addAll")}
-            </Button>
-            <Button
-              variant="outline-danger"
-              onClick={clearWishlist}
-            >
-              <FaTrash className="me-2" />
-              {t("wishlist.clearAll")}
-            </Button>
-          </div>
-        )}
-      </div>
-
-      {favorites.length === 0 ? (
-        <Card className="text-center py-5 border-0 shadow-sm">
-          <Card.Body>
-            <FaHeart className="text-muted" size={80} />
-            <h3 className="mt-4 mb-3">{t("wishlist.emptyTitle")}</h3>
-            <p className="text-muted mb-4">
-              {t("wishlist.emptySubtitle")}
-            </p>
-            <Button
-              variant="primary"
-              onClick={() => navigate('/')}
-              size="lg"
-            >
-              {t("wishlist.startShopping")}
-            </Button>
-          </Card.Body>
-        </Card>
-      ) : (
-        <>
-          <Row xs={1} sm={2} lg={3} xl={4} className="g-4">
-            {favorites.map((item) => {
-              const discount = calculateDiscount(item.price, item.originalPrice);
-
-              return (
-                <Col key={item.id}>
-                  <Card className="h-100 shadow-sm border-0">
-                    <div className="position-relative">
-                      <Link to={`/product/${item.productId}`}>
-                        <Card.Img
-                          variant="top"
-                          src={item.image || "https://via.placeholder.com/300x200"}
-                          alt={item.name}
-                          style={{ height: "200px", objectFit: "contain", padding: "20px" }}
-                          className="p-3"
-                        />
-                      </Link>
-                      {discount > 0 && (
-                        <Badge bg="danger" className="position-absolute top-0 start-0 m-2">
-                          <FaTag className="me-1" />
-                          {discount}% OFF
-                        </Badge>
-                      )}
-                      <Button
-                        variant="outline-danger"
-                        size="sm"
-                        className="position-absolute top-0 end-0 m-2 rounded-circle"
-                        onClick={() => removeFromWishlist(item.id, item.name)}
-                        title={t("wishlist.remove")}
-                      >
-                        <FaTrash size={14} />
-                      </Button>
+        <Container fluid className="py-4 px-lg-5 mt-3">
+            <Row className="g-4 align-items-start">
+                {/* Left Sidebar - Account Menu */}
+                <Col lg={3}>
+                    <div style={{ position: 'sticky', top: '100px' }}>
+                        <Card className="border shadow-sm p-4" style={{ borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)' }}>
+                            <h4 className="fw-bolder mb-4 px-2" style={{ color: '#1a202c', fontSize: '20px', fontWeight: 800 }}>My Account</h4>
+                            <div className="d-flex flex-column gap-2">
+                                <Link to="/profile" className="d-flex align-items-center gap-3 px-3 py-2 rounded-3 text-decoration-none sidebar-link">
+                                    <FaUser size={18} className="sidebar-icon" />
+                                    <span className="fw-semibold" style={{ fontSize: '15px' }}>My Profile</span>
+                                </Link>
+                                <Link to="/orders" className="d-flex align-items-center gap-3 px-3 py-2 rounded-3 text-decoration-none sidebar-link">
+                                    <FaShoppingBag size={18} className="sidebar-icon" />
+                                    <span className="fw-semibold" style={{ fontSize: '15px' }}>My Orders</span>
+                                </Link>
+                                <Link to="/wishlist" className="d-flex align-items-center gap-3 px-3 py-2 rounded-3 text-decoration-none active-sidebar-link">
+                                    <FaHeart size={18} className="sidebar-icon" />
+                                    <span className="fw-semibold" style={{ fontSize: '15px' }}>Wishlist</span>
+                                </Link>
+                                <Link to="/address" className="d-flex align-items-center gap-3 px-3 py-2 rounded-3 text-decoration-none sidebar-link">
+                                    <FaMapMarkerAlt size={18} className="sidebar-icon" />
+                                    <span className="fw-semibold" style={{ fontSize: '15px' }}>My Addresses</span>
+                                </Link>
+                                <Link to="/refercode" className="d-flex align-items-center gap-3 px-3 py-2 rounded-3 text-decoration-none sidebar-link">
+                                    <FaGift size={18} className="sidebar-icon" />
+                                    <span className="fw-semibold" style={{ fontSize: '15px' }}>Sadhana Rewards</span>
+                                </Link>
+                                <Link to="/wallet" className="d-flex align-items-center gap-3 px-3 py-2 rounded-3 text-decoration-none sidebar-link">
+                                    <FaCreditCard size={18} className="sidebar-icon" />
+                                    <span className="fw-semibold" style={{ fontSize: '15px' }}>Payment Methods</span>
+                                </Link>
+                                <Link to="/profile" className="d-flex align-items-center gap-3 px-3 py-2 rounded-3 text-decoration-none sidebar-link">
+                                    <FaCog size={18} className="sidebar-icon" />
+                                    <span className="fw-semibold" style={{ fontSize: '15px' }}>Account Settings</span>
+                                </Link>
+                                <div style={{ height: '1px', backgroundColor: '#e2e8f0', margin: '12px 8px' }}></div>
+                                <button
+                                    onClick={handleLogout}
+                                    className="btn d-flex align-items-center gap-3 px-3 py-2 rounded-3 border-0 text-start w-100 sidebar-link logout-link"
+                                >
+                                    <FaSignOutAlt size={18} className="sidebar-icon" />
+                                    <span className="fw-semibold" style={{ fontSize: '15px' }}>Logout</span>
+                                </button>
+                            </div>
+                        </Card>
                     </div>
-                    <Card.Body className="d-flex flex-column">
-                      <Link
-                        to={`/product/${item.productId}`}
-                        className="text-decoration-none text-dark"
-                      >
-                        <Card.Title className="fs-6 fw-bold text-truncate">
-                          {item.name}
-                        </Card.Title>
-                        {item.category && (
-                          <Badge bg="light" text="dark" className="mb-2">
-                            {item.category}
-                          </Badge>
-                        )}
-                      </Link>
-
-                      <div className="mt-auto">
-                        <div className="d-flex align-items-center mb-2">
-                          <span className="text-danger fw-bold fs-5">₹{item.price}</span>
-                          {item.originalPrice && item.originalPrice > item.price && (
-                            <span className="text-muted text-decoration-line-through ms-2">
-                              ₹{item.originalPrice}
-                            </span>
-                          )}
-                        </div>
-
-                        {item.size && (
-                          <div className="mb-3">
-                            <small className="text-muted"><small className="text-muted">{t("wishlist.size")}</small> </small>
-                            <Badge bg="secondary" className="ms-1">
-                              {item.size}
-                            </Badge>
-                          </div>
-                        )}
-
-                        <div className="d-grid gap-2">
-                          <Button
-                            variant="warning"
-                            onClick={() => addToCartFromWishlist(item)}
-                          >
-                            <FaShoppingCart className="me-2" />
-                            {t("wishlist.addToCart")}
-                          </Button>
-                          <Button
-                            variant="outline-dark"
-                            onClick={() => navigate(`/product/${item.productId}`)}
-                          >
-                            {t("wishlist.viewDetails")}
-                          </Button>
-                        </div>
-                      </div>
-                    </Card.Body>
-                  </Card>
                 </Col>
-              );
-            })}
-          </Row>
-        </>
-      )}
-    </Container>
-  );
+
+                {/* Right Main Content - Wishlist Grid */}
+                <Col lg={9}>
+                    <div className="d-flex justify-content-between align-items-center mb-4">
+                        <h3 className="fw-bold mb-0 text-dark">
+                            My Wishlist <span className="text-muted fs-6 fw-normal">({favorites.length} Items)</span>
+                        </h3>
+                        {favorites.length > 0 && (
+                            <div className="d-flex gap-2">
+                                <Button
+                                    variant="outline-primary"
+                                    size="sm"
+                                    className="px-3 py-2 fw-semibold"
+                                    style={{ fontSize: '13px' }}
+                                    onClick={handleMoveAllToCart}
+                                >
+                                    Move All to Cart
+                                </Button>
+                                <Button
+                                    variant="outline-danger"
+                                    size="sm"
+                                    className="px-3 py-2 fw-semibold"
+                                    style={{ fontSize: '13px' }}
+                                    onClick={handleClearWishlist}
+                                >
+                                    Remove All
+                                </Button>
+                            </div>
+                        )}
+                    </div>
+
+                    {favorites.length === 0 ? (
+                        <Card className="text-center py-5 border shadow-sm rounded-4 mb-5">
+                            <Card.Body>
+                                <FaHeart className="text-muted mb-3" size={64} />
+                                <h4 className="fw-bold mb-2">Your wishlist is empty</h4>
+                                <p className="text-muted mb-4 small">Save your favorite items here to view them later.</p>
+                                <Button variant="primary" className="rounded-pill px-4" onClick={() => navigate("/")}>
+                                    Go Shopping
+                                </Button>
+                            </Card.Body>
+                        </Card>
+                    ) : (
+                        <div style={{
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            gap: '16px',
+                            marginBottom: '24px'
+                        }}>
+                            {favorites.map((item) => {
+                                const finalPrice = Number(item.price || 0);
+                                const originalPrice = Number(item.originalPrice || Math.round(finalPrice * 1.5));
+                                const discountPercent = Math.round(((originalPrice - finalPrice) / originalPrice) * 100);
+
+                                return (
+                                    <div
+                                        key={item.id}
+                                        style={{
+                                            width: '200px',
+                                            flexShrink: 0,
+                                            background: '#fff',
+                                            borderRadius: '16px',
+                                            boxShadow: '0 2px 12px rgba(0,0,0,0.07)',
+                                            overflow: 'hidden',
+                                            display: 'flex',
+                                            flexDirection: 'column'
+                                        }}
+                                    >
+                                        {/* Image */}
+                                        <div style={{ position: 'relative', background: 'linear-gradient(135deg,#f8faff,#f0f4ff)', height: '160px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+                                            {discountPercent > 0 && (
+                                                <div style={{ position: 'absolute', top: 8, left: 8, background: 'linear-gradient(135deg,#ff6b6b,#ee5a24)', color: '#fff', borderRadius: 7, fontSize: '10px', fontWeight: 700, padding: '2px 7px' }}>
+                                                    {discountPercent}% OFF
+                                                </div>
+                                            )}
+                                            <button
+                                                onClick={() => removeFromWishlist(item.id, item.name)}
+                                                style={{ position: 'absolute', top: 8, right: 8, width: 28, height: 28, borderRadius: '50%', background: '#fff', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.12)' }}
+                                            >
+                                                <FaHeart color="#ef4444" size={12} />
+                                            </button>
+                                            <img
+                                                src={item.image || "https://via.placeholder.com/200"}
+                                                alt={item.name}
+                                                style={{ height: '120px', width: 'auto', maxWidth: '100%', objectFit: 'contain', cursor: 'pointer' }}
+                                                onClick={() => navigate(`/product/${item.productId}`)}
+                                            />
+                                        </div>
+
+                                        {/* Info */}
+                                        <div style={{ padding: '12px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                                            <div>
+                                                <div
+                                                    style={{ fontWeight: 600, fontSize: '12.5px', color: '#111827', lineHeight: 1.3, marginBottom: 5, cursor: 'pointer', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}
+                                                    onClick={() => navigate(`/product/${item.productId}`)}
+                                                >
+                                                    {item.name}
+                                                </div>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+                                                    <span style={{ fontWeight: 800, fontSize: '14px', color: '#111827' }}>₹{finalPrice.toLocaleString()}</span>
+                                                    <span style={{ fontSize: '11px', color: '#9ca3af', textDecoration: 'line-through' }}>₹{originalPrice.toLocaleString()}</span>
+                                                </div>
+                                            </div>
+                                            {/* Buttons */}
+                                            <div style={{ display: 'flex', gap: 6 }}>
+                                                <button
+                                                    onClick={() => { handleAddToCart(item); removeFromWishlist(item.id, item.name); }}
+                                                    style={{ flex: 1, padding: '6px 8px', border: 'none', borderRadius: 8, background: '#2563eb', color: '#fff', fontWeight: 600, fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}
+                                                    className="add-to-cart-btn"
+                                                >
+                                                    <FaShoppingCart size={10} /> Move to Cart
+                                                </button>
+                                                <button
+                                                    onClick={() => removeFromWishlist(item.id, item.name)}
+                                                    style={{ padding: '6px 9px', border: '1.5px solid #fca5a5', borderRadius: 8, background: '#fff5f5', color: '#ef4444', fontWeight: 600, fontSize: '11px', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                                                    onMouseEnter={e => { e.currentTarget.style.background = '#ef4444'; e.currentTarget.style.color = '#fff'; }}
+                                                    onMouseLeave={e => { e.currentTarget.style.background = '#fff5f5'; e.currentTarget.style.color = '#ef4444'; }}
+                                                >
+                                                    Remove
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+
+                    {/* Suggestions Section: "You May Also Like" */}
+                    {suggestions.length > 0 && (
+                        <div className="mt-5 suggestion-slider-container">
+                            <div className="d-flex justify-content-between align-items-center mb-4">
+                                <h4 className="fw-bold mb-0 text-dark">You May Also Like</h4>
+                                <div className="d-flex gap-2">
+                                    <button
+                                        onClick={() => scrollSuggestions("left")}
+                                        className="btn btn-light rounded-circle shadow-sm border d-flex align-items-center justify-content-center"
+                                        style={{ width: '36px', height: '36px' }}
+                                    >
+                                        <FaChevronLeft size={12} />
+                                    </button>
+                                    <button
+                                        onClick={() => scrollSuggestions("right")}
+                                        className="btn btn-light rounded-circle shadow-sm border d-flex align-items-center justify-content-center"
+                                        style={{ width: '36px', height: '36px' }}
+                                    >
+                                        <FaChevronRight size={12} />
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div
+                                ref={sliderRef}
+                                className="d-flex overflow-auto pb-4 gap-4 scrollbar-hidden"
+                                style={{
+                                    scrollSnapType: 'x mandatory',
+                                    WebkitOverflowScrolling: 'touch',
+                                    scrollbarWidth: 'none',
+                                    msOverflowStyle: 'none'
+                                }}
+                            >
+                                {suggestions.map((p) => {
+                                    const finalPrice = Number(p.offerprice || p.price || 0);
+                                    const originalPrice = p.price && p.offerprice ? Number(p.price) : Math.round(finalPrice * 1.5);
+
+                                    return (
+                                        <div
+                                            key={p.id}
+                                            style={{
+                                                minWidth: '220px',
+                                                maxWidth: '220px',
+                                                flex: '0 0 auto',
+                                                scrollSnapAlign: 'start'
+                                            }}
+                                        >
+                                            <Card className="h-100 border shadow-sm p-2 product-card-hover" style={{ borderRadius: '16px', overflow: 'hidden' }}>
+                                                <div className="d-flex justify-content-center align-items-center p-3 position-relative rounded-3" style={{ height: "160px", backgroundColor: '#f8fafc' }}>
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); addToWishlist(p); }}
+                                                        className="suggestion-wishlist-btn"
+                                                        style={{ position: 'absolute', top: 8, right: 8, width: 28, height: 28, borderRadius: '50%', background: '#fff', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.12)', zIndex: 2 }}
+                                                    >
+                                                        <FaHeart className="suggestion-heart-icon" size={12} color="#cbd5e1" />
+                                                    </button>
+                                                    <Card.Img
+                                                        src={(Array.isArray(p.images) && p.images[0]) || p.image || "https://via.placeholder.com/150"}
+                                                        style={{ height: "120px", width: 'auto', objectFit: "contain" }}
+                                                        className="cursor-pointer"
+                                                        onClick={() => navigate(`/product/${p.id}`)}
+                                                    />
+                                                </div>
+
+                                                <Card.Body className="p-3 bg-white">
+                                                    <Card.Title
+                                                        className="fw-semibold text-truncate mb-1 text-dark cursor-pointer"
+                                                        style={{ fontSize: '0.85rem' }}
+                                                        onClick={() => navigate(`/product/${p.id}`)}
+                                                    >
+                                                        {p.name || p.title}
+                                                    </Card.Title>
+
+                                                    <div className="d-flex align-items-center gap-2 mb-2">
+                                                        <span className="fw-bold text-dark" style={{ fontSize: '13px' }}>
+                                                            ₹{finalPrice.toLocaleString()}
+                                                        </span>
+                                                        <span className="text-muted text-decoration-line-through" style={{ fontSize: '11px' }}>
+                                                            ₹{originalPrice.toLocaleString()}
+                                                        </span>
+                                                    </div>
+                                                </Card.Body>
+                                            </Card>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+                </Col>
+            </Row>
+
+            <style jsx>{`
+                .sidebar-link {
+                    transition: all 0.15s ease;
+                    color: #4a5568 !important;
+                }
+                .sidebar-link:hover {
+                    background-color: #f7fafc !important;
+                    color: #2b6cb0 !important;
+                }
+                .sidebar-link:hover .sidebar-icon {
+                    color: #2b6cb0 !important;
+                }
+                .active-sidebar-link {
+                    background-color: #eff4ff !important;
+                    color: #2b6cb0 !important;
+                }
+                .active-sidebar-link .sidebar-icon {
+                    color: #2b6cb0 !important;
+                }
+                .sidebar-icon {
+                    color: #4a5568;
+                    transition: color 0.15s ease;
+                }
+                .logout-link:hover {
+                    background-color: #fff5f5 !important;
+                    color: #c53030 !important;
+                }
+                .logout-link:hover .sidebar-icon {
+                    color: #c53030 !important;
+                }
+                .product-card-hover {
+                    transition: transform 0.2s ease, box-shadow 0.2s ease;
+                }
+                .product-card-hover:hover {
+                    transform: translateY(-4px);
+                    box-shadow: 0 10px 20px -5px rgba(0,0,0,0.08) !important;
+                }
+                .suggestion-wishlist-btn:hover .suggestion-heart-icon {
+                    fill: #ef4444 !important;
+                    color: #ef4444 !important;
+                }
+                .add-to-cart-btn:hover {
+                    background-color: #2563eb !important;
+                    color: #fff !important;
+                }
+                .cursor-pointer {
+                    cursor: pointer;
+                }
+                .scrollbar-hidden::-webkit-scrollbar {
+                    display: none;
+                }
+            `}</style>
+        </Container>
+    );
 }
+
+const getDummySuggestions = () => {
+    return [
+        { id: "sug_1", name: "Striped T-Shirt", price: 349, offerprice: 199, image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=200" },
+        { id: "sug_2", name: "Girls Frock", price: 649, offerprice: 409, image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=200" },
+        { id: "sug_3", name: "Boys Shirt", price: 449, offerprice: 349, image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=200" },
+        { id: "sug_4", name: "Casual Shoes", price: 999, offerprice: 609, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200" }
+    ];
+};
 
 export default Wishlist;

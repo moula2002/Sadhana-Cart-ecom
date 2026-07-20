@@ -1,0 +1,140 @@
+.brand-details-page {
+  background: var(--bg-primary, #f5f5f5);
+  min-height: 100vh;
+  padding-bottom: 40px;
+}
+
+.brand-banner-container {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  background: #fff;
+  overflow: hidden;
+  box-shadow: var(--shadow-soft, 0 2px 8px rgba(0,0,0,0.1));
+}
+
+.brand-banner-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.8);
+}
+
+.brand-banner-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 30px 40px;
+  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.brand-banner-logo {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  background: #fff;
+  object-fit: contain;
+}
+
+.brand-banner-title {
+  color: #fff;
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin: 0;
+  text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
+}
+
+.brand-content-wrapper {
+  max-width: var(--max-content-width, 1200px);
+  margin: 0 auto;
+  padding: 30px 20px;
+}
+
+.brand-subcategories {
+  margin-bottom: 30px;
+}
+
+.subcats-title {
+  font-size: 1.2rem;
+  color: var(--text-dark, #333);
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+.subcats-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.subcat-chip {
+  background: #fff;
+  border: 1px solid var(--border-color, #e0e0e0);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  color: var(--text-secondary, #555);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.subcat-chip:hover,
+.subcat-chip.active {
+  background: var(--sadhana-orange, #f4a11a);
+  color: #fff;
+  border-color: var(--sadhana-orange, #f4a11a);
+}
+
+.brand-section-title {
+  font-size: 1.5rem;
+  color: var(--text-dark, #333);
+  margin-bottom: 20px;
+  font-weight: 700;
+  border-bottom: 2px solid var(--sadhana-orange, #f4a11a);
+  padding-bottom: 10px;
+  display: inline-block;
+}
+
+.brand-products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.no-products-msg {
+  text-align: center;
+  padding: 40px;
+  background: #fff;
+  border-radius: 8px;
+  color: #777;
+  font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+  .brand-banner-container {
+    height: 200px;
+  }
+  .brand-banner-overlay {
+    padding: 20px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .brand-banner-logo {
+    width: 70px;
+    height: 70px;
+  }
+  .brand-banner-title {
+    font-size: 1.6rem;
+  }
+  .brand-products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+}

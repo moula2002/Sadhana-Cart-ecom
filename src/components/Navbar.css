@@ -15,7 +15,7 @@
     --max-content-width: 1400px;
     --padding-sides: 15px;
     --hover-bg: rgba(255, 255, 255, 0.1);
-    
+
     /* CSS Variables for Theming */
     --bg-primary: #ffffff;
     --bg-secondary: #f8f9fa;
@@ -41,7 +41,7 @@
     --cart-blue: #1a237e;
     --cart-blue-dark: #0d1b5c;
     --cart-blue-light: #283593;
-    
+
     /* CSS Variables for Dark Theme */
     --bg-primary: #121212;
     --bg-secondary: #1e1e1e;
@@ -101,13 +101,13 @@ body {
     }
 }
 
-/* ==================== SECOND HEADER STYLES ==================== */
+/* ==================== SECOND HEADER STYLES (White nav - overridden by SecondHeader.css) ==================== */
 .second-header-wrapper {
     width: 100%;
-    background-color: var(--cart-blue);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    background-color: var(--bg-primary);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
     z-index: 999;
-    border-top: 3px solid var(--sadhana-orange);
     position: sticky;
     top: 0;
 }
@@ -115,8 +115,8 @@ body {
 .second-header {
     display: flex;
     align-items: center;
-    height: 60px;
-    color: var(--text-white);
+    min-height: 60px;
+    height: auto;
     max-width: var(--max-content-width);
     margin: 0 auto;
     padding: 0 var(--padding-sides);
@@ -142,25 +142,33 @@ body {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background: rgba(8, 21, 77, 0.9);
-    border: 1px solid var(--sadhana-orange);
-    color: var(--text-white);
-    width: 30px;
-    height: 30px;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    color: var(--text-dark);
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     z-index: 10;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: 0.3s;
+    transition: 0.2s;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
-.left-arrow { left: 0; }
-.right-arrow { right: 0; }
+.left-arrow {
+    left: 0;
+}
+
+.right-arrow {
+    right: 0;
+}
 
 .scroll-arrow:hover {
     background: var(--sadhana-orange);
+    color: #fff;
+    border-color: var(--sadhana-orange);
 }
 
 /* Horizontal Scroll List */
@@ -168,12 +176,13 @@ body {
     display: flex;
     list-style: none;
     margin: 0;
-    padding: 0 35px;
+    padding: 0 30px;
     overflow-x: auto;
     scroll-behavior: smooth;
     white-space: nowrap;
     scrollbar-width: none;
     -ms-overflow-style: none;
+    align-items: center;
 }
 
 .menu-list::-webkit-scrollbar {
@@ -182,49 +191,66 @@ body {
 
 .menu-item {
     flex: 0 0 auto;
-    padding: 0 15px;
-    height: 60px;
+    padding: 6px 12px;
+    height: auto;
     display: flex;
     align-items: center;
     cursor: pointer;
-    font-weight: 600;
-    text-transform: uppercase;
-    font-size: 0.85rem;
-    transition: 0.3s;
+    font-weight: 500;
+    font-size: 0.82rem;
+    color: #333;
+    position: relative;
+    transition: color 0.2s ease;
+    white-space: nowrap;
+}
+
+.menu-item:hover {
+    color: var(--sadhana-orange);
 }
 
 .category-box {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
+    gap: 4px;
 }
 
 .category-image {
-    width: 28px;
-    height: 28px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     object-fit: cover;
+    border: 1px solid #e0e0e0;
+    background: #f5f5f5;
+    transition: transform 0.2s ease;
+}
+
+.menu-item:hover .category-image {
+    transform: scale(1.05);
 }
 
 .category-name {
-    color: var(--text-white);
+    color: #333;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: none;
+    text-align: center;
+    max-width: 70px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .menu-item:hover .category-name {
     color: var(--sadhana-orange);
 }
 
-.menu-item.all {
-    display: none;
-    padding: 0 20px;
-    background-color: var(--cart-blue-dark);
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
-}
-
 .menu-icon {
     font-size: 1.2rem;
     margin-right: 8px;
 }
+
 
 /* Mobile Menu Styles */
 .mobile-menu {
@@ -360,8 +386,13 @@ body {
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 /* ==================== FLIPKART STYLE DROPDOWN ==================== */
@@ -418,6 +449,7 @@ body {
         opacity: 0;
         transform: translate3d(0, 10px, 0);
     }
+
     to {
         opacity: 1;
         transform: translate3d(0, 0, 0);
@@ -592,7 +624,7 @@ body {
     top: 2px;
     left: 2px;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .theme-toggle-switch.dark .theme-toggle-slider {
@@ -655,6 +687,7 @@ body {
     transform: scale(1.05);
     color: var(--text-primary) !important;
 }
+
 .navbar-brand {
     text-decoration: none !important;
 }
@@ -685,6 +718,33 @@ body {
 .dark-theme .search-wrapper {
     background-color: #1a1a1a;
     border-color: #333;
+}
+
+/* Premium Account Pill Button */
+.account-pill-btn {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 50px;
+    padding: 6px 18px 6px 6px;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.account-pill-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+    border-color: rgba(244, 161, 26, 0.3);
+}
+
+.dark-theme .account-pill-btn {
+    background: linear-gradient(135deg, #2d2d2d 0%, #1e1e1e 100%);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.dark-theme .account-pill-btn:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    border-color: rgba(244, 161, 26, 0.4);
 }
 
 
@@ -846,6 +906,7 @@ body {
     .filter-text {
         display: none;
     }
+
     .filter-button {
         padding: 0 15px !important;
     }
@@ -1102,16 +1163,37 @@ body {
 
 /* ==================== ANIMATIONS ==================== */
 @keyframes bounce-in {
-    0% { transform: scale(0.3); opacity: 0; }
-    50% { transform: scale(1.1); }
-    70% { transform: scale(0.9); }
-    100% { transform: scale(1); opacity: 1; }
+    0% {
+        transform: scale(0.3);
+        opacity: 0;
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    70% {
+        transform: scale(0.9);
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
 @keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(1); }
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 .cart-count.pulse {
@@ -1339,17 +1421,22 @@ body {
 
 /* Loading states */
 .category-section .skeleton {
-    background: linear-gradient(90deg, 
-        var(--bg-secondary) 25%, 
-        var(--border-color) 50%, 
-        var(--bg-secondary) 75%);
+    background: linear-gradient(90deg,
+            var(--bg-secondary) 25%,
+            var(--border-color) 50%,
+            var(--bg-secondary) 75%);
     background-size: 200% 100%;
     animation: loading 1.5s infinite;
 }
 
 @keyframes loading {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
 }
 
 /* Category-specific overrides */
@@ -1430,12 +1517,12 @@ body {
     .menu-list {
         padding: 0 30px;
     }
-    
+
     .menu-item {
         padding: 0 12px;
         font-size: 0.8rem;
     }
-    
+
     .category-image {
         width: 24px;
         height: 24px;
@@ -1448,11 +1535,11 @@ body {
         height: 55px;
         padding: 0 10px;
     }
-    
+
     .desktop-menu-container {
         display: none !important;
     }
-    
+
     .menu-item.all {
         display: flex;
         align-items: center;
@@ -1461,19 +1548,19 @@ body {
         height: 55px;
         padding: 0 15px;
     }
-    
+
     .all-text {
         font-size: 0.9rem;
     }
-    
+
     .mobile-menu-backdrop {
         display: block;
     }
-    
+
     .mobile-menu {
         width: 280px;
     }
-    
+
     /* Mobile dropdown styles */
     .flipkart-login-dropdown .dropdown-menu {
         position: fixed !important;
@@ -1517,28 +1604,28 @@ body {
     .search-wrapper {
         height: 44px;
     }
-    
+
     .filter-button span {
         display: none;
     }
-    
+
     .filter-button {
         padding: 0 15px !important;
     }
-    
+
     .filter-button i {
         font-size: 1.1rem;
         margin: 0;
     }
-    
+
     .search-icon-left {
         padding-left: 12px;
     }
-    
+
     .search-input-desktop {
         font-size: 0.9rem !important;
     }
-    
+
     .suggestions-dropdown {
         top: 45px;
         max-height: 300px;
@@ -1550,53 +1637,53 @@ body {
     .second-header {
         height: 50px;
     }
-    
+
     .menu-item.all {
         height: 50px;
         padding: 0 12px;
     }
-    
+
     .all-text {
         font-size: 0.85rem;
     }
-    
+
     .menu-icon {
         font-size: 1rem;
         margin-right: 6px;
     }
-    
+
     .mobile-menu {
         width: 85%;
         max-width: 280px;
     }
-    
+
     .mobile-menu-header {
         padding: 15px;
     }
-    
+
     .mobile-menu-header h3 {
         font-size: 1.1rem;
     }
-    
+
     .mobile-menu-item {
         padding: 12px 15px;
     }
-    
+
     .mobile-category-box {
         gap: 10px;
     }
-    
+
     .mobile-category-image,
     .mobile-category-icon-placeholder {
         width: 28px;
         height: 28px;
         font-size: 0.8rem;
     }
-    
+
     .mobile-category-name {
         font-size: 0.9rem;
     }
-    
+
     /* Very small mobile dropdown */
     .flipkart-login-dropdown .dropdown-menu {
         width: 92vw !important;
@@ -1608,23 +1695,23 @@ body {
     .search-wrapper {
         height: 40px;
     }
-    
+
     .filter-button {
         padding: 0 12px !important;
     }
-    
+
     .search-icon-left {
         padding-left: 10px;
     }
-    
+
     .search-input-desktop {
         font-size: 0.85rem !important;
     }
-    
+
     .suggestions-dropdown {
         max-height: 280px;
     }
-    
+
     .suggestion-item,
     .recent-search-item {
         padding: 10px 12px;
@@ -1637,16 +1724,16 @@ body {
     .second-header {
         height: 48px;
     }
-    
+
     .menu-item.all {
         height: 48px;
         padding: 0 10px;
     }
-    
+
     .all-text {
         font-size: 0.8rem;
     }
-    
+
     .mobile-menu {
         width: 90%;
     }
@@ -1654,10 +1741,10 @@ body {
 
 /* Smooth transitions for theme switching */
 * {
-    transition: background-color 0.3s ease, 
-                color 0.3s ease, 
-                border-color 0.3s ease,
-                box-shadow 0.3s ease;
+    transition: background-color 0.3s ease,
+        color 0.3s ease,
+        border-color 0.3s ease,
+        box-shadow 0.3s ease;
 }
 
 /* ==================== ADVANCED SEARCH FILTER BUTTON ==================== */
@@ -1685,6 +1772,7 @@ body {
         transform: scale(0, 0);
         opacity: 0.5;
     }
+
     100% {
         transform: scale(20, 20);
         opacity: 0;
@@ -1717,6 +1805,7 @@ body {
     background-color: rgba(255, 138, 92, 0.3);
     color: #ff8a5c;
 }
+
 .flipkart-login-dropdown .dropdown-item {
     text-decoration: none !important;
 }
@@ -1729,17 +1818,840 @@ body {
     text-decoration: none !important;
 }
 
-@media (max-width:768px){
+@media (max-width:768px) {
 
-.brand-text{
-font-size:1.1rem !important;
+    .brand-text {
+        font-size: 1.1rem !important;
+    }
+
+    .logo-img {
+        width: 40px !important;
+        height: 40px !important;
+    }
+
 }
 
-.logo-img{
-width:40px !important;
-height:40px !important;
+/* ============================================================ */
+/* ✨ REFERENCE UI — REDESIGNED NAVBAR STYLES                  */
+/* ============================================================ */
+
+/* Override old navbar sticky top */
+.navbar-custom {
+    position: sticky;
+    top: 0;
+    z-index: 1020;
+    background: #ffffff;
+    border-bottom: 1px solid #e0e0e0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    padding: 0;
 }
 
+/* Main row: hamburger+logo | search | right actions */
+.navbar-main-row {
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    gap: 16px;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
 }
 
+/* LEFT: hamburger + logo */
+.navbar-left-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
 
+/* Hamburger Button */
+.hamburger-btn {
+    background: none;
+    border: none;
+    padding: 6px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #444;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.hamburger-btn:hover {
+    background: rgba(0, 0, 0, 0.06);
+    color: #0b1e6d;
+}
+
+/* Brand link (logo + text) */
+.navbar-brand-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none !important;
+    border: none !important;
+    gap: 8px;
+}
+
+.navbar-brand-link:hover,
+.navbar-brand-link:focus,
+.brand-name-gold:hover,
+.brand-name-navy:hover,
+.brand-text-wrap:hover {
+    text-decoration: none !important;
+}
+
+.logo-img {
+    width: 54px;
+    height: 54px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.brand-text-wrap {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+    text-decoration: none !important;
+}
+
+.brand-name-gold {
+    font-weight: 800;
+    font-size: 1.3rem;
+    color: goldenrod;
+    font-family: 'Poppins', sans-serif;
+    text-decoration: none !important;
+    border-bottom: none !important;
+}
+
+.brand-name-navy {
+    font-weight: 800;
+    font-size: 1.3rem;
+    color: navy;
+    font-family: 'Poppins', sans-serif;
+    text-decoration: none !important;
+    border-bottom: none !important;
+}
+
+/* SEARCH WRAP */
+.navbar-search-wrap {
+    flex: 1;
+    max-width: 600px;
+    margin: 0 8px;
+}
+
+/* Reference-style search bar */
+.ref-search-bar {
+    display: flex;
+    align-items: center;
+    border: 1.5px solid #e2e2e2;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #ffffff;
+    height: 44px;
+    width: 100%;
+    transition: border-color 0.2s;
+}
+
+.ref-search-bar:focus-within {
+    border-color: #f4a11a;
+    box-shadow: 0 0 0 3px rgba(244, 161, 26, 0.12);
+}
+
+.ref-search-input {
+    flex: 1;
+    height: 100%;
+    border: none;
+    outline: none;
+    padding: 0 14px;
+    font-size: 0.88rem;
+    color: #333;
+    background: transparent;
+    cursor: pointer;
+}
+
+.ref-search-divider {
+    width: 1px;
+    height: 24px;
+    background: #ddd;
+    flex-shrink: 0;
+}
+
+.ref-category-select {
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 0.82rem;
+    color: #555;
+    padding: 0 10px 0 8px;
+    cursor: pointer;
+    height: 100%;
+    flex-shrink: 0;
+    min-width: 120px;
+}
+
+.ref-search-btn {
+    background: #ffa800;
+    border: none;
+    width: 46px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #ffffff;
+    flex-shrink: 0;
+    transition: background 0.2s;
+}
+
+.ref-search-btn:hover {
+    background: #e09400;
+}
+
+/* RIGHT GROUP */
+.navbar-right-group {
+    display: flex;
+    align-items: center;
+    gap: 36px;
+    flex-shrink: 0;
+}
+
+/* Deliver To */
+.ref-deliver-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.ref-pin-icon {
+    color: #e53935;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.ref-deliver-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.ref-deliver-label {
+    font-size: 0.7rem;
+    color: #888;
+}
+
+.ref-deliver-city {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #212121;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.ref-chev {
+    font-size: 0.6rem;
+    color: #555;
+}
+
+/* Icon buttons: Wishlist, Cart */
+.ref-icon-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    gap: 2px;
+    padding: 4px 2px;
+    border-radius: 6px;
+    transition: background 0.2s;
+    position: relative;
+}
+
+.ref-icon-btn:hover {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.ref-icon {
+    font-size: 1.25rem;
+    color: #333;
+}
+
+.ref-icon-label {
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: #333;
+    white-space: nowrap;
+}
+
+/* Cart icon with badge */
+.ref-cart-icon-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ref-cart-badge {
+    position: absolute;
+    top: -8px;
+    right: -10px;
+    background: #0b1e6d;
+    color: #fff;
+    font-size: 0.6rem;
+    font-weight: 700;
+    min-width: 17px;
+    height: 17px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 2px;
+    border: 2px solid #fff;
+}
+
+/* Override FlipkartLoginDropdown button to match reference style */
+.flipkart-login-dropdown .dropdown-toggle {
+    background: transparent !important;
+    color: #333 !important;
+    border: none !important;
+    font-weight: 600 !important;
+    padding: 4px 2px !important;
+    border-radius: 6px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 2px !important;
+    box-shadow: none !important;
+    min-width: 0 !important;
+}
+
+.flipkart-login-dropdown .dropdown-toggle:hover {
+    background: rgba(0, 0, 0, 0.04) !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.flipkart-login-dropdown .dropdown-toggle::after {
+    display: none !important;
+}
+
+.flipkart-login-dropdown .dropdown-toggle i {
+    color: #333 !important;
+    font-size: 1.25rem !important;
+    margin-bottom: 0 !important;
+}
+
+.flipkart-login-dropdown .dropdown-toggle span {
+    color: #333 !important;
+    font-size: 0.68rem !important;
+    font-weight: 600 !important;
+    display: block !important;
+    white-space: nowrap;
+}
+
+/* The "Login / Sign up" + "My Account >" style */
+.flipkart-login-dropdown .dropdown-toggle .login-top-text {
+    font-size: 0.7rem;
+    color: #333;
+    font-weight: 500;
+}
+
+.flipkart-login-dropdown .dropdown-toggle .login-bottom-text {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #212121;
+}
+
+/* ============================================================ */
+/* SUB-NAVBAR MENU ROW                                          */
+/* ============================================================ */
+
+.sub-navbar-row {
+    border-top: 1px solid #ebebeb;
+    background: #ffffff;
+    width: 100%;
+}
+
+.sub-navbar-inner {
+    display: flex;
+    align-items: center;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+    height: 46px;
+    gap: 0;
+}
+
+/* All Categories button */
+.sub-nav-all-cat {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0 12px 0 0;
+    margin-right: 8px;
+    border-right: 1px solid #ebebeb;
+    font-weight: 700;
+    font-size: 0.82rem;
+    color: #0b1e6d;
+    cursor: pointer;
+    white-space: nowrap;
+    height: 100%;
+}
+
+.sub-nav-grid-icon {
+    font-size: 0.85rem;
+    color: #0b1e6d;
+}
+
+.sub-nav-chev {
+    font-size: 0.65rem;
+    color: #0b1e6d;
+}
+
+/* Nav links row */
+.sub-nav-links {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    height: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+/* Mega Menu Dropdown */
+.sub-nav-all-cat {
+    position: relative;
+    /* important for dropdown positioning */
+}
+
+.all-categories-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 680px;
+    background: #ffffff;
+    border: 1px solid #ebebeb;
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    z-index: 1050;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    max-height: 450px;
+    overflow-y: auto;
+    padding: 16px;
+    animation: slideDownCompact 0.2s ease-out forwards;
+}
+
+.cat-dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    gap: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+    text-decoration: none;
+    border-radius: 8px;
+}
+
+.cat-dropdown-item:hover {
+    background: #f8fafc;
+}
+
+.cat-dropdown-img {
+    width: 32px;
+    height: 32px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.cat-dropdown-icon-placeholder {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f4a11a;
+    color: #fff;
+    font-weight: bold;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.cat-dropdown-name {
+    font-size: 0.85rem;
+    color: #333;
+    font-weight: 500;
+}
+
+.dark-theme .all-categories-dropdown {
+    background: #1a1a2e;
+    border-color: #333;
+}
+
+.dark-theme .cat-dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.dark-theme .cat-dropdown-name {
+    color: #e9ecef;
+}
+
+.sub-nav-links::-webkit-scrollbar {
+    display: none;
+}
+
+.sub-nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0 10px;
+    height: 100%;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: #333;
+    text-decoration: none;
+    white-space: nowrap;
+    position: relative;
+    border-bottom: 3px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+}
+
+.sub-nav-link:hover {
+    color: #f4a11a;
+    text-decoration: none;
+}
+
+.sub-nav-link.sub-nav-active {
+    color: #0b1e6d;
+    font-weight: 700;
+    border-bottom-color: #f4a11a;
+}
+
+/* Badges */
+.sub-nav-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 3px;
+    line-height: 1.4;
+}
+
+.sub-nav-badge-hot {
+    background: #e53935;
+    color: #fff;
+}
+
+.sub-nav-badge-new {
+    background: #2e7d32;
+    color: #fff;
+}
+
+/* Dark mode overrides */
+.dark-theme .navbar-custom {
+    background: #1a1a2e !important;
+    border-bottom-color: #333 !important;
+}
+
+.dark-theme .brand-name-gold {
+    color: #fbbf24 !important;
+}
+
+.dark-theme .brand-name-navy {
+    color: #93c5fd !important;
+}
+
+.dark-theme .hamburger-btn {
+    color: #e9ecef;
+}
+
+.dark-theme .hamburger-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.dark-theme .ref-search-bar {
+    background: #1a1a1a;
+    border-color: #333;
+}
+
+.dark-theme .ref-search-input {
+    color: #e9ecef;
+}
+
+.dark-theme .ref-category-select {
+    color: #ccc;
+    background: #1a1a1a;
+}
+
+.dark-theme .ref-deliver-city {
+    color: #e9ecef;
+}
+
+.dark-theme .ref-deliver-label {
+    color: #aaa;
+}
+
+.dark-theme .ref-icon {
+    color: #e9ecef;
+}
+
+.dark-theme .ref-icon-label {
+    color: #e9ecef;
+}
+
+.dark-theme .sub-navbar-row {
+    background: #1a1a2e;
+    border-top-color: #333;
+}
+
+.dark-theme .sub-nav-link {
+    color: #ccc;
+}
+
+.dark-theme .sub-nav-link:hover {
+    color: #f4a11a;
+}
+
+.dark-theme .sub-nav-link.sub-nav-active {
+    color: #f4a11a;
+    border-bottom-color: #f4a11a;
+}
+
+.dark-theme .sub-nav-all-cat {
+    color: #f4a11a;
+    border-right-color: #333;
+}
+
+.dark-theme .sub-nav-grid-icon,
+.dark-theme .sub-nav-chev {
+    color: #f4a11a;
+}
+
+.dark-theme .flipkart-login-dropdown .dropdown-toggle i {
+    color: #e9ecef !important;
+}
+
+.dark-theme .flipkart-login-dropdown .dropdown-toggle span {
+    color: #e9ecef !important;
+}
+
+/* Mobile adjustments */
+@media (max-width: 991px) {
+    .navbar-main-row {
+        padding: 8px 14px;
+        gap: 10px;
+    }
+
+    .logo-img {
+        width: 36px !important;
+        height: 36px !important;
+    }
+
+    .brand-name-gold,
+    .brand-name-navy {
+        font-size: 0.95rem !important;
+    }
+
+    .sub-navbar-inner {
+        padding: 0 10px;
+        height: 40px;
+    }
+
+    .sub-nav-all-cat {
+        font-size: 0.75rem;
+        padding-right: 8px;
+        margin-right: 6px;
+    }
+
+    .sub-nav-link {
+        font-size: 0.75rem;
+        padding: 0 8px;
+    }
+
+    .all-categories-dropdown {
+        width: 480px;
+        grid-template-columns: repeat(2, 1fr);
+        padding: 10px;
+    }
+}
+
+@media (max-width: 576px) {
+    .all-categories-dropdown {
+        width: 290px;
+        grid-template-columns: 1fr;
+        padding: 8px;
+    }
+}
+
+/* Account toggle button - reference style */
+.ref-account-toggle {
+    background: transparent !important;
+    border: none !important;
+    padding: 4px 2px !important;
+    box-shadow: none !important;
+    border-radius: 6px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    text-decoration: none !important;
+    cursor: pointer;
+}
+
+.ref-account-toggle:hover {
+    background: rgba(0, 0, 0, 0.04) !important;
+    transform: none !important;
+}
+
+.ref-account-toggle::after {
+    display: none !important;
+}
+
+.dark-theme .ref-account-toggle span {
+    color: #e9ecef !important;
+}
+
+/* ==================== HAMBURGER COLORFUL ICON STYLES ==================== */
+.menu-icon-color {
+    font-size: 1rem !important;
+    margin-right: 12px;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 6px !important;
+    transition: all 0.2s ease !important;
+}
+
+.profile-color {
+    color: #3b82f6 !important;
+    background-color: rgba(59, 130, 246, 0.1) !important;
+}
+
+.address-color {
+    color: #ef4444 !important;
+    background-color: rgba(239, 68, 68, 0.1) !important;
+}
+
+.orders-color {
+    color: #f59e0b !important;
+    background-color: rgba(245, 158, 11, 0.1) !important;
+}
+
+.wishlist-color {
+    color: #ec4899 !important;
+    background-color: rgba(236, 72, 153, 0.1) !important;
+}
+
+.cart-color {
+    color: #10b981 !important;
+    background-color: rgba(16, 185, 129, 0.1) !important;
+}
+
+.wallet-color {
+    color: #8b5cf6 !important;
+    background-color: rgba(139, 92, 246, 0.1) !important;
+}
+
+.refer-color {
+    color: #14b8a6 !important;
+    background-color: rgba(20, 184, 166, 0.1) !important;
+}
+
+.categories-color {
+    color: #06b6d4 !important;
+    background-color: rgba(6, 182, 212, 0.1) !important;
+}
+
+.offers-color {
+    color: #f97316 !important;
+    background-color: rgba(249, 115, 22, 0.1) !important;
+}
+
+.new-color {
+    color: #eab308 !important;
+    background-color: rgba(234, 179, 8, 0.1) !important;
+}
+
+.help-color {
+    color: #6366f1 !important;
+    background-color: rgba(99, 102, 241, 0.1) !important;
+}
+
+.faqs-color {
+    color: #3b82f6 !important;
+    background-color: rgba(59, 130, 246, 0.1) !important;
+}
+
+.contact-color {
+    color: #10b981 !important;
+    background-color: rgba(16, 185, 129, 0.1) !important;
+}
+
+.about-color {
+    color: #2563eb !important;
+    background-color: rgba(37, 99, 235, 0.1) !important;
+}
+
+.policies-color {
+    color: #64748b !important;
+    background-color: rgba(100, 116, 139, 0.1) !important;
+}
+
+.privacy-color {
+    color: #0ea5e9 !important;
+    background-color: rgba(14, 165, 233, 0.1) !important;
+}
+
+.terms-color {
+    color: #84cc16 !important;
+    background-color: rgba(132, 204, 22, 0.1) !important;
+}
+
+.returns-color {
+    color: #f43f5e !important;
+    background-color: rgba(244, 63, 94, 0.1) !important;
+}
+
+.theme-color-dark {
+    color: #eab308 !important;
+    background-color: rgba(234, 179, 8, 0.1) !important;
+}
+
+.theme-color-light {
+    color: #f59e0b !important;
+    background-color: rgba(245, 158, 11, 0.1) !important;
+}
+
+.instagram-color {
+    color: #e1306c !important;
+    background-color: rgba(225, 48, 108, 0.1) !important;
+}
+
+.facebook-color {
+    color: #1877f2 !important;
+    background-color: rgba(24, 119, 242, 0.1) !important;
+}
+
+.youtube-color {
+    color: #ff0000 !important;
+    background-color: rgba(255, 0, 0, 0.1) !important;
+}
+
+.logout-color {
+    color: #ef4444 !important;
+    background-color: rgba(239, 68, 68, 0.1) !important;
+}
+
+.hamburger-menu-item:hover .menu-icon-color {
+    transform: scale(1.1) rotate(5deg);
+}

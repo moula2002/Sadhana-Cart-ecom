@@ -9,7 +9,10 @@ import {
   Spinner,
   Alert,
   Image,
+  Badge,
 } from "react-bootstrap";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
@@ -29,7 +32,7 @@ import { db } from "../../firebase";
 import "./CartPage.css";
 import "./CheckoutPage.css";
 import Loading from "../../pages/Loading";
-import { FaCoins, FaTags, FaChevronRight } from "react-icons/fa";
+import { FaCoins, FaTags, FaChevronRight, FaAddressBook, FaPlus, FaCreditCard, FaMoneyBillWave, FaMapMarkerAlt, FaUser, FaPhone, FaCheckCircle } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 
 const RAZORPAY_KEY_ID = "rzp_live_SRuwxqek1NJhN6";
@@ -123,6 +126,10 @@ const CheckoutPage = () => {
   const [theme, setTheme] = useState("light");
   const [walletCoins, setWalletCoins] = useState(0);
   const [coinsToUse, setCoinsToUse] = useState(0);
+  const [savedAddress, setSavedAddress] = useState(null);
+  const [showAddressForm, setShowAddressForm] = useState(false);
+  const [allSavedAddresses, setAllSavedAddresses] = useState([]);
+  const [showSavedAddressesList, setShowSavedAddressesList] = useState(false);
 
   /* ---------------- THEME MANAGEMENT ---------------- */
   useEffect(() => {
@@ -227,18 +234,83 @@ const CheckoutPage = () => {
 
         setWalletCoins(data.walletCoins || 0);
 
-        setBillingDetails((prev) => {
-          if (savedCheckoutState?.billingDetails) return prev;
-          return {
-            ...prev,
-            fullName: data.name || prev.fullName,
-            email: data.email || prev.email,
-            phone: data.phone || prev.phone || "",
-            address: data.shipping_address?.addressLine1 || prev.address,
-            city: data.shipping_address?.city || prev.city,
-            pincode: data.shipping_address?.postalCode || prev.pincode,
-          };
-        });
+        try {
+          const addressSnap = await getDocs(collection(db, "users", uid, "addresses"));
+          let hasSavedAddress = false;
+
+          if (!addressSnap.empty) {
+            let defaultAddr = null;
+            let firstAddr = null;
+            const fetchedAddresses = [];
+            addressSnap.forEach((docItem) => {
+              const addrData = { id: docItem.id, ...docItem.data() };
+              fetchedAddresses.push(addrData);
+              if (!firstAddr) firstAddr = addrData;
+              if (addrData.isDefault) defaultAddr = addrData;
+            });
+            setAllSavedAddresses(fetchedAddresses);
+            const selectedAddr = defaultAddr || firstAddr;
+
+            let formattedAddress = `${selectedAddr.street || ""}`;
+            if (selectedAddr.apartment) formattedAddress += `, ${selectedAddr.apartment}`;
+            if (selectedAddr.landmark) formattedAddress += `, near ${selectedAddr.landmark}`;
+            formattedAddress = formattedAddress.trim().replace(/^,\s*/, '');
+
+            const newSavedAddr = {
+              fullName: selectedAddr.fullName || data.name || "",
+              email: selectedAddr.email || data.email || "",
+              phone: selectedAddr.phone || data.phone || "",
+              address: formattedAddress,
+              city: selectedAddr.city || "",
+              pincode: selectedAddr.zip || "",
+            };
+
+            setSavedAddress(newSavedAddr);
+            setShowAddressForm(false);
+            hasSavedAddress = true;
+
+            setBillingDetails((prev) => {
+              if (savedCheckoutState?.billingDetails) return prev;
+              return { ...prev, ...newSavedAddr };
+            });
+          } else {
+            // Fallback to data.shipping_address if addresses subcollection is empty
+            if (data.shipping_address && data.shipping_address.addressLine1) {
+              const newSavedAddr = {
+                fullName: data.name || "",
+                email: data.email || "",
+                phone: data.phone || "",
+                address: data.shipping_address.addressLine1 || "",
+                city: data.shipping_address.city || "",
+                pincode: data.shipping_address.postalCode || "",
+              };
+              setSavedAddress(newSavedAddr);
+              setShowAddressForm(false);
+              hasSavedAddress = true;
+
+              setBillingDetails((prev) => {
+                if (savedCheckoutState?.billingDetails) return prev;
+                return { ...prev, ...newSavedAddr };
+              });
+            }
+          }
+
+          if (!hasSavedAddress) {
+            setShowAddressForm(true);
+            setBillingDetails((prev) => {
+              if (savedCheckoutState?.billingDetails) return prev;
+              return {
+                ...prev,
+                fullName: data.name || prev.fullName,
+                email: data.email || prev.email,
+                phone: data.phone || prev.phone || "",
+              };
+            });
+          }
+        } catch (addrErr) {
+          console.error("Error fetching addresses:", addrErr);
+          setShowAddressForm(true);
+        }
       }
     } catch (error) {
       console.error("Error fetching user data:", error);
@@ -330,7 +402,7 @@ const CheckoutPage = () => {
       if (totalPrice >= Number(found.minOrderAmount)) {
         setAppliedCoupon(found);
         setHasHandledStateCoupon(true);
-        
+
         let discountAmount = 0;
         const dType = found.discountType || "percentage";
         const dValue = Number(found.discountValue || found.discountPercent || 0);
@@ -340,7 +412,7 @@ const CheckoutPage = () => {
         } else {
           discountAmount = dValue;
         }
-        
+
         setCouponDiscount(discountAmount);
         setInputCode(found.code || "");
       } else {
@@ -362,7 +434,7 @@ const CheckoutPage = () => {
     if (appliedRazorpayOfferFromLocation && totalPrice > 0 && !hasHandledStateOffer) {
       setAppliedRazorpayOffer(appliedRazorpayOfferFromLocation);
       setHasHandledStateOffer(true);
-      
+
       let discountValue = 0;
       const offer = appliedRazorpayOfferFromLocation;
 
@@ -402,7 +474,7 @@ const CheckoutPage = () => {
       if (maxD && discountValue > Number(maxD)) {
         discountValue = Number(maxD);
       }
-      
+
       setRazorpayDiscount(discountValue);
       setPaymentMethod("razorpay"); // Using lowercase to match radio buttons
     }
@@ -414,7 +486,7 @@ const CheckoutPage = () => {
   };
 
   const coinDiscount = coinsToUse * COIN_TO_RUPEE_RATE;
-  
+
   // Bank offer discount should only apply if Razorpay is selected
   const effectiveRazorpayDiscount = (paymentMethod?.toLowerCase() === "razorpay") ? razorpayDiscount : 0;
 
@@ -451,16 +523,12 @@ const CheckoutPage = () => {
         setLocationStatusMessage(null);
       } else {
         setCoordinates({ lat: null, lng: null });
-        setGeocodingError(
-          `Address could not be accurately located. Please check the spelling.`
-        );
-        setLocationStatusMessage(null);
+        toast.error("Address could not be accurately located. Please check the spelling.");
       }
     } catch (error) {
       console.error("Error during Nominatim API call:", error);
       setCoordinates({ lat: null, lng: null });
-      setGeocodingError("Failed to connect to geocoding service (Network Error).");
-      setLocationStatusMessage(null);
+      toast.error("Failed to connect to geocoding service (Network Error).");
     }
   }, []);
 
@@ -519,17 +587,14 @@ const CheckoutPage = () => {
         }));
 
         setCoordinates({ lat: parseFloat(data.lat), lng: parseFloat(data.lon) });
-        setGeocodingError(null);
-        setLocationStatusMessage("Address pre-filled from current location! Please check and edit the House/Door Number if necessary.");
+        toast.success("Address pre-filled from current location! Please check and edit the House/Door Number if necessary.");
       } else {
         setCoordinates({ lat: null, lng: null });
-        setGeocodingError("Reverse geocoding failed: Address not found for coordinates.");
-        setLocationStatusMessage(null);
+        toast.error("Reverse geocoding failed: Address not found for coordinates.");
       }
     } catch (error) {
       console.error("Error during reverse geocoding:", error);
-      setGeocodingError("Failed to connect to reverse geocoding service.");
-      setLocationStatusMessage(null);
+      toast.error("Failed to connect to reverse geocoding service.");
     } finally {
       setIsLocating(false);
     }
@@ -900,11 +965,33 @@ const CheckoutPage = () => {
     }
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = async (e) => {
     const { id, value } = e.target;
+
+    if (id === "phone") {
+      const val = value.replace(/\D/g, "");
+      if (val.length > 10) return;
+      setBillingDetails({ ...billingDetails, [id]: val });
+      return;
+    }
 
     const newDetails = { ...billingDetails, [id]: value };
     setBillingDetails(newDetails);
+
+    if (id === "pincode" && value.length === 6) {
+      try {
+        const response = await fetch(`https://api.postalpincode.in/pincode/${value}`);
+        const data = await response.json();
+        if (data && data[0].Status === "Success") {
+          const postOffice = data[0].PostOffice[0];
+          newDetails.city = postOffice.District || postOffice.Block || postOffice.Region || "";
+          newDetails.address = postOffice.Name + ", " + postOffice.State;
+          setBillingDetails({ ...newDetails });
+        }
+      } catch (error) {
+        console.error("Error fetching pincode data:", error);
+      }
+    }
 
     if (id === "address" || id === "pincode" || id === "city") {
       if (
@@ -1032,14 +1119,12 @@ const CheckoutPage = () => {
       }
     }
 
-    await geocodeAddress(billingDetails);
-
-    if (!coordinates.lat || !coordinates.lng) {
-      alert(
-        "Could not confirm shipping address location. Please check the address details and ensure the address is complete."
-      );
+    if (billingDetails.phone.length !== 10) {
+      alert("Phone number must be exactly 10 digits");
       return;
     }
+
+    await geocodeAddress(billingDetails);
 
     await saveBillingDetails(billingDetails);
 
@@ -1066,9 +1151,9 @@ const CheckoutPage = () => {
     await handleRazorpayPayment();
   };
 
-if (loading) {
-  return <Loading />;
-}
+  if (loading) {
+    return <Loading />;
+  }
 
   if (mergedCartItems.length === 0) {
     return (
@@ -1089,6 +1174,7 @@ if (loading) {
 
   return (
     <Container className="py-5 checkout-container theme-container">
+      <ToastContainer position="top-right" autoClose={3000} />
       <Row>
         <Col md={7}>
           <h3 className="fw-bold mb-4 border-bottom pb-2 theme-title">
@@ -1096,164 +1182,301 @@ if (loading) {
           </h3>
           <Card className="shadow-lg border-0 p-4 theme-card">
             <Form onSubmit={handlePayment}>
-              <Row>
-                <Col md={6} className="mb-3">
-                  <Form.Group controlId="fullName">
-                    <Form.Label className="theme-form-label">{t("checkout.fullName")} *</Form.Label>
-                    <Form.Control
-                      type="text"
-                      placeholder={t("checkout.enterFullName")}
-                      required
-                      value={billingDetails.fullName}
-                      onChange={handleInputChange}
-                      className="theme-form-control"
-                    />
-                  </Form.Group>
-                </Col>
-                <Col md={6} className="mb-3">
-                  <Form.Group controlId="email">
-                    <Form.Label className="theme-form-label">{t("checkout.email")} *</Form.Label>
-                    <Form.Control
-                      type="email"
-                      placeholder="Enter email"
-                      required
-                      value={billingDetails.email}
-                      onChange={handleInputChange}
-                      className="theme-form-control"
-                    />
-                  </Form.Group>
-                </Col>
-              </Row>
-              <Form.Group className="mb-3" controlId="phone">
-                <Form.Label className="theme-form-label">{t("checkout.phone")} *</Form.Label>
-                <Form.Control
-                  type="tel"
-                  placeholder="Enter phone number"
-                  required
-                  value={billingDetails.phone}
-                  onChange={handleInputChange}
-                  className="theme-form-control"
-                />
-              </Form.Group>
+              {savedAddress && !showAddressForm && !showSavedAddressesList && (
+                <div className="mb-4 p-4 border rounded shadow-sm bg-white position-relative overflow-hidden theme-address-card">
+                  <div className="position-absolute top-0 start-0 w-100 bg-primary" style={{ height: "4px" }}></div>
+                  <div className="d-flex justify-content-between align-items-center mb-4">
+                    <h5 className="fw-bold mb-0 text-dark d-flex align-items-center">
+                      <FaMapMarkerAlt className="me-2 text-primary" /> Delivery Address
+                    </h5>
+                    <FaCheckCircle className="text-success fs-4" />
+                  </div>
 
-              <div className="mb-3 d-flex justify-content-end">
-                <Button
-                  variant="outline-secondary"
-                  size="sm"
-                  onClick={fetchCurrentLocation}
-                  disabled={!userId || isLocating}
-                  className="theme-button-outline"
-                >
-                  {isLocating ? (
-                    <>
-                      <Spinner
-                        as="span"
-                        animation="border"
-                        size="sm"
-                        role="status"
-                        aria-hidden="true"
-                        className="me-2"
-                      />
-                      {t("checkout.locating")}
-                    </>
-                  ) : (
-                    <>
-                      <span className="me-1">📍</span>
-                      {t("checkout.useLocation")}
-                    </>
-
-                  )}
-                </Button>
-              </div>
-
-              <Form.Group className="mb-3" controlId="address">
-                <Form.Label className="theme-form-label">{t("checkout.address")} *</Form.Label>
-                <Form.Control
-                  as="textarea"
-                  rows={2}
-                  placeholder="Enter full street address (including door/house number)"
-                  required
-                  value={billingDetails.address}
-                  onChange={handleInputChange}
-                  className="theme-form-control"
-                />
-              </Form.Group>
-              <Row>
-                <Col md={6} className="mb-3">
-                  <Form.Group controlId="city">
-                    <Form.Label className="theme-form-label">{t("checkout.city")} *</Form.Label>
-                    <Form.Control
-                      type="text"
-                      placeholder="City"
-                      required
-                      value={billingDetails.city}
-                      onChange={handleInputChange}
-                      className="theme-form-control"
-                    />
-                  </Form.Group>
-                </Col>
-                <Col md={6} className="mb-3">
-                  <Form.Group controlId="pincode">
-                    <Form.Label className="theme-form-label">{t("checkout.pincode")} *</Form.Label>
-                    <Form.Control
-                      type="text"
-                      placeholder="PIN code"
-                      required
-                      value={billingDetails.pincode}
-                      onChange={handleInputChange}
-                      className="theme-form-control"
-                    />
-                  </Form.Group>
-                </Col>
-              </Row>
-
-              {locationStatusMessage ? (
-                <Alert variant="success" className="mt-2 theme-alert-success">
-                  {locationStatusMessage}
-                </Alert>
-              ) : geocodingError ? (
-                <Alert
-                  variant={
-                    geocodingError.includes("failed") || geocodingError.includes("denied") || geocodingError.includes("Could not get location")
-                      ? "danger"
-                      : "info"
-                  }
-                  className="mt-2 theme-alert-info"
-                >
-                  {geocodingError}
-                </Alert>
-              ) : null}
-
-              <Form.Group className="mb-3">
-                <Form.Label className="theme-form-label">{t("checkout.paymentMethod")} *</Form.Label>
-                <div>
-                  <Form.Check
-                    inline
-                    type="radio"
-                    label={t("checkout.razorpay")}
-                    name="paymentMethod"
-                    id="razorpay"
-                    checked={paymentMethod === "razorpay"}
-                    onChange={() => setPaymentMethod("razorpay")}
-                    className="theme-radio"
-                  />
-                  <Form.Check
-                    inline
-                    type="radio"
-                    label={t("checkout.cod")}
-                    name="paymentMethod"
-                    id="cod"
-                    checked={paymentMethod === "cod"}
-                    onChange={() => setPaymentMethod("cod")}
-                    className="theme-radio"
-                  />
+                  <div className="ps-2 ps-md-4 ms-md-2 border-start border-2 border-light">
+                    <div className="d-flex align-items-center mb-2">
+                      <FaUser className="text-muted small me-3" />
+                      <span className="fw-bold text-dark fs-5">{savedAddress.fullName}</span>
+                    </div>
+                    <div className="d-flex align-items-start mb-2">
+                      <FaMapMarkerAlt className="text-muted small me-3 mt-1" />
+                      <span className="text-muted">
+                        {savedAddress.address}, <br />
+                        {savedAddress.city} - <span className="fw-bold text-dark">{savedAddress.pincode}</span>
+                      </span>
+                    </div>
+                    <div className="d-flex align-items-center mb-2">
+                      <FaPhone className="text-muted small me-3" />
+                      <span className="text-muted fw-semibold">{savedAddress.phone}</span>
+                    </div>
+                  </div>
+                  <div className="d-flex flex-wrap gap-3 mt-4">
+                    <Button
+                      variant="outline-primary"
+                      size="sm"
+                      className="d-flex align-items-center fw-semibold px-3 py-2 shadow-sm rounded-pill"
+                      onClick={() => setShowSavedAddressesList(true)}
+                    >
+                      <FaAddressBook className="me-2" /> Select Saved Address
+                    </Button>
+                    <Button
+                      variant="outline-secondary"
+                      size="sm"
+                      className="d-flex align-items-center fw-semibold px-3 py-2 shadow-sm rounded-pill"
+                      onClick={() => {
+                        setShowAddressForm(true);
+                        setBillingDetails(prev => ({
+                          ...prev,
+                          address: "",
+                          city: "",
+                          pincode: ""
+                        }));
+                      }}
+                    >
+                      <FaPlus className="me-2" /> Add New Address
+                    </Button>
+                  </div>
                 </div>
+              )}
+
+              {showSavedAddressesList && (
+                <div className="mb-4 p-3 border rounded theme-address-form position-relative">
+                  <div className="d-flex justify-content-between align-items-center mb-3">
+                    <h5 className="fw-bold mb-0 text-dark">Select Saved Address</h5>
+                    <Button
+                      variant="link"
+                      className="text-danger p-0 text-decoration-none fw-bold"
+                      onClick={() => setShowSavedAddressesList(false)}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                  {allSavedAddresses.map(addr => {
+                    let formattedAddress = `${addr.street || ""}`;
+                    if (addr.apartment) formattedAddress += `, ${addr.apartment}`;
+                    if (addr.landmark) formattedAddress += `, near ${addr.landmark}`;
+                    formattedAddress = formattedAddress.trim().replace(/^,\s*/, '');
+
+                    return (
+                      <div
+                        key={addr.id}
+                        className="border p-3 mb-2 rounded shadow-sm bg-white"
+                        style={{ cursor: "pointer" }}
+                        onClick={() => {
+                          const newSavedAddr = {
+                            fullName: addr.fullName || "",
+                            email: addr.email || "",
+                            phone: addr.phone || "",
+                            address: formattedAddress,
+                            city: addr.city || "",
+                            pincode: addr.zip || "",
+                          };
+                          setSavedAddress(newSavedAddr);
+                          setBillingDetails((prev) => ({ ...prev, ...newSavedAddr }));
+                          setShowSavedAddressesList(false);
+                          setShowAddressForm(false);
+                        }}
+                      >
+                        <p className="mb-1 fw-bold text-dark">
+                          {addr.fullName}
+                          {addr.isDefault && <Badge bg="success" className="ms-2">Default</Badge>}
+                        </p>
+                        <p className="mb-1 text-muted small">{formattedAddress}, {addr.city}, {addr.zip}</p>
+                        <p className="mb-0 text-muted small">{addr.phone}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {showAddressForm && (
+                <div className="mb-4 p-3 border rounded theme-address-form position-relative">
+                  <div className="d-flex justify-content-between align-items-center mb-3">
+                    <h5 className="fw-bold mb-0 text-dark">
+                      {savedAddress ? "Add New Address" : "Delivery Address"}
+                    </h5>
+                    {savedAddress && (
+                      <Button
+                        variant="link"
+                        className="text-danger p-0 text-decoration-none fw-bold"
+                        onClick={() => {
+                          setShowAddressForm(false);
+                          setBillingDetails({ ...savedAddress });
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    )}
+                  </div>
+                  <Row>
+                    <Col md={6} className="mb-3">
+                      <Form.Group controlId="fullName">
+                        <Form.Label className="theme-form-label">{t("checkout.fullName")} *</Form.Label>
+                        <Form.Control
+                          type="text"
+                          placeholder={t("checkout.enterFullName")}
+                          required
+                          value={billingDetails.fullName}
+                          onChange={handleInputChange}
+                          className="theme-form-control"
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col md={6} className="mb-3">
+                      <Form.Group controlId="email">
+                        <Form.Label className="theme-form-label">{t("checkout.email")} *</Form.Label>
+                        <Form.Control
+                          type="email"
+                          placeholder="Enter email"
+                          required
+                          value={billingDetails.email}
+                          onChange={handleInputChange}
+                          className="theme-form-control"
+                        />
+                      </Form.Group>
+                    </Col>
+                  </Row>
+                  <Form.Group className="mb-3" controlId="phone">
+                    <Form.Label className="theme-form-label">{t("checkout.phone")} *</Form.Label>
+                    <Form.Control
+                      type="tel"
+                      placeholder="Enter 10-digit phone number"
+                      required
+                      maxLength={10}
+                      pattern="[0-9]{10}"
+                      title="Phone number must be exactly 10 digits"
+                      value={billingDetails.phone}
+                      onChange={handleInputChange}
+                      className="theme-form-control"
+                    />
+                  </Form.Group>
+
+                  <div className="mb-3 d-flex justify-content-end">
+                    <Button
+                      variant="outline-secondary"
+                      size="sm"
+                      onClick={fetchCurrentLocation}
+                      disabled={!userId || isLocating}
+                      className="theme-button-outline"
+                    >
+                      {isLocating ? (
+                        <>
+                          <Spinner
+                            as="span"
+                            animation="border"
+                            size="sm"
+                            role="status"
+                            aria-hidden="true"
+                            className="me-2"
+                          />
+                          {t("checkout.locating")}
+                        </>
+                      ) : (
+                        <>
+                          <span className="me-1">📍</span>
+                          {t("checkout.useLocation")}
+                        </>
+
+                      )}
+                    </Button>
+                  </div>
+
+                  <Form.Group className="mb-3" controlId="address">
+                    <Form.Label className="theme-form-label">{t("checkout.address")} *</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      rows={2}
+                      placeholder="Enter full street address (including door/house number)"
+                      required
+                      value={billingDetails.address}
+                      onChange={handleInputChange}
+                      className="theme-form-control"
+                    />
+                  </Form.Group>
+                  <Row>
+                    <Col md={6} className="mb-3">
+                      <Form.Group controlId="city">
+                        <Form.Label className="theme-form-label">{t("checkout.city")} *</Form.Label>
+                        <Form.Control
+                          type="text"
+                          placeholder="City"
+                          required
+                          value={billingDetails.city}
+                          onChange={handleInputChange}
+                          className="theme-form-control"
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col md={6} className="mb-3">
+                      <Form.Group controlId="pincode">
+                        <Form.Label className="theme-form-label">{t("checkout.pincode")} *</Form.Label>
+                        <Form.Control
+                          type="text"
+                          placeholder="PIN code"
+                          required
+                          value={billingDetails.pincode}
+                          onChange={handleInputChange}
+                          className="theme-form-control"
+                        />
+                      </Form.Group>
+                    </Col>
+                  </Row>
+                </div>
+              )}
+
+              <Form.Group className="mb-4 mt-4">
+                <Form.Label className="theme-form-label fw-bold mb-3">{t("checkout.paymentMethod")} *</Form.Label>
+                <Row className="g-3">
+                  <Col md={6}>
+                    <div
+                      className={`p-3 border rounded shadow-sm d-flex align-items-center transition-all ${paymentMethod === 'razorpay' ? 'border-primary bg-primary bg-opacity-10' : 'bg-white'}`}
+                      style={{ cursor: "pointer" }}
+                      onClick={() => setPaymentMethod("razorpay")}
+                    >
+                      <div className="me-3 fs-3 text-primary">
+                        <FaCreditCard />
+                      </div>
+                      <div className="flex-grow-1">
+                        <h6 className="fw-bold mb-0 text-dark">Razorpay</h6>
+                        <small className="text-muted">Cards, UPI & Wallets</small>
+                      </div>
+                      <div>
+                        <Form.Check
+                          type="radio"
+                          checked={paymentMethod === 'razorpay'}
+                          onChange={() => setPaymentMethod("razorpay")}
+                        />
+                      </div>
+                    </div>
+                  </Col>
+                  <Col md={6}>
+                    <div
+                      className={`p-3 border rounded shadow-sm d-flex align-items-center transition-all ${paymentMethod === 'cod' ? 'border-primary bg-primary bg-opacity-10' : 'bg-white'}`}
+                      style={{ cursor: "pointer" }}
+                      onClick={() => setPaymentMethod("cod")}
+                    >
+                      <div className="me-3 fs-3 text-success">
+                        <FaMoneyBillWave />
+                      </div>
+                      <div className="flex-grow-1">
+                        <h6 className="fw-bold mb-0 text-dark">Cash on Delivery</h6>
+                        <small className="text-muted">Pay when you receive</small>
+                      </div>
+                      <div>
+                        <Form.Check
+                          type="radio"
+                          checked={paymentMethod === 'cod'}
+                          onChange={() => setPaymentMethod("cod")}
+                        />
+                      </div>
+                    </div>
+                  </Col>
+                </Row>
               </Form.Group>
               <Button
-                variant="warning"
-                className="w-100 mt-3 py-2 fw-bold shadow-sm"
+                variant="primary"
+                className="w-100 mt-3 py-2 fw-bold shadow-sm text-white"
                 type="submit"
-                disabled={!coordinates.lat || isLocating || finalAmount <= 0}
+                disabled={isLocating || finalAmount <= 0}
               >
                 🔒 {t("checkout.pay")} {formatPrice(finalAmount)}
               </Button>

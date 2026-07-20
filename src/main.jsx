@@ -13,19 +13,19 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js";
 const applyTheme = () => {
   const savedTheme = localStorage.getItem('theme');
   const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  
+
   let theme = 'light'; // Default theme
-  
+
   if (savedTheme) {
     theme = savedTheme;
   } else if (systemPrefersDark) {
     theme = 'dark';
   }
-  
+
   // Set both Bootstrap theme attribute and custom theme attribute
   document.documentElement.setAttribute('data-bs-theme', theme);
   document.documentElement.setAttribute('data-theme', theme);
-  
+
   if (theme === 'dark') {
     document.body.classList.add('dark-theme');
     document.body.classList.remove('light-theme');
