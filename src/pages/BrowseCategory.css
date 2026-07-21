@@ -226,16 +226,17 @@
 }
 
 .prod-title {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #333;
-  margin: 0 0 5px 0;
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 6px 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1.3;
+  line-height: 1.35;
+  height: 2.5em;
+  text-align: left;
 }
 
 .prod-price-row {
@@ -243,18 +244,48 @@
   align-items: baseline;
   gap: 8px;
   margin-top: 4px;
+  margin-bottom: 10px;
+  text-align: left;
 }
 
 .prod-offer-price {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #1976d2;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #0f172a;
 }
 
 .prod-original-price {
   font-size: 0.75rem;
   color: #888;
   text-decoration: line-through;
+}
+
+/* Red Discount Tag on Top-Left */
+.sc-discount-tag,
+.bs-discount-tag,
+.rv-discount-tag {
+  position: absolute !important;
+  top: 12px !important;
+  left: 12px !important;
+  background: #ef4444 !important;
+  color: #ffffff !important;
+  font-size: 0.68rem !important;
+  font-weight: 800 !important;
+  padding: 3px 8px !important;
+  border-radius: 4px !important;
+  z-index: 10 !important;
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3) !important;
+  line-height: 1 !important;
+}
+
+/* Green Discount Percentage in Price Row */
+.sc-off,
+.bs-off,
+.rv-discount-off,
+.prod-off {
+  font-size: 0.78rem !important;
+  color: #059669 !important;
+  font-weight: 700 !important;
 }
 
 .browse-wishlist-btn {
@@ -340,4 +371,104 @@
     font-size: 0.85rem;
     max-width: 120px;
   }
+}
+
+/* ============================================================ */
+/* 🌙 DARK MODE STYLES FOR BROWSE CATEGORY PAGE                 */
+/* ============================================================ */
+.dark-theme .browse-category-page-wrapper {
+  background-color: #121212 !important;
+}
+
+.dark-theme .mobile-browse-header {
+  background-color: #1a1a2e !important;
+  border-bottom: 1px solid #2d2d44 !important;
+}
+
+.dark-theme .browse-content-container {
+  background-color: #1a1a2e !important;
+  border-color: #2d2d44 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25) !important;
+}
+
+.dark-theme .category-sidebar-scroll {
+  background-color: #18182b !important;
+  border-right-color: #2d2d44 !important;
+}
+
+.dark-theme .cat-img-wrapper {
+  background-color: #25253e !important;
+  border-color: transparent;
+}
+
+.dark-theme .sidebar-cat-item.active .cat-img-wrapper {
+  border-color: #60a5fa !important;
+  box-shadow: 0 2px 8px rgba(96, 165, 250, 0.4) !important;
+}
+
+.dark-theme .cat-name {
+  color: #cbd5e1 !important;
+}
+
+.dark-theme .sidebar-cat-item.active .cat-name {
+  color: #60a5fa !important;
+}
+
+.dark-theme .products-main-area {
+  background-color: #1a1a2e !important;
+}
+
+.dark-theme .subcat-chip {
+  background-color: #25253e !important;
+  border-color: #3f3f5c !important;
+  color: #e2e8f0 !important;
+}
+
+.dark-theme .subcat-chip.active {
+  background-color: #f59e0b !important;
+  border-color: #f59e0b !important;
+  color: #121212 !important;
+}
+
+.dark-theme .browse-prod-card {
+  background-color: #25253e !important;
+  border: 1px solid #353554 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+.dark-theme .browse-prod-card:hover {
+  border-color: #60a5fa !important;
+}
+
+.dark-theme .prod-img-box {
+  background-color: #1a1a2e !important;
+}
+
+.dark-theme .prod-title {
+  color: #f1f5f9 !important;
+}
+
+.dark-theme .prod-offer-price {
+  color: #f1f5f9 !important;
+}
+
+.dark-theme .prod-original-price {
+  color: #94a3b8 !important;
+}
+
+.dark-theme .browse-wishlist-btn {
+  background: #2a2a40 !important;
+  color: #cbd5e1 !important;
+}
+
+.dark-theme .no-prods-found {
+  color: #94a3b8 !important;
+}
+
+.dark-theme .desktop-breadcrumb .text-secondary {
+  color: #94a3b8 !important;
+}
+
+.dark-theme .desktop-breadcrumb .text-dark {
+  color: #f1f5f9 !important;
 }

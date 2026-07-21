@@ -200,6 +200,7 @@ export default function LoginPage({ onClose, initialMode = "login" }) {
     try {
       if (isLogin) {
         await signInWithEmailAndPassword(auth, email, password);
+        sessionStorage.setItem("justLoggedIn", "true");
         showToast("Login successful 🎉");
         if (onClose) {
           onClose();
@@ -246,6 +247,7 @@ export default function LoginPage({ onClose, initialMode = "login" }) {
         });
 
         showToast(`Account created ✅ ${referralResult.referralMessage || ""}`);
+        sessionStorage.setItem("justLoggedIn", "true");
 
         // Clear form after successful signup
         setName("");
@@ -307,6 +309,8 @@ export default function LoginPage({ onClose, initialMode = "login" }) {
         }, { merge: true });
         showToast("Welcome back! 👋");
       }
+
+      sessionStorage.setItem("justLoggedIn", "true");
 
       if (onClose) {
         onClose();
@@ -421,6 +425,8 @@ export default function LoginPage({ onClose, initialMode = "login" }) {
 
           showToast("Welcome new user 🎉");
         }
+
+        sessionStorage.setItem("justLoggedIn", "true");
       } else {
         setError(response.data.message || "Invalid OTP");
       }
@@ -518,7 +524,7 @@ export default function LoginPage({ onClose, initialMode = "login" }) {
                 if (onClose) {
                   onClose();
                 } else {
-                  navigate(-1);
+                  navigate("/");
                 }
               }}
               aria-label="Close"

@@ -34,6 +34,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useTheme } from "../../context/ThemeContext";
 
 const formatCurrency = (val) =>
   new Intl.NumberFormat("en-IN", {
@@ -53,7 +54,7 @@ function CancelOrderPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [userId, setUserId] = useState(null);
-  const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const { isDark } = useTheme();
   const functions = getFunctions();
   const razorpayRefund = httpsCallable(functions, "razorpayRefund");
 

@@ -1,0 +1,86 @@
+.custom-filter-offcanvas {
+  width: 100vw !important;
+  max-width: 400px;
+}
+
+.filter-header {
+  padding: 1rem;
+}
+
+.filter-sidebar {
+  width: 120px;
+  background-color: #f5f5f5;
+  border-right: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-tab {
+  padding: 15px 10px;
+  font-size: 0.9rem;
+  color: #555;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: all 0.2s;
+}
+
+.filter-tab.active {
+  background-color: #ffffff;
+  color: #0d6efd;
+  font-weight: 600;
+  border-left: 3px solid #0d6efd;
+}
+
+.filter-content {
+  background-color: #ffffff;
+}
+
+.price-input-box {
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  padding: 5px 10px;
+  flex: 1;
+}
+
+.price-input-box input:focus {
+  outline: none;
+}
+
+/* Custom dual-like slider styles */
+.custom-price-range {
+  width: 100%;
+  accent-color: #0d6efd;
+}
+
+.quick-select-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.quick-select-btn {
+  background: #ffffff;
+  border: 1px solid #ced4da;
+  color: #0d6efd;
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.quick-select-btn:hover {
+  background: #f0f7ff;
+  border-color: #0d6efd;
+}
+
+.filter-footer {
+  background-color: #ffffff;
+}
+
+.apply-filter-btn {
+  padding: 8px 30px;
+  font-weight: bold;
+  border-radius: 6px;
+}

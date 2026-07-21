@@ -46,3 +46,21 @@ body.dark-theme .language-switcher select {
 body.dark-theme .language-switcher select:hover {
   border-color: #ffc107;
 }
+
+/* Mobile responsive compact style */
+@media (max-width: 768px) {
+  .language-switcher {
+    margin-top: 0;
+  }
+
+  .language-switcher select {
+    width: 90px;
+    padding: 3px 18px 3px 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    height: 32px;
+    border-radius: 8px;
+    background-position: right 5px center;
+    background-size: 12px;
+  }
+}

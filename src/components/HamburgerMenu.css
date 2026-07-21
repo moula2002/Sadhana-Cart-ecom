@@ -114,35 +114,72 @@
 
 /* Dark mode overrides for hamburger menu */
 .dark-theme .hamburger-offcanvas,
+[data-bs-theme="dark"] .hamburger-offcanvas,
+[data-theme="dark"] .hamburger-offcanvas,
 .dark-theme .hamburger-header,
-.dark-theme .hamburger-menu-list {
-  background-color: #1e1e1e;
+[data-bs-theme="dark"] .hamburger-header,
+[data-theme="dark"] .hamburger-header,
+.dark-theme .hamburger-menu-list,
+[data-bs-theme="dark"] .hamburger-menu-list,
+[data-theme="dark"] .hamburger-menu-list {
+  background-color: #1a1f2e !important;
 }
 
-.dark-theme .hamburger-avatar {
-  background-color: #333;
-  color: #f5f5f5;
+.dark-theme .hamburger-avatar,
+[data-bs-theme="dark"] .hamburger-avatar,
+[data-theme="dark"] .hamburger-avatar {
+  background-color: #2d3748 !important;
+  color: #f1f5f9 !important;
 }
 
 .dark-theme .hamburger-welcome h5,
+[data-bs-theme="dark"] .hamburger-welcome h5,
+[data-theme="dark"] .hamburger-welcome h5 {
+  color: #f1f5f9 !important;
+}
+
+/* Menu items: override Bootstrap's text-dark class */
 .dark-theme .hamburger-menu-item,
-.dark-theme .hamburger-menu-item:hover {
-  color: #f5f5f5;
+[data-bs-theme="dark"] .hamburger-menu-item,
+[data-theme="dark"] .hamburger-menu-item {
+  color: #e2e8f0 !important;
+  background-color: transparent !important;
 }
 
-.dark-theme .hamburger-signup-btn {
-  border-color: #f5f5f5;
-  color: #f5f5f5;
+.dark-theme .hamburger-menu-item span,
+[data-bs-theme="dark"] .hamburger-menu-item span,
+[data-theme="dark"] .hamburger-menu-item span {
+  color: #e2e8f0 !important;
 }
 
-.dark-theme .hamburger-signup-btn:hover {
-  background-color: #333;
+.dark-theme .hamburger-menu-item:hover,
+[data-bs-theme="dark"] .hamburger-menu-item:hover,
+[data-theme="dark"] .hamburger-menu-item:hover {
+  background-color: #243047 !important;
+  color: #f1f5f9 !important;
 }
 
-.dark-theme .menu-chevron {
-  color: #777 !important;
+.dark-theme .hamburger-signup-btn,
+[data-bs-theme="dark"] .hamburger-signup-btn,
+[data-theme="dark"] .hamburger-signup-btn {
+  border-color: #94a3b8 !important;
+  color: #e2e8f0 !important;
 }
 
-.dark-theme .hamburger-divider {
-  border-color: #333;
+.dark-theme .hamburger-signup-btn:hover,
+[data-bs-theme="dark"] .hamburger-signup-btn:hover,
+[data-theme="dark"] .hamburger-signup-btn:hover {
+  background-color: #2d3748 !important;
+}
+
+.dark-theme .menu-chevron,
+[data-bs-theme="dark"] .menu-chevron,
+[data-theme="dark"] .menu-chevron {
+  color: #64748b !important;
+}
+
+.dark-theme .hamburger-divider,
+[data-bs-theme="dark"] .hamburger-divider,
+[data-theme="dark"] .hamburger-divider {
+  border-color: #2d3748 !important;
 }

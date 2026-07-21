@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useLocation, useNavigate, Link } from "react-router-dom";
 import { db, collection, getDocs, query, where } from "../../firebase";
@@ -5,10 +6,16 @@ import "./CategoryProducts.css";
 import Loading from "../../pages/Loading"; 
 import { FaHome, FaSpinner, FaSearch, FaTag, FaChevronRight, FaTimes, FaFileImage } from "react-icons/fa";
 
-const CategoryProducts = () => {
+import { useDispatch } from "react-redux";
+import { addToCart } from "../../redux/cartSlice";
+import { toast } from "react-toastify";
+
+const CategoryProducts = () => { 
+  const { t } = useTranslation();
   const { categoryId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
@@ -426,12 +433,35 @@ const CategoryProducts = () => {
                     {product.subcategory}
                   </p>
 
-                  {/* DESCRIPTION */}
-                  <p className="product-description">{description}</p>
                   <div className="price-wrapper">
                     <span className="offer-price">₹{offerprice.toLocaleString()}</span>
                     {price > offerprice && <span className="original-price">₹{price.toLocaleString()}</span>}
+                    {price > offerprice && (
+                      <span className="sc-off" style={{ fontSize: "0.78rem", color: "#059669", fontWeight: 700 }}>
+                        {Math.round(((price - offerprice) / price) * 100)}% off
+                      </span>
+                    )}
                   </div>
+
+                  <button
+                    className="sc-add-btn mt-3"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      dispatch(addToCart({
+                        id: product.id,
+                        title: product.name || "Product",
+                        price: offerprice,
+                        image: getFirstImage(product),
+                        quantity: 1,
+                      }));
+                      toast.success(`${product.name || "Product"} added to cart!`, {
+                        position: "bottom-right",
+                        autoClose: 2000,
+                      });
+                    }}
+                  >
+                    {t("addToCart", "Add to Cart")}
+                  </button>
                 </div>
               </div>
 
@@ -443,9 +473,7 @@ const CategoryProducts = () => {
             ref={observerTarget} 
             className="load-more-trigger mt-5 text-center mb-5 pb-5 d-flex flex-column align-items-center"
           >
-            <div className="spinner-border text-primary mb-3" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </div>
+            <Loading small inline />
             <p className="text-muted small">Loading more products...</p>
             <p className="mt-2 text-muted extra-small">
               Showing {Math.min(visibleCount, filteredProducts.length)} of {filteredProducts.length} items

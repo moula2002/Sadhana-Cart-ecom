@@ -22,6 +22,7 @@ import {
 import { db } from "../firebase";
 import { collection, getDocs, deleteDoc, doc, setDoc } from "firebase/firestore";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+import { useTranslation } from "react-i18next";
 
 const auth = getAuth();
 
@@ -30,6 +31,7 @@ function Wishlist() {
     const [suggestions, setSuggestions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentUser, setCurrentUser] = useState(null);
+    const { t } = useTranslation();
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
@@ -84,7 +86,7 @@ function Wishlist() {
 
             } catch (error) {
                 console.error("Error fetching wishlist data:", error);
-                toast.error("Failed to load wishlist items");
+                toast.error(t("failedToLoadWishlistItems", "Failed to load wishlist items"));
             } finally {
                 setLoading(false);
             }
@@ -97,16 +99,16 @@ function Wishlist() {
         try {
             await deleteDoc(doc(db, "users", currentUser.uid, "favorites", favId));
             setFavorites(favorites.filter((item) => item.id !== favId));
-            toast.success(`Removed "${productName}" from wishlist`, { position: "bottom-right", autoClose: 2000 });
+            toast.success(t("removedFromWishlist", "Removed '{{name}}' from wishlist", { name: productName }).replace("{{name}}", productName), { position: "bottom-right", autoClose: 2000 });
         } catch (error) {
             console.error("Error removing from wishlist:", error);
-            toast.error("Failed to remove item");
+            toast.error(t("failedToRemoveItem", "Failed to remove item"));
         }
     };
 
     const addToWishlist = async (product) => {
         if (!currentUser) {
-            toast.info("Please login to add items to wishlist");
+            toast.info(t("loginToWishlist", "Please login to add items to wishlist"));
             navigate('/login', { state: { from: '/wishlist' } });
             return;
         }
@@ -127,10 +129,10 @@ function Wishlist() {
             setSuggestions(suggestions.filter(s => s.id !== product.id));
             setFavorites([...favorites, { id: product.id, ...newFav }]);
             
-            toast.success(`Added "${product.name || product.title}" to wishlist!`, { position: "bottom-right", autoClose: 2000 });
+            toast.success(t("addedToWishlist", "Added '{{name}}' to wishlist!", { name: product.name || product.title }).replace("{{name}}", product.name || product.title), { position: "bottom-right", autoClose: 2000 });
         } catch (error) {
             console.error("Error adding to wishlist:", error);
-            toast.error("Failed to add to wishlist");
+            toast.error(t("failedToAddToWishlist", "Failed to add to wishlist"));
         }
     };
 
@@ -146,7 +148,7 @@ function Wishlist() {
                 sellerId: item.sellerId || "default_seller"
             })
         );
-        toast.success(`Added "${item.name || item.title}" to cart!`, { position: "bottom-right", autoClose: 2000 });
+        toast.success(t("addedToCartMsg", "Added {{name}} to cart!", { name: item.name || item.title }).replace("{{name}}", item.name || item.title), { position: "bottom-right", autoClose: 2000 });
     };
 
     const handleMoveAllToCart = () => {
@@ -164,7 +166,7 @@ function Wishlist() {
                 })
             );
         });
-        toast.success(`Moved all ${favorites.length} items to cart!`, { position: "bottom-right", autoClose: 3000 });
+        toast.success(t("movedAllToCart", "Moved all {{count}} items to cart!", { count: favorites.length }).replace("{{count}}", favorites.length), { position: "bottom-right", autoClose: 3000 });
     };
 
     const handleClearWishlist = async () => {
@@ -174,17 +176,17 @@ function Wishlist() {
                 await deleteDoc(doc(db, "users", currentUser.uid, "favorites", item.id));
             }
             setFavorites([]);
-            toast.success("Wishlist cleared successfully", { position: "bottom-right", autoClose: 2000 });
+            toast.success(t("wishlistCleared", "Wishlist cleared successfully"), { position: "bottom-right", autoClose: 2000 });
         } catch (error) {
             console.error("Error clearing wishlist:", error);
-            toast.error("Failed to clear wishlist");
+            toast.error(t("failedToClearWishlist", "Failed to clear wishlist"));
         }
     };
 
     const handleLogout = async () => {
         try {
             await signOut(auth);
-            toast.success("Logged out successfully");
+            toast.success(t("loggedOutSuccess", "Logged out successfully"));
             navigate("/login");
         } catch (error) {
             console.error("Error signing out:", error);
@@ -206,7 +208,7 @@ function Wishlist() {
         return (
             <Container className="py-5 text-center">
                 <Spinner animation="border" variant="primary" />
-                <p className="mt-3 text-muted">Loading your wishlist...</p>
+                <p className="mt-3 text-muted">{t("loadingWishlist", "Loading your wishlist...")}</p>
             </Container>
         );
     }
@@ -217,36 +219,36 @@ function Wishlist() {
                 {/* Left Sidebar - Account Menu */}
                 <Col lg={3}>
                     <div style={{ position: 'sticky', top: '100px' }}>
-                        <Card className="border shadow-sm p-4" style={{ borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)' }}>
-                            <h4 className="fw-bolder mb-4 px-2" style={{ color: '#1a202c', fontSize: '20px', fontWeight: 800 }}>My Account</h4>
+                        <Card className="border shadow-sm p-4 wishlist-sidebar">
+                            <h4 className="fw-bolder mb-4 px-2 wishlist-sidebar-title">{t("myAccount", "My Account")}</h4>
                             <div className="d-flex flex-column gap-2">
                                 <Link to="/profile" className="d-flex align-items-center gap-3 px-3 py-2 rounded-3 text-decoration-none sidebar-link">
                                     <FaUser size={18} className="sidebar-icon" />
-                                    <span className="fw-semibold" style={{ fontSize: '15px' }}>My Profile</span>
+                                    <span className="fw-semibold" style={{ fontSize: '15px' }}>{t("myProfile", "My Profile")}</span>
                                 </Link>
                                 <Link to="/orders" className="d-flex align-items-center gap-3 px-3 py-2 rounded-3 text-decoration-none sidebar-link">
                                     <FaShoppingBag size={18} className="sidebar-icon" />
-                                    <span className="fw-semibold" style={{ fontSize: '15px' }}>My Orders</span>
+                                    <span className="fw-semibold" style={{ fontSize: '15px' }}>{t("myOrders", "My Orders")}</span>
                                 </Link>
                                 <Link to="/wishlist" className="d-flex align-items-center gap-3 px-3 py-2 rounded-3 text-decoration-none active-sidebar-link">
                                     <FaHeart size={18} className="sidebar-icon" />
-                                    <span className="fw-semibold" style={{ fontSize: '15px' }}>Wishlist</span>
+                                    <span className="fw-semibold" style={{ fontSize: '15px' }}>{t("wishlistLabel", "Wishlist")}</span>
                                 </Link>
                                 <Link to="/address" className="d-flex align-items-center gap-3 px-3 py-2 rounded-3 text-decoration-none sidebar-link">
                                     <FaMapMarkerAlt size={18} className="sidebar-icon" />
-                                    <span className="fw-semibold" style={{ fontSize: '15px' }}>My Addresses</span>
+                                    <span className="fw-semibold" style={{ fontSize: '15px' }}>{t("myAddresses", "My Addresses")}</span>
                                 </Link>
                                 <Link to="/refercode" className="d-flex align-items-center gap-3 px-3 py-2 rounded-3 text-decoration-none sidebar-link">
                                     <FaGift size={18} className="sidebar-icon" />
-                                    <span className="fw-semibold" style={{ fontSize: '15px' }}>Sadhana Rewards</span>
+                                    <span className="fw-semibold" style={{ fontSize: '15px' }}>{t("sadhanaRewards", "Sadhana Rewards")}</span>
                                 </Link>
                                 <Link to="/wallet" className="d-flex align-items-center gap-3 px-3 py-2 rounded-3 text-decoration-none sidebar-link">
                                     <FaCreditCard size={18} className="sidebar-icon" />
-                                    <span className="fw-semibold" style={{ fontSize: '15px' }}>Payment Methods</span>
+                                    <span className="fw-semibold" style={{ fontSize: '15px' }}>{t("paymentMethods", "Payment Methods")}</span>
                                 </Link>
                                 <Link to="/profile" className="d-flex align-items-center gap-3 px-3 py-2 rounded-3 text-decoration-none sidebar-link">
                                     <FaCog size={18} className="sidebar-icon" />
-                                    <span className="fw-semibold" style={{ fontSize: '15px' }}>Account Settings</span>
+                                    <span className="fw-semibold" style={{ fontSize: '15px' }}>{t("accountSettings", "Account Settings")}</span>
                                 </Link>
                                 <div style={{ height: '1px', backgroundColor: '#e2e8f0', margin: '12px 8px' }}></div>
                                 <button
@@ -254,7 +256,7 @@ function Wishlist() {
                                     className="btn d-flex align-items-center gap-3 px-3 py-2 rounded-3 border-0 text-start w-100 sidebar-link logout-link"
                                 >
                                     <FaSignOutAlt size={18} className="sidebar-icon" />
-                                    <span className="fw-semibold" style={{ fontSize: '15px' }}>Logout</span>
+                                    <span className="fw-semibold" style={{ fontSize: '15px' }}>{t("logout", "Logout")}</span>
                                 </button>
                             </div>
                         </Card>
@@ -265,7 +267,7 @@ function Wishlist() {
                 <Col lg={9}>
                     <div className="d-flex justify-content-between align-items-center mb-4">
                         <h3 className="fw-bold mb-0 text-dark">
-                            My Wishlist <span className="text-muted fs-6 fw-normal">({favorites.length} Items)</span>
+                            {t("myWishlistTitle", "My Wishlist")} <span className="text-muted fs-6 fw-normal">({favorites.length} {t("items", "Items")})</span>
                         </h3>
                         {favorites.length > 0 && (
                             <div className="d-flex gap-2">
@@ -276,7 +278,7 @@ function Wishlist() {
                                     style={{ fontSize: '13px' }}
                                     onClick={handleMoveAllToCart}
                                 >
-                                    Move All to Cart
+                                    {t("moveAllToCart", "Move All to Cart")}
                                 </Button>
                                 <Button
                                     variant="outline-danger"
@@ -285,7 +287,7 @@ function Wishlist() {
                                     style={{ fontSize: '13px' }}
                                     onClick={handleClearWishlist}
                                 >
-                                    Remove All
+                                    {t("removeAll", "Remove All")}
                                 </Button>
                             </div>
                         )}
@@ -295,10 +297,10 @@ function Wishlist() {
                         <Card className="text-center py-5 border shadow-sm rounded-4 mb-5">
                             <Card.Body>
                                 <FaHeart className="text-muted mb-3" size={64} />
-                                <h4 className="fw-bold mb-2">Your wishlist is empty</h4>
-                                <p className="text-muted mb-4 small">Save your favorite items here to view them later.</p>
+                                <h4 className="fw-bold mb-2">{t("emptyWishlistTitle", "Your wishlist is empty")}</h4>
+                                <p className="text-muted mb-4 small">{t("emptyWishlistSub", "Save your favorite items here to view them later.")}</p>
                                 <Button variant="primary" className="rounded-pill px-4" onClick={() => navigate("/")}>
-                                    Go Shopping
+                                    {t("goShopping", "Go Shopping")}
                                 </Button>
                             </Card.Body>
                         </Card>
@@ -317,10 +319,10 @@ function Wishlist() {
                                 return (
                                     <div
                                         key={item.id}
+                                        className="wishlist-item-card"
                                         style={{
                                             width: '200px',
                                             flexShrink: 0,
-                                            background: '#fff',
                                             borderRadius: '16px',
                                             boxShadow: '0 2px 12px rgba(0,0,0,0.07)',
                                             overflow: 'hidden',
@@ -332,7 +334,7 @@ function Wishlist() {
                                         <div style={{ position: 'relative', background: 'linear-gradient(135deg,#f8faff,#f0f4ff)', height: '160px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
                                             {discountPercent > 0 && (
                                                 <div style={{ position: 'absolute', top: 8, left: 8, background: 'linear-gradient(135deg,#ff6b6b,#ee5a24)', color: '#fff', borderRadius: 7, fontSize: '10px', fontWeight: 700, padding: '2px 7px' }}>
-                                                    {discountPercent}% OFF
+                                                    {discountPercent}% {t("off", "OFF")}
                                                 </div>
                                             )}
                                             <button
@@ -353,13 +355,14 @@ function Wishlist() {
                                         <div style={{ padding: '12px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                                             <div>
                                                 <div
-                                                    style={{ fontWeight: 600, fontSize: '12.5px', color: '#111827', lineHeight: 1.3, marginBottom: 5, cursor: 'pointer', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}
+                                                    className="wishlist-item-title"
+                                                    style={{ fontWeight: 600, fontSize: '12.5px', lineHeight: 1.3, marginBottom: 5, cursor: 'pointer', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}
                                                     onClick={() => navigate(`/product/${item.productId}`)}
                                                 >
                                                     {item.name}
                                                 </div>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
-                                                    <span style={{ fontWeight: 800, fontSize: '14px', color: '#111827' }}>₹{finalPrice.toLocaleString()}</span>
+                                                    <span className="wishlist-item-price" style={{ fontWeight: 800, fontSize: '14px' }}>₹{finalPrice.toLocaleString()}</span>
                                                     <span style={{ fontSize: '11px', color: '#9ca3af', textDecoration: 'line-through' }}>₹{originalPrice.toLocaleString()}</span>
                                                 </div>
                                             </div>
@@ -370,7 +373,7 @@ function Wishlist() {
                                                     style={{ flex: 1, padding: '6px 8px', border: 'none', borderRadius: 8, background: '#2563eb', color: '#fff', fontWeight: 600, fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}
                                                     className="add-to-cart-btn"
                                                 >
-                                                    <FaShoppingCart size={10} /> Move to Cart
+                                                    <FaShoppingCart size={10} /> {t("moveToCart", "Move to Cart")}
                                                 </button>
                                                 <button
                                                     onClick={() => removeFromWishlist(item.id, item.name)}
@@ -378,7 +381,7 @@ function Wishlist() {
                                                     onMouseEnter={e => { e.currentTarget.style.background = '#ef4444'; e.currentTarget.style.color = '#fff'; }}
                                                     onMouseLeave={e => { e.currentTarget.style.background = '#fff5f5'; e.currentTarget.style.color = '#ef4444'; }}
                                                 >
-                                                    Remove
+                                                    {t("remove", "Remove")}
                                                 </button>
                                             </div>
                                         </div>
@@ -392,7 +395,7 @@ function Wishlist() {
                     {suggestions.length > 0 && (
                         <div className="mt-5 suggestion-slider-container">
                             <div className="d-flex justify-content-between align-items-center mb-4">
-                                <h4 className="fw-bold mb-0 text-dark">You May Also Like</h4>
+                                <h4 className="fw-bold mb-0 text-dark">{t("youMayAlsoLike", "You May Also Like")}</h4>
                                 <div className="d-flex gap-2">
                                     <button
                                         onClick={() => scrollSuggestions("left")}
@@ -435,8 +438,8 @@ function Wishlist() {
                                                 scrollSnapAlign: 'start'
                                             }}
                                         >
-                                            <Card className="h-100 border shadow-sm p-2 product-card-hover" style={{ borderRadius: '16px', overflow: 'hidden' }}>
-                                                <div className="d-flex justify-content-center align-items-center p-3 position-relative rounded-3" style={{ height: "160px", backgroundColor: '#f8fafc' }}>
+                                            <Card className="h-100 border shadow-sm p-2 product-card-hover wishlist-sug-card" style={{ borderRadius: '16px', overflow: 'hidden' }}>
+                                                <div className="d-flex justify-content-center align-items-center p-3 position-relative rounded-3 wishlist-sug-img-bg" style={{ height: "160px" }}>
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); addToWishlist(p); }}
                                                         className="suggestion-wishlist-btn"
@@ -530,6 +533,91 @@ function Wishlist() {
                 }
                 .scrollbar-hidden::-webkit-scrollbar {
                     display: none;
+                }
+                
+                /* Dark Mode Additions */
+                .wishlist-sidebar {
+                    background-color: #fff;
+                }
+                .wishlist-sidebar-title {
+                    color: #1a202c;
+                    font-size: 20px;
+                    font-weight: 800;
+                }
+                .wishlist-item-card {
+                    background-color: #fff;
+                }
+                .wishlist-item-title, .wishlist-item-price {
+                    color: #111827;
+                }
+                .wishlist-sug-card {
+                    background-color: #fff;
+                }
+                .wishlist-sug-img-bg {
+                    background-color: #f8fafc;
+                }
+                
+                [data-bs-theme="dark"] .wishlist-sidebar,
+                [data-theme="dark"] .wishlist-sidebar,
+                .dark-theme .wishlist-sidebar {
+                    background-color: #1e293b !important;
+                    border-color: #334155 !important;
+                }
+                [data-bs-theme="dark"] .wishlist-sidebar-title,
+                [data-theme="dark"] .wishlist-sidebar-title,
+                .dark-theme .wishlist-sidebar-title {
+                    color: #f8fafc !important;
+                }
+                [data-bs-theme="dark"] .sidebar-link,
+                [data-theme="dark"] .sidebar-link,
+                .dark-theme .sidebar-link {
+                    color: #94a3b8 !important;
+                }
+                [data-bs-theme="dark"] .sidebar-link:hover,
+                [data-theme="dark"] .sidebar-link:hover,
+                .dark-theme .sidebar-link:hover {
+                    background-color: #334155 !important;
+                    color: #f8fafc !important;
+                }
+                [data-bs-theme="dark"] .active-sidebar-link,
+                [data-theme="dark"] .active-sidebar-link,
+                .dark-theme .active-sidebar-link {
+                    background-color: #1e3a8a !important;
+                    color: #93c5fd !important;
+                }
+                [data-bs-theme="dark"] .wishlist-item-card,
+                [data-theme="dark"] .wishlist-item-card,
+                .dark-theme .wishlist-item-card {
+                    background-color: #1e293b !important;
+                }
+                [data-bs-theme="dark"] .wishlist-item-title,
+                [data-theme="dark"] .wishlist-item-title,
+                [data-bs-theme="dark"] .wishlist-item-price,
+                [data-theme="dark"] .wishlist-item-price,
+                .dark-theme .wishlist-item-title,
+                .dark-theme .wishlist-item-price {
+                    color: #f8fafc !important;
+                }
+                [data-bs-theme="dark"] .wishlist-sug-card,
+                [data-theme="dark"] .wishlist-sug-card,
+                .dark-theme .wishlist-sug-card {
+                    background-color: #1e293b !important;
+                    border-color: #334155 !important;
+                }
+                [data-bs-theme="dark"] .wishlist-sug-img-bg,
+                [data-theme="dark"] .wishlist-sug-img-bg,
+                .dark-theme .wishlist-sug-img-bg {
+                    background-color: #0f172a !important;
+                }
+                [data-bs-theme="dark"] .bg-white,
+                [data-theme="dark"] .bg-white,
+                .dark-theme .bg-white {
+                    background-color: transparent !important;
+                }
+                [data-bs-theme="dark"] .text-dark,
+                [data-theme="dark"] .text-dark,
+                .dark-theme .text-dark {
+                    color: #f8fafc !important;
                 }
             `}</style>
         </Container>

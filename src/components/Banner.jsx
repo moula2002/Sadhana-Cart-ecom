@@ -6,63 +6,58 @@ import Loading from "../pages/Loading";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
 const Banner = () => {
-
-  const [banners,setBanners]=useState([]);
-  const [index,setIndex]=useState(0);
-  const [loading,setLoading]=useState(true);
+  const [banners, setBanners] = useState(() => {
+    try {
+      const cached = sessionStorage.getItem("sc_cached_banners");
+      return cached ? JSON.parse(cached) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+  const [index, setIndex] = useState(0);
+  const [loading, setLoading] = useState(() => {
+    try {
+      return !sessionStorage.getItem("sc_cached_banners");
+    } catch (e) {
+      return true;
+    }
+  });
 
   /* ==========================
      FETCH BANNERS
   ========================== */
 
-  useEffect(()=>{
-
-    const fetchBanners=async()=>{
-
-      try{
-
-        const q=query(
-          collection(db,"posters"),
-          where("status","==","active"),
+  useEffect(() => {
+    const fetchBanners = async () => {
+      try {
+        const q = query(
+          collection(db, "posters"),
+          where("status", "==", "active"),
           limit(5)
         );
 
-        const snap=await getDocs(q);
+        const snap = await getDocs(q);
 
-        const list=snap.docs.map(doc=>({
-          id:doc.id,
-          image:doc.data().image
+        const list = snap.docs.map((doc) => ({
+          id: doc.id,
+          image: doc.data().image,
         }));
 
-        setBanners(list);
-
-        /* preload images */
-
-        list.forEach((b)=>{
-
-          const img=new Image();
-          img.src=b.image;
-          img.decoding="async";
-          img.loading="eager";
-
-        });
-
+        if (list.length > 0) {
+          setBanners(list);
+          try {
+            sessionStorage.setItem("sc_cached_banners", JSON.stringify(list));
+          } catch (e) {}
+        }
         setLoading(false);
-
-      }
-
-      catch(error){
-
-        console.error("Error fetching banners:",error);
+      } catch (error) {
+        console.error("Error fetching banners:", error);
         setLoading(false);
-
       }
-
     };
 
     fetchBanners();
-
-  },[]);
+  }, []);
 
   /* ==========================
      AUTO SLIDE
@@ -123,7 +118,7 @@ const Banner = () => {
   };
 
 if (loading) {
-  return <Loading />;
+  return <Loading minHeight="280px" message="Loading Banners..." />;
 }
 
 if (banners.length < 1) {

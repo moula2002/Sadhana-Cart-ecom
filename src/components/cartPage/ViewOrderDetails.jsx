@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState, useEffect } from "react";
 import {
   Container,
@@ -115,7 +116,7 @@ const getStatusDisplayText = (status) => {
     return "Return Approved";
   }
   if (statusLower === "refund_completed" || statusLower === "refunded") {
-    return "Refund Completed";
+    return t("refundCompleted", "Refund Completed");
   }
 
   // Regular order status display text
@@ -229,7 +230,8 @@ else if (returnedProduct?.returnStatus) {
   };
 };
 
-function ViewOrderDetails() {
+function ViewOrderDetails() { 
+  const { t } = useTranslation();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState(null);
@@ -294,15 +296,15 @@ function ViewOrderDetails() {
     });
 
   const statusTabs = [
-    "All",
-    "Pending",
-    "Processing",
-    "Shipped",
-    "Delivered",
-    "Cancelled",
-    "Return Requested",
-    "Return Approved",
-    "Refund Completed"
+    t("all", "All"),
+    t("pending", "Pending"),
+    t("processing", "Processing"),
+    t("shipped", "Shipped"),
+    t("delivered", "Delivered"),
+    t("cancelled", "Cancelled"),
+    t("returnRequested", "Return Requested"),
+    t("returnApproved", "Return Approved"),
+    t("refundCompleted", "Refund Completed")
   ];
 
   if (loading) {
@@ -319,60 +321,60 @@ function ViewOrderDetails() {
   };
 
   return (
-    <div className="profile-dashboard-wrapper" style={{ background: "#f8f9fa", padding: "20px" }}>
-      <div className="profile-dashboard-container" style={{ maxWidth: "1200px", margin: "0 auto", border: "1px solid #e0e0e0", borderRadius: "10px", overflow: "hidden", background: "white" }}>
+    <div className="profile-dashboard-wrapper" style={{ padding: "20px" }}>
+      <div className="profile-dashboard-container address-container" style={{ maxWidth: "1200px", margin: "0 auto", borderRadius: "10px", overflow: "hidden" }}>
         
         {/* Title */}
-        <div className="profile-title-header d-flex align-items-center" style={{ gap: "12px", background: "#0a45bd", color: "white", padding: "16px 24px", margin: 0, borderRadius: 0 }}>
-          <h2 style={{ color: "white", margin: 0, fontSize: "20px", fontWeight: "bold" }}>My Orders Page</h2>
+        <div className="profile-title-header d-flex align-items-center" style={{ gap: "12px", padding: "16px 24px", margin: 0, borderRadius: 0 }}>
+          <h2 style={{ margin: 0, fontSize: "20px", fontWeight: "bold" }}>{t("myOrdersPage", "My Orders Page")}</h2>
         </div>
 
         {/* Outer Dashboard Grid */}
-        <div className="dashboard-grid-layout" style={{ margin: 0, borderRadius: "0 0 10px 10px", background: "white", gap: 0 }}>
+        <div className="dashboard-grid-layout" style={{ margin: 0, borderRadius: "0 0 10px 10px", gap: 0 }}>
           
           {/* Sidebar Menu */}
-          <div className="dashboard-sidebar" style={{ borderRight: "1px solid #e0e0e0", padding: "24px 16px", minHeight: "600px", borderRadius: 0, marginTop: 0 }}>
+          <div className="dashboard-sidebar" style={{ padding: "24px 16px", minHeight: "600px", borderRadius: 0, marginTop: 0 }}>
             <ul className="sidebar-menu-list" style={{ marginTop: "10px" }}>
               <li className="sidebar-menu-item" onClick={() => navigate("/profile")}>
                 <FaUser className="menu-icon" />
-                <span>My Profile</span>
+                <span>{t("myProfile", "My Profile")}</span>
               </li>
-              <li className="sidebar-menu-item active" onClick={() => navigate("/orders")} style={{ background: "#e8f0fe", color: "#0a45bd", borderRadius: "6px" }}>
-                <FaShoppingBag className="menu-icon" style={{ color: "#0a45bd" }} />
-                <span style={{ fontWeight: "bold" }}>My Orders</span>
+              <li className="sidebar-menu-item active" onClick={() => navigate("/orders")}>
+                <FaShoppingBag className="menu-icon" />
+                <span style={{ fontWeight: "bold" }}>{t("myOrders", "My Orders")}</span>
               </li>
               <li className="sidebar-menu-item" onClick={() => navigate("/wishlist")}>
                 <FaHeart className="menu-icon" />
-                <span>Wishlist</span>
+                <span>{t("wishlistLabel", "Wishlist")}</span>
               </li>
               <li className="sidebar-menu-item" onClick={() => navigate("/save-address")}>
                 <FaMapMarkerAlt className="menu-icon" />
-                <span>My Addresses</span>
+                <span>{t("myAddresses", "My Addresses")}</span>
               </li>
-              <li className="sidebar-menu-item">
+              <li className="sidebar-menu-item" onClick={() => navigate("/rewards")}>
                 <FaGift className="menu-icon" />
-                <span>Sadhana Rewards</span>
+                <span>{t("sadhanaRewards", "Sadhana Rewards")}</span>
               </li>
               <li className="sidebar-menu-item">
                 <FaCreditCard className="menu-icon" />
-                <span>Payment Methods</span>
+                <span>{t("paymentMethods", "Payment Methods")}</span>
               </li>
               <li className="sidebar-menu-item">
                 <FaCog className="menu-icon" />
-                <span>Account Settings</span>
+                <span>{t("accountSettings", "Account Settings")}</span>
               </li>
               <li className="sidebar-menu-item logout-item" onClick={handleLogoutClick} style={{ marginTop: "40px" }}>
                 <FaSignOutAlt className="menu-icon" />
-                <span>Logout</span>
+                <span>{t("logout", "Logout")}</span>
               </li>
             </ul>
           </div>
 
           {/* Main Dashboard Section */}
           <div className="dashboard-main-content" style={{ padding: "32px", display: "block" }}>
-            <h4 className="fw-bold mb-4 text-dark" style={{ fontSize: "18px" }}>My Orders</h4>
+            <h4 className="fw-bold mb-4 order-num-id" style={{ fontSize: "18px" }}>{t("myOrders", "My Orders")}</h4>
             
-            <div className="d-flex gap-4 mb-4 border-bottom" style={{ borderColor: "#eee" }}>
+            <div className="d-flex gap-4 mb-4 sidebar-divider" style={{ borderBottom: "1px solid", borderBottomColor: 'inherit' }}>
               {statusTabs.slice(0, 5).map((tab) => (
                 <span
                   key={tab}
@@ -393,21 +395,21 @@ function ViewOrderDetails() {
             </div>
 
             {filteredOrders.length === 0 ? (
-              <Alert variant="light" className="text-center py-5" style={{ background: "#f9f9f9" }}>
-                No {selectedTab !== "All" ? selectedTab.toLowerCase() : ""} orders found
+              <Alert variant="light" className="text-center py-5 empty-address-view">
+                {t("noOrdersFound", "No orders found")}
               </Alert>
             ) : (
               filteredOrders.map((order) => (
                 <Card
                   key={order.id}
-                  className="mb-4"
-                  style={{ border: "1px solid #f0f0f0", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.03)" }}
+                  className="mb-4 overview-card"
+                  style={{ borderRadius: "12px" }}
                 >
                   <Card.Body className="p-4 d-flex justify-content-between align-items-center">
                     {/* Left Column: ID and Images */}
                     <div style={{ flex: "1" }}>
-                      <div className="text-dark fw-bold mb-3" style={{ fontSize: "14px" }}>
-                        Order ID: <span className="text-dark">#{order.orderId}</span>
+                      <div className="order-num-id fw-bold mb-3" style={{ fontSize: "14px" }}>
+                        {t("orderId", "Order ID:")} <span className="order-num-id">#{order.orderId}</span>
                       </div>
                       <div className="d-flex flex-wrap gap-2">
                         {order.products.map((product, index) => (
@@ -427,10 +429,10 @@ function ViewOrderDetails() {
 
                     {/* Middle Column: Date and Items count */}
                     <div style={{ flex: "1", textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "space-between", height: "125px" }}>
-                      <div className="text-muted" style={{ fontSize: "14px", marginTop: "2px" }}>
+                      <div className="order-item-date" style={{ fontSize: "14px", marginTop: "2px" }}>
                         {order.date}
                       </div>
-                      <div className="text-dark fw-bold" style={{ fontSize: "14px", marginTop: "auto" }}>
+                      <div className="order-num-id fw-bold" style={{ fontSize: "14px", marginTop: "auto" }}>
                         {order.products.reduce((acc, p) => acc + (p.quantity || 1), 0)} items
                       </div>
                     </div>

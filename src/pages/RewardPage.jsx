@@ -5,8 +5,10 @@ import { FiAward, FiHeadphones } from "react-icons/fi";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc, collection, getDocs, query, orderBy } from "firebase/firestore";
 import { db } from "../firebase";
+import { useTranslation } from "react-i18next";
 
 const RewardPage = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [walletBalance, setWalletBalance] = useState(0);
   const [transactions, setTransactions] = useState([]);
@@ -54,36 +56,36 @@ const RewardPage = () => {
   };
 
   return (
-    <div className="profile-dashboard-wrapper" style={{ background: "#f8f9fa", padding: "20px" }}>
-      <div className="profile-dashboard-container" style={{ maxWidth: "1200px", margin: "0 auto", border: "1px solid #e0e0e0", borderRadius: "10px", overflow: "hidden", background: "white" }}>
+    <div className="profile-dashboard-wrapper" style={{ padding: "20px" }}>
+      <div className="profile-dashboard-container address-container" style={{ maxWidth: "1200px", margin: "0 auto", borderRadius: "10px", overflow: "hidden" }}>
         
         {/* Title */}
-        <div className="profile-title-header d-flex align-items-center" style={{ gap: "12px", background: "#0a45bd", color: "white", padding: "16px 24px", margin: 0, borderRadius: '10px 10px 0 0' }}>
-          <h2 style={{ color: "white", margin: 0, fontSize: "20px", fontWeight: "bold" }}>Sadhana Rewards</h2>
+        <div className="profile-title-header d-flex align-items-center" style={{ gap: "12px", padding: "16px 24px", margin: 0, borderRadius: '10px 10px 0 0' }}>
+          <h2 style={{ margin: 0, fontSize: "20px", fontWeight: "bold" }}>{t("sadhanaRewards", "Sadhana Rewards")}</h2>
         </div>
 
         {/* Outer Dashboard Grid */}
-        <div className="dashboard-grid-layout" style={{ margin: 0, borderRadius: "0 0 10px 10px", background: "white", gap: 0, display: 'flex', flexDirection: 'row' }}>
+        <div className="dashboard-grid-layout" style={{ margin: 0, borderRadius: "0 0 10px 10px", gap: 0, display: 'flex', flexDirection: 'row' }}>
           
           {/* Sidebar Menu */}
-          <div className="dashboard-sidebar" style={{ borderRight: "1px solid #e0e0e0", padding: "24px 16px", minHeight: "600px", borderRadius: 0, marginTop: 0, minWidth: '250px', flexShrink: 0 }}>
-            <h6 style={{ fontWeight: '700', color: '#1a202c', marginBottom: '20px', paddingLeft: '12px', fontSize: '15px' }}>My Account</h6>
+          <div className="dashboard-sidebar" style={{ padding: "24px 16px", minHeight: "600px", borderRadius: 0, marginTop: 0, minWidth: '250px', flexShrink: 0 }}>
+            <h6 className="sidebar-title" style={{ fontWeight: '700', marginBottom: '20px', paddingLeft: '12px', fontSize: '15px' }}>{t("myAccount", "My Account")}</h6>
             <ul className="sidebar-menu-list" style={{ marginTop: "0", listStyle: "none", padding: 0 }}>
-              <li className="sidebar-menu-item" onClick={() => navigate("/orders")} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', cursor: 'pointer', color: '#4a5568' }}>
+              <li className="sidebar-menu-item" onClick={() => navigate("/orders")} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', cursor: 'pointer' }}>
                 <FaUser className="menu-icon" style={{ fontSize: '16px' }} />
-                <span style={{ fontSize: '14px', fontWeight: '500' }}>My Orders</span>
+                <span style={{ fontSize: '14px', fontWeight: '500' }}>{t("myOrders", "My Orders")}</span>
               </li>
-              <li className="sidebar-menu-item active" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', cursor: 'pointer', background: "#e8f0fe", color: "#0a45bd", borderRadius: "6px" }}>
-                <FiAward className="menu-icon" style={{ color: "#0a45bd", fontSize: '16px' }} />
-                <span style={{ fontWeight: "bold", fontSize: '14px' }}>Account Rewards</span>
+              <li className="sidebar-menu-item active" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', cursor: 'pointer' }}>
+                <FiAward className="menu-icon" style={{ fontSize: '16px' }} />
+                <span style={{ fontWeight: "bold", fontSize: '14px' }}>{t("accountRewards", "Account Rewards")}</span>
               </li>
-              <li className="sidebar-menu-item" onClick={() => navigate("/save-address")} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', cursor: 'pointer', color: '#4a5568' }}>
+              <li className="sidebar-menu-item" onClick={() => navigate("/save-address")} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', cursor: 'pointer' }}>
                 <FaMapMarkerAlt className="menu-icon" style={{ fontSize: '16px' }} />
-                <span style={{ fontSize: '14px', fontWeight: '500' }}>Saved Addresses</span>
+                <span style={{ fontSize: '14px', fontWeight: '500' }}>{t("savedAddresses", "Saved Addresses")}</span>
               </li>
-              <li className="sidebar-menu-item" onClick={() => navigate("/support")} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', cursor: 'pointer', color: '#4a5568' }}>
+              <li className="sidebar-menu-item" onClick={() => navigate("/support")} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', cursor: 'pointer' }}>
                 <FiHeadphones className="menu-icon" style={{ fontSize: '16px' }} />
-                <span style={{ fontSize: '14px', fontWeight: '500' }}>Help Center</span>
+                <span style={{ fontSize: '14px', fontWeight: '500' }}>{t("helpCenter", "Help Center")}</span>
               </li>
             </ul>
           </div>
@@ -91,7 +93,7 @@ const RewardPage = () => {
           {/* Main Dashboard Section */}
           <div className="dashboard-main-content" style={{ padding: "40px 60px", flexGrow: 1, display: "block" }}>
             
-            <h4 className="fw-bold mb-4 text-dark" style={{ fontSize: "20px" }}>Sadhana Rewards</h4>
+            <h4 className="fw-bold mb-4 order-num-id" style={{ fontSize: "20px" }}>{t("sadhanaRewards", "Sadhana Rewards")}</h4>
             
             {/* Top Blue Card */}
             <div style={{ 
@@ -108,10 +110,10 @@ const RewardPage = () => {
               marginBottom: '30px'
             }}>
               <div>
-                <p style={{ fontSize: '14px', marginBottom: '8px', opacity: 0.9 }}>Available Points</p>
+                <p style={{ fontSize: '14px', marginBottom: '8px', opacity: 0.9 }}>{t("availablePoints", "Available Points")}</p>
                 <h1 style={{ fontSize: '48px', fontWeight: 'bold', margin: '0 0 12px 0', lineHeight: 1 }}>{walletBalance}</h1>
                 <div style={{ background: '#fbbf24', color: '#92400e', padding: '4px 12px', borderRadius: '4px', display: 'inline-block', fontWeight: 'bold', fontSize: '14px' }}>
-                  1 Point = ₹ 1
+                  {t("pointValue", "1 Point = ₹ 1")}
                 </div>
               </div>
               <div style={{ position: 'relative', width: '120px', height: '120px' }}>
@@ -121,43 +123,43 @@ const RewardPage = () => {
 
             {/* 3 Action Cards */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', maxWidth: '550px', marginBottom: '40px' }}>
-              <div style={{ border: '1px solid #e2e8f0', borderRadius: '12px', padding: '24px 16px', textAlign: 'center' }}>
+              <div className="overview-card" style={{ borderRadius: '12px', padding: '24px 16px', textAlign: 'center' }}>
                 <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: '#ecfdf5', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: '20px', color: '#10b981' }}>💎</div>
-                <h5 style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px', color: '#1a202c' }}>How to Earn Points</h5>
-                <a href="#" style={{ color: '#3b82f6', fontSize: '12px', textDecoration: 'none', fontWeight: '600' }}>Show more</a>
+                <h5 className="card-info" style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>{t("howToEarnPoints", "How to Earn Points")}</h5>
+                <a href="#" style={{ color: '#3b82f6', fontSize: '12px', textDecoration: 'none', fontWeight: '600' }}>{t("showMore", "Show more")}</a>
               </div>
-              <div style={{ border: '1px solid #e2e8f0', borderRadius: '12px', padding: '24px 16px', textAlign: 'center' }}>
+              <div className="overview-card" style={{ borderRadius: '12px', padding: '24px 16px', textAlign: 'center' }}>
                 <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: '#fff7ed', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: '20px', color: '#f97316' }}>🛍️</div>
-                <h5 style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px', color: '#1a202c' }}>Redeem Points</h5>
-                <a href="#" style={{ color: '#3b82f6', fontSize: '12px', textDecoration: 'none', fontWeight: '600' }}>Explore offers</a>
+                <h5 className="card-info" style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>{t("redeemPoints", "Redeem Points")}</h5>
+                <a href="#" style={{ color: '#3b82f6', fontSize: '12px', textDecoration: 'none', fontWeight: '600' }}>{t("exploreOffers", "Explore offers")}</a>
               </div>
-              <div style={{ border: '1px solid #e2e8f0', borderRadius: '12px', padding: '24px 16px', textAlign: 'center' }}>
+              <div className="overview-card" style={{ borderRadius: '12px', padding: '24px 16px', textAlign: 'center' }}>
                 <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: '20px', color: '#3b82f6' }}>📋</div>
-                <h5 style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px', color: '#1a202c' }}>Rewards History</h5>
-                <a href="#" style={{ color: '#3b82f6', fontSize: '12px', textDecoration: 'none', fontWeight: '600' }}>View past rewards</a>
+                <h5 className="card-info" style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>{t("rewardsHistory", "Rewards History")}</h5>
+                <a href="#" style={{ color: '#3b82f6', fontSize: '12px', textDecoration: 'none', fontWeight: '600' }}>{t("viewPastRewards", "View past rewards")}</a>
               </div>
             </div>
 
-            <h5 className="fw-bold mb-3 text-dark" style={{ fontSize: "16px" }}>Recent Transactions</h5>
+            <h5 className="fw-bold mb-3 order-num-id" style={{ fontSize: "16px" }}>{t("recentTransactions", "Recent Transactions")}</h5>
             
             {/* Transaction List */}
             <div style={{ maxWidth: '550px', marginBottom: '30px' }}>
               {loading ? (
-                <div className="text-center py-4">Loading transactions...</div>
+                <div className="text-center py-4">{t("loadingTransactions", "Loading transactions...")}</div>
               ) : transactions.length === 0 ? (
-                <div className="text-center py-4 text-muted">No transactions found</div>
+                <div className="text-center py-4 text-muted">{t("noTransactionsFound", "No transactions found")}</div>
               ) : (
                 transactions.map((tx) => (
-                  <div key={tx.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 0', borderBottom: '1px solid #f1f5f9' }}>
+                  <div key={tx.id} className="sidebar-divider" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 0', borderBottom: '1px solid', borderBottomColor: 'inherit' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: '2px solid #e2e8f0' }}></div>
-                      <span style={{ fontSize: '14px', color: '#475569', fontWeight: '500' }}>{tx.description || (tx.type === 'credit' ? 'Added to Wallet' : 'Redeemed')}</span>
+                      <div className="sidebar-divider" style={{ width: '20px', height: '20px', borderRadius: '50%', border: '2px solid' }}></div>
+                      <span className="card-info" style={{ fontSize: '14px', fontWeight: '500' }}>{tx.description || (tx.type === 'credit' ? t("addedToWallet", "Added to Wallet") : t("redeemed", "Redeemed"))}</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                       <span style={{ color: tx.type === 'credit' ? '#10b981' : '#ef4444', fontWeight: 'bold', fontSize: '14px' }}>
                         {tx.type === 'credit' ? '+' : '-'}{tx.amount}
                       </span>
-                      <span style={{ color: '#94a3b8', fontSize: '13px' }}>{formatDate(tx.date || tx.createdAt)}</span>
+                      <span className="email-text" style={{ fontSize: '13px' }}>{formatDate(tx.date || tx.createdAt)}</span>
                     </div>
                   </div>
                 ))
@@ -166,19 +168,17 @@ const RewardPage = () => {
 
             {/* View All Button */}
             {transactions.length > 0 && (
-              <button style={{ 
+              <button className="overview-card text-primary" style={{ 
                 width: '100%', 
                 maxWidth: '550px',
                 padding: '14px', 
-                background: 'white',
-                border: '1px solid #e2e8f0',
                 borderRadius: '8px',
-                color: '#0a45bd',
                 fontWeight: '600',
                 fontSize: '14px',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                border: '1px solid transparent'
               }}>
-                View All Transactions
+                {t("viewAllTransactions", "View All Transactions")}
               </button>
             )}
             

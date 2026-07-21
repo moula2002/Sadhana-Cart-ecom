@@ -1,12 +1,17 @@
+import { useTranslation } from "react-i18next";
 import React, { useEffect, useRef, useState } from "react";
-import { Heart, ShoppingCart } from "lucide-react";
+import { ChevronLeft, ChevronRight, Heart, ShoppingCart } from "lucide-react";
 import { useWishlist } from "../../hooks/useWishlist";
 import { useRatings } from "../../hooks/useRatings";
 import { db } from "../../firebase";
 import { collection, getDocs } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { addToCart } from "../../redux/cartSlice";
+import { toast } from "react-toastify";
 
-function FeatureProducts({ showCart = false }) {
+function FeatureProducts({ showCart = false }) { 
+  const { t } = useTranslation();
   const [products, setProducts] = useState([]);
   const { wishlisted, toggleWishlist } = useWishlist();
   const ratings = useRatings();
@@ -29,9 +34,9 @@ function FeatureProducts({ showCart = false }) {
     fetchProducts();
   }, []);
 
-  const calculateDiscount = (price, oldPrice) => {
-    if (!price || !oldPrice || oldPrice <= price) return 0;
-    return Math.round(((oldPrice - price) / oldPrice) * 100);
+  const calculateDiscount = (offer, old) => {
+    if (!offer || !old || old <= offer) return 0;
+    return Math.round(((old - offer) / old) * 100);
   };
 
   const scroll = (dir) => {
@@ -40,28 +45,94 @@ function FeatureProducts({ showCart = false }) {
     }
   };
 
+  const dispatch = useDispatch();
+
+  const handleAddToCart = (e, product, offerprice, image, name) => {
+    e.stopPropagation();
+    dispatch(
+      addToCart({
+        id: product.id,
+        title: name,
+        price: offerprice,
+        image: image,
+        quantity: 1,
+      })
+    );
+    toast.success(`${name} added to cart!`, {
+      position: "bottom-right",
+      autoClose: 2000,
+    });
+  };
 
   if (products.length === 0) return null;
 
   return (
-    <div style={{ position: "relative" }}>
-      {/* Scroll buttons */}
-      <button
-        onClick={() => scroll("left")}
-        style={scrollBtnStyle("left")}
-        aria-label="Scroll left"
-      >
-        ‹
-      </button>
-
+    <div className="position-relative">
+      {products.length > 3 && (
+        <>
+          <button
+            className="btn btn-light rounded-circle shadow-sm border position-absolute start-0 top-50 translate-middle-y d-flex align-items-center justify-content-center"
+            style={{
+              width: '38px',
+              height: '38px',
+              zIndex: 10,
+              left: '-10px',
+              backgroundColor: 'rgba(255, 255, 255, 0.95)',
+              cursor: 'pointer'
+            }}
+            onClick={() => scroll("left")}
+            aria-label="Scroll left"
+          >
+            <ChevronLeft size={20} />
+          </button>
+          <button
+            className="btn btn-light rounded-circle shadow-sm border position-absolute end-0 top-50 translate-middle-y d-flex align-items-center justify-content-center"
+            style={{
+              width: '38px',
+              height: '38px',
+              zIndex: 10,
+              right: '-10px',
+              backgroundColor: 'rgba(255, 255, 255, 0.95)',
+              cursor: 'pointer'
+            }}
+            onClick={() => scroll("right")}
+            aria-label="Scroll right"
+          >
+            <ChevronRight size={20} />
+          </button>
+        </>
+      )}
       <div ref={scrollRef} className="sc-products-row">
         {products.map((product) => {
           const info = product.featuredProductInfo || {};
           const name = info.title || product.name || "Product";
-          const price = product.price || 0;
-          const oldPrice = product.oldPrice || 0;
-          const discount = calculateDiscount(price, oldPrice);
-          const image = product.images?.[0] || "";
+
+          const rawPrice = Number(product.price || 0);
+          const rawOffer = Number(product.offerprice || product.offerPrice || product.discountPrice || 0);
+          const rawOld = Number(product.oldPrice || product.mrp || product.originalPrice || 0);
+
+          let offerprice = 0;
+          let oldPrice = 0;
+
+          if (rawOffer > 0 && rawOffer < rawPrice) {
+            offerprice = rawOffer;
+            oldPrice = rawPrice;
+          } else if (rawOffer > 0) {
+            offerprice = rawOffer;
+            oldPrice = rawOld > rawOffer ? rawOld : Math.round(rawOffer * 1.2);
+          } else if (rawOld > rawPrice && rawPrice > 0) {
+            offerprice = rawPrice;
+            oldPrice = rawOld;
+          } else if (rawPrice > 0) {
+            offerprice = rawPrice;
+            oldPrice = Math.round(rawPrice * 1.2);
+          } else {
+            offerprice = 0;
+            oldPrice = 0;
+          }
+
+          const discount = calculateDiscount(offerprice, oldPrice);
+          const image = product.images?.[0] || product.image || "";
 
           return (
             <div
@@ -75,7 +146,7 @@ function FeatureProducts({ showCart = false }) {
                 onClick={(e) => toggleWishlist(e, product)}
                 aria-label="Wishlist"
               >
-                {wishlisted[product.id] ? <Heart size={20} fill="#ff4081" color="#ff4081" /> : <Heart size={20} strokeWidth={2.5} color="#555" />}
+                {wishlisted[product.id] ? <Heart size={16} fill="#ff4081" color="#ff4081" /> : <Heart size={16} color="#64748b" />}
               </button>
 
               {/* Discount tag */}
@@ -103,8 +174,8 @@ function FeatureProducts({ showCart = false }) {
 
               {/* Price */}
               <div className="sc-price-row">
-                <span className="sc-offer">₹{price.toLocaleString()}</span>
-                {oldPrice > price && (
+                <span className="sc-offer">₹{offerprice.toLocaleString()}</span>
+                {oldPrice > offerprice && (
                   <span className="sc-mrp">₹{oldPrice.toLocaleString()}</span>
                 )}
                 {discount > 0 && (
@@ -112,30 +183,19 @@ function FeatureProducts({ showCart = false }) {
                 )}
               </div>
 
-              {/* Add to Cart — only if showCart=true */}
+              {/* Add to Cart */}
               {showCart && (
                 <button
                   className="sc-add-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    // dispatch handled in parent or can add here
-                  }}
+                  onClick={(e) => handleAddToCart(e, product, offerprice, image, name)}
                 >
-                  <ShoppingCart size={15} color="#94a3b8" /> Add to Cart
+                  <ShoppingCart size={14} /> {t("addToCart", "Add to Cart")}
                 </button>
               )}
             </div>
           );
         })}
       </div>
-
-      <button
-        onClick={() => scroll("right")}
-        style={scrollBtnStyle("right")}
-        aria-label="Scroll right"
-      >
-        ›
-      </button>
     </div>
   );
 }

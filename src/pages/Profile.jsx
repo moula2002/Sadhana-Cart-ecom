@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { auth, storage, db } from "../firebase";
 import { updateProfile, onAuthStateChanged, signOut, deleteUser } from "firebase/auth";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
@@ -50,6 +51,7 @@ import "./Profile.css";
 import rewardsGiftBox from "../Images/rewards_gift_box.png";
 
 function Profile() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -522,16 +524,16 @@ function Profile() {
         
         {/* Breadcrumbs */}
         <div className="profile-breadcrumbs">
-          <Link to="/">Home</Link>
+          <Link to="/">{t("homeLabel", "Home")}</Link>
           <span className="breadcrumb-separator">&gt;</span>
-          <span className="breadcrumb-active">My Account</span>
+          <span className="breadcrumb-active">{t("myAccount", "My Account")}</span>
           <span className="breadcrumb-separator">&gt;</span>
-          <span className="breadcrumb-active">My Profile</span>
+          <span className="breadcrumb-active">{t("myProfile", "My Profile")}</span>
         </div>
 
         {/* Title */}
         <div className="profile-title-header">
-          <h2>My Profile</h2>
+          <h2>{t("myProfile", "My Profile")}</h2>
         </div>
 
         {/* Top Summary Stats Cards */}
@@ -541,7 +543,7 @@ function Profile() {
               <FaShoppingBag />
             </div>
             <div className="stat-details">
-              <span className="stat-label">Orders</span>
+              <span className="stat-label">{t("ordersLabel", "Orders")}</span>
               <span className="stat-count">{ordersCount}</span>
             </div>
           </div>
@@ -550,7 +552,7 @@ function Profile() {
               <FaGift />
             </div>
             <div className="stat-details">
-              <span className="stat-label">Rewards Points</span>
+              <span className="stat-label">{t("rewardsPoints", "Rewards Points")}</span>
               <span className="stat-count">{rewardsPoints}</span>
             </div>
           </div>
@@ -559,7 +561,7 @@ function Profile() {
               <FaHeart />
             </div>
             <div className="stat-details">
-              <span className="stat-label">Wishlist Items</span>
+              <span className="stat-label">{t("wishlistItems", "Wishlist Items")}</span>
               <span className="stat-count">{wishlistCount}</span>
             </div>
           </div>
@@ -568,7 +570,7 @@ function Profile() {
               <FaMapMarkerAlt />
             </div>
             <div className="stat-details">
-              <span className="stat-label">Saved Addresses</span>
+              <span className="stat-label">{t("savedAddresses", "Saved Addresses")}</span>
               <span className="stat-count">{addressesCount}</span>
             </div>
           </div>
@@ -579,40 +581,40 @@ function Profile() {
           
           {/* Sidebar Menu */}
           <div className="dashboard-sidebar">
-            <h3 className="sidebar-title">My Account</h3>
+            <h3 className="sidebar-title">{t("myAccount", "My Account")}</h3>
             <ul className="sidebar-menu-list">
               <li className="sidebar-menu-item active">
                 <FaUser className="menu-icon" />
-                <span>My Profile</span>
+                <span>{t("myProfile", "My Profile")}</span>
               </li>
               <li className="sidebar-menu-item" onClick={() => navigate("/orders")}>
                 <FaShoppingBag className="menu-icon" />
-                <span>My Orders</span>
+                <span>{t("myOrders", "My Orders")}</span>
               </li>
               <li className="sidebar-menu-item" onClick={() => navigate("/wishlist")}>
                 <FaHeart className="menu-icon" />
-                <span>Wishlist</span>
+                <span>{t("wishlistLabel", "Wishlist")}</span>
               </li>
               <li className="sidebar-menu-item" onClick={() => navigate("/save-address")}>
                 <FaMapMarkerAlt className="menu-icon" />
-                <span>My Addresses</span>
+                <span>{t("myAddresses", "My Addresses")}</span>
               </li>
               <li className="sidebar-menu-item" onClick={() => toast.info("Rewards section clicked")}>
                 <FaGift className="menu-icon" />
-                <span>Sadhana Rewards</span>
+                <span>{t("home.sadhanaRewardsPromo", "Sadhana Rewards")}</span>
               </li>
               <li className="sidebar-menu-item" onClick={() => setShowPaymentModal(true)}>
                 <FaCreditCard className="menu-icon" />
-                <span>Payment Methods</span>
+                <span>{t("paymentMethods", "Payment Methods")}</span>
               </li>
               <li className="sidebar-menu-item" onClick={() => setIsEditing(true)}>
                 <FaCog className="menu-icon" />
-                <span>Account Settings</span>
+                <span>{t("accountSettings", "Account Settings")}</span>
               </li>
               <li className="sidebar-divider"></li>
               <li className="sidebar-menu-item logout-item" onClick={handleLogoutClick}>
                 <FaSignOutAlt className="menu-icon" />
-                <span>Logout</span>
+                <span>{t("logout", "Logout")}</span>
               </li>
             </ul>
           </div>
@@ -639,7 +641,7 @@ function Profile() {
                   <p className="email-text">{email}</p>
                   {phone && <p className="phone-text">{phone}</p>}
                   <button className="edit-profile-btn" onClick={() => setIsEditing(true)}>
-                    <FaEdit /> Edit Profile
+                    <FaEdit /> {t("editProfile", "Edit Profile")}
                   </button>
                 </div>
 
@@ -647,21 +649,21 @@ function Profile() {
                   <div className="detail-row">
                     <span className="detail-icon"><FaCalendarAlt /></span>
                     <div className="detail-info">
-                      <span className="detail-label">Date of Birth</span>
-                      <span className="detail-value">{dob ? new Date(dob).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "Not specified"}</span>
+                      <span className="detail-label">{t("dateOfBirth", "Date of Birth")}</span>
+                      <span className="detail-value">{dob ? new Date(dob).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : t("notSpecified", "Not specified")}</span>
                     </div>
                   </div>
                   <div className="detail-row">
                     <span className="detail-icon"><FaVenusMars /></span>
                     <div className="detail-info">
-                      <span className="detail-label">Gender</span>
-                      <span className="detail-value">{gender || "Not specified"}</span>
+                      <span className="detail-label">{t("gender", "Gender")}</span>
+                      <span className="detail-value">{gender || t("notSpecified", "Not specified")}</span>
                     </div>
                   </div>
                   <div className="detail-row">
                     <span className="detail-icon"><FaCheckCircle /></span>
                     <div className="detail-info">
-                      <span className="detail-label">Joined On</span>
+                      <span className="detail-label">{t("joinedOn", "Joined On")}</span>
                       <span className="detail-value">{joinedOn}</span>
                     </div>
                   </div>
@@ -669,7 +671,7 @@ function Profile() {
               </div>
 
               {/* Account Overview Grid */}
-              <h3 className="section-subtitle">Account Overview</h3>
+              <h3 className="section-subtitle">{t("accountOverview", "Account Overview")}</h3>
               <div className="account-overview-grid">
                 <div className="overview-card" onClick={() => navigate("/orders")}>
                   <div className="card-left">
@@ -677,8 +679,8 @@ function Profile() {
                       <FaShoppingBag />
                     </div>
                     <div className="card-info">
-                      <h4>My Orders</h4>
-                      <p>Track, return or buy again</p>
+                      <h4>{t("myOrders", "My Orders")}</h4>
+                      <p>{t("myOrdersDesc", "Track, return or buy again")}</p>
                     </div>
                   </div>
                   <FaChevronRight className="chevron-right-icon" />
@@ -690,8 +692,8 @@ function Profile() {
                       <FaMapMarkerAlt />
                     </div>
                     <div className="card-info">
-                      <h4>My Addresses</h4>
-                      <p>Manage saved addresses</p>
+                      <h4>{t("myAddresses", "My Addresses")}</h4>
+                      <p>{t("myAddressesDesc", "Manage saved addresses")}</p>
                     </div>
                   </div>
                   <FaChevronRight className="chevron-right-icon" />
@@ -703,8 +705,8 @@ function Profile() {
                       <FaCreditCard />
                     </div>
                     <div className="card-info">
-                      <h4>Payment Methods</h4>
-                      <p>Manage cards, UPI & wallets</p>
+                      <h4>{t("paymentMethods", "Payment Methods")}</h4>
+                      <p>{t("paymentMethodsDesc", "Manage cards, UPI & wallets")}</p>
                     </div>
                   </div>
                   <FaChevronRight className="chevron-right-icon" />
@@ -716,8 +718,8 @@ function Profile() {
                       <FaGift />
                     </div>
                     <div className="card-info">
-                      <h4>Sadhana Rewards</h4>
-                      <p>View points, rewards & offers</p>
+                      <h4>{t("home.sadhanaRewardsPromo", "Sadhana Rewards")}</h4>
+                      <p>{t("rewardsDesc", "View points, rewards & offers")}</p>
                     </div>
                   </div>
                   <FaChevronRight className="chevron-right-icon" />
@@ -729,8 +731,8 @@ function Profile() {
                       <FaHeart />
                     </div>
                     <div className="card-info">
-                      <h4>Wishlist</h4>
-                      <p>View items you saved</p>
+                      <h4>{t("wishlistLabel", "Wishlist")}</h4>
+                      <p>{t("wishlistDesc", "View items you saved")}</p>
                     </div>
                   </div>
                   <FaChevronRight className="chevron-right-icon" />
@@ -742,8 +744,8 @@ function Profile() {
                       <FaCog />
                     </div>
                     <div className="card-info">
-                      <h4>Account Settings</h4>
-                      <p>Change password & preferences</p>
+                      <h4>{t("accountSettings", "Account Settings")}</h4>
+                      <p>{t("accountSettingsDesc", "Change password & preferences")}</p>
                     </div>
                   </div>
                   <FaChevronRight className="chevron-right-icon" />
@@ -755,8 +757,8 @@ function Profile() {
                       <FaBell />
                     </div>
                     <div className="card-info">
-                      <h4>Notifications</h4>
-                      <p>Manage your notifications</p>
+                      <h4>{t("notifications", "Notifications")}</h4>
+                      <p>{t("manageNotifications", "Manage your notifications")}</p>
                     </div>
                   </div>
                   <FaChevronRight className="chevron-right-icon" />
@@ -768,8 +770,8 @@ function Profile() {
                       <FaQuestionCircle />
                     </div>
                     <div className="card-info">
-                      <h4>Help Center</h4>
-                      <p>Get help & support</p>
+                      <h4>{t("helpCenter", "Help Center")}</h4>
+                      <p>{t("getHelpSupport", "Get help & support")}</p>
                     </div>
                   </div>
                   <FaChevronRight className="chevron-right-icon" />
@@ -781,8 +783,8 @@ function Profile() {
                       <FaSignOutAlt />
                     </div>
                     <div className="card-info">
-                      <h4>Logout</h4>
-                      <p>Sign out from your account</p>
+                      <h4>{t("logout", "Logout")}</h4>
+                      <p>{t("signOutFromAccount", "Sign out from your account")}</p>
                     </div>
                   </div>
                   <FaChevronRight className="chevron-right-icon" />
@@ -798,16 +800,16 @@ function Profile() {
                 <div className="rewards-card-header">
                   <div className="rewards-title-wrapper">
                     <FaGift className="reward-icon-svg" />
-                    <span>Sadhana Rewards</span>
+                    <span>{t("home.sadhanaRewardsPromo", "Sadhana Rewards")}</span>
                   </div>
                   <FaChevronRight className="rewards-chevron" onClick={() => toast.info("View Rewards History")} />
                 </div>
                 
                 <div className="rewards-card-body">
                   <div className="body-left">
-                    <span className="body-label">Available Points</span>
+                    <span className="body-label">{t("availablePoints", "Available Points")}</span>
                     <span className="points-number">{rewardsPoints}</span>
-                    <span className="points-badge">1 Point = ₹1</span>
+                    <span className="points-badge">{t("pointsRatio", "1 Point = ₹1")}</span>
                   </div>
                   <div className="body-right">
                     <img 
@@ -819,7 +821,7 @@ function Profile() {
                 </div>
 
                 <div className="rewards-card-footer" onClick={() => toast.info("Rewards History details")}>
-                  <span>View Rewards History</span>
+                  <span>{t("viewRewardsHistory", "View Rewards History")}</span>
                   <FaChevronRight />
                 </div>
               </div>
@@ -827,14 +829,14 @@ function Profile() {
               {/* Recent Orders List Card */}
               <div className="recent-orders-card">
                 <div className="orders-card-header">
-                  <h3>Recent Orders</h3>
-                  <Link to="/orders" className="view-all-link">View All</Link>
+                  <h3>{t("recentOrders", "Recent Orders")}</h3>
+                  <Link to="/orders" className="view-all-link">{t("viewAll", "View All")}</Link>
                 </div>
 
                 <div className="orders-list-body">
                   {recentOrders.length === 0 ? (
                     <div className="empty-orders-view">
-                      <p>No recent orders found</p>
+                      <p>{t("noRecentOrders", "No recent orders found")}</p>
                     </div>
                   ) : (
                     recentOrders.map((order, idx) => (
@@ -850,13 +852,13 @@ function Profile() {
                             }}
                           />
                           <div className="order-details-meta">
-                            <span className="order-num-id">Order #{order.orderId.substring(0, 10)}...</span>
-                            <span className="order-meta-desc">{order.itemCount} Items | {formatCurrency(order.total)}</span>
+                            <span className="order-num-id">{t("orderHash", "Order #")}{order.orderId.substring(0, 10)}...</span>
+                            <span className="order-meta-desc">{order.itemCount} {t("itemsLabel", "Items")} | {formatCurrency(order.total)}</span>
                           </div>
                         </div>
                         <div className="order-item-right">
                           <span className={`status-pill ${order.status.toLowerCase()}`}>
-                            {order.status}
+                            {t(`orderStatus.${order.status.toLowerCase()}`, order.status)}
                           </span>
                           <span className="order-item-date">{order.date}</span>
                         </div>
@@ -866,7 +868,7 @@ function Profile() {
                 </div>
 
                 <div className="orders-card-footer" onClick={() => navigate("/orders")}>
-                  <span>View All Orders</span>
+                  <span>{t("viewAllOrders", "View All Orders")}</span>
                   <FaChevronRight />
                 </div>
               </div>
@@ -890,7 +892,7 @@ function Profile() {
               exit={{ scale: 0.9, opacity: 0 }}
             >
               <div className="modal-header">
-                <h3>Edit Profile Details</h3>
+                <h3>{t("editProfileDetails", "Edit Profile Details")}</h3>
                 <button className="close-modal-btn" onClick={() => setIsEditing(false)}>
                   <FaTimesCircle />
                 </button>
@@ -905,12 +907,12 @@ function Profile() {
                       <input type="file" onChange={handlePhotoChange} accept="image/*" />
                     </label>
                   </div>
-                  <span className="helper-txt">Max file size: 2MB</span>
+                  <span className="helper-txt">{t("maxFileSize", "Max file size: 2MB")}</span>
                 </div>
 
                 <div className="form-grid">
                   <div className="form-group">
-                    <label>Full Name</label>
+                    <label>{t("fullName", "Full Name")}</label>
                     <input 
                       type="text" 
                       value={name} 
@@ -920,7 +922,7 @@ function Profile() {
                   </div>
 
                   <div className="form-group">
-                    <label>Email Address</label>
+                    <label>{t("emailAddress", "Email Address")}</label>
                     <input 
                       type="email" 
                       value={email} 
@@ -930,7 +932,7 @@ function Profile() {
                   </div>
 
                   <div className="form-group">
-                    <label>Phone Number</label>
+                    <label>{t("phoneNumber", "Phone Number")}</label>
                     <input 
                       type="text" 
                       value={phone} 
@@ -939,17 +941,17 @@ function Profile() {
                   </div>
 
                   <div className="form-group">
-                    <label>Gender</label>
+                    <label>{t("gender", "Gender")}</label>
                     <select value={gender} onChange={(e) => setGender(e.target.value)}>
-                      <option value="">Select Gender</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Other">Other</option>
+                      <option value="">{t("selectGender", "Select Gender")}</option>
+                      <option value="Male">{t("male", "Male")}</option>
+                      <option value="Female">{t("female", "Female")}</option>
+                      <option value="Other">{t("otherLabel", "Other")}</option>
                     </select>
                   </div>
 
                   <div className="form-group full-width">
-                    <label>Date of Birth</label>
+                    <label>{t("dateOfBirth", "Date of Birth")}</label>
                     <input 
                       type="date" 
                       value={dob} 
@@ -960,10 +962,10 @@ function Profile() {
 
                 <div className="form-action-buttons">
                   <button type="submit" className="save-btn" disabled={loading}>
-                    {loading ? "Saving..." : <><FaSave /> Save Changes</>}
+                    {loading ? t("saving", "Saving...") : <><FaSave /> {t("saveChanges", "Save Changes")}</>}
                   </button>
                   <button type="button" className="cancel-btn" onClick={() => setIsEditing(false)}>
-                    Cancel
+                    {t("cancel", "Cancel")}
                   </button>
                 </div>
               </form>
@@ -984,14 +986,14 @@ function Profile() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="modal-header">
-                <h3>Payment Methods</h3>
+                <h3>{t("paymentMethods", "Payment Methods")}</h3>
                 <button className="close-modal-btn" onClick={() => setShowPaymentModal(false)}>
                   <FaTimesCircle />
                 </button>
               </div>
 
               <div className="payment-modal-body">
-                <p className="payment-modal-subtitle">WE ACCEPT</p>
+                <p className="payment-modal-subtitle">{t("weAccept", "WE ACCEPT")}</p>
                 <div className="profile-payments-container">
                   <div className="prof-pay-card prof-visa">VISA</div>
                   <div className="prof-pay-card prof-mc">
@@ -1021,7 +1023,7 @@ function Profile() {
               exit={{ scale: 0.9, opacity: 0 }}
             >
               <div className="modal-header">
-                <h3>Crop Profile Photo</h3>
+                <h3>{t("cropProfilePhoto", "Crop Profile Photo")}</h3>
                 <button className="close-modal-btn" onClick={() => setShowCropModal(false)}>
                   <FaTimesCircle />
                 </button>
@@ -1062,7 +1064,7 @@ function Profile() {
                 {/* Range Zoom & Crop Frame Sizer Slider */}
                 <div className="crop-controls-wrapper">
                   <div className="zoom-slider-row">
-                    <span>Zoom:</span>
+                    <span>{t("zoom", "Zoom")}:</span>
                     <input 
                       type="range" 
                       min="1" 
@@ -1075,7 +1077,7 @@ function Profile() {
                   </div>
 
                   <div className="zoom-slider-row">
-                    <span>Crop Size:</span>
+                    <span>{t("cropSize", "Crop Size")}:</span>
                     <input 
                       type="range" 
                       min="100" 
@@ -1088,17 +1090,17 @@ function Profile() {
                   </div>
 
                   <button type="button" className="rotate-btn" onClick={handleCropRotate}>
-                    <i className="fas fa-sync-alt"></i> Rotate 90°
+                    <i className="fas fa-sync-alt"></i> {t("rotate90", "Rotate 90°")}
                   </button>
                 </div>
               </div>
 
               <div className="form-action-buttons px-4 pb-4">
                 <button type="button" className="save-btn" onClick={handleCropSave} disabled={loading}>
-                  {loading ? "Uploading..." : "Save Image"}
+                  {loading ? t("uploading", "Uploading...") : t("saveImage", "Save Image")}
                 </button>
                 <button type="button" className="cancel-btn" onClick={() => setShowCropModal(false)} disabled={loading}>
-                  Cancel
+                  {t("cancel", "Cancel")}
                 </button>
               </div>
             </motion.div>
@@ -1119,7 +1121,7 @@ function Profile() {
               style={{ maxWidth: '440px' }}
             >
               <div className="modal-header">
-                <h3>Confirm Log Out</h3>
+                <h3>{t("confirmLogOut", "Confirm Log Out")}</h3>
                 <button className="close-modal-btn" onClick={() => setShowLogoutConfirmModal(false)}>
                   <FaTimesCircle />
                 </button>
@@ -1127,19 +1129,19 @@ function Profile() {
 
               <div className="logout-confirm-body text-center p-4">
                 <h4 className="fw-bold mb-2 text-dark" style={{ textAlign: 'left', fontSize: '18px', fontWeight: '700', color: '#1a202c', margin: '0' }}>
-                  Are you sure you want to log out?
+                  {t("areYouSureLogout", "Are you sure you want to log out?")}
                 </h4>
                 <p className="text-muted text-sm" style={{ textAlign: 'left', fontSize: '13px', lineHeight: '1.6', color: '#4a5568', margin: '12px 0 0 0' }}>
-                  You'll be signed out of your account and will need to log in again to access your profile, bookings, and other personalized features.
+                  {t("logoutConfirmDesc", "You'll be signed out of your account and will need to log in again to access your profile, bookings, and other personalized features.")}
                 </p>
               </div>
 
               <div className="form-action-buttons px-4 pb-4" style={{ gap: '12px', padding: '16px 24px 24px 24px', display: 'flex' }}>
                 <button type="button" className="save-btn logout-confirm-btn-primary" onClick={handleLogoutConfirm} style={{ flex: '1', backgroundColor: '#e53e3e', color: '#ffffff', border: 'none', height: '42px', borderRadius: '6px', fontWeight: '700', cursor: 'pointer' }}>
-                  Log Out
+                  {t("logout", "Log Out")}
                 </button>
                 <button type="button" className="cancel-btn logout-confirm-btn-secondary" onClick={() => setShowLogoutConfirmModal(false)} style={{ flex: '1', backgroundColor: '#38a169', color: '#ffffff', border: 'none', height: '42px', borderRadius: '6px', fontWeight: '700', cursor: 'pointer' }}>
-                  Stay Signed In
+                  {t("staySignedIn", "Stay Signed In")}
                 </button>
               </div>
             </motion.div>

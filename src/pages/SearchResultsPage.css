@@ -348,3 +348,86 @@
 ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(135deg, #0056b3, #008c9e);
 }
+
+/* ================= DARK MODE OVERRIDES ================= */
+.dark-theme .search-results-page,
+[data-bs-theme="dark"] .search-results-page,
+[data-theme="dark"] .search-results-page {
+  background: #0f172a;
+}
+
+.dark-theme .search-header,
+[data-bs-theme="dark"] .search-header,
+[data-theme="dark"] .search-header {
+  background: #1e293b;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.dark-theme .search-title,
+[data-bs-theme="dark"] .search-title,
+[data-theme="dark"] .search-title {
+  background: linear-gradient(135deg, #f8fafc, #60a5fa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.dark-theme .search-breadcrumb,
+[data-bs-theme="dark"] .search-breadcrumb,
+[data-theme="dark"] .search-breadcrumb {
+  color: #94a3b8;
+}
+
+.dark-theme .active-filters,
+[data-bs-theme="dark"] .active-filters,
+[data-theme="dark"] .active-filters {
+  background: #0f172a;
+}
+
+.dark-theme .product-card,
+[data-bs-theme="dark"] .product-card,
+[data-theme="dark"] .product-card {
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.dark-theme .product-card:hover,
+[data-bs-theme="dark"] .product-card:hover,
+[data-theme="dark"] .product-card:hover {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 15px rgba(59, 130, 246, 0.2) !important;
+  border-color: #3b82f6;
+}
+
+.dark-theme .product-image-wrapper,
+[data-bs-theme="dark"] .product-image-wrapper,
+[data-theme="dark"] .product-image-wrapper {
+  background: #ffffff !important;
+  border-radius: 12px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+.dark-theme .product-title,
+[data-bs-theme="dark"] .product-title,
+[data-theme="dark"] .product-title {
+  color: #f8fafc;
+}
+
+.dark-theme .product-price,
+[data-bs-theme="dark"] .product-price,
+[data-theme="dark"] .product-price {
+  color: #ffffff;
+}
+
+.dark-theme .category-badge,
+[data-bs-theme="dark"] .category-badge,
+[data-theme="dark"] .category-badge {
+  background: #0f172a;
+  color: #94a3b8;
+}
+
+.dark-theme .no-products-alert,
+[data-bs-theme="dark"] .no-products-alert,
+[data-theme="dark"] .no-products-alert {
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}

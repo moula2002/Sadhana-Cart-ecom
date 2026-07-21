@@ -92,7 +92,7 @@
 
 .sc-auth-new a:hover {
   color: #c45500;
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 /* ── Main Dark Footer Shell ── */
@@ -179,6 +179,7 @@
 
 .sc-link-list a:hover {
   color: #fbbf24;
+  text-decoration: none;
 }
 
 /* ── Contact List ── */
@@ -204,6 +205,7 @@
 
 .sc-contact-list a:hover {
   color: #fbbf24;
+  text-decoration: none;
 }
 
 .sc-icon {
@@ -439,6 +441,7 @@
 
 .sc-bottom-links a:hover {
   color: #fff;
+  text-decoration: none;
 }
 
 .sc-sep {
@@ -504,4 +507,93 @@
   .sc-auth-card {
     flex-direction: column;
   }
+}
+
+/* ── Dark Mode Overrides for Auth Banner & Card ── */
+.dark-theme .sc-auth-banner,
+[data-bs-theme="dark"] .sc-auth-banner,
+[data-theme="dark"] .sc-auth-banner {
+  background: #0f172a !important;
+  border-top-color: rgba(255, 255, 255, 0.08) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark-theme .sc-auth-card,
+[data-bs-theme="dark"] .sc-auth-card,
+[data-theme="dark"] .sc-auth-card {
+  background: #1e293b !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35) !important;
+}
+
+.dark-theme .sc-auth-title,
+[data-bs-theme="dark"] .sc-auth-title,
+[data-theme="dark"] .sc-auth-title {
+  color: #f8fafc !important;
+}
+
+.dark-theme .sc-auth-text,
+[data-bs-theme="dark"] .sc-auth-text,
+[data-theme="dark"] .sc-auth-text {
+  color: #cbd5e1 !important;
+}
+
+.dark-theme .sc-auth-new,
+[data-bs-theme="dark"] .sc-auth-new,
+[data-theme="dark"] .sc-auth-new {
+  color: #cbd5e1 !important;
+}
+
+.dark-theme .sc-auth-new a,
+[data-bs-theme="dark"] .sc-auth-new a,
+[data-theme="dark"] .sc-auth-new a {
+  color: #60a5fa !important;
+}
+
+.dark-theme .sc-auth-btn,
+[data-bs-theme="dark"] .sc-auth-btn,
+[data-theme="dark"] .sc-auth-btn {
+  background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%) !important;
+  border-color: #b45309 !important;
+  color: #0f172a !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3) !important;
+}
+
+/* ── Dark Mode Overrides for Payment Cards ── */
+.dark-theme .sc-pay-card,
+[data-bs-theme="dark"] .sc-pay-card,
+[data-theme="dark"] .sc-pay-card {
+  background: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+}
+
+.dark-theme .sc-visa,
+[data-bs-theme="dark"] .sc-visa,
+[data-theme="dark"] .sc-visa {
+  color: #1434CB !important;
+}
+
+.dark-theme .sc-rupay,
+[data-bs-theme="dark"] .sc-rupay,
+[data-theme="dark"] .sc-rupay {
+  color: #2e60a3 !important;
+}
+
+.dark-theme .sc-upi,
+[data-bs-theme="dark"] .sc-upi,
+[data-theme="dark"] .sc-upi {
+  color: #0f172a !important;
+}
+
+.dark-theme .sc-paytm span:first-child,
+[data-bs-theme="dark"] .sc-paytm span:first-child,
+[data-theme="dark"] .sc-paytm span:first-child {
+  color: #00b9f1 !important;
+}
+
+.dark-theme .sc-paytm span:last-child,
+[data-bs-theme="dark"] .sc-paytm span:last-child,
+[data-theme="dark"] .sc-paytm span:last-child {
+  color: #002970 !important;
 }

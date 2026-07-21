@@ -26,9 +26,11 @@ import {
   FaSlidersH
 } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import "./AdvancedSearchPage.css";
 
 const AdvancedSearchPage = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
@@ -117,7 +119,7 @@ const AdvancedSearchPage = () => {
             transition={{ delay: 0.3 }}
             className="loading-text-advanced mt-3"
           >
-            Loading categories...
+            {t("loadingCategories", "Loading categories...")}
           </motion.p>
         </motion.div>
       </div>
@@ -149,10 +151,10 @@ const AdvancedSearchPage = () => {
                       </div>
                       <div className="ms-3">
                         <h2 className="text-white mb-1 fw-bold">
-                          Advanced Search
+                          {t("advancedSearch", "Advanced Search")}
                         </h2>
                         <p className="text-white-50 mb-0">
-                          Find exactly what you're looking for
+                          {t("advancedSearchSub", "Find exactly what you're looking for")}
                         </p>
                       </div>
                     </div>
@@ -164,7 +166,7 @@ const AdvancedSearchPage = () => {
                         className="active-filters-badge"
                       >
                         <Badge className="filter-count-badge">
-                          {activeFilterCount} Active {activeFilterCount === 1 ? 'Filter' : 'Filters'}
+                          {activeFilterCount} {t("activeLabel", "Active")} {activeFilterCount === 1 ? t("filterSingular", "Filter") : t("filtersPlural", "Filters")}
                         </Badge>
                       </motion.div>
                     )}
@@ -184,7 +186,7 @@ const AdvancedSearchPage = () => {
                         <div className="d-flex flex-wrap align-items-center">
                           <span className="active-filters-label me-3">
                             <FaFilter className="me-2" />
-                            Active Filters:
+                            {t("activeFilters", "Active Filters:")}
                           </span>
                           
                           {filters.category && (
@@ -217,7 +219,7 @@ const AdvancedSearchPage = () => {
                             >
                               <Badge className="filter-badge-active">
                                 <FaRupeeSign className="me-1" />
-                                Max: ₹{filters.maxPrice}
+                                {t("maxPriceFilterLabel", "Max:")} ₹{filters.maxPrice}
                                 <Button
                                   variant="link"
                                   className="filter-remove-btn p-0 ms-2"
@@ -238,7 +240,7 @@ const AdvancedSearchPage = () => {
                             >
                               <Badge className="filter-badge-active">
                                 <FaStar className="me-2" />
-                                {filters.rating}★ & above
+                                {filters.rating}★ {t("andAbove", "& above")}
                                 <Button
                                   variant="link"
                                   className="filter-remove-btn p-0 ms-2"
@@ -259,9 +261,9 @@ const AdvancedSearchPage = () => {
                             >
                               <Badge className="filter-badge-active">
                                 <FaSortAmountDown className="me-2" />
-                                {filters.sortBy === 'priceLow' ? 'Price: Low to High' :
-                                 filters.sortBy === 'priceHigh' ? 'Price: High to Low' :
-                                 filters.sortBy === 'rating' ? 'Top Rated' : filters.sortBy}
+                                {filters.sortBy === 'priceLow' ? t("priceLowToHigh", "Price: Low to High") :
+                                 filters.sortBy === 'priceHigh' ? t("priceHighToLow", "Price: High to Low") :
+                                 filters.sortBy === 'rating' ? t("topRated", "Top Rated") : filters.sortBy}
                                 <Button
                                   variant="link"
                                   className="filter-remove-btn p-0 ms-2"
@@ -283,7 +285,7 @@ const AdvancedSearchPage = () => {
                               className="clear-all-btn"
                               onClick={clearAllFilters}
                             >
-                              Clear All
+                              {t("clearAll", "Clear All")}
                             </Button>
                           </motion.div>
                         </div>
@@ -304,7 +306,7 @@ const AdvancedSearchPage = () => {
                             <div className="filter-label-wrapper">
                               <FaTag className="filter-icon" />
                               <Form.Label className="filter-label">
-                                Category
+                                {t("category", "Category")}
                               </Form.Label>
                             </div>
                             <Form.Select
@@ -314,13 +316,13 @@ const AdvancedSearchPage = () => {
                               className="filter-select"
                               size="lg"
                             >
-                              <option value="">All Categories</option>
+                              <option value="">{t("allCategories", "All Categories")}</option>
                               {categories.map((cat, i) => (
                                 <option key={i} value={cat}>{cat}</option>
                               ))}
                             </Form.Select>
                             <div className="filter-hint">
-                              Select a specific category
+                              {t("selectSpecificCategory", "Select a specific category")}
                             </div>
                           </Form.Group>
                         </motion.div>
@@ -337,7 +339,7 @@ const AdvancedSearchPage = () => {
                             <div className="filter-label-wrapper">
                               <FaRupeeSign className="filter-icon" />
                               <Form.Label className="filter-label">
-                                Maximum Price
+                                {t("maxPrice", "Maximum Price")}
                               </Form.Label>
                             </div>
                             <div className="price-input-wrapper">
@@ -348,12 +350,12 @@ const AdvancedSearchPage = () => {
                                 value={filters.maxPrice}
                                 onChange={handleChange}
                                 className="filter-input price-input"
-                                placeholder="Enter max price"
+                                placeholder={t("enterMaxPrice", "Enter max price")}
                                 size="lg"
                               />
                             </div>
                             <div className="filter-hint">
-                              Products under this price
+                              {t("productsUnderPrice", "Products under this price")}
                             </div>
                           </Form.Group>
                         </motion.div>
@@ -370,7 +372,7 @@ const AdvancedSearchPage = () => {
                             <div className="filter-label-wrapper">
                               <FaStar className="filter-icon" />
                               <Form.Label className="filter-label">
-                                Minimum Rating
+                                {t("minRating", "Minimum Rating")}
                               </Form.Label>
                             </div>
                             <Form.Select
@@ -380,13 +382,13 @@ const AdvancedSearchPage = () => {
                               className="filter-select"
                               size="lg"
                             >
-                              <option value="">Any Rating</option>
-                              <option value="4">4★ & above (Excellent)</option>
-                              <option value="3">3★ & above (Good)</option>
-                              <option value="2">2★ & above (Average)</option>
+                              <option value="">{t("anyRating", "Any Rating")}</option>
+                              <option value="4">{t("rating4Plus", "4★ & above (Excellent)")}</option>
+                              <option value="3">{t("rating3Plus", "3★ & above (Good)")}</option>
+                              <option value="2">{t("rating2Plus", "2★ & above (Average)")}</option>
                             </Form.Select>
                             <div className="filter-hint">
-                              Customer satisfaction level
+                              {t("customerSatisfaction", "Customer satisfaction level")}
                             </div>
                           </Form.Group>
                         </motion.div>
@@ -403,7 +405,7 @@ const AdvancedSearchPage = () => {
                             <div className="filter-label-wrapper">
                               <FaSortAmountDown className="filter-icon" />
                               <Form.Label className="filter-label">
-                                Sort By
+                                {t("sortBy", "Sort By")}
                               </Form.Label>
                             </div>
                             <Form.Select
@@ -413,13 +415,13 @@ const AdvancedSearchPage = () => {
                               className="filter-select"
                               size="lg"
                             >
-                              <option value="">Relevance (Default)</option>
-                              <option value="priceLow">Price: Low to High</option>
-                              <option value="priceHigh">Price: High to Low</option>
-                              <option value="rating">Top Rated First</option>
+                              <option value="">{t("relevanceDefault", "Relevance (Default)")}</option>
+                              <option value="priceLow">{t("priceLowToHigh", "Price: Low to High")}</option>
+                              <option value="priceHigh">{t("priceHighToLow", "Price: High to Low")}</option>
+                              <option value="rating">{t("topRatedFirst", "Top Rated First")}</option>
                             </Form.Select>
                             <div className="filter-hint">
-                              Order your search results
+                              {t("orderSearchResults", "Order your search results")}
                             </div>
                           </Form.Group>
                         </motion.div>
@@ -440,7 +442,7 @@ const AdvancedSearchPage = () => {
                           >
                             <span className="btn-content">
                               <FaSearch className="me-2" />
-                              Search Products
+                              {t("searchProductsBtn", "Search Products")}
                               <FaChevronRight className="ms-2 btn-arrow" />
                             </span>
                           </Button>
@@ -448,7 +450,7 @@ const AdvancedSearchPage = () => {
                           <div className="search-info mt-3">
                             <small className="text-muted">
                               <FaFilter className="me-1" />
-                              Found {categories.length} categories available
+                              {t("foundCategoriesCount", "Found {{count}} categories available", { count: categories.length }).replace("{{count}}", categories.length)}
                             </small>
                           </div>
                         </motion.div>

@@ -1,12 +1,17 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Heart, ShoppingCart } from "lucide-react";
+import { ChevronLeft, ChevronRight, Heart, ShoppingCart } from "lucide-react";
 import { useWishlist } from "../../hooks/useWishlist";
 import { useRatings } from "../../hooks/useRatings";
 import { db } from "../../firebase";
 import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { addToCart } from "../../redux/cartSlice";
+import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 function BestArrivals({ showCart = false }) {
+  const { t } = useTranslation();
   const [products, setProducts] = useState([]);
   const { wishlisted, toggleWishlist } = useWishlist();
   const ratings = useRatings();
@@ -67,28 +72,46 @@ function BestArrivals({ showCart = false }) {
     fetchProducts();
   }, []);
 
-  const calculateDiscount = (price, oldPrice) => {
-    if (!price || !oldPrice || oldPrice <= price) return 0;
-    return Math.round(((oldPrice - price) / oldPrice) * 100);
-  };
-
   const scroll = (dir) => {
     if (scrollRef.current) {
       scrollRef.current.scrollBy({ left: dir === "left" ? -360 : 360, behavior: "smooth" });
     }
   };
 
+  const dispatch = useDispatch();
+
+  const calculateDiscount = (offer, old) => {
+    if (!offer || !old || old <= offer) return 0;
+    return Math.round(((old - offer) / old) * 100);
+  };
+
+  const handleAddToCart = (e, product, offerprice, image, name) => {
+    e.stopPropagation();
+    dispatch(
+      addToCart({
+        id: product.id,
+        title: name,
+        price: offerprice,
+        image: image,
+        quantity: 1,
+      })
+    );
+    toast.success(`${name} added to cart!`, {
+      position: "bottom-right",
+      autoClose: 2000,
+    });
+  };
 
   if (products.length === 0) return null;
 
   return (
-    <section className="sc-section home-section-animated" style={{ position: "relative" }}>
-      <div className="sc-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', paddingBottom: '12px', borderBottom: '1px solid #e0e0e0' }}>
-        <div className="sc-title-row" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-          <h2 className="sc-title" style={{ fontSize: '1.3rem', fontWeight: '800', margin: 0, color: '#212121' }}>Flash Deals</h2>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '0.85rem', color: '#555', fontWeight: '500' }}>Ends in</span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+    <section className="sc-section home-section-animated position-relative">
+      <div className="sc-header">
+        <div className="sc-title-row">
+          <h2 className="sc-title">{t("home.flashDeals", "Flash Deals")}</h2>
+          <div className="d-flex align-items-center gap-2">
+            <span className="text-muted small fw-semibold">{t("home.endsIn", "Ends in")}</span>
+            <div className="countdown-timer">
               <div style={redTimerBox}>{String(timeLeft.hours).padStart(2, '0')}</div>
               <span style={{ fontWeight: 'bold', color: '#ff2222' }}>:</span>
               <div style={redTimerBox}>{String(timeLeft.minutes).padStart(2, '0')}</div>
@@ -97,26 +120,77 @@ function BestArrivals({ showCart = false }) {
             </div>
           </div>
         </div>
-        <a className="sc-view-all" href="#" style={{ color: '#0b65c2', fontWeight: '700', fontSize: '0.9rem', textDecoration: 'none' }}>View All →</a>
+        <div className="d-flex align-items-center gap-3">
+          <a className="sc-view-all" href="#">{t("home.viewAllDeals", "View All Deals →")}</a>
+        </div>
       </div>
 
-      {/* Scroll buttons */}
-      <button
-        onClick={() => scroll("left")}
-        style={scrollBtnStyle("left")}
-        aria-label="Scroll left"
-      >
-        ‹
-      </button>
-
-      <div ref={scrollRef} className="sc-products-row">
+      <div className="position-relative">
+        {products.length > 3 && (
+          <>
+            <button
+              className="btn btn-light rounded-circle shadow-sm border position-absolute start-0 top-50 translate-middle-y d-flex align-items-center justify-content-center"
+              style={{
+                width: '38px',
+                height: '38px',
+                zIndex: 10,
+                left: '-10px',
+                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                cursor: 'pointer'
+              }}
+              onClick={() => scroll("left")}
+              aria-label="Scroll left"
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <button
+              className="btn btn-light rounded-circle shadow-sm border position-absolute end-0 top-50 translate-middle-y d-flex align-items-center justify-content-center"
+              style={{
+                width: '38px',
+                height: '38px',
+                zIndex: 10,
+                right: '-10px',
+                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                cursor: 'pointer'
+              }}
+              onClick={() => scroll("right")}
+              aria-label="Scroll right"
+            >
+              <ChevronRight size={20} />
+            </button>
+          </>
+        )}
+        <div ref={scrollRef} className="sc-products-row">
         {products.map((product) => {
           const info = product.bestArrivalInfo || {};
           const name = info.title || product.name || "Product";
-          const price = product.price || 0;
-          const oldPrice = product.oldPrice || 0;
-          const discount = calculateDiscount(price, oldPrice);
-          const image = product.images?.[0] || "";
+
+          const rawPrice = Number(product.price || 0);
+          const rawOffer = Number(product.offerprice || product.offerPrice || product.discountPrice || 0);
+          const rawOld = Number(product.oldPrice || product.mrp || product.originalPrice || 0);
+
+          let offerprice = 0;
+          let oldPrice = 0;
+
+          if (rawOffer > 0 && rawOffer < rawPrice) {
+            offerprice = rawOffer;
+            oldPrice = rawPrice;
+          } else if (rawOffer > 0) {
+            offerprice = rawOffer;
+            oldPrice = rawOld > rawOffer ? rawOld : Math.round(rawOffer * 1.2);
+          } else if (rawOld > rawPrice && rawPrice > 0) {
+            offerprice = rawPrice;
+            oldPrice = rawOld;
+          } else if (rawPrice > 0) {
+            offerprice = rawPrice;
+            oldPrice = Math.round(rawPrice * 1.2);
+          } else {
+            offerprice = 0;
+            oldPrice = 0;
+          }
+
+          const discount = calculateDiscount(offerprice, oldPrice);
+          const image = product.images?.[0] || product.image || "";
 
           return (
             <div
@@ -130,21 +204,21 @@ function BestArrivals({ showCart = false }) {
                 onClick={(e) => toggleWishlist(e, product)}
                 aria-label="Wishlist"
               >
-                {wishlisted[product.id] ? <Heart size={20} fill="#ff4081" color="#ff4081" /> : <Heart size={20} strokeWidth={2.5} color="#555" />}
+                {wishlisted[product.id] ? <Heart size={16} fill="#ff4081" color="#ff4081" /> : <Heart size={16} color="#64748b" />}
               </button>
 
               {/* Discount tag */}
               {discount > 0 && (
-                <span className="sc-discount-tag" style={{ background: '#ff1a1a', borderRadius: '4px', padding: '3px 6px', fontSize: '0.65rem' }}>{discount}% OFF</span>
+                <span className="sc-discount-tag">{discount}% OFF</span>
               )}
 
               {/* Image */}
-              <div className="img-box" style={{ height: '140px', padding: '10px' }}>
-                <img src={image} alt={name} loading="lazy" style={{ objectFit: 'contain' }} />
+              <div className="img-box">
+                <img src={image} alt={name} loading="lazy" />
               </div>
 
               {/* Name */}
-              <div className="sc-name" style={{ fontSize: '0.85rem', fontWeight: '500', margin: '8px 0 4px 0', textAlign: 'center', color: '#333' }}>{name}</div>
+              <div className="sc-name">{name}</div>
 
               {/* Rating */}
               {ratings[product.id] && (
@@ -157,10 +231,13 @@ function BestArrivals({ showCart = false }) {
               )}
 
               {/* Price */}
-              <div className="sc-price-row" style={{ flexDirection: 'column', alignItems: 'center', gap: '2px', margin: '0 0 10px 0' }}>
-                <span className="sc-offer" style={{ fontSize: '1.05rem', fontWeight: '800' }}>₹{price.toLocaleString()}</span>
-                {oldPrice > price && (
-                  <span className="sc-mrp" style={{ fontSize: '0.75rem', color: '#888', textDecoration: 'line-through' }}>₹{oldPrice.toLocaleString()}</span>
+              <div className="sc-price-row">
+                <span className="sc-offer">₹{offerprice.toLocaleString()}</span>
+                {oldPrice > offerprice && (
+                  <span className="sc-mrp">₹{oldPrice.toLocaleString()}</span>
+                )}
+                {discount > 0 && (
+                  <span className="sc-off">{discount}% off</span>
                 )}
               </div>
               
@@ -168,26 +245,16 @@ function BestArrivals({ showCart = false }) {
               {showCart && (
                 <button
                   className="sc-add-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                  }}
-                  style={{ marginTop: 'auto' }}
+                  onClick={(e) => handleAddToCart(e, product, offerprice, image, name)}
                 >
-                  <ShoppingCart size={15} color="#94a3b8" /> Add to Cart
+                  <ShoppingCart size={14} /> {t("addToCart", "Add to Cart")}
                 </button>
               )}
             </div>
           );
         })}
       </div>
-
-      <button
-        onClick={() => scroll("right")}
-        style={scrollBtnStyle("right")}
-        aria-label="Scroll right"
-      >
-        ›
-      </button>
+      </div>
     </section>
   );
 }

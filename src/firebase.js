@@ -21,12 +21,10 @@ import {
 /* ================= STORAGE ================= */
 import { getStorage } from "firebase/storage";
 
-/* ================= AUTH ================= */
 import {
-  getAuth,
-  GoogleAuthProvider,
-  setPersistence,
+  initializeAuth,
   browserLocalPersistence,
+  GoogleAuthProvider,
   RecaptchaVerifier,
 } from "firebase/auth";
 
@@ -47,16 +45,11 @@ const app = initializeApp(firebaseConfig);
 /* ================= SERVICES ================= */
 const db = getFirestore(app);
 const storage = getStorage(app);
-const auth = getAuth(app);
+const auth = initializeAuth(app, {
+  persistence: browserLocalPersistence
+});
 
-/* ================= AUTH SETTINGS ================= */
-setPersistence(auth, browserLocalPersistence)
-  .then(() => {
-    console.log("Auth persistence enabled");
-  })
-  .catch((error) => {
-    console.error("Auth persistence error:", error);
-  });
+
 
 /* ================= PROVIDERS ================= */
 const googleProvider = new GoogleAuthProvider();
@@ -102,7 +95,7 @@ export {
   googleProvider,
   initializeRecaptcha,
   RecaptchaVerifier,
-  
+
   // Firestore helpers
   collection,
   getDocs,

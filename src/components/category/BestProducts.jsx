@@ -11,8 +11,10 @@ import { useDispatch } from "react-redux";
 import { addToCart } from "../../redux/cartSlice";
 import { Toast, ToastContainer } from "react-bootstrap";
 import Loading from "../../pages/Loading";
+import { useTranslation } from "react-i18next";
 
 function BestProducts() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -139,7 +141,7 @@ function BestProducts() {
                 onClick={(e) => toggleWishlist(e, product)}
                 aria-label="Wishlist"
               >
-                {wishlisted[product.id] ? <Heart size={20} fill="#ff4081" color="#ff4081" /> : <Heart size={20} strokeWidth={2.5} color="#555" />}
+                {wishlisted[product.id] ? <Heart size={16} fill="#ff4081" color="#ff4081" /> : <Heart size={16} color="#64748b" />}
               </button>
               {discount > 0 && <span className="bs-discount-tag">{discount}% OFF</span>}
 
@@ -163,8 +165,11 @@ function BestProducts() {
               {/* Price Info */}
               <div className="bs-price-row">
                 <span className="bs-offer">₹{offerprice.toLocaleString()}</span>
-                {price !== offerprice && (
+                {price > offerprice && (
                   <span className="bs-mrp">₹{price.toLocaleString()}</span>
+                )}
+                {discount > 0 && (
+                  <span className="bs-off">{discount}% off</span>
                 )}
               </div>
 
@@ -172,7 +177,7 @@ function BestProducts() {
                 className="bs-add-btn"
                 onClick={(e) => handleAddToCart(e, product)}
               >
-                <ShoppingCart size={15} color="#94a3b8" /> Add to Cart
+                <ShoppingCart size={14} /> {t("addToCart", "Add to Cart")}
               </button>
             </div>
           );
@@ -182,33 +187,103 @@ function BestProducts() {
       {loading && products.length === 0 && <Loading />}
       {loading && products.length > 0 && (
         <div style={{ textAlign: "center", padding: "16px" }}>
-          <div className="spinner-border spinner-border-sm text-secondary" />
+          <Loading small inline />
         </div>
       )}
 
       {!loading && lastDoc && (
-        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "4px", paddingBottom: "8px", paddingRight: "16px" }}>
+        <div className="d-flex flex-column align-items-end mt-1 mb-0 px-1 position-relative ms-auto" style={{ width: 'fit-content' }}>
+          {/* Animated Popup Tooltip Badge */}
+          <div className="view-more-tooltip-badge me-1">
+            <span>Discover More Products!</span>
+          </div>
+
+          {/* View All Button matching user screenshot */}
           <button 
             onClick={loadMore} 
-            style={{ 
-              background: "none", 
-              color: "#2874f0", 
-              border: "none", 
-              fontWeight: "600",
-              fontSize: "0.95rem",
-              cursor: "pointer",
-              padding: "8px 16px",
-              display: "flex",
-              alignItems: "center",
-              gap: "4px"
-            }}
-            onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
-            onMouseOut={(e) => e.target.style.textDecoration = 'none'}
+            className="view-all-link-btn d-flex align-items-center gap-1"
           >
-            View More &rarr;
+            <span>{t("home.viewAll", "View All")}</span>
+            <span className="view-all-arrow">→</span>
           </button>
         </div>
       )}
+
+      <style>{`
+        .view-more-tooltip-badge {
+          position: relative;
+          background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
+          color: #ffffff;
+          font-weight: 700;
+          font-size: 0.68rem;
+          padding: 3px 10px;
+          border-radius: 6px;
+          box-shadow: 0 4px 14px rgba(217, 70, 239, 0.35);
+          margin-bottom: 3px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          animation: tooltipShake 3.2s infinite cubic-bezier(0.36, 0.07, 0.19, 0.97);
+          transform-origin: center bottom;
+          white-space: nowrap;
+          letter-spacing: 0.02em;
+        }
+
+        .view-more-tooltip-badge::after {
+          content: "";
+          position: absolute;
+          bottom: -5px;
+          right: 20px;
+          width: 0;
+          height: 0;
+          border-left: 5px solid transparent;
+          border-right: 5px solid transparent;
+          border-top: 5px solid #d946ef;
+        }
+
+        @keyframes tooltipShake {
+          0%, 80%, 100% {
+            transform: translateY(0) rotate(0deg);
+          }
+          85% {
+            transform: translateY(-2px) rotate(-3deg);
+          }
+          90% {
+            transform: translateY(-2px) rotate(3deg);
+          }
+          95% {
+            transform: translateY(-1px) rotate(-1.5deg);
+          }
+        }
+
+        .view-all-link-btn {
+          background: transparent !important;
+          color: #8b5cf6 !important;
+          border: none !important;
+          font-weight: 700 !important;
+          font-size: 0.85rem !important;
+          cursor: pointer !important;
+          padding: 2px 4px !important;
+          transition: all 0.2s ease-in-out !important;
+          display: flex !important;
+          align-items: center !important;
+          gap: 3px !important;
+        }
+
+        .view-all-link-btn:hover {
+          color: #7c3aed !important;
+        }
+
+        .view-all-link-btn:hover .view-all-arrow {
+          transform: translateX(3px);
+        }
+
+        .view-all-arrow {
+          font-size: 0.95rem;
+          font-weight: 700;
+          transition: transform 0.2s ease;
+        }
+      `}</style>
 
       <ToastContainer position="bottom-end" className="p-3">
         <Toast

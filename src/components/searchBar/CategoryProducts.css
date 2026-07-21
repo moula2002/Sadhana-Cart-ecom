@@ -31,14 +31,18 @@
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.dark-theme {
-  --glass-bg: rgba(30, 41, 59, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.05);
+.dark-theme,
+[data-bs-theme="dark"],
+[data-theme="dark"] {
+  --glass-bg: rgba(30, 41, 59, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.08);
   --text-primary: #f8fafc;
-  --text-secondary: #e2e8f0;
-  --bg-main: #020617;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --bg-main: #0f172a;
   --bg-card: #1e293b;
-  --shadow-premium: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+  --shadow-premium: 0 10px 30px -5px rgba(0, 0, 0, 0.4);
+  --shadow-hover: 0 20px 35px -5px rgba(0, 0, 0, 0.5), 0 0 15px rgba(99, 102, 241, 0.2);
 }
 
 .category-products-page {

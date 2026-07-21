@@ -7,6 +7,8 @@ import { collection, query, where, limit, getDocs } from "firebase/firestore";
 import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
 import { addToCart } from "../redux/cartSlice";
+import { useTheme } from "../context/ThemeContext";
+import { useTranslation } from "react-i18next";
 
 // Helper to get the first valid image URL (consistent with CategoryProducts.jsx)
 const getFirstImage = (product) => {
@@ -57,7 +59,9 @@ const getFirstImage = (product) => {
 };
 
 function ProductSuggestions({ currentProductId, category, subcategory }) {
+    const { t } = useTranslation();
     const dispatch = useDispatch();
+    const { isDark } = useTheme();
     const sliderRef = useRef(null);
 
     const scrollLeft = () => {
@@ -161,7 +165,7 @@ function ProductSuggestions({ currentProductId, category, subcategory }) {
         return (
             <div className="text-center py-5">
                 <Spinner animation="border" variant="primary" />
-                <p className="mt-3 text-muted">Finding similar products...</p>
+                <p className="mt-3 text-muted">{t("findingSimilarProducts", "Finding similar products...")}</p>
             </div>
         );
     }
@@ -173,12 +177,12 @@ function ProductSuggestions({ currentProductId, category, subcategory }) {
     return (
         <div className="mt-5 mb-5 similar-products-container">
             <div className="d-flex justify-content-between align-items-center mb-4">
-                <h3 className="fw-bold mb-0">Similar Products</h3>
+                <h3 className="fw-bold mb-0" style={{ color: isDark ? '#f8fafc' : '#111' }}>{t("similarProducts", "Similar Products")}</h3>
             </div>
 
             {filteredAndSorted.length === 0 ? (
                 <Alert variant="info" className="rounded-3 border-0 shadow-sm">
-                    No products found matching your current filters in this category.
+                    {t("noProductsFoundMatchingFilters", "No products found matching your current filters in this category.")}
                 </Alert>
             ) : (
                 <div className="position-relative">
@@ -186,20 +190,36 @@ function ProductSuggestions({ currentProductId, category, subcategory }) {
                     <button
                         onClick={scrollLeft}
                         type="button"
-                        className="btn btn-light rounded-circle shadow-sm border position-absolute start-0 top-50 translate-middle-y d-flex align-items-center justify-content-center"
-                        style={{ width: '40px', height: '40px', zIndex: 10, left: '-20px' }}
+                        className="btn rounded-circle shadow-sm border position-absolute start-0 top-50 translate-middle-y d-flex align-items-center justify-content-center"
+                        style={{
+                            width: '40px',
+                            height: '40px',
+                            zIndex: 10,
+                            left: '-20px',
+                            backgroundColor: isDark ? '#1e293b' : '#ffffff',
+                            borderColor: isDark ? '#334155' : '#e2e8f0',
+                            color: isDark ? '#f8fafc' : '#333'
+                        }}
                     >
-                        <i className="fas fa-chevron-left" style={{ fontSize: '14px', color: '#333' }}></i>
+                        <i className="fas fa-chevron-left" style={{ fontSize: '14px' }}></i>
                     </button>
 
                     {/* Right Scroll Arrow */}
                     <button
                         onClick={scrollRight}
                         type="button"
-                        className="btn btn-light rounded-circle shadow-sm border position-absolute end-0 top-50 translate-middle-y d-flex align-items-center justify-content-center"
-                        style={{ width: '40px', height: '40px', zIndex: 10, right: '-20px' }}
+                        className="btn rounded-circle shadow-sm border position-absolute end-0 top-50 translate-middle-y d-flex align-items-center justify-content-center"
+                        style={{
+                            width: '40px',
+                            height: '40px',
+                            zIndex: 10,
+                            right: '-20px',
+                            backgroundColor: isDark ? '#1e293b' : '#ffffff',
+                            borderColor: isDark ? '#334155' : '#e2e8f0',
+                            color: isDark ? '#f8fafc' : '#333'
+                        }}
                     >
-                        <i className="fas fa-chevron-right" style={{ fontSize: '14px', color: '#333' }}></i>
+                        <i className="fas fa-chevron-right" style={{ fontSize: '14px' }}></i>
                     </button>
 
                     <div
@@ -217,22 +237,6 @@ function ProductSuggestions({ currentProductId, category, subcategory }) {
                             const originalPrice = p.price && p.offerprice ? Number(p.price) : Math.round(finalPrice * 1.5);
                             const discountPercent = Math.round(((originalPrice - finalPrice) / originalPrice) * 100);
 
-                            // Randomize promotional tags to match mockup
-                            let promoText = "";
-                            let promoColor = "";
-                            if (idx % 3 === 0) {
-                                promoText = "Lowest price in the year";
-                                promoColor = "#15803d"; // Green
-                            } else if (idx % 3 === 1) {
-                                promoText = "Hot Deal";
-                                promoColor = "#b91c1c"; // Red
-                            } else {
-                                const offersCount = (idx % 2) + 2;
-                                const discountAmt = Math.round(finalPrice * 0.1);
-                                promoText = `₹${discountAmt} with ${offersCount} offers`;
-                                promoColor = "#1d4ed8"; // Blue
-                            }
-
                             return (
                                 <div
                                     key={p.id}
@@ -244,18 +248,18 @@ function ProductSuggestions({ currentProductId, category, subcategory }) {
                                         scrollSnapAlign: 'start'
                                     }}
                                 >
-                                    <Card className="h-100 border-0 shadow-sm" style={{ borderRadius: '16px', overflow: 'hidden' }}>
-                                        <Link to={`/product/${p.id}`} className="text-decoration-none text-dark" onClick={() => window.scrollTo(0, 0)}>
+                                    <Card className="h-100 border shadow-sm" style={{ borderRadius: '16px', overflow: 'hidden', backgroundColor: isDark ? '#1e293b' : '#ffffff', borderColor: isDark ? 'rgba(255,255,255,0.08)' : '#e5e7eb' }}>
+                                        <Link to={`/product/${p.id}`} className="text-decoration-none" onClick={() => window.scrollTo(0, 0)}>
                                             {/* Image Container with Badges */}
-                                            <div className="d-flex justify-content-center align-items-center p-3 position-relative" style={{ height: "200px", backgroundColor: '#f3f4f6' }}>
+                                            <div className="d-flex justify-content-center align-items-center p-3 position-relative" style={{ height: "200px", backgroundColor: '#ffffff', borderRadius: '12px 12px 0 0' }}>
                                                 {/* Bestseller Badge */}
                                                 {p.rating?.rate >= 4.0 && (
                                                     <Badge bg="primary" className="position-absolute top-0 start-0 m-2 px-2 py-1 rounded" style={{ fontSize: '0.65rem', fontWeight: '800' }}>
-                                                        Bestseller
+                                                        {t("bestseller", "Bestseller")}
                                                     </Badge>
                                                 )}
                                                 {/* Circular/Square Rating Badge at bottom-left */}
-                                                <div className="position-absolute bottom-0 start-0 m-2 px-2 py-0.5 rounded bg-white border d-flex align-items-center gap-1 shadow-sm" style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>
+                                                <div className="position-absolute bottom-0 start-0 m-2 px-2 py-0.5 rounded border d-flex align-items-center gap-1 shadow-sm" style={{ fontSize: '0.75rem', fontWeight: 'bold', backgroundColor: isDark ? '#0f172a' : '#ffffff', borderColor: isDark ? '#334155' : '#dee2e6', color: isDark ? '#f8fafc' : '#212529' }}>
                                                     <span>{(p.rating?.rate || 4.1).toFixed(1)}</span>
                                                     <FaStar className="text-success" size={10} />
                                                 </div>
@@ -266,33 +270,46 @@ function ProductSuggestions({ currentProductId, category, subcategory }) {
                                             </div>
 
                                             {/* Card Details */}
-                                            <Card.Body className="p-3 bg-white">
-                                                <Card.Title className="fw-semibold text-truncate mb-1 text-dark" style={{ fontSize: '0.9rem', color: '#333' }}>
-                                                    {p.name || p.title}
-                                                </Card.Title>
+                                            <Card.Body className="p-3 d-flex flex-column justify-content-between" style={{ backgroundColor: isDark ? '#1e293b' : '#ffffff' }}>
+                                                 <Card.Title className="fw-bold mb-1" style={{ fontSize: '0.92rem', color: isDark ? '#f8fafc' : '#0f172a', fontWeight: '800', lineHeight: '1.35', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', height: '2.5em' }}>
+                                                     {p.name || p.title}
+                                                 </Card.Title>
 
-                                                <div className="d-flex flex-column mb-2">
-                                                    {/* Discount percentage */}
-                                                    <span className="fw-bold text-success" style={{ fontSize: '13px' }}>
-                                                        {discountPercent}% OFF
-                                                    </span>
+                                                 {/* Pricing row */}
+                                                 <div className="d-flex align-items-baseline gap-2 mb-2">
+                                                     <span className="fw-bold" style={{ fontSize: '1.1rem', fontWeight: '800', color: isDark ? '#ffffff' : '#0f172a' }}>
+                                                         ₹{finalPrice.toLocaleString()}
+                                                     </span>
+                                                     {originalPrice > finalPrice && (
+                                                         <span className="text-decoration-line-through" style={{ fontSize: '0.8rem', color: isDark ? '#94a3b8' : '#64748b' }}>
+                                                             ₹{originalPrice.toLocaleString()}
+                                                         </span>
+                                                     )}
+                                                     {discountPercent > 0 && (
+                                                         <span className="fw-bold" style={{ fontSize: '0.78rem', color: isDark ? '#34d399' : '#059669' }}>
+                                                             {discountPercent}% {t("off", "off")}
+                                                         </span>
+                                                     )}
+                                                 </div>
 
-                                                    {/* Pricing row */}
-                                                    <div className="d-flex align-items-center gap-2">
-                                                        <span className="text-muted text-decoration-line-through" style={{ fontSize: '13px' }}>
-                                                            ₹{originalPrice.toLocaleString()}
-                                                        </span>
-                                                        <span className="fw-bold text-dark" style={{ fontSize: '15px' }}>
-                                                            ₹{finalPrice.toLocaleString()}
-                                                        </span>
-                                                    </div>
-                                                </div>
-
-                                                {/* Highlight offer promo text */}
-                                                <div className="fw-bold" style={{ fontSize: '12px', color: promoColor }}>
-                                                    {promoText}
-                                                </div>
-                                            </Card.Body>
+                                                 <button
+                                                     className="sc-add-btn mt-2"
+                                                     onClick={(e) => {
+                                                         e.preventDefault();
+                                                         e.stopPropagation();
+                                                         dispatch(addToCart({
+                                                             id: p.id,
+                                                             title: p.name || p.title,
+                                                             price: finalPrice,
+                                                             image: getFirstImage(p),
+                                                             quantity: 1,
+                                                         }));
+                                                         toast.success(t("addedToCartMsg", "Added {{name}} to cart!", { name: p.name || p.title }).replace("{{name}}", p.name || p.title), { position: "bottom-right", autoClose: 2000 });
+                                                     }}
+                                                 >
+                                                     <i className="fas fa-shopping-cart me-1"></i> {t("addToCart", "Add to Cart")}
+                                                 </button>
+                                             </Card.Body>
                                         </Link>
                                     </Card>
                                 </div>

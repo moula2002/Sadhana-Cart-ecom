@@ -8,9 +8,11 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { collection, addDoc, doc, updateDoc, getDocs, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebase";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import "./Profile.css"; // Reuse dashboard layout styles
 
 function SaveAddress() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const existingAddress = location.state?.address || null;
@@ -133,53 +135,53 @@ function SaveAddress() {
   }
 
   return (
-    <div className="profile-dashboard-wrapper" style={{ background: "#f8f9fa", padding: "20px" }}>
-      <div className="profile-dashboard-container" style={{ maxWidth: "1200px", margin: "0 auto", border: "1px solid #e0e0e0", borderRadius: "10px", overflow: "hidden", background: "white" }}>
+    <div className="profile-dashboard-wrapper" style={{ padding: "20px" }}>
+      <div className="profile-dashboard-container address-container" style={{ maxWidth: "1200px", margin: "0 auto", borderRadius: "10px", overflow: "hidden" }}>
         
         {/* Title */}
-        <div className="profile-title-header d-flex align-items-center" style={{ gap: "12px", background: "#0a45bd", color: "white", padding: "16px 24px", margin: 0, borderRadius: '10px 10px 0 0' }}>
+        <div className="profile-title-header d-flex align-items-center" style={{ gap: "12px", padding: "16px 24px", margin: 0, borderRadius: '10px 10px 0 0' }}>
 
-          <h2 style={{ color: "white", margin: 0, fontSize: "20px", fontWeight: "bold" }}>Address Management Page</h2>
+          <h2 style={{ margin: 0, fontSize: "20px", fontWeight: "bold" }}>{t("addressManagement", "Address Management Page")}</h2>
         </div>
 
         {/* Outer Dashboard Grid */}
-        <div className="dashboard-grid-layout" style={{ margin: 0, borderRadius: "0 0 10px 10px", background: "white", gap: 0 }}>
+        <div className="dashboard-grid-layout" style={{ margin: 0, borderRadius: "0 0 10px 10px", gap: 0 }}>
           
           {/* Sidebar Menu */}
-          <div className="dashboard-sidebar" style={{ borderRight: "1px solid #e0e0e0", padding: "24px 16px", minHeight: "600px", borderRadius: 0, marginTop: 0 }}>
-            <h6 style={{ fontWeight: '700', color: '#1a202c', marginBottom: '20px', paddingLeft: '12px', fontSize: '15px' }}>My Account</h6>
+          <div className="dashboard-sidebar" style={{ padding: "24px 16px", minHeight: "600px", borderRadius: 0, marginTop: 0 }}>
+            <h6 className="sidebar-title" style={{ fontWeight: '700', marginBottom: '20px', paddingLeft: '12px', fontSize: '15px' }}>{t("myAccount", "My Account")}</h6>
             <ul className="sidebar-menu-list" style={{ marginTop: "0" }}>
               <li className="sidebar-menu-item" onClick={() => navigate("/profile")}>
                 <FaUser className="menu-icon" />
-                <span>My Profile</span>
+                <span>{t("myProfile", "My Profile")}</span>
               </li>
               <li className="sidebar-menu-item" onClick={() => navigate("/orders")}>
                 <FaShoppingBag className="menu-icon" />
-                <span>My Orders</span>
+                <span>{t("myOrders", "My Orders")}</span>
               </li>
               <li className="sidebar-menu-item" onClick={() => navigate("/wishlist")}>
                 <FaHeart className="menu-icon" />
-                <span>Wishlist</span>
+                <span>{t("wishlistLabel", "Wishlist")}</span>
               </li>
-              <li className="sidebar-menu-item active" onClick={() => navigate("/save-address")} style={{ background: "#e8f0fe", color: "#0a45bd", borderRadius: "6px" }}>
-                <FaMapMarkerAlt className="menu-icon" style={{ color: "#0a45bd" }} />
-                <span style={{ fontWeight: "bold" }}>My Addresses</span>
+              <li className="sidebar-menu-item active" onClick={() => navigate("/save-address")}>
+                <FaMapMarkerAlt className="menu-icon" />
+                <span style={{ fontWeight: "bold" }}>{t("myAddresses", "My Addresses")}</span>
               </li>
               <li className="sidebar-menu-item">
                 <FaGift className="menu-icon" />
-                <span>Sadhana Rewards</span>
+                <span>{t("home.sadhanaRewardsPromo", "Sadhana Rewards")}</span>
               </li>
               <li className="sidebar-menu-item">
                 <FaCreditCard className="menu-icon" />
-                <span>Payment Methods</span>
+                <span>{t("paymentMethods", "Payment Methods")}</span>
               </li>
               <li className="sidebar-menu-item">
                 <FaCog className="menu-icon" />
-                <span>Account Settings</span>
+                <span>{t("accountSettings", "Account Settings")}</span>
               </li>
               <li className="sidebar-menu-item logout-item" onClick={handleLogoutClick} style={{ marginTop: "40px" }}>
                 <FaSignOutAlt className="menu-icon" />
-                <span>Logout</span>
+                <span>{t("logout", "Logout")}</span>
               </li>
             </ul>
           </div>
@@ -188,27 +190,28 @@ function SaveAddress() {
           <div className="dashboard-main-content" style={{ padding: "32px", display: "block", width: "100%" }}>
             
             <div className="mb-4">
-              <h4 className="fw-bold m-0" style={{ fontSize: "18px", color: '#111827' }}>
-                {existingAddress ? "Edit Address" : "Add New Address"}
+              <h4 className="fw-bold m-0 order-num-id" style={{ fontSize: "18px" }}>
+                {existingAddress ? t("editAddress", "Edit Address") : t("addNewAddress", "Add New Address")}
               </h4>
             </div>
 
             <Form onSubmit={handleSave} style={{ maxWidth: '800px' }}>
               
               <div className="mb-4">
-                <label style={{ fontSize: "14px", fontWeight: "600", color: "#4b5563", marginBottom: "12px", display: "block" }}>Address Type</label>
+                <label className="form-group label" style={{ fontSize: "14px", fontWeight: "600", marginBottom: "12px", display: "block" }}>{t("addressType", "Address Type")}</label>
                 <div className="d-flex gap-3 flex-wrap">
-                  {["Home", "Work", "Other"].map((type) => (
+                  {[{key: "Home", label: t("homeLabel", "Home")}, {key: "Work", label: t("workLabel", "Work")}, {key: "Other", label: t("otherLabel", "Other")}].map((type) => (
                     <div
-                      key={type}
-                      onClick={() => setAddressType(type)}
+                      key={type.key}
+                      className={addressType === type.key ? "address-type-option active" : "address-type-option"}
+                      onClick={() => setAddressType(type.key)}
                       style={{
                         padding: "10px 24px",
                         border: addressType === type ? "1px solid #0a45bd" : "1px solid #e5e7eb",
                         borderRadius: "8px",
                         cursor: "pointer",
-                        backgroundColor: addressType === type ? "#eff4ff" : "white",
-                        color: addressType === type ? "#0a45bd" : "#4b5563",
+                        backgroundColor: addressType === type.key ? "#eff4ff" : "white",
+                        color: addressType === type.key ? "#0a45bd" : "#4b5563",
                         fontWeight: "600",
                         fontSize: "14px",
                         display: "flex",
@@ -217,10 +220,10 @@ function SaveAddress() {
                         transition: "all 0.2s"
                       }}
                     >
-                      {type === "Home" && <FaHome />}
-                      {type === "Work" && <FaBriefcase />}
-                      {type === "Other" && <FaMapMarkerAlt />}
-                      {type}
+                      {type.key === "Home" && <FaHome />}
+                      {type.key === "Work" && <FaBriefcase />}
+                      {type.key === "Other" && <FaMapMarkerAlt />}
+                      {type.label}
                     </div>
                   ))}
                 </div>
@@ -228,22 +231,22 @@ function SaveAddress() {
 
               <Row>
                 <Col md={6} className="mb-3">
-                  <Form.Group>
-                    <Form.Label style={{ fontSize: "13px", fontWeight: "600", color: "#4b5563" }}>Full Name *</Form.Label>
+                  <Form.Group className="form-group">
+                    <Form.Label>{t("fullName", "Full Name")} *</Form.Label>
                     <Form.Control
                       type="text"
                       name="fullName"
                       value={formData.fullName}
                       onChange={handleChange}
                       required
-                      placeholder="e.g. John Doe"
+                      placeholder={t("fullNamePlaceholder", "e.g. John Doe")}
                       style={{ padding: "10px 14px", borderRadius: "6px", fontSize: "14px" }}
                     />
                   </Form.Group>
                 </Col>
                 <Col md={6} className="mb-3">
-                  <Form.Group>
-                    <Form.Label style={{ fontSize: "13px", fontWeight: "600", color: "#4b5563" }}>Phone Number (10 digits) *</Form.Label>
+                  <Form.Group className="form-group">
+                    <Form.Label>{t("phoneNumberLabel", "Phone Number (10 digits)")} *</Form.Label>
                     <div className="d-flex align-items-center">
                       <span style={{ padding: "9px 14px", background: "#f3f4f6", border: "1px solid #ced4da", borderRight: "none", borderRadius: "6px 0 0 6px", fontSize: "14px", color: "#4b5563", fontWeight: "500" }}>
                         +91
@@ -255,7 +258,7 @@ function SaveAddress() {
                         onChange={handlePhoneChange}
                         maxLength={10}
                         required
-                        placeholder="Mobile Number"
+                        placeholder={t("mobileNumberPlaceholder", "Mobile Number")}
                         style={{ padding: "10px 14px", borderRadius: "0 6px 6px 0", fontSize: "14px" }}
                       />
                     </div>
@@ -265,28 +268,28 @@ function SaveAddress() {
 
               <Row>
                 <Col md={6} className="mb-3">
-                  <Form.Group>
-                    <Form.Label style={{ fontSize: "13px", fontWeight: "600", color: "#4b5563" }}>Email (Optional)</Form.Label>
+                  <Form.Group className="form-group">
+                    <Form.Label>{t("emailOptional", "Email (Optional)")}</Form.Label>
                     <Form.Control
                       type="email"
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
-                      placeholder="e.g. email@example.com"
+                      placeholder={t("emailPlaceholder", "e.g. email@example.com")}
                       style={{ padding: "10px 14px", borderRadius: "6px", fontSize: "14px" }}
                     />
                   </Form.Group>
                 </Col>
                 <Col md={6} className="mb-3">
-                  <Form.Group>
-                    <Form.Label style={{ fontSize: "13px", fontWeight: "600", color: "#4b5563" }}>Street Address *</Form.Label>
+                  <Form.Group className="form-group">
+                    <Form.Label>{t("streetAddress", "Street Address")} *</Form.Label>
                     <Form.Control
                       type="text"
                       name="street"
                       value={formData.street}
                       onChange={handleChange}
                       required
-                      placeholder="House No, Building, Street Area"
+                      placeholder={t("streetAddressPlaceholder", "House No, Building, Street Area")}
                       style={{ padding: "10px 14px", borderRadius: "6px", fontSize: "14px" }}
                     />
                   </Form.Group>
@@ -295,27 +298,27 @@ function SaveAddress() {
 
               <Row>
                 <Col md={6} className="mb-3">
-                  <Form.Group>
-                    <Form.Label style={{ fontSize: "13px", fontWeight: "600", color: "#4b5563" }}>Apartment, Suite, etc (Optional)</Form.Label>
+                  <Form.Group className="form-group">
+                    <Form.Label>{t("apartmentOptional", "Apartment, Suite, etc (Optional)")}</Form.Label>
                     <Form.Control
                       type="text"
                       name="apartment"
                       value={formData.apartment}
                       onChange={handleChange}
-                      placeholder="Apartment or Suite number"
+                      placeholder={t("apartmentPlaceholder", "Apartment or Suite number")}
                       style={{ padding: "10px 14px", borderRadius: "6px", fontSize: "14px" }}
                     />
                   </Form.Group>
                 </Col>
                 <Col md={6} className="mb-3">
-                  <Form.Group>
-                    <Form.Label style={{ fontSize: "13px", fontWeight: "600", color: "#4b5563" }}>Landmark (Optional)</Form.Label>
+                  <Form.Group className="form-group">
+                    <Form.Label>{t("landmarkOptional", "Landmark (Optional)")}</Form.Label>
                     <Form.Control
                       type="text"
                       name="landmark"
                       value={formData.landmark}
                       onChange={handleChange}
-                      placeholder="E.g. near Apollo Hospital"
+                      placeholder={t("landmarkPlaceholder", "E.g. near Apollo Hospital")}
                       style={{ padding: "10px 14px", borderRadius: "6px", fontSize: "14px" }}
                     />
                   </Form.Group>
@@ -324,29 +327,29 @@ function SaveAddress() {
 
               <Row>
                 <Col md={6} className="mb-3">
-                  <Form.Group>
-                    <Form.Label style={{ fontSize: "13px", fontWeight: "600", color: "#4b5563" }}>City *</Form.Label>
+                  <Form.Group className="form-group">
+                    <Form.Label>{t("city", "City")} *</Form.Label>
                     <Form.Control
                       type="text"
                       name="city"
                       value={formData.city}
                       onChange={handleChange}
                       required
-                      placeholder="City Name"
+                      placeholder={t("cityName", "City Name")}
                       style={{ padding: "10px 14px", borderRadius: "6px", fontSize: "14px" }}
                     />
                   </Form.Group>
                 </Col>
                 <Col md={6} className="mb-3">
-                  <Form.Group>
-                    <Form.Label style={{ fontSize: "13px", fontWeight: "600", color: "#4b5563" }}>State *</Form.Label>
+                  <Form.Group className="form-group">
+                    <Form.Label>{t("state", "State")} *</Form.Label>
                     <Form.Control
                       type="text"
                       name="state"
                       value={formData.state}
                       onChange={handleChange}
                       required
-                      placeholder="State Name"
+                      placeholder={t("stateName", "State Name")}
                       style={{ padding: "10px 14px", borderRadius: "6px", fontSize: "14px" }}
                     />
                   </Form.Group>
@@ -355,8 +358,8 @@ function SaveAddress() {
 
               <Row>
                 <Col md={6} className="mb-4">
-                  <Form.Group>
-                    <Form.Label style={{ fontSize: "13px", fontWeight: "600", color: "#4b5563" }}>Country *</Form.Label>
+                  <Form.Group className="form-group">
+                    <Form.Label>{t("country", "Country")} *</Form.Label>
                     <Form.Select
                       name="country"
                       value={formData.country}
@@ -364,20 +367,20 @@ function SaveAddress() {
                       required
                       style={{ padding: "10px 14px", borderRadius: "6px", fontSize: "14px" }}
                     >
-                      <option value="India">India</option>
+                      <option value="India">{t("india", "India")}</option>
                     </Form.Select>
                   </Form.Group>
                 </Col>
                 <Col md={6} className="mb-4">
-                  <Form.Group>
-                    <Form.Label style={{ fontSize: "13px", fontWeight: "600", color: "#4b5563" }}>ZIP / PIN Code *</Form.Label>
+                  <Form.Group className="form-group">
+                    <Form.Label>{t("zipCodeLabel", "ZIP / PIN Code")} *</Form.Label>
                     <Form.Control
                       type="text"
                       name="zip"
                       value={formData.zip}
                       onChange={handleChange}
                       required
-                      placeholder="e.g. 560038"
+                      placeholder={t("zipPlaceholder", "e.g. 560038")}
                       style={{ padding: "10px 14px", borderRadius: "6px", fontSize: "14px" }}
                     />
                   </Form.Group>
@@ -390,7 +393,7 @@ function SaveAddress() {
                   onClick={() => navigate("/save-address")}
                   style={{ fontWeight: "600", padding: "10px 24px", borderRadius: "6px" }}
                 >
-                  Cancel
+                  {t("cancel", "Cancel")}
                 </Button>
                 <Button 
                   type="submit" 
@@ -400,7 +403,7 @@ function SaveAddress() {
                 >
                   {loading ? (
                     <Spinner size="sm" animation="border" />
-                  ) : existingAddress ? "Update Address" : "Save Address"}
+                  ) : existingAddress ? t("updateAddress", "Update Address") : t("saveAddress", "Save Address")}
                 </Button>
               </div>
 

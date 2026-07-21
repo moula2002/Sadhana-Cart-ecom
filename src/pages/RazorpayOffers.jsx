@@ -3,8 +3,10 @@ import { db } from "../firebase";
 import { collection, getDocs } from "firebase/firestore";
 import { Card, Badge, Spinner, Row, Col, Alert, Button } from "react-bootstrap";
 import { FaTag, FaUniversity, FaInfoCircle, FaGift, FaCopy } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 
 function RazorpayOffers({ hideApplyButton = false }) {
+  const { t } = useTranslation();
   const [offers, setOffers] = useState([]);
   const [coupons, setCoupons] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,7 +15,7 @@ function RazorpayOffers({ hideApplyButton = false }) {
   const handleCopyCode = (code) => {
     navigator.clipboard.writeText(code);
     setCopiedCode(code);
-    alert(`✅ Code "${code}" copied to clipboard! Apply it at checkout.`);
+    alert(t("codeCopied", "✅ Code '{{code}}' copied to clipboard! Apply it at checkout.", { code }).replace("{{code}}", code));
     setTimeout(() => setCopiedCode(null), 3000);
   };
 
@@ -58,7 +60,7 @@ function RazorpayOffers({ hideApplyButton = false }) {
       <div className="d-flex justify-content-center align-items-center py-5">
         <Spinner animation="border" variant="primary" />
         <span className="ms-3 fw-semibold fs-5 text-primary">
-          Loading special offers...
+          {t("loadingSpecialOffers", "Loading special offers...")}
         </span>
       </div>
     );
@@ -81,10 +83,10 @@ function RazorpayOffers({ hideApplyButton = false }) {
             <span className="bg-danger bg-opacity-10 p-2 rounded-circle me-2 d-flex align-items-center justify-content-center">
               <FaGift className="text-danger" size={18} />
             </span>
-            Exclusive Bank Offers
+            {t("exclusiveBankOffers", "Exclusive Bank Offers")}
           </h5>
           <p className="small mt-1 mb-0 ms-0 ms-md-4 ps-md-2 py-0 text-muted" style={{ borderLeft: "2px solid #0d6efd", fontSize: "0.8rem" }}>
-            Maximize your savings with our verified partner banks.
+            {t("maximizeSavings", "Maximize your savings with our verified partner banks.")}
           </p>
         </div>
       </Card.Header>
@@ -93,7 +95,7 @@ function RazorpayOffers({ hideApplyButton = false }) {
         {offers.length === 0 ? (
           <Alert variant="info" className="border-0 rounded-3 text-center mt-2 shadow-sm py-4">
             <FaInfoCircle size={24} className="mb-2 text-info opacity-75" /><br />
-            <span className="fw-semibold text-dark" style={{ fontSize: "0.9rem" }}>No offers available at the moment.</span>
+            <span className="fw-semibold text-dark" style={{ fontSize: "0.9rem" }}>{t("noOffersAvailable", "No offers available at the moment.")}</span>
           </Alert>
         ) : (
           <Row className="g-4 mt-2">
@@ -112,7 +114,7 @@ function RazorpayOffers({ hideApplyButton = false }) {
                   <Card.Body className="p-3 d-flex flex-column z-1">
                     <div className="d-flex justify-content-between align-items-start mb-3">
                       <Badge bg="primary" className="px-2 py-1 rounded-pill fw-semibold shadow-sm text-uppercase tracking-wide" style={{ fontSize: "0.65rem", letterSpacing: "0.5px" }}>
-                        <FaTag className="me-1" /> {offer.offerName || "Special Deal"}
+                        <FaTag className="me-1" /> {offer.offerName || t("specialDeal", "Special Deal")}
                       </Badge>
                     </div>
 
@@ -123,7 +125,7 @@ function RazorpayOffers({ hideApplyButton = false }) {
                       >
                         <FaUniversity className="text-primary" size={18} />
                       </span>
-                      <span style={{ lineHeight: "1.3", fontSize: "0.95rem" }}>{offer.bankName || offer.bank_name || offer.bank || "Partner Bank"}</span>
+                      <span style={{ lineHeight: "1.3", fontSize: "0.95rem" }}>{offer.bankName || offer.bank_name || offer.bank || t("partnerBank", "Partner Bank")}</span>
                     </h6>
 
                     <div
@@ -153,9 +155,9 @@ function RazorpayOffers({ hideApplyButton = false }) {
                         variant="outline-primary"
                         size="sm"
                         className="fw-bold px-3 rounded-pill"
-                        onClick={() => alert("Bank offers are automatically processed at the Razorpay Payment screen. Proceed to checkout to avail this deal!")}
+                        onClick={() => alert(t("bankOfferAlert", "Bank offers are automatically processed at the Razorpay Payment screen. Proceed to checkout to avail this deal!"))}
                       >
-                        APPLY OFFER
+                        {t("applyOffer", "APPLY OFFER")}
                       </Button>
                     )}
                   </Card.Footer>
@@ -175,10 +177,10 @@ function RazorpayOffers({ hideApplyButton = false }) {
             <span className="bg-success bg-opacity-10 p-2 rounded-circle me-2 d-flex align-items-center justify-content-center">
               <FaTag className="text-success" size={18} />
             </span>
-            Available Coupons
+            {t("availableCoupons", "Available Coupons")}
           </h5>
           <p className="small mt-1 mb-0 ms-0 ms-md-4 ps-md-2 py-0 text-muted" style={{ borderLeft: "2px solid #198754", fontSize: "0.8rem" }}>
-            Get special discounts on your order!
+            {t("getSpecialDiscounts", "Get special discounts on your order!")}
           </p>
         </div>
       </Card.Header>
@@ -187,7 +189,7 @@ function RazorpayOffers({ hideApplyButton = false }) {
         {coupons.length === 0 ? (
           <Alert variant="info" className="border-0 rounded-3 text-center mt-2 shadow-sm py-4">
             <FaInfoCircle size={24} className="mb-2 text-info opacity-75" /><br />
-            <span className="fw-semibold text-dark" style={{ fontSize: "0.9rem" }}>No coupons available at the moment.</span>
+            <span className="fw-semibold text-dark" style={{ fontSize: "0.9rem" }}>{t("noCouponsAvailable", "No coupons available at the moment.")}</span>
           </Alert>
         ) : (
           <Row className="g-4 mt-2">
@@ -219,7 +221,7 @@ function RazorpayOffers({ hideApplyButton = false }) {
                           {coupon.discountType === "flat" ? "₹" : ""}{coupon.discountValue || coupon.discountPercent || 0}{coupon.discountType !== "flat" ? "%" : ""}
                         </span>
                       </span>
-                      <span style={{ lineHeight: "1.3", fontSize: "0.95rem" }}>{coupon.title || coupon.description || "Discount on your order"}</span>
+                      <span style={{ lineHeight: "1.3", fontSize: "0.95rem" }}>{coupon.title || coupon.description || t("discountOnYourOrder", "Discount on your order")}</span>
                     </h6>
 
                     <div
@@ -238,8 +240,8 @@ function RazorpayOffers({ hideApplyButton = false }) {
                         className="fw-bold px-3 rounded-pill"
                         onClick={() => handleCopyCode(coupon.code)}
                       >
-                        {copiedCode === coupon.code ? "COPIED!" : (
-                          <><FaCopy className="me-1" /> COPY</>
+                        {copiedCode === coupon.code ? t("copied", "COPIED!") : (
+                          <><FaCopy className="me-1" /> {t("copy", "COPY")}</>
                         )}
                       </Button>
                     </div>

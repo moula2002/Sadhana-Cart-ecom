@@ -1216,7 +1216,7 @@ const CheckoutPage = () => {
                       className="d-flex align-items-center fw-semibold px-3 py-2 shadow-sm rounded-pill"
                       onClick={() => setShowSavedAddressesList(true)}
                     >
-                      <FaAddressBook className="me-2" /> Select Saved Address
+                      <FaAddressBook className="me-2" /> {t("checkout.selectSavedAddress", "Select Saved Address")}
                     </Button>
                     <Button
                       variant="outline-secondary"
@@ -1241,7 +1241,7 @@ const CheckoutPage = () => {
               {showSavedAddressesList && (
                 <div className="mb-4 p-3 border rounded theme-address-form position-relative">
                   <div className="d-flex justify-content-between align-items-center mb-3">
-                    <h5 className="fw-bold mb-0 text-dark">Select Saved Address</h5>
+                    <h5 className="fw-bold mb-0 text-dark">{t("checkout.selectSavedAddress", "Select Saved Address")}</h5>
                     <Button
                       variant="link"
                       className="text-danger p-0 text-decoration-none fw-bold"
@@ -1398,7 +1398,7 @@ const CheckoutPage = () => {
                         <Form.Label className="theme-form-label">{t("checkout.city")} *</Form.Label>
                         <Form.Control
                           type="text"
-                          placeholder="City"
+                          placeholder={t("checkout.cityPlaceholder", "City")}
                           required
                           value={billingDetails.city}
                           onChange={handleInputChange}
@@ -1411,7 +1411,7 @@ const CheckoutPage = () => {
                         <Form.Label className="theme-form-label">{t("checkout.pincode")} *</Form.Label>
                         <Form.Control
                           type="text"
-                          placeholder="PIN code"
+                          placeholder={t("checkout.pinPlaceholder", "PIN code")}
                           required
                           value={billingDetails.pincode}
                           onChange={handleInputChange}
@@ -1437,7 +1437,7 @@ const CheckoutPage = () => {
                       </div>
                       <div className="flex-grow-1">
                         <h6 className="fw-bold mb-0 text-dark">Razorpay</h6>
-                        <small className="text-muted">Cards, UPI & Wallets</small>
+                        <small className="text-muted">{t("checkout.cardsUpiWallets", "Cards, UPI & Wallets")}</small>
                       </div>
                       <div>
                         <Form.Check
@@ -1458,8 +1458,8 @@ const CheckoutPage = () => {
                         <FaMoneyBillWave />
                       </div>
                       <div className="flex-grow-1">
-                        <h6 className="fw-bold mb-0 text-dark">Cash on Delivery</h6>
-                        <small className="text-muted">Pay when you receive</small>
+                        <h6 className="fw-bold mb-0 text-dark">{t("checkout.cashOnDelivery", "Cash on Delivery")}</h6>
+                        <small className="text-muted">{t("checkout.payWhenReceive", "Pay when you receive")}</small>
                       </div>
                       <div>
                         <Form.Check
@@ -1598,10 +1598,10 @@ const CheckoutPage = () => {
                         </small>
                       )}
                       <small className="d-block theme-text-secondary">
-                        Quantity: {item.quantity || 1}
+                        {t("checkout.quantityText", "Quantity: ")}{item.quantity || 1}
                       </small>
                       <small className="d-block theme-text-secondary">
-                        Price per item: {formatPrice(item.price || 0)}
+                        {t("checkout.pricePerItem", "Price per item: ")}{formatPrice(item.price || 0)}
                       </small>
                       <span className="fw-bold theme-price">
                         Total:{" "}
@@ -1646,7 +1646,7 @@ const CheckoutPage = () => {
                     >
                       <div className="d-flex align-items-center text-white">
                         <FaTags size={20} className="me-3" />
-                        <span className="fw-bold fs-6 tracking-wide">View All Coupons & Offers</span>
+                        <span className="fw-bold fs-6 tracking-wide">{t("checkout.viewCoupons", "View All Coupons & Offers")}</span>
                       </div>
                       <FaChevronRight className="text-white opacity-75" />
                     </Button>

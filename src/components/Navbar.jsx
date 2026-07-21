@@ -6,13 +6,16 @@ import { Navbar, Nav, Container, Button, Modal, Badge, Dropdown, Offcanvas } fro
 import { motion, AnimatePresence } from "framer-motion";
 
 import AuthPage from "../pages/LoginPage";
+import Loading from "../pages/Loading";
+import { syncLocalStorageToFirestore } from "../services/recentlyViewedService";
+import FilterOffcanvas from "./searchBar/FilterOffcanvas";
 
 
 import {
   FiUser, FiMapPin, FiPackage, FiHeart, FiCreditCard,
-  FiGrid, FiTag, FiStar, FiHelpCircle, FiMessageCircle,
+  FiGrid, FiList, FiTag, FiStar, FiHelpCircle, FiMessageCircle,
   FiPhone, FiInfo, FiShield, FiFileText, FiRefreshCcw,
-  FiMoon, FiSun, FiInstagram, FiFacebook, FiYoutube, FiLogOut
+  FiMoon, FiSun, FiInstagram, FiFacebook, FiYoutube, FiLogOut, FiSearch, FiLock
 } from "react-icons/fi";
 
 import "./Navbar.css";
@@ -21,16 +24,29 @@ import logo from "../Images/Sadhanacart1.png";
 import cartGif from "../Images/shopping-cart icon.gif";
 import LanguageSwitcher from "../language/LanguageSwitcher";
 import { useTranslation } from "react-i18next";
+import { useTheme } from "../context/ThemeContext";
 
-// Firebase
-import { db } from "../firebase";
+import { db, auth } from "../firebase";
 import { collection, query, getDocs, orderBy, limit, where, doc, getDoc, onSnapshot } from "firebase/firestore";
-import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+const EMPTY_ARRAY = [];
 
-const auth = getAuth();
 /* ---------------- MODALS ---------------- */
 const LoginConfirmationModal = ({ show, onClose, userName }) => {
   const { t } = useTranslation();
+
+  const [greeting, setGreeting] = useState({ text: "Welcome", icon: "👋" });
+
+  useEffect(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) {
+      setGreeting({ text: "Good Morning", icon: "🌅" });
+    } else if (hour < 17) {
+      setGreeting({ text: "Good Afternoon", icon: "☀️" });
+    } else {
+      setGreeting({ text: "Good Evening", icon: "🌙" });
+    }
+  }, [show]);
 
   return (
     <Modal show={show} onHide={onClose} centered className="login-success-modal">
@@ -46,14 +62,17 @@ const LoginConfirmationModal = ({ show, onClose, userName }) => {
               <motion.div
                 initial={{ scale: 0.5 }}
                 animate={{ scale: 1 }}
-                className="text-success mb-4"
+                className="mb-3"
+                style={{ fontSize: "3.5rem" }}
               >
-                <i className="fas fa-check-circle fa-3x"></i>
+                {greeting.icon}
               </motion.div>
-              <h4 className="mb-2 fw-bolder text-dark">{t("welcomeBack")}</h4>
+              <h3 className="mb-2 fw-bolder text-dark">
+                {greeting.text}, <span className="text-primary">{userName || "User"}</span>!
+              </h3>
               <p className="text-muted mt-3 mb-0">
-                {t("hello")} <span className="fw-bold text-primary">{userName}</span>! <br />
-                {t("signedIn")}
+                You have successfully signed in. <br />
+                Ready to explore new deals?
               </p>
             </Modal.Body>
           </motion.div>
@@ -63,8 +82,20 @@ const LoginConfirmationModal = ({ show, onClose, userName }) => {
   );
 };
 
-const LogoutConfirmationModal = ({ show, onClose }) => {
+const LogoutConfirmationModal = ({ show, onClose, userName }) => {
   const { t } = useTranslation();
+  const [greeting, setGreeting] = useState({ text: "Goodbye", icon: "👋" });
+
+  useEffect(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) {
+      setGreeting({ text: "Have a great Morning", icon: "🌅" });
+    } else if (hour < 17) {
+      setGreeting({ text: "Have a great Afternoon", icon: "☀️" });
+    } else {
+      setGreeting({ text: "Good Night", icon: "🌙" });
+    }
+  }, [show]);
 
   return (
     <Modal show={show} onHide={onClose} centered className="logout-success-modal">
@@ -78,14 +109,20 @@ const LogoutConfirmationModal = ({ show, onClose }) => {
           >
             <Modal.Body className="p-4 text-center py-5">
               <motion.div
-                initial={{ rotate: -180, scale: 0.5 }}
+                initial={{ rotate: -10, scale: 0.5 }}
                 animate={{ rotate: 0, scale: 1 }}
-                className="text-danger mb-4"
+                className="mb-3"
+                style={{ fontSize: "3.5rem" }}
               >
-                <i className="fas fa-sign-out-alt fa-3x"></i>
+                {greeting.icon}
               </motion.div>
-              <h4 className="mb-2 fw-bold text-danger">{t("logoutSuccess")}</h4>
-              <p className="text-muted mt-3 mb-0">{t("loggedOut")}</p>
+              <h3 className="mb-2 fw-bold text-danger">
+                {greeting.text}, {userName || "User"}!
+              </h3>
+              <p className="text-muted mt-3 mb-0">
+                You have been successfully logged out. <br />
+                See you next time!
+              </p>
             </Modal.Body>
           </motion.div>
         )}
@@ -98,6 +135,7 @@ const LogoutConfirmationModal = ({ show, onClose }) => {
 const HoverCartIcon = ({ src, alt, style }) => {
   const [isHovered, setIsHovered] = useState(false);
   const canvasRef = useRef(null);
+  const { theme } = useTheme();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -113,6 +151,8 @@ const HoverCartIcon = ({ src, alt, style }) => {
     };
   }, [src]);
 
+  const darkStyle = theme === 'dark' ? { filter: 'invert(1)', mixBlendMode: 'screen' } : { mixBlendMode: 'multiply' };
+
   return (
     <div
       onMouseEnter={() => setIsHovered(true)}
@@ -126,6 +166,7 @@ const HoverCartIcon = ({ src, alt, style }) => {
           height: "100%",
           objectFit: style?.objectFit || "contain",
           display: isHovered ? "none" : "block",
+          ...darkStyle
         }}
       />
       <img
@@ -136,6 +177,7 @@ const HoverCartIcon = ({ src, alt, style }) => {
           height: "100%",
           objectFit: style?.objectFit || "contain",
           display: isHovered ? "block" : "none",
+          ...darkStyle
         }}
       />
     </div>
@@ -143,7 +185,7 @@ const HoverCartIcon = ({ src, alt, style }) => {
 };
 
 /* ---------------- SEARCH BAR COMPONENT WITH FILTER BUTTON ---------------- */
-const SearchBar = () => {
+const SearchBar = ({ onFilterClick }) => {
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
   const [suggestions, setSuggestions] = useState([]);
@@ -151,9 +193,18 @@ const SearchBar = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [loading, setLoading] = useState(false);
   const [recentSearches, setRecentSearches] = useState([]);
+  const [showFilterOffcanvas, setShowFilterOffcanvas] = useState(false);
 
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
+
+  const handleApplyFilter = (filters) => {
+    const cleanFilters = Object.fromEntries(
+      Object.entries(filters).filter(([_, v]) => v !== "")
+    );
+    const params = new URLSearchParams(cleanFilters).toString();
+    navigate(`/search-results?${params}`);
+  };
 
   const highlightText = (text, query) => {
     if (!query) return text;
@@ -189,8 +240,19 @@ const SearchBar = () => {
     };
 
     fetchTrending();
+    fetchTrending();
     const stored = JSON.parse(localStorage.getItem("recentSearches")) || [];
     setRecentSearches(stored);
+
+    // Fallback if trending is empty or taking too long
+    if (trending.length === 0) {
+      setTrending([
+        { id: "fallback-1", name: "T-Shirts" },
+        { id: "fallback-2", name: "Shoes" },
+        { id: "fallback-3", name: "Watches" },
+        { id: "fallback-4", name: "Sunglasses" }
+      ]);
+    }
   }, []);
 
   const fetchSearchData = async (value) => {
@@ -200,14 +262,24 @@ const SearchBar = () => {
     }
 
     setLoading(true);
-    const keyword = value.toLowerCase();
+    setLoading(true);
+    const searchTerms = value.toLowerCase().split(/\s+/).filter(w => w.length > 0);
+    
+    if (searchTerms.length === 0) {
+      setLoading(false);
+      return;
+    }
+    
+    const firstWord = searchTerms[0];
 
     try {
       const productsRef = collection(db, "products");
+      
+      // Query Firebase using the first keyword to narrow down
       const q = query(
         productsRef,
-        where("searchkeywords", "array-contains", keyword),
-        limit(6)
+        where("searchkeywords", "array-contains", firstWord),
+        limit(50) // fetch more for local filtering
       );
 
       const snap = await getDocs(q);
@@ -216,17 +288,27 @@ const SearchBar = () => {
         ...doc.data()
       }));
 
-      if (results.length === 0) {
-        const allSnap = await getDocs(query(productsRef, limit(20)));
-        results = allSnap.docs
-          .map(doc => ({ id: doc.id, ...doc.data() }))
-          .filter(p =>
-            p.pattern?.toLowerCase().includes(keyword) ||
-            p.name?.toLowerCase().includes(keyword)
-          );
+      // Filter locally to ensure ALL search terms are present (AND logic)
+      if (searchTerms.length > 1) {
+        results = results.filter(p => {
+          const keywords = p.searchkeywords || [];
+          const textToSearch = (p.name + " " + (p.pattern || "") + " " + (p.category || "") + " " + keywords.join(" ")).toLowerCase();
+          return searchTerms.every(term => textToSearch.includes(term));
+        });
       }
 
-      setSuggestions(results);
+      // Fallback if no exact array-contains matches found
+      if (results.length === 0) {
+        const allSnap = await getDocs(query(productsRef, limit(30)));
+        results = allSnap.docs
+          .map(doc => ({ id: doc.id, ...doc.data() }))
+          .filter(p => {
+            const textToSearch = (p.name + " " + (p.pattern || "") + " " + (p.category || "")).toLowerCase();
+            return searchTerms.every(term => textToSearch.includes(term));
+          });
+      }
+
+      setSuggestions(results.slice(0, 8));
     } catch (error) {
       console.error("Search error:", error);
     } finally {
@@ -313,16 +395,15 @@ const SearchBar = () => {
 
   return (
     <div className="position-relative w-100" ref={dropdownRef}>
-      <div className="search-wrapper">
-        <span className="search-icon-left">
-          <i className="fas fa-search"></i>
-        </span>
+      <div className="ref-search-bar w-100">
+        <FiSearch className="search-icon-left" />
         <input
           type="text"
-          className="search-input-desktop"
-          placeholder="What are you looking for"
+          className="ref-search-input"
+          placeholder={t("searchPlaceholder", "Try Saree, Kurti or Search by Product Code")}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          onClick={() => setShowDropdown(true)}
           onFocus={() => setShowDropdown(true)}
           onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
         />
@@ -331,17 +412,18 @@ const SearchBar = () => {
             className="search-clear-btn"
             onClick={clearSearchText}
             type="button"
+            style={{ position: 'absolute', right: '140px', border: 'none', background: 'none', color: '#888' }}
           >
             <i className="fas fa-times"></i>
           </button>
         )}
+        <div className="ref-search-divider" />
         <button
           className="filter-button"
-          onClick={handleFilterClick}
           type="button"
+          onClick={onFilterClick}
         >
-          <i className="fas fa-sliders-h"></i>
-          <span className="filter-text">Filter</span>
+          <i className="fas fa-sliders-h me-2"></i> {t("nav.filter", "Filter")}
         </button>
       </div>
 
@@ -354,39 +436,36 @@ const SearchBar = () => {
         >
           {loading ? (
             <div className="p-3 text-center">
-              <div className="spinner-border spinner-border-sm text-warning"></div>
-              <span className="ms-2">Searching...</span>
+              <Loading small inline message="Searching..." />
             </div>
           ) : searchTerm.length > 0 ? (
             suggestions.length > 0 ? (
               suggestions.map((p) => (
                 <div
                   key={p.id}
-                  className="suggestion-item"
+                  className="suggestion-row"
                   onClick={() => handleSelect(p)}
                 >
-                  <i className="fas fa-search suggestion-icon"></i>
-                  {p.image || p.images?.[0] ? (
+                  <div className="suggestion-thumb-wrapper">
                     <img
-                      src={p.image || p.thumbnail || p.images?.[0]}
+                      src={p.image || p.thumbnail || p.images?.[0] || "https://via.placeholder.com/50"}
                       alt={p.pattern || p.name}
-                      className="search-suggestion-img"
-                      onError={(e) => e.target.src = "https://via.placeholder.com/40"}
+                      className="suggestion-thumb"
+                      onError={(e) => e.target.src = "https://via.placeholder.com/50"}
                     />
-                  ) : null}
-                  <div className="flex-grow-1">
+                  </div>
+                  <div className="suggestion-info">
                     <div className="suggestion-title">
                       {highlightText(p.pattern || p.name, searchTerm)}
                     </div>
                     <div className="suggestion-category">
-                      {p.category} â€¢ {p.subcategory || ""}
+                      in {p.category?.toLowerCase() || 'fashion'}
                     </div>
                   </div>
-                  {p.mrp && p.offerprice && (
-                    <Badge bg="danger" className="ms-2 suggestion-badge">
-                      {Math.round(((p.mrp - p.offerprice) / p.mrp) * 100)}% OFF
-                    </Badge>
-                  )}
+                  <div className="suggestion-action">
+                    <div className="suggestion-price">₹{p.offerprice || p.mrp || 209}</div>
+                    <i className="fas fa-arrow-up" style={{ transform: 'rotate(45deg)', color: '#aaa', fontSize: '1.1rem' }}></i>
+                  </div>
                 </div>
               ))
             ) : (
@@ -431,20 +510,30 @@ const SearchBar = () => {
                 </>
               )}
 
-              {trending.map((p) => (
-                <div
-                  key={p.id}
-                  className="suggestion-item trending-item"
-                  onClick={() => handleSelect(p)}
-                >
-                  <i className="fas fa-chart-line trending-icon"></i>
-                  <span>{p.pattern || p.name}</span>
-                </div>
-              ))}
+              {trending.length > 0 && (
+                <>
+                  <div className="recent-searches-header mt-2">
+                    <div className="recent-searches-title">
+                      <i className="fas fa-fire text-danger"></i> Popular Searches
+                    </div>
+                  </div>
+                  {trending.map((p) => (
+                    <div
+                      key={p.id}
+                      className="suggestion-item trending-item"
+                      onClick={() => handleSelect(p)}
+                    >
+                      <i className="fas fa-search trending-icon text-muted"></i>
+                      <span>{p.pattern || p.name}</span>
+                    </div>
+                  ))}
+                </>
+              )}
             </>
           )}
         </motion.div>
       )}
+
     </div>
   );
 };
@@ -456,42 +545,9 @@ const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal, se
   const [walletBalance, setWalletBalance] = useState(0);
   const [walletCoins, setWalletCoins] = useState(0);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [theme, setTheme] = useState('light');
+  const { theme, toggleTheme } = useTheme();
   const [savedAddresses, setSavedAddresses] = useState([]);
   const [profileImage, setProfileImage] = useState(null);
-
-  // Initialize theme from localStorage or system preference
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-    if (savedTheme) {
-      setTheme(savedTheme);
-      applyTheme(savedTheme);
-    } else if (systemPrefersDark) {
-      setTheme('dark');
-      applyTheme('dark');
-    }
-  }, []);
-
-  // Apply theme to entire document
-  const applyTheme = (theme) => {
-    if (theme === 'dark') {
-      document.documentElement.setAttribute('data-bs-theme', 'dark');
-      document.body.classList.add('dark-theme');
-    } else {
-      document.documentElement.removeAttribute('data-bs-theme');
-      document.body.classList.remove('dark-theme');
-    }
-  };
-
-  // Toggle theme function
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
-    applyTheme(newTheme);
-  };
 
   // Listen to user data in real-time
   useEffect(() => {
@@ -580,13 +636,13 @@ const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal, se
             }}
           />
         ) : (
-          <motion.div 
+          <motion.div
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
-            className="rounded-circle d-flex align-items-center justify-content-center text-white shadow-sm" 
-            style={{ 
-              width: '38px', 
-              height: '38px', 
+            className="rounded-circle d-flex align-items-center justify-content-center text-white shadow-sm"
+            style={{
+              width: '38px',
+              height: '38px',
               background: 'linear-gradient(135deg, #f97316 0%, #fbbf24 100%)',
               border: '2px solid rgba(255, 255, 255, 0.8)'
             }}
@@ -602,17 +658,17 @@ const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal, se
               </span>
               <div className="d-flex align-items-center">
                 <span style={{ fontSize: '0.9rem', fontWeight: '700', color: '#212121', lineHeight: '1.2' }}>
-                  My Account
+                  {t("myAccount", "My Account")}
                 </span>
                 <i className="fas fa-chevron-down ms-2" style={{ fontSize: '0.7rem', color: '#888' }}></i>
               </div>
             </>
           ) : (
             <>
-              <span style={{ fontSize: '0.8rem', color: '#888', lineHeight: '1.2' }}>Login / Sign up</span>
+              <span style={{ fontSize: '0.8rem', color: '#888', lineHeight: '1.2' }}>{t("loginSignUp", "Login / Sign up")}</span>
               <div className="d-flex align-items-center">
                 <span style={{ fontSize: '0.9rem', fontWeight: '700', color: '#212121', lineHeight: '1.2' }}>
-                  My Account
+                  {t("myAccount", "My Account")}
                 </span>
                 <i className="fas fa-chevron-down ms-2" style={{ fontSize: '0.7rem', color: '#888' }}></i>
               </div>
@@ -626,7 +682,7 @@ const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal, se
           <div className="d-flex align-items-center gap-3">
             <img src={logo} alt="SadhanaCart" style={{ height: '35px' }} />
             <Offcanvas.Title className="theme-text fw-bold mb-0">
-              {currentUser ? "My Account" : "Welcome to Sadhana Cart"}
+              {currentUser ? t("myAccount", "My Account") : t("welcomeToSadhanaCart", "Welcome to Sadhana Cart")}
             </Offcanvas.Title>
           </div>
         </Offcanvas.Header>
@@ -667,7 +723,7 @@ const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal, se
                     }}
                   />
                 ) : (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ type: "spring", stiffness: 300, damping: 20 }}
@@ -713,8 +769,8 @@ const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal, se
                 </a>
 
                 <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); navigate("/cart"); setDropdownOpen(false); }}>
-                  <HoverCartIcon src={cartGif} alt="Cart" style={{ width: '20px', height: '20px', objectFit: 'contain', marginRight: '8px' }} />
-                  <span className="fw-bold text-dark">Cart</span>
+                  <HoverCartIcon src={cartGif} alt={t("cart", "Cart")} style={{ width: '20px', height: '20px', objectFit: 'contain', marginRight: '8px' }} />
+                  <span className="fw-bold text-dark">{t("cart", "Cart")}</span>
                   <i className="fas fa-chevron-right ms-auto menu-chevron"></i>
                 </a>
 
@@ -731,7 +787,7 @@ const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal, se
 
                 <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); handleGiftCardsClick(); }}>
                   <FiCreditCard className="menu-icon-svg text-info" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
-                  <span className="fw-bold text-dark">{t("referEarn")}</span>
+                  <span className="fw-bold text-dark">{t("referEarn", "Refer & Earn")}</span>
                   <i className="fas fa-chevron-right ms-auto menu-chevron"></i>
                 </a>
 
@@ -739,21 +795,21 @@ const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal, se
               </>
             )}
 
-            <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); navigate("/categories"); setDropdownOpen(false); }}>
-              <FiGrid className="menu-icon-svg text-primary" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
-              <span className="fw-bold text-dark">Browse Categories</span>
+            <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); navigate("/browse-categories"); setDropdownOpen(false); }}>
+              <FiList className="menu-icon-svg text-primary" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
+              <span className="fw-bold text-dark">{t("nav.browseCategory", "Browse Categories")}</span>
               <i className="fas fa-chevron-right ms-auto menu-chevron"></i>
             </a>
 
             <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); navigate("/offers"); setDropdownOpen(false); }}>
               <FiTag className="menu-icon-svg text-warning" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
-              <span className="fw-bold text-dark">Offers & Deals</span>
+              <span className="fw-bold text-dark">{t("nav.offersZone", "Offers & Deals")}</span>
               <i className="fas fa-chevron-right ms-auto menu-chevron"></i>
             </a>
 
             <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); navigate("/new-arrivals"); setDropdownOpen(false); }}>
               <FiStar className="menu-icon-svg text-success" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
-              <span className="fw-bold text-dark">New Arrivals</span>
+              <span className="fw-bold text-dark">{t("nav.newArrivals", "New Arrivals")}</span>
               <i className="fas fa-chevron-right ms-auto menu-chevron"></i>
             </a>
 
@@ -761,19 +817,19 @@ const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal, se
 
             <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); navigate("/support"); setDropdownOpen(false); }}>
               <FiHelpCircle className="menu-icon-svg text-info" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
-              <span className="fw-bold text-dark">Help & Support</span>
+              <span className="fw-bold text-dark">{t("helpSupport", "Help & Support")}</span>
               <i className="fas fa-chevron-right ms-auto menu-chevron"></i>
             </a>
 
             <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); navigate("/faqs"); setDropdownOpen(false); }}>
               <FiMessageCircle className="menu-icon-svg text-primary" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
-              <span className="fw-bold text-dark">FAQs</span>
+              <span className="fw-bold text-dark">{t("footer.faqs", "FAQs")}</span>
               <i className="fas fa-chevron-right ms-auto menu-chevron"></i>
             </a>
 
             <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); navigate("/contact"); setDropdownOpen(false); }}>
               <FiPhone className="menu-icon-svg text-success" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
-              <span className="fw-bold text-dark">Contact Us</span>
+              <span className="fw-bold text-dark">{t("footer.contactUs", "Contact Us")}</span>
               <i className="fas fa-chevron-right ms-auto menu-chevron"></i>
             </a>
 
@@ -781,31 +837,31 @@ const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal, se
 
             <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); navigate("/about"); setDropdownOpen(false); }}>
               <FiInfo className="menu-icon-svg text-primary" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
-              <span className="fw-bold text-dark">About Us</span>
+              <span className="fw-bold text-dark">{t("aboutUs", "About Us")}</span>
               <i className="fas fa-chevron-right ms-auto menu-chevron"></i>
             </a>
 
             <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); navigate("/policies"); setDropdownOpen(false); }}>
               <FiShield className="menu-icon-svg text-secondary" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
-              <span className="fw-bold text-dark">Store Policies</span>
+              <span className="fw-bold text-dark">{t("footer.policies", "Store Policies")}</span>
               <i className="fas fa-chevron-right ms-auto menu-chevron"></i>
             </a>
 
             <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); navigate("/privacy"); setDropdownOpen(false); }}>
-              <FiShield className="menu-icon-svg text-success" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
-              <span className="fw-bold text-dark">Privacy Policy</span>
+              <FiLock className="menu-icon-svg text-info" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
+              <span className="fw-bold text-dark">{t("footer.privacyPolicy", "Privacy Policy")}</span>
               <i className="fas fa-chevron-right ms-auto menu-chevron"></i>
             </a>
 
             <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); navigate("/terms"); setDropdownOpen(false); }}>
               <FiFileText className="menu-icon-svg text-secondary" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
-              <span className="fw-bold text-dark">Terms & Conditions</span>
+              <span className="fw-bold text-dark">{t("term's", "Terms & Conditions")}</span>
               <i className="fas fa-chevron-right ms-auto menu-chevron"></i>
             </a>
 
             <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); navigate("/returns"); setDropdownOpen(false); }}>
               <FiRefreshCcw className="menu-icon-svg text-warning" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
-              <span className="fw-bold text-dark">Return & Refund Policy</span>
+              <span className="fw-bold text-dark">{t("returnPolicy", "Return & Refund Policy")}</span>
               <i className="fas fa-chevron-right ms-auto menu-chevron"></i>
             </a>
 
@@ -836,7 +892,7 @@ const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal, se
 
             {/* FOLLOW US */}
             <div className="px-4 py-3">
-              <small className="text-muted fw-bold d-block mb-3">FOLLOW US</small>
+              <small className="text-muted fw-bold d-block mb-3">{t("footer.followUs", "FOLLOW US")}</small>
               <div className="d-flex align-items-center gap-3">
                 <a href="#" style={{ background: 'radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%)', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', transition: 'transform 0.2s' }} onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-3px)'} onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
                   <FiInstagram color="white" size={22} />
@@ -873,17 +929,15 @@ export default function Header() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // ðŸ”¥ MEMOIZED SELECTORS - Fix Redux warning
-  const { location } = useSelector((state) => state.header);
+  // 🔥 MEMOIZED SELECTORS - Fix Redux warning
+  const headerLocation = useSelector((state) => state.header?.location);
 
   // Memoized cart items selector
-  const cartItems = useSelector((state) => state.cart?.items || []);
-  const orders = useSelector((state) => state.orders?.items || []);
+  const cartItems = useSelector((state) => state.cart?.items) || EMPTY_ARRAY;
+  const orders = useSelector((state) => state.orders?.items) || EMPTY_ARRAY;
 
   // Memoized counts - prevents unnecessary re-renders
-  const cartCount = useMemo(() => cartItems.length, [cartItems]);
-  const orderCount = useMemo(() => orders.length, [orders]);
-
+  const cartCount = cartItems.length;
   // Local State
   const [currentUser, setCurrentUser] = useState(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -892,42 +946,21 @@ export default function Header() {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showLogoutConfirmModal, setShowLogoutConfirmModal] = useState(false);
   const [loggedInUserName, setLoggedInUserName] = useState("");
-  const [mobileSearchActive, setMobileSearchActive] = useState(false);
   const [wishlistCount, setWishlistCount] = useState(0);
 
   // Categories Dropdown State
   const [categories, setCategories] = useState([]);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
 
-  // Check theme on component mount
-  const [theme, setTheme] = useState('light');
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    setTheme(savedTheme);
-    if (savedTheme === 'dark') {
-      document.documentElement.setAttribute('data-bs-theme', 'dark');
-      document.body.classList.add('dark-theme');
-    }
-  }, []);
-
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
-    if (newTheme === 'dark') {
-      document.documentElement.setAttribute('data-bs-theme', 'dark');
-      document.body.classList.add('dark-theme');
-    } else {
-      document.documentElement.removeAttribute('data-bs-theme');
-      document.body.classList.remove('dark-theme');
-    }
-  };
+  const { theme, toggleTheme } = useTheme();
 
   // Auth State Listener
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
+      if (user) {
+        syncLocalStorageToFirestore(user);
+      }
     });
     return () => unsubscribe();
   }, []);
@@ -961,13 +994,20 @@ export default function Header() {
     fetchCategories();
   }, []);
 
+  useEffect(() => {
+    if (currentUser && sessionStorage.getItem("justLoggedIn") === "true") {
+      sessionStorage.removeItem("justLoggedIn");
+      handleLoginSuccess(currentUser);
+    }
+  }, [currentUser]);
+
   /* ---------------- HANDLERS ---------------- */
   const handleLoginSuccess = (user) => {
     setShowAuthModal(false);
     const nameToDisplay = user.displayName || user.email?.split('@')[0] || "User";
     setLoggedInUserName(nameToDisplay);
     setShowLoginModal(true);
-    setTimeout(() => setShowLoginModal(false), 2000);
+    setTimeout(() => setShowLoginModal(false), 5000);
   };
 
   const handleLogout = (e) => {
@@ -978,6 +1018,8 @@ export default function Header() {
   const handleConfirmLogoutAction = async () => {
     try {
       setShowLogoutConfirmModal(false);
+      const nameToDisplay = currentUser?.displayName || currentUser?.email?.split('@')[0] || "User";
+      setLoggedInUserName(nameToDisplay);
       await signOut(auth);
       setShowLogoutModal(true);
       setTimeout(() => {
@@ -1000,127 +1042,83 @@ export default function Header() {
     <>
       {/* =================== MAIN NAVBAR =================== */}
       <div className="navbar-custom sticky-top">
-        <div className="navbar-main-row">
+        <div className="navbar-main-row flex-wrap">
 
-          {/* LOGO */}
-          <div className="navbar-left-group">
-            <a href="/" className="navbar-brand-link">
-              <img src={logo} alt="Sadhana Cart" className="logo-img" />
-              <div className="brand-text-wrap">
-                <span className="brand-name-gold">Sadhana</span>
-                <span className="brand-name-navy">Cart</span>
+          {/* TOP HEADER ROW: LOGO & RIGHT ACTIONS */}
+          <div className="d-flex align-items-center justify-content-between w-100 flex-xl-nowrap gap-2">
+            {/* LOGO */}
+            <div className="navbar-left-group">
+              <a href="/" className="navbar-brand-link">
+                <img src={logo} alt="Sadhana Cart" className="logo-img" />
+                <div className="brand-text-wrap">
+                  <span className="brand-name-gold">{t("sadhana", "Sadhana")}</span>
+                  <span className="brand-name-navy">{t("cart", "Cart")}</span>
+                </div>
+              </a>
+            </div>
+
+            {/* SEARCH BAR — Desktop (inline) */}
+            <div className="navbar-search-wrap d-none d-xl-flex flex-grow-1 mx-3">
+              <SearchBar onFilterClick={() => navigate("/search")} />
+            </div>
+
+            {/* RIGHT ACTIONS — All Screen Sizes */}
+            <div className="navbar-right-group d-flex align-items-center gap-1 gap-sm-2 gap-md-3">
+
+              {/* Language Switcher */}
+              <div className="ref-deliver-wrap d-flex align-items-center">
+                <LanguageSwitcher />
               </div>
-            </a>
+
+              {/* Wishlist */}
+              <div className="ref-icon-btn" onClick={() => {
+                if (!currentUser) { setShowAuthModal(true); return; }
+                navigate('/wishlist');
+              }}>
+                <div className="ref-cart-icon-wrap">
+                  <FiHeart className="ref-icon" />
+                  {wishlistCount > 0 && (
+                    <span className="ref-cart-badge">{wishlistCount}</span>
+                  )}
+                </div>
+                <span className="ref-icon-label d-none d-sm-inline">{t("wishList", "Wishlist")}</span>
+              </div>
+
+              {/* Cart */}
+              <div className="ref-icon-btn ref-cart-btn" onClick={goToCart}>
+                <div className="ref-cart-icon-wrap">
+                  <HoverCartIcon src={cartGif} alt={t("cartLabel", "Cart")} style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
+                  {cartCount > 0 && (
+                    <span className="ref-cart-badge">{cartCount}</span>
+                  )}
+                </div>
+                <span className="ref-icon-label d-none d-sm-inline">{t("cartLabel", "Cart")}</span>
+              </div>
+
+              {/* Account */}
+              <FlipkartLoginDropdown
+                currentUser={currentUser}
+                handleLogout={handleLogout}
+                setShowAuthModal={setShowAuthModal}
+                setAuthMode={setAuthMode}
+              />
+            </div>
           </div>
 
-          {/* SEARCH BAR — Desktop */}
-          <div className="navbar-search-wrap d-none d-xl-flex">
-            <div className="ref-search-bar">
+          {/* SEARCH BAR — Mobile / Tablet (<1200px) */}
+          <div className="navbar-mobile-search-row d-xl-none w-100 mt-2">
+            <div className="ref-search-bar w-100" onClick={() => navigate("/search")} style={{ cursor: 'pointer' }}>
+              <FiSearch className="search-icon-left" />
               <input
                 type="text"
                 className="ref-search-input"
-                placeholder="Search for products, brands and more..."
-                onClick={() => navigate('/advanced-search')}
+                placeholder={t("searchPlaceholder", "Try Saree, Kurti or Search by Product Code")}
+                style={{ pointerEvents: 'none' }}
                 readOnly
               />
-              <div className="ref-search-divider" />
-              <select className="ref-category-select">
-                <option>All Categories</option>
-              </select>
-              <button className="ref-search-btn" onClick={() => navigate('/advanced-search')}>
-                <i className="fas fa-search"></i>
-              </button>
             </div>
           </div>
 
-          {/* RIGHT ACTIONS — Desktop */}
-          <div className="navbar-right-group d-none d-xl-flex">
-
-            {/* Language Switcher */}
-            <div className="ref-deliver-wrap d-flex align-items-center">
-              <LanguageSwitcher />
-            </div>
-
-            {/* Wishlist */}
-            <div className="ref-icon-btn" onClick={() => {
-              if (!currentUser) { setShowAuthModal(true); return; }
-              navigate('/wishlist');
-            }}>
-              <div className="ref-cart-icon-wrap">
-                <FiHeart className="ref-icon" />
-                {wishlistCount > 0 && (
-                  <span className="ref-cart-badge">{wishlistCount}</span>
-                )}
-              </div>
-              <span className="ref-icon-label">Wishlist</span>
-            </div>
-
-            {/* Cart */}
-            <div className="ref-icon-btn ref-cart-btn" onClick={goToCart}>
-              <div className="ref-cart-icon-wrap">
-                <HoverCartIcon src={cartGif} alt="Cart" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
-                {cartCount > 0 && (
-                  <span className="ref-cart-badge">{cartCount}</span>
-                )}
-              </div>
-              <span className="ref-icon-label">Cart</span>
-            </div>
-
-            {/* Account */}
-            <FlipkartLoginDropdown
-              currentUser={currentUser}
-              handleLogout={handleLogout}
-              setShowAuthModal={setShowAuthModal}
-              setAuthMode={setAuthMode}
-            />
-          </div>
-
-          {/* MOBILE ACTIONS */}
-          <div className="d-flex d-xl-none align-items-center gap-2 ms-auto">
-            {!mobileSearchActive && (
-              <>
-                <div className="navbar-action-item px-2" onClick={() => setMobileSearchActive(true)}>
-                  <i className="fas fa-search text-primary"></i>
-                </div>
-                <FlipkartLoginDropdown
-                  currentUser={currentUser}
-                  handleLogout={handleLogout}
-                  setShowAuthModal={setShowAuthModal}
-                  setAuthMode={setAuthMode}
-                />
-                <div className="ref-icon-btn ref-cart-btn" onClick={() => {
-                  if (!currentUser) { setShowAuthModal(true); return; }
-                  navigate('/wishlist');
-                }}>
-                  <div className="ref-cart-icon-wrap">
-                    <FiHeart className="ref-icon" />
-                    {wishlistCount > 0 && (
-                      <span className="ref-cart-badge">{wishlistCount}</span>
-                    )}
-                  </div>
-                </div>
-                <div className="ref-icon-btn ref-cart-btn" onClick={goToCart}>
-                  <div className="ref-cart-icon-wrap">
-                    <HoverCartIcon src={cartGif} alt="Cart" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
-                    {cartCount > 0 && (
-                      <span className="ref-cart-badge">{cartCount}</span>
-                    )}
-                  </div>
-                </div>
-              </>
-            )}
-            {mobileSearchActive && (
-              <div className="d-flex align-items-center w-100 gap-2">
-                <button
-                  className="btn btn-link text-dark p-0"
-                  onClick={() => setMobileSearchActive(false)}
-                >
-                  <i className="fas fa-arrow-left"></i>
-                </button>
-                <SearchBar />
-              </div>
-            )}
-          </div>
         </div>
 
         {/* =================== SUB-NAVBAR MENU ROW =================== */}
@@ -1132,7 +1130,7 @@ export default function Header() {
               onMouseLeave={() => setShowCategoryDropdown(false)}
             >
               <i className="fas fa-th sub-nav-grid-icon"></i>
-              <span>All Categories</span>
+              <span>{t("allCategories", "All Categories")}</span>
               <i className={`fas fa-chevron-${showCategoryDropdown ? 'up' : 'down'} sub-nav-chev`}></i>
 
               {/* Mega Menu Dropdown */}
@@ -1166,19 +1164,19 @@ export default function Header() {
               )}
             </div>
             <nav className="sub-nav-links">
-              <a href="/" className="sub-nav-link sub-nav-active">Home</a>
-              <a href="#" className="sub-nav-link" onClick={(e) => { e.preventDefault(); navigate("/browse-categories"); }}>Browse Category</a>
-              <a href="#" className="sub-nav-link" onClick={(e) => { e.preventDefault(); navigate("/best-sellers"); }}>Best Sellers</a>
-              <a href="#" className="sub-nav-link" onClick={(e) => { e.preventDefault(); navigate("/new-arrivals"); }}>New Arrivals</a>
+              <a href="/" className="sub-nav-link sub-nav-active">{t("nav.home", "Home")}</a>
+              <a href="#" className="sub-nav-link" onClick={(e) => { e.preventDefault(); navigate("/browse-categories"); }}>{t("nav.browseCategory", "Browse Category")}</a>
+              <a href="#" className="sub-nav-link" onClick={(e) => { e.preventDefault(); navigate("/best-sellers"); }}>{t("nav.bestSellers", "Best Sellers")}</a>
+              <a href="#" className="sub-nav-link" onClick={(e) => { e.preventDefault(); navigate("/new-arrivals"); }}>{t("nav.newArrivals", "New Arrivals")}</a>
               <a href="#" className="sub-nav-link" onClick={(e) => { e.preventDefault(); navigate("/rewards"); }}>
-                Sadhana Rewards <span className="sub-nav-badge sub-nav-badge-new">New</span>
+                {t("nav.sadhanaRewards", "Sadhana Rewards")} <span className="sub-nav-badge sub-nav-badge-new">{t("new", "New")}</span>
               </a>
-              <a href="#" className="sub-nav-link" onClick={(e) => { e.preventDefault(); navigate("/offers"); }}>Offers Zone</a>
-              <a href="/track-order" className="sub-nav-link">Track Order</a>
+              <a href="#" className="sub-nav-link" onClick={(e) => { e.preventDefault(); navigate("/offers"); }}>{t("nav.offersZone", "Offers Zone")}</a>
+              <a href="/track-order" className="sub-nav-link">{t("nav.trackOrder", "Track Order")}</a>
               <a href="#" className="sub-nav-link" onClick={(e) => { e.preventDefault(); handleSellerClick(); }}>
-                Become a Seller
+                {t("nav.becomeSeller", "Become a Seller")}
               </a>
-              <a href="/support" className="sub-nav-link">Help &amp; Support</a>
+              <a href="/support" className="sub-nav-link">{t("helpSupport", "Help & Support")}</a>
             </nav>
           </div>
         </div>
@@ -1186,14 +1184,17 @@ export default function Header() {
 
       {/* MODALS */}
       <AnimatePresence>
-        <Modal show={showAuthModal} onHide={() => setShowAuthModal(false)} centered size="lg">
-          <Modal.Body className="p-0">
-            <AuthPage onClose={() => setShowAuthModal(false)} initialMode={authMode} onLoginSuccess={handleLoginSuccess} />
-          </Modal.Body>
-        </Modal>
+        {showAuthModal && (
+          <Modal key="auth-modal" show={showAuthModal} onHide={() => setShowAuthModal(false)} centered size="lg">
+            <Modal.Body className="p-0">
+              <AuthPage onClose={() => setShowAuthModal(false)} initialMode={authMode} onLoginSuccess={handleLoginSuccess} />
+            </Modal.Body>
+          </Modal>
+        )}
 
         {showLoginModal && (
           <LoginConfirmationModal
+            key="login-modal"
             show={showLoginModal}
             onClose={() => setShowLoginModal(false)}
             userName={loggedInUserName}
@@ -1202,43 +1203,47 @@ export default function Header() {
 
         {showLogoutModal && (
           <LogoutConfirmationModal
+            key="logout-modal"
             show={showLogoutModal}
             onClose={() => setShowLogoutModal(false)}
+            userName={loggedInUserName}
           />
         )}
 
         {/* Logout Confirmation Modal */}
-        <Modal show={showLogoutConfirmModal} onHide={() => setShowLogoutConfirmModal(false)} centered>
-          <Modal.Header closeButton className="border-0 pb-0">
-            <Modal.Title className="fw-bold" style={{ fontSize: '1.25rem' }}>Confirm Log Out</Modal.Title>
-          </Modal.Header>
-          <Modal.Body className="pt-2">
-            <h4 className="fw-bold mb-2 text-dark" style={{ fontSize: '18px' }}>
-              Are you sure you want to log out?
-            </h4>
-            <p className="text-muted" style={{ fontSize: '14px', lineHeight: '1.6' }}>
-              You'll be signed out of your account and will need to log in again to access your profile, bookings, and other personalized features.
-            </p>
-            <div className="d-flex gap-3 mt-4">
-              <button 
-                type="button" 
-                className="btn text-white w-100 fw-bold rounded" 
-                style={{ backgroundColor: '#e53e3e', height: '42px' }}
-                onClick={handleConfirmLogoutAction}
-              >
-                Log Out
-              </button>
-              <button 
-                type="button" 
-                className="btn text-white w-100 fw-bold rounded" 
-                style={{ backgroundColor: '#38a169', height: '42px' }}
-                onClick={() => setShowLogoutConfirmModal(false)}
-              >
-                Stay Signed In
-              </button>
-            </div>
-          </Modal.Body>
-        </Modal>
+        {showLogoutConfirmModal && (
+          <Modal key="logout-confirm-modal" show={showLogoutConfirmModal} onHide={() => setShowLogoutConfirmModal(false)} centered>
+            <Modal.Header closeButton className="border-0 pb-0">
+              <Modal.Title className="fw-bold" style={{ fontSize: '1.25rem' }}>{t("confirmLogoutTitle", "Confirm Log Out")}</Modal.Title>
+            </Modal.Header>
+            <Modal.Body className="pt-2">
+              <h4 className="fw-bold mb-2 text-dark" style={{ fontSize: '18px' }}>
+                {t("confirmLogoutMessage", "Are you sure you want to log out?")}
+              </h4>
+              <p className="text-muted" style={{ fontSize: '14px', lineHeight: '1.6' }}>
+                {t("confirmLogoutDesc", "You'll be signed out of your account and will need to log in again to access your profile, bookings, and other personalized features.")}
+              </p>
+              <div className="d-flex gap-3 mt-4">
+                <button
+                  type="button"
+                  className="btn text-white w-100 fw-bold rounded"
+                  style={{ backgroundColor: '#e53e3e', height: '42px' }}
+                  onClick={handleConfirmLogoutAction}
+                >
+                  {t("logout", "Log Out")}
+                </button>
+                <button
+                  type="button"
+                  className="btn text-white w-100 fw-bold rounded"
+                  style={{ backgroundColor: '#38a169', height: '42px' }}
+                  onClick={() => setShowLogoutConfirmModal(false)}
+                >
+                  {t("staySignedIn", "Stay Signed In")}
+                </button>
+              </div>
+            </Modal.Body>
+          </Modal>
+        )}
       </AnimatePresence>
     </>
   );

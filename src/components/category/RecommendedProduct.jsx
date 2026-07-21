@@ -9,8 +9,11 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { addToCart } from "../../redux/cartSlice";
+import Loading from "../../pages/Loading";
+import { useTranslation } from "react-i18next";
 
 function RecommendedProduct({ showCart = true }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -132,7 +135,7 @@ function RecommendedProduct({ showCart = true }) {
                 onClick={(e) => toggleWishlist(e, product)}
                 aria-label="Wishlist"
               >
-                {wishlisted[product.id] ? <Heart size={20} fill="#ff4081" color="#ff4081" /> : <Heart size={20} strokeWidth={2.5} color="#555" />}
+                {wishlisted[product.id] ? <Heart size={16} fill="#ff4081" color="#ff4081" /> : <Heart size={16} color="#64748b" />}
               </button>
 
               {/* Discount tag */}
@@ -175,7 +178,7 @@ function RecommendedProduct({ showCart = true }) {
                   className="sc-add-btn"
                   onClick={(e) => handleAddToCart(e, product)}
                 >
-                  <ShoppingCart size={15} color="#94a3b8" /> Add to Cart
+                  <ShoppingCart size={14} /> {t("addToCart", "Add to Cart")}
                 </button>
               )}
             </div>
@@ -187,7 +190,7 @@ function RecommendedProduct({ showCart = true }) {
             className="sc-product-card"
             style={{ alignItems: "center", justifyContent: "center", minWidth: 100 }}
           >
-            <div className="spinner-border spinner-border-sm text-secondary" />
+            <Loading small inline />
           </div>
         )}
       </div>

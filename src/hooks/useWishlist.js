@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { db } from "../firebase";
 import { collection, doc, setDoc, deleteDoc, onSnapshot } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
@@ -40,6 +41,7 @@ const initGlobalWishlist = () => {
 };
 
 export const useWishlist = () => {
+    const navigate = useNavigate();
     const [wishlisted, setWishlisted] = useState(globalWishlist);
 
     useEffect(() => {
@@ -54,12 +56,13 @@ export const useWishlist = () => {
     }, []);
 
     const toggleWishlist = async (e, product) => {
-        e.stopPropagation();
+        if (e && e.stopPropagation) e.stopPropagation();
         const auth = getAuth();
         const user = auth.currentUser;
         
         if (!user) {
             toast.info("Please login to manage your wishlist");
+            navigate('/login');
             return;
         }
 

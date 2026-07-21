@@ -66,11 +66,11 @@ const Footer = () => {
               </svg>
             </div>
             <div className="sc-auth-body">
-              <h5 className="sc-auth-title">See personalized recommendations</h5>
-              <p className="sc-auth-text">Sign in to get a better shopping experience tailored just for you.</p>
-              <button className="sc-auth-btn" onClick={() => navigate("/login")}>Sign in</button>
+              <h5 className="sc-auth-title">{t("footer.seeRecommendations", "See personalized recommendations")}</h5>
+              <p className="sc-auth-text">{t("footer.signInText", "Sign in to get a better shopping experience tailored just for you.")}</p>
+              <button className="sc-auth-btn" onClick={() => navigate("/login")}>{t("footer.signInBtn", "Sign in")}</button>
               <p className="sc-auth-new">
-                New customer? <Link to="/login?mode=signup">Start here.</Link>
+                {t("footer.newCustomer", "New customer?")} <Link to="/login?mode=signup">{t("footer.startHere", "Start here.")}</Link>
               </p>
             </div>
           </div>
@@ -90,53 +90,52 @@ const Footer = () => {
                 <img src={logo} alt="SadhanaCart" className="sc-logo-img" />
                 <div>
                   <div className="sc-logo-name">
-                    Sadhana<span className="sc-logo-cart">Cart</span>
+                    {t("sadhana", "Sadhana")}<span className="sc-logo-cart">{t("cart", "Cart")}</span>
                   </div>
-                  <div className="sc-tagline">Happiness in Every Cart</div>
+                  <div className="sc-tagline">{t("footer.tagline", "Happiness in Every Cart")}</div>
                 </div>
               </div>
               <p className="sc-brand-desc mt-3">
-                SadhanaCart is a multipurpose ecommerce platform for Electronics,
-                Fashion, Groceries, Gifts, Medical, and more.
+                {t("footer.brandDesc", "SadhanaCart is a multipurpose ecommerce platform for Electronics, Fashion, Groceries, Gifts, Medical, and more.")}
               </p>
             </div>
 
             {/* Col 2: Customer Service */}
             <div className="col-xl-2 col-lg-2 col-md-3 col-sm-6 col-6 mb-5">
-              <h6 className="sc-col-heading">CUSTOMER SERVICE</h6>
+              <h6 className="sc-col-heading">{t("footer.customerService", "CUSTOMER SERVICE")}</h6>
               <ul className="sc-link-list">
-                <li><Link to="/help-center">Help Center</Link></li>
-                <li><Link to="/track-order">Track Order</Link></li>
-                <li><Link to="/contact-us">Contact Us</Link></li>
-                <li><Link to="/faqs">FAQs</Link></li>
+                <li><Link to="/help-center">{t("footer.helpCenter", "Help Center")}</Link></li>
+                <li><Link to="/track-order">{t("footer.trackOrder", "Track Order")}</Link></li>
+                <li><Link to="/contact-us">{t("footer.contactUs", "Contact Us")}</Link></li>
+                <li><Link to="/faqs">{t("footer.faqs", "FAQs")}</Link></li>
               </ul>
             </div>
 
             {/* Col 3: Policies */}
             <div className="col-xl-2 col-lg-2 col-md-3 col-sm-6 col-6 mb-5">
-              <h6 className="sc-col-heading">POLICIES</h6>
+              <h6 className="sc-col-heading">{t("footer.policiesHeading", "POLICIES")}</h6>
               <ul className="sc-link-list">
-                <li><Link to="/return-policy">Return Policy</Link></li>
-                <li><Link to="/shipping-policy">Shipping Policy</Link></li>
-                <li><Link to="/privacy-policy">Privacy Policy</Link></li>
-                <li><Link to="/terms-and-conditions">Terms & Conditions</Link></li>
+                <li><Link to="/return-policy">{t("return-Policy;", "Return Policy")}</Link></li>
+                <li><Link to="/shipping-policy">{t("shipping-Policy", "Shipping Policy")}</Link></li>
+                <li><Link to="/privacy-policy">{t("footer.privacyPolicy", "Privacy Policy")}</Link></li>
+                <li><Link to="/terms-and-conditions">{t("term's", "Terms & Conditions")}</Link></li>
               </ul>
             </div>
 
             {/* Col 4: Company */}
             <div className="col-xl-1 col-lg-1 col-md-3 col-sm-6 col-6 mb-5">
-              <h6 className="sc-col-heading">COMPANY</h6>
+              <h6 className="sc-col-heading">{t("footer.company", "COMPANY")}</h6>
               <ul className="sc-link-list">
-                <li><Link to="/about-us">About Us</Link></li>
-                <li><Link to="/careers">Careers</Link></li>
-                <li><Link to="/become-a-seller">Become a Seller</Link></li>
-                <li><Link to="/blog">Blog</Link></li>
+                <li><Link to="/about-us">{t("aboutUs", "About Us")}</Link></li>
+                <li><Link to="/careers">{t("footer.careers", "Careers")}</Link></li>
+                <li><Link to="/become-a-seller">{t("home.becomeSeller", "Become a Seller")}</Link></li>
+                <li><Link to="/blog">{t("footer.blog", "Blog")}</Link></li>
               </ul>
             </div>
 
             {/* Col 5: Contact Us */}
             <div className="col-xl-2 col-lg-2 col-md-3 col-sm-6 col-6 mb-5">
-              <h6 className="sc-col-heading">CONTACT US</h6>
+              <h6 className="sc-col-heading">{t("footer.contactUsHeading", "CONTACT US")}</h6>
               <ul className="sc-contact-list">
                 <li>
                   <FaPhoneAlt className="sc-icon" />
@@ -148,24 +147,22 @@ const Footer = () => {
                 </li>
                 <li>
                   <FaRegClock className="sc-icon" />
-                  <span>Mon - Sat, 9:00 AM - 6:00 PM IST<br />Sunday Closed</span>
+                  <span>{t("workingDays", "Monday to Saturday")}, 9:00 AM - 6:00 PM IST<br />{t("footer.sundayClosed", "Sunday Closed")}</span>
                 </li>
               </ul>
             </div>
 
             {/* Col 6: Registered Office */}
             <div className="col-xl-2 col-lg-2 col-md-6 col-sm-12 mb-5">
-              <h6 className="sc-col-heading">REGISTERED OFFICE</h6>
+              <h6 className="sc-col-heading">{t("registeredOffice", "REGISTERED OFFICE")}</h6>
               <ul className="sc-contact-list">
                 <li>
                   <FaMapMarkerAlt className="sc-icon sc-icon-pin" />
                   <span>
-                    Ground Floor, Ward No. 24,<br />
-                    A No. 4-14-155/36A,<br />
-                    Teachers Colony, Near LIC Office,<br />
-                    Gangavati – 583222,<br />
-                    Koppal District,<br />
-                    Karnataka, India.
+                    {t("addresspage.line1", "Ground Floor, Ward No. 24, A No. 4-14-155/36A,")}<br />
+                    {t("addresspage.line2", "Teachers Colony, Near LIC Office,")}<br />
+                    {t("addresspage.line3", "Gangawati – 583222, Koppal District,")}<br />
+                    {t("addresspage.line4", "Karnataka.")}
                   </span>
                 </li>
               </ul>
@@ -180,7 +177,7 @@ const Footer = () => {
 
             {/* Download App */}
             <div className="col-lg-5 col-md-12 mb-4 mb-lg-0">
-              <p className="sc-section-label">DOWNLOAD OUR APP</p>
+              <p className="sc-section-label">{t("home.downloadApp", "DOWNLOAD OUR APP").toUpperCase()}</p>
               <div className="sc-app-row">
                 {/* Google Play Badge */}
                 <a
@@ -209,7 +206,7 @@ const Footer = () => {
 
             {/* We Accept */}
             <div className="col-lg-4 col-md-12 mb-4 mb-lg-0 text-center">
-              <p className="sc-section-label">WE ACCEPT</p>
+              <p className="sc-section-label">{t("footer.weAccept", "WE ACCEPT")}</p>
               <div className="sc-payments">
                 <div className="sc-pay-card sc-visa">VISA</div>
                 <div className="sc-pay-card sc-mc">
@@ -226,7 +223,7 @@ const Footer = () => {
 
             {/* Follow Us */}
             <div className="col-lg-3 col-md-12 text-lg-end text-center">
-              <p className="sc-section-label text-lg-end">FOLLOW US</p>
+              <p className="sc-section-label text-lg-end">{t("footer.followUs", "FOLLOW US")}</p>
               <div className="sc-socials justify-content-lg-end justify-content-center">
                 <a href="https://instagram.com" target="_blank" rel="noreferrer" className="sc-social sc-insta"><FaInstagram /></a>
                 <a href="https://facebook.com" target="_blank" rel="noreferrer" className="sc-social sc-fb"><FaFacebookF /></a>
@@ -241,14 +238,14 @@ const Footer = () => {
           {/* ── BOTTOM BAR ── */}
           <div className="sc-bottom d-flex flex-column flex-md-row justify-content-between align-items-center">
             <p className="sc-copyright mb-2 mb-md-0">
-              © 2025 SadhanaCart. All Rights Reserved.
+              © 2025 SadhanaCart. {t("allRights", "All Rights Reserved.")}
             </p>
             <div className="sc-bottom-links">
-              <Link to="/privacy-policy">Privacy Policy</Link>
+              <Link to="/privacy-policy">{t("footer.privacyPolicy", "Privacy Policy")}</Link>
               <span className="sc-sep">|</span>
-              <Link to="/terms-and-conditions">Terms & Conditions</Link>
+              <Link to="/terms-and-conditions">{t("term's", "Terms & Conditions")}</Link>
               <span className="sc-sep">|</span>
-              <Link to="/sitemap">Sitemap</Link>
+              <Link to="/sitemap">{t("footer.sitemap", "Sitemap")}</Link>
             </div>
             <button className="sc-back-top" onClick={scrollToTop} aria-label="Back to Top">
               <FaArrowUp />

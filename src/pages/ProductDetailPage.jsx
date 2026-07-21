@@ -11,7 +11,7 @@ import {
     FaShieldAlt, FaHeart, FaRegHeart, FaEdit, FaTrash, FaCamera,
     FaTimes, FaExpand, FaCheck, FaStore, FaBox, FaRupeeSign,
     FaArrowLeft, FaArrowRight, FaShoppingCart, FaBolt, FaTag,
-    FaChevronLeft, FaChevronRight, FaImage, FaUser
+    FaChevronLeft, FaChevronRight, FaImage, FaUser, FaThumbsUp, FaMoneyBillWave, FaUndo, FaHandHoldingUsd, FaBoxOpen
 } from 'react-icons/fa';
 import { db, storage } from "../firebase";
 import { doc, getDoc, collection, getDocs, query, where, limit, addDoc, serverTimestamp, deleteDoc, updateDoc } from "firebase/firestore";
@@ -21,12 +21,18 @@ import { useTranslation } from "react-i18next";
 import ProductSuggestions from "../pages/ProductSuggestions";
 import LoginPage from "./LoginPage";
 import RazorpayOffers from "./RazorpayOffers";
+import FrequentlyBoughtTogether from "../components/category/FrequentlyBoughtTogether";
+import RecentlyViewed from "../components/category/RecentlyViewed";
+import { recordRecentlyViewed } from "../services/recentlyViewedService";
+import { useTheme } from "../context/ThemeContext";
+
 
 const EXCHANGE_RATE = 1;
 const auth = getAuth();
 
 function ProductDetailPage() {
     const { t } = useTranslation();
+    const { isDark } = useTheme();
     const { id } = useParams();
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -397,6 +403,13 @@ function ProductDetailPage() {
         return () => unsubscribe();
     }, []);
 
+    // Record Recently Viewed product when product state updates
+    useEffect(() => {
+        if (product && (product.id || product.productid)) {
+            recordRecentlyViewed(product, auth.currentUser);
+        }
+    }, [product]);
+
     // Function to open image viewer
     const openImageViewer = (images, index = 0) => {
         setCurrentReviewImages(images);
@@ -697,19 +710,6 @@ function ProductDetailPage() {
                 }
             }
 
-            try {
-                const sellersQuery = query(collection(db, "sellers"), limit(50));
-                const sellersSnapshot = await getDocs(sellersQuery);
-                const allSellers = sellersSnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
-
-                setSellerInfo(prev => ({ ...prev, allSellers }));
-            } catch (sellersError) {
-                console.error("Error fetching all sellers:", sellersError);
-            }
-
         } catch (error) {
             console.error("Error in fetchSellerInfo:", error);
         } finally {
@@ -804,63 +804,9 @@ function ProductDetailPage() {
 
                 const data = { id: productSnap.id, ...productSnap.data() };
                 setProduct(data);
-
-                // Add to Recently Viewed
-                try {
-                    const rvStr = localStorage.getItem("recentlyViewed");
-                    let rvList = rvStr ? JSON.parse(rvStr) : [];
-                    rvList = rvList.filter(p => p.id !== data.id);
-                    rvList.unshift(data);
-                    if (rvList.length > 20) rvList = rvList.slice(0, 20);
-                    localStorage.setItem("recentlyViewed", JSON.stringify(rvList));
-                    setRecentlyViewed(rvList.filter(p => p.id !== id));
-                } catch (e) {
-                    console.error("Error saving/loading recently viewed", e);
-                }
-
-                // Fetch Explore More products
-                try {
-                    const exploreQ = query(
-                        collection(db, "products"),
-                        where("category", "==", data.category),
-                        limit(35)
-                    );
-                    const exploreSnap = await getDocs(exploreQ);
-                    const exploreList = exploreSnap.docs.map(doc => {
-                        const pData = doc.data();
-                        const priceValue = (pData.price || 0) * EXCHANGE_RATE;
-                        return {
-                            id: doc.id,
-                            ...pData,
-                            priceINR: priceValue.toFixed(0),
-                            priceValue,
-                            rating: pData.rating || { rate: 4.0, count: 100 }
-                        };
-                    }).filter(p => p.id !== id);
-                    setExploreProducts(exploreList.slice(0, 30));
-                } catch (exploreErr) {
-                    console.error("Error fetching explore products:", exploreErr);
-                }
-
-                await fetchSellerInfo(data);
-                await fetchDeliveryTerms(id);
-                await fetchReviews(id);
-                try {
-                    const querySnapshot = await getDocs(collection(db, "razorpay_offers"));
-                    const offerList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), type: 'offer' }));
-                    const enabledOffers = offerList.filter(o => o.status === "Enabled" || o.isActive !== false);
-
-                    const couponsSnapshot = await getDocs(collection(db, "coupons"));
-                    const couponList = couponsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), type: 'coupon' }));
-                    const enabledCoupons = couponList.filter(c => c.status === "Enabled" || c.isActive !== false);
-
-                    setAvailOffers([...enabledOffers, ...enabledCoupons]);
-                } catch (offerErr) {
-                    console.error("Error fetching offers:", offerErr);
-                }
+                // Set Product States and unblock UI IMMEDIATELY
                 const fetchedVariants = Array.isArray(data.sizevariants) ? data.sizevariants : [];
                 setProductVariants(fetchedVariants);
-
                 if (fetchedVariants.length > 0) {
                     setSelectedSize(fetchedVariants[0].size || null);
                 } else {
@@ -874,10 +820,79 @@ function ProductDetailPage() {
 
                 setProductImages(images);
                 setMainImage(images[0]);
+                setLoading(false); // 🔥 Product is ready to render instantly!
+
+                // Add to Recently Viewed in background
+                try {
+                    const rvStr = localStorage.getItem("recentlyViewed");
+                    let rvList = rvStr ? JSON.parse(rvStr) : [];
+                    rvList = rvList.filter(p => p.id !== data.id);
+                    rvList.unshift(data);
+                    if (rvList.length > 20) rvList = rvList.slice(0, 20);
+                    localStorage.setItem("recentlyViewed", JSON.stringify(rvList));
+                    setRecentlyViewed(rvList.filter(p => p.id !== id));
+                } catch (e) {
+                    console.error("Error saving/loading recently viewed", e);
+                }
+
+                // Load Secondary Information asynchronously in parallel in background
+                Promise.allSettled([
+                    // 1. Explore products
+                    (async () => {
+                        try {
+                            const exploreQ = query(
+                                collection(db, "products"),
+                                where("category", "==", data.category),
+                                limit(35)
+                            );
+                            const exploreSnap = await getDocs(exploreQ);
+                            const exploreList = exploreSnap.docs.map(doc => {
+                                const pData = doc.data();
+                                const priceValue = (pData.price || 0) * EXCHANGE_RATE;
+                                return {
+                                    id: doc.id,
+                                    ...pData,
+                                    priceINR: priceValue.toFixed(0),
+                                    priceValue,
+                                    rating: pData.rating || { rate: 4.0, count: 100 }
+                                };
+                            }).filter(p => p.id !== id);
+                            setExploreProducts(exploreList.slice(0, 30));
+                        } catch (exploreErr) {
+                            console.error("Error fetching explore products:", exploreErr);
+                        }
+                    })(),
+
+                    // 2. Seller info
+                    fetchSellerInfo(data),
+
+                    // 3. Delivery terms
+                    fetchDeliveryTerms(id),
+
+                    // 4. Reviews & Ratings
+                    fetchReviews(id),
+
+                    // 5. Offers & Coupons
+                    (async () => {
+                        try {
+                            const querySnapshot = await getDocs(collection(db, "razorpay_offers"));
+                            const offerList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), type: 'offer' }));
+                            const enabledOffers = offerList.filter(o => o.status === "Enabled" || o.isActive !== false);
+
+                            const couponsSnapshot = await getDocs(collection(db, "coupons"));
+                            const couponList = couponsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), type: 'coupon' }));
+                            const enabledCoupons = couponList.filter(c => c.status === "Enabled" || c.isActive !== false);
+
+                            setAvailOffers([...enabledOffers, ...enabledCoupons]);
+                        } catch (offerErr) {
+                            console.error("Error fetching offers:", offerErr);
+                        }
+                    })()
+                ]);
+
             } catch (err) {
                 console.error("🔥 Error fetching product details:", err);
                 setError(err.message);
-            } finally {
                 setLoading(false);
             }
         };
@@ -1441,8 +1456,8 @@ function ProductDetailPage() {
                     <Col lg={6} md={12} className="ps-lg-4">
                         <div className="d-flex justify-content-between align-items-start mb-2">
                             <div>
-                                <h1 className="fw-bold mb-2" style={{ fontSize: '24px', color: '#111' }}>{product.name || product.title}</h1>
-                                <span className="text-uppercase text-muted" style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '0.8px' }}>
+                                <h1 className="fw-bold mb-2" style={{ fontSize: '24px', color: isDark ? '#f8fafc' : '#111' }}>{product.name || product.title}</h1>
+                                <span className="text-uppercase" style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '0.8px', color: isDark ? '#94a3b8' : '#6c757d' }}>
                                     Category: {product.category}
                                 </span>
                             </div>
@@ -1450,14 +1465,16 @@ function ProductDetailPage() {
 
                         {/* Rating Row */}
                         <div className="d-flex align-items-center gap-2 mb-3" style={{ fontSize: '14px' }}>
-                            <div className="d-flex align-items-center gap-1" style={{ color: '#eab308' }}>
-                                <FaStar />
-                                <FaStar />
-                                <FaStar />
-                                <FaStar />
-                                <FaStar />
+                            <div className="d-flex align-items-center gap-1">
+                                {[...Array(5)].map((_, i) => (
+                                    i < Math.round(rating.rate) ? (
+                                        <FaStar key={i} className="text-warning" />
+                                    ) : (
+                                        <FaRegStar key={i} style={{ color: isDark ? '#64748b' : '#cbd5e1' }} />
+                                    )
+                                ))}
                             </div>
-                            <span style={{ color: '#4a5568', fontWeight: '600' }}>
+                            <span style={{ color: isDark ? '#cbd5e1' : '#4a5568', fontWeight: '600' }}>
                                 {rating.rate.toFixed(1)} ({rating.count} Reviews)
                             </span>
                         </div>
@@ -1465,25 +1482,25 @@ function ProductDetailPage() {
                         {/* Price Block */}
                         <div className="mb-4">
                             <div className="d-flex align-items-center gap-2">
-                                <h2 style={{ fontSize: '32px', fontWeight: '800', color: '#111', margin: 0 }}>
+                                <h2 style={{ fontSize: '32px', fontWeight: '800', color: isDark ? '#ffffff' : '#111', margin: 0 }}>
                                     ₹{calculatedPriceINR}
                                 </h2>
-                                <span className="text-muted text-decoration-line-through" style={{ fontSize: '18px' }}>
+                                <span className="text-decoration-line-through" style={{ fontSize: '18px', color: isDark ? '#94a3b8' : '#6c757d' }}>
                                     ₹{calculatedOriginalPriceINR}
                                 </span>
                                 {discountPercentage > 0 && (
-                                    <span style={{ backgroundColor: '#e6fffa', color: '#0d9488', fontSize: '13px', fontWeight: '700', padding: '4px 8px', borderRadius: '4px' }}>
+                                    <span style={{ backgroundColor: isDark ? 'rgba(5, 150, 105, 0.25)' : '#e6fffa', color: isDark ? '#34d399' : '#0d9488', fontSize: '13px', fontWeight: '700', padding: '4px 8px', borderRadius: '4px' }}>
                                         {discountPercentage}% OFF
                                     </span>
                                 )}
                             </div>
-                            <span style={{ fontSize: '12px', color: '#718096', display: 'block', marginTop: '4px' }}>Inclusive of all taxes</span>
+                            <span style={{ fontSize: '12px', color: isDark ? '#94a3b8' : '#718096', display: 'block', marginTop: '4px' }}>{t("productDetail.inclusiveOfTaxes", "Inclusive of all taxes")}</span>
                         </div>
 
                         {/* Size Selector */}
                         {sortedVariants.length > 0 && (
                             <div className="mb-4">
-                                <label className="fw-bold mb-2" style={{ fontSize: '14px', color: '#333' }}>Select Size</label>
+                                <label className="fw-bold mb-2" style={{ fontSize: '14px', color: isDark ? '#f8fafc' : '#333' }}>{t("productDetail.selectSize", "Select Size")}</label>
                                 <div className="d-flex flex-wrap gap-2">
                                     {sortedVariants.map((variant) => (
                                         <button
@@ -1491,9 +1508,9 @@ function ProductDetailPage() {
                                             type="button"
                                             onClick={() => handleSizeSelect(variant.size)}
                                             style={{
-                                                border: selectedSize === variant.size ? '2px solid #2874f0' : '1px solid #cbd5e0',
-                                                backgroundColor: selectedSize === variant.size ? '#f0f7ff' : '#ffffff',
-                                                color: selectedSize === variant.size ? '#2874f0' : '#2d3748',
+                                                border: selectedSize === variant.size ? '2px solid #3b82f6' : (isDark ? '1px solid #334155' : '1px solid #cbd5e0'),
+                                                backgroundColor: selectedSize === variant.size ? (isDark ? '#1e3a8a' : '#f0f7ff') : (isDark ? '#1e293b' : '#ffffff'),
+                                                color: selectedSize === variant.size ? (isDark ? '#93c5fd' : '#2874f0') : (isDark ? '#f8fafc' : '#2d3748'),
                                                 padding: '8px 16px',
                                                 borderRadius: '6px',
                                                 fontSize: '13px',
@@ -1511,34 +1528,31 @@ function ProductDetailPage() {
                             </div>
                         )}
 
-
-
                         {/* Quantity Selector */}
                         <div className="mb-4">
-                            <label className="fw-bold mb-2" style={{ fontSize: '14px', color: '#333' }}>Quantity</label>
-                            <div className="d-flex align-items-center border" style={{ width: '120px', height: '38px', borderRadius: '6px', overflow: 'hidden', backgroundColor: '#fcfcfc' }}>
+                            <label className="fw-bold mb-2" style={{ fontSize: '14px', color: isDark ? '#f8fafc' : '#333' }}>{t("productDetail.quantity", "Quantity")}</label>
+                            <div className="d-flex align-items-center border" style={{ width: '120px', height: '38px', borderRadius: '6px', overflow: 'hidden', backgroundColor: isDark ? '#1e293b' : '#fcfcfc', borderColor: isDark ? '#334155' : '#dee2e6' }}>
                                 <button
                                     type="button"
                                     onClick={() => setQuantity(q => Math.max(1, q - 1))}
                                     disabled={isOutOfStock}
-                                    style={{ flex: 1, height: '100%', border: 'none', background: 'transparent', fontSize: '18px', fontWeight: 'bold' }}
+                                    style={{ flex: 1, height: '100%', border: 'none', background: 'transparent', fontSize: '18px', fontWeight: 'bold', color: isDark ? '#f8fafc' : '#111' }}
                                 >
                                     -
                                 </button>
-                                <span style={{ flex: 1, textAlign: 'center', fontWeight: '600', fontSize: '14px' }}>
+                                <span style={{ flex: 1, textAlign: 'center', fontWeight: '600', fontSize: '14px', color: isDark ? '#f8fafc' : '#111' }}>
                                     {quantity}
                                 </span>
                                 <button
                                     type="button"
                                     onClick={handleIncrementQuantity}
                                     disabled={isOutOfStock}
-                                    style={{ flex: 1, height: '100%', border: 'none', background: 'transparent', fontSize: '18px', fontWeight: 'bold' }}
+                                    style={{ flex: 1, height: '100%', border: 'none', background: 'transparent', fontSize: '18px', fontWeight: 'bold', color: isDark ? '#f8fafc' : '#111' }}
                                 >
                                     +
                                 </button>
                             </div>
                         </div>
-
                         {/* Call to Action Buttons */}
                         <div className="d-flex gap-3 mb-4">
                             <Button
@@ -1547,9 +1561,9 @@ function ProductDetailPage() {
                                 style={{
                                     flex: 1,
                                     height: '50px',
-                                    border: '2px solid #2874f0',
-                                    backgroundColor: 'transparent',
-                                    color: '#2874f0',
+                                    border: isDark ? '2px solid #3b82f6' : '2px solid #2874f0',
+                                    backgroundColor: isDark ? 'rgba(59, 130, 246, 0.15)' : 'transparent',
+                                    color: isDark ? '#60a5fa' : '#2874f0',
                                     borderRadius: '8px',
                                     display: 'flex',
                                     alignItems: 'center',
@@ -1585,24 +1599,25 @@ function ProductDetailPage() {
                         </div>
 
                         {/* Action Links Footer */}
-                        <div className="d-flex align-items-center gap-4 pt-2 border-top" style={{ fontSize: '13px', color: '#4a5568' }}>
+                        <div className="d-flex align-items-center gap-4 pt-2 border-top" style={{ fontSize: '13px', color: isDark ? '#cbd5e1' : '#4a5568', borderColor: isDark ? 'rgba(255,255,255,0.08)' : '#dee2e6' }}>
                             <div className="d-flex align-items-center gap-2" style={{ cursor: 'pointer' }} onClick={toggleWishlist}>
                                 {isInWishlist ? (
                                     <FaHeart className="text-danger" />
                                 ) : (
                                     <FaRegHeart />
                                 )}
-                                <span>Wishlist</span>
+                                <span>{t("wishList", "Wishlist")}</span>
                             </div>
                             <div className="d-flex align-items-center gap-2" style={{ cursor: 'pointer' }} onClick={handleCompare}>
                                 <i className="fas fa-exchange-alt"></i>
-                                <span>Compare</span>
+                                <span>{t("productDetail.compare", "Compare")}</span>
                             </div>
                             <div className="d-flex align-items-center gap-2" style={{ cursor: 'pointer' }} onClick={handleShare}>
                                 <i className="fas fa-share-alt"></i>
-                                <span>Share</span>
+                                <span>{t("productDetail.share", "Share")}</span>
                             </div>
-                        </div>         </Col>
+                        </div>
+                    </Col>
                 </Row>
             </Card>
 
@@ -1610,17 +1625,17 @@ function ProductDetailPage() {
             <Row className="g-4 mb-5">
                 {/* Description Card */}
                 <Col md={6} xs={12}>
-                    <Card className="border shadow-sm border-0" style={{ borderRadius: '12px', overflow: 'hidden' }}>
+                    <Card className="border shadow-sm" style={{ borderRadius: '12px', overflow: 'hidden', backgroundColor: isDark ? '#1e293b' : '#ffffff', borderColor: isDark ? 'rgba(255,255,255,0.08)' : '#e2e8f0' }}>
                         <div
                             className="d-flex align-items-center justify-content-between p-3"
-                            style={{ cursor: 'pointer', backgroundColor: '#fff', borderBottom: descExpanded ? '1px solid #f0f0f0' : 'none' }}
+                            style={{ cursor: 'pointer', backgroundColor: isDark ? '#1e293b' : '#ffffff', borderBottom: descExpanded ? (isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #f0f0f0') : 'none' }}
                             onClick={() => setDescExpanded(!descExpanded)}
                         >
-                            <h3 className="mb-0 fw-bold" style={{ fontSize: '18px', color: '#111' }}>Description</h3>
-                            <i className={`fas ${descExpanded ? 'fa-chevron-up' : 'fa-chevron-down'}`} style={{ color: '#2874f0', transition: 'transform 0.2s' }}></i>
+                            <h3 className="mb-0 fw-bold" style={{ fontSize: '18px', color: isDark ? '#f8fafc' : '#111' }}>{t("productDetail.description", "Description")}</h3>
+                            <i className={`fas ${descExpanded ? 'fa-chevron-up' : 'fa-chevron-down'}`} style={{ color: '#3b82f6', transition: 'transform 0.2s' }}></i>
                         </div>
                         {descExpanded && (
-                            <Card.Body className="p-3" style={{ fontSize: '14px', lineHeight: '1.6', color: '#4a5568' }}>
+                            <Card.Body className="p-3" style={{ fontSize: '14px', lineHeight: '1.6', color: isDark ? '#cbd5e1' : '#4a5568' }}>
                                 {product.description || "No description available."}
                             </Card.Body>
                         )}
@@ -1629,67 +1644,67 @@ function ProductDetailPage() {
 
                 {/* Details Card */}
                 <Col md={6} xs={12}>
-                    <Card className="border shadow-sm border-0" style={{ borderRadius: '12px', overflow: 'hidden' }}>
+                    <Card className="border shadow-sm" style={{ borderRadius: '12px', overflow: 'hidden', backgroundColor: isDark ? '#1e293b' : '#ffffff', borderColor: isDark ? 'rgba(255,255,255,0.08)' : '#e2e8f0' }}>
                         <div
                             className="d-flex align-items-center justify-content-between p-3"
-                            style={{ cursor: 'pointer', backgroundColor: '#fff', borderBottom: detailsExpanded ? '1px solid #f0f0f0' : 'none' }}
+                            style={{ cursor: 'pointer', backgroundColor: isDark ? '#1e293b' : '#ffffff', borderBottom: detailsExpanded ? (isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #f0f0f0') : 'none' }}
                             onClick={() => setDetailsExpanded(!detailsExpanded)}
                         >
-                            <h3 className="mb-0 fw-bold" style={{ fontSize: '18px', color: '#111' }}>Details</h3>
-                            <i className={`fas ${detailsExpanded ? 'fa-chevron-up' : 'fa-chevron-down'}`} style={{ color: '#2874f0', transition: 'transform 0.2s' }}></i>
+                            <h3 className="mb-0 fw-bold" style={{ fontSize: '18px', color: isDark ? '#f8fafc' : '#111' }}>{t("productDetail.details", "Details")}</h3>
+                            <i className={`fas ${detailsExpanded ? 'fa-chevron-up' : 'fa-chevron-down'}`} style={{ color: '#3b82f6', transition: 'transform 0.2s' }}></i>
                         </div>
                         {detailsExpanded && (
                             <Card.Body className="p-3">
-                                <div className="d-flex flex-column gap-3" style={{ fontSize: '14px', color: '#333' }}>
+                                <div className="d-flex flex-column gap-3" style={{ fontSize: '14px', color: isDark ? '#f8fafc' : '#333' }}>
                                     {hasValue(product.brand) && (
-                                        <div className="d-flex justify-content-between align-items-center border-bottom pb-2">
-                                            <span className="fw-bold text-secondary">brand :</span>
+                                        <div className="d-flex justify-content-between align-items-center border-bottom pb-2" style={{ borderColor: isDark ? 'rgba(255,255,255,0.08)' : '#e2e8f0' }}>
+                                            <span className="fw-bold" style={{ color: isDark ? '#94a3b8' : '#6c757d' }}>{t("productDetail.brand", "brand")}:</span>
                                             <span>{product.brand}</span>
                                         </div>
                                     )}
                                     {(hasValue(product.material) || hasValue(product.fabric)) && (
-                                        <div className="d-flex justify-content-between align-items-center border-bottom pb-2">
-                                            <span className="fw-bold text-secondary">material :</span>
+                                        <div className="d-flex justify-content-between align-items-center border-bottom pb-2" style={{ borderColor: isDark ? 'rgba(255,255,255,0.08)' : '#e2e8f0' }}>
+                                            <span className="fw-bold" style={{ color: isDark ? '#94a3b8' : '#6c757d' }}>{t("productDetail.material", "material")}:</span>
                                             <span>{product.material || product.fabric}</span>
                                         </div>
                                     )}
                                     {hasValue(product.pattern) && (
-                                        <div className="d-flex justify-content-between align-items-center border-bottom pb-2">
-                                            <span className="fw-bold text-secondary">pattern :</span>
+                                        <div className="d-flex justify-content-between align-items-center border-bottom pb-2" style={{ borderColor: isDark ? 'rgba(255,255,255,0.08)' : '#e2e8f0' }}>
+                                            <span className="fw-bold" style={{ color: isDark ? '#94a3b8' : '#6c757d' }}>{t("productDetail.pattern", "pattern")}:</span>
                                             <span>{product.pattern}</span>
                                         </div>
                                     )}
                                     {hasValue(product.hsncode) && (
-                                        <div className="d-flex justify-content-between align-items-center border-bottom pb-2">
-                                            <span className="fw-bold text-secondary">hsncode :</span>
+                                        <div className="d-flex justify-content-between align-items-center border-bottom pb-2" style={{ borderColor: isDark ? 'rgba(255,255,255,0.08)' : '#e2e8f0' }}>
+                                            <span className="fw-bold" style={{ color: isDark ? '#94a3b8' : '#6c757d' }}>{t("productDetail.hsncode", "hsncode")}:</span>
                                             <span>{product.hsncode}</span>
                                         </div>
                                     )}
                                     {hasValue(product.gender) && (
-                                        <div className="d-flex justify-content-between align-items-center border-bottom pb-2">
-                                            <span className="fw-bold text-secondary">gender :</span>
+                                        <div className="d-flex justify-content-between align-items-center border-bottom pb-2" style={{ borderColor: isDark ? 'rgba(255,255,255,0.08)' : '#e2e8f0' }}>
+                                            <span className="fw-bold" style={{ color: isDark ? '#94a3b8' : '#6c757d' }}>{t("productDetail.gender", "gender")}:</span>
                                             <span>{product.gender}</span>
                                         </div>
                                     )}
                                     {hasValue(product.closuretype) && (
-                                        <div className="d-flex justify-content-between align-items-center border-bottom pb-2">
-                                            <span className="fw-bold text-secondary">closuretype :</span>
+                                        <div className="d-flex justify-content-between align-items-center border-bottom pb-2" style={{ borderColor: isDark ? 'rgba(255,255,255,0.08)' : '#e2e8f0' }}>
+                                            <span className="fw-bold" style={{ color: isDark ? '#94a3b8' : '#6c757d' }}>closuretype :</span>
                                             <span>{product.closuretype}</span>
                                         </div>
                                     )}
                                     {hasValue(product.color) && (
-                                        <div className="d-flex justify-content-between align-items-center border-bottom pb-2">
-                                            <span className="fw-bold text-secondary">color :</span>
+                                        <div className="d-flex justify-content-between align-items-center border-bottom pb-2" style={{ borderColor: isDark ? 'rgba(255,255,255,0.08)' : '#e2e8f0' }}>
+                                            <span className="fw-bold" style={{ color: isDark ? '#94a3b8' : '#6c757d' }}>{t("productDetail.color", "color")}:</span>
                                             <span>{product.color}</span>
                                         </div>
                                     )}
-                                    <div className="d-flex justify-content-between align-items-center border-bottom pb-2">
-                                        <span className="fw-bold text-secondary">rating :</span>
+                                    <div className="d-flex justify-content-between align-items-center border-bottom pb-2" style={{ borderColor: isDark ? 'rgba(255,255,255,0.08)' : '#e2e8f0' }}>
+                                        <span className="fw-bold" style={{ color: isDark ? '#94a3b8' : '#6c757d' }}>{t("productDetail.ratingLabel", "rating")}:</span>
                                         <span>{rating.rate.toFixed(1)}</span>
                                     </div>
                                     {discountPercentage > 0 && (
-                                        <div className="d-flex justify-content-between align-items-center border-bottom pb-2">
-                                            <span className="fw-bold text-secondary">discount :</span>
+                                        <div className="d-flex justify-content-between align-items-center border-bottom pb-2" style={{ borderColor: isDark ? 'rgba(255,255,255,0.08)' : '#e2e8f0' }}>
+                                            <span className="fw-bold" style={{ color: isDark ? '#94a3b8' : '#6c757d' }}>{t("productDetail.discountLabel", "discount")}:</span>
                                             <span>{discountPercentage}%</span>
                                         </div>
                                     )}
@@ -1701,16 +1716,14 @@ function ProductDetailPage() {
             </Row>
 
             {/* Available Offers & Delivery Section */}
-            <div className="mb-5 mt-4 p-4 border" style={{ borderRadius: '12px', backgroundColor: '#ffffff' }}>
-                <h5 className="fw-bold mb-3 d-flex align-items-center gap-2" style={{ color: '#111', fontSize: '18px' }}>
-                    <FaTag style={{ color: '#2874f0' }} />
-                    Available Offers
-                </h5>
+            <div className="mb-5 mt-4 p-4 border" style={{ borderRadius: '12px', backgroundColor: isDark ? '#1e293b' : '#ffffff', borderColor: isDark ? 'rgba(255,255,255,0.08)' : '#e2e8f0' }}>
+                <h5 className="fw-bold mb-3 d-flex align-items-center gap-2" style={{ color: isDark ? '#f8fafc' : '#111', fontSize: '18px' }}>
+                    <FaTag style={{ color: '#3b82f6' }} />{t("productDetail.availableOffers", "Available Offers")}</h5>
 
                 {/* Horizontal Scrolling Offers */}
                 <div className="d-flex gap-3 overflow-auto pb-3 custom-horizontal-scroller" style={{ scrollbarWidth: 'thin' }}>
                     {availOffers.length === 0 ? (
-                        <div className="p-3 border rounded text-muted" style={{ minWidth: '280px', backgroundColor: '#fff' }}>
+                        <div className="p-3 border rounded" style={{ minWidth: '280px', backgroundColor: isDark ? '#0f172a' : '#fff', borderColor: isDark ? '#334155' : '#e2e8f0', color: isDark ? '#94a3b8' : '#6c757d' }}>
                             No active offers available
                         </div>
                     ) : (
@@ -1721,14 +1734,14 @@ function ProductDetailPage() {
                                 style={{
                                     minWidth: '280px',
                                     maxWidth: '280px',
-                                    backgroundColor: '#fff',
+                                    backgroundColor: isDark ? '#0f172a' : '#fff',
                                     borderRadius: '12px',
-                                    border: '1.5px solid #e2e8f0',
-                                    boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
+                                    border: isDark ? '1.5px solid #334155' : '1.5px solid #e2e8f0',
+                                    boxShadow: isDark ? '0 4px 12px rgba(0,0,0,0.3)' : '0 2px 8px rgba(0,0,0,0.02)'
                                 }}
                             >
                                 <div className="d-flex align-items-center justify-content-between mb-2">
-                                    <span style={{ backgroundColor: '#e0f2fe', color: '#0369a1', fontSize: '11px', fontWeight: '700', padding: '3px 8px', borderRadius: '4px' }}>
+                                    <span style={{ backgroundColor: isDark ? '#1e3a8a' : '#e0f2fe', color: isDark ? '#60a5fa' : '#0369a1', fontSize: '11px', fontWeight: '700', padding: '3px 8px', borderRadius: '4px' }}>
                                         {offer.code || offer.offerName || "OFFER"}
                                     </span>
                                     <div className="d-flex align-items-center gap-2" style={{ fontSize: '14px' }}>
@@ -1736,11 +1749,11 @@ function ProductDetailPage() {
                                         <i className="fas fa-university text-secondary"></i>
                                     </div>
                                 </div>
-                                <h6 className="fw-bold mb-1 text-dark" style={{ fontSize: '14px', whiteSpace: 'normal', lineHeight: '1.4' }}>
+                                <h6 className="fw-bold mb-1" style={{ fontSize: '14px', whiteSpace: 'normal', lineHeight: '1.4', color: isDark ? '#f8fafc' : '#0f172a' }}>
                                     {offer.title || offer.bankName || offer.displayText1 || "Special Discount"}
                                 </h6>
                                 {offer.minOrderAmount && (
-                                    <div className="text-danger mt-1" style={{ fontSize: '11px', fontWeight: '500' }}>
+                                    <div className="mt-1" style={{ fontSize: '11px', fontWeight: '500', color: isDark ? '#f87171' : '#dc2626' }}>
                                         Min order ₹{offer.minOrderAmount}
                                     </div>
                                 )}
@@ -1749,107 +1762,90 @@ function ProductDetailPage() {
                     )}
                 </div>
 
-                {/* Green Delivery Banner */}
+                {/* Dark Green Delivery Banner (as per screenshot) */}
                 <div
-                    className="d-flex align-items-center gap-3 p-3 mt-4"
+                    className="d-flex align-items-center gap-3 p-3 mt-4 mb-4"
                     style={{
-                        backgroundColor: '#f0fdf4',
-                        border: '1.5px solid #bbf7d0',
-                        borderRadius: '12px'
+                        backgroundColor: isDark ? '#1b2e2d' : '#173b37',
+                        border: isDark ? '1px solid #14532d' : '1px solid #173b37',
+                        borderRadius: '8px'
                     }}
                 >
                     <div
                         className="d-flex align-items-center justify-content-center rounded-circle"
-                        style={{ width: '40px', height: '40px', backgroundColor: '#dcfce7' }}
+                        style={{ width: '32px', height: '32px', backgroundColor: '#115e59' }}
                     >
-                        <FaTruck style={{ color: '#15803d', fontSize: '18px' }} />
+                        <FaTruck style={{ color: '#34d399', fontSize: '14px' }} />
                     </div>
-                    <span className="fw-bold" style={{ color: '#15803d', fontSize: '15px' }}>
-                        {hasDeliveryInfo ? `Delivery: ${formatDeliveryInfo(deliveryTerms.deliveryDate)}` : "Delivery in 5-7 business days"}
+                    <span className="fw-bold" style={{ color: '#f1f5f9', fontSize: '15px' }}>
+                        {hasDeliveryInfo ? `Delivery in ${deliveryTerms.deliveryDate.replace(/days/i, '').trim()} business days` : t("productDetail.deliveryDays", "Delivery in 5-7 business days")}
                     </span>
+                </div>
+
+                {/* Badges Section: {t("productDetail.lowestPrice", "Lowest Price")}, COD, {t("productDetail.sevenDayReturns", "7-day Returns")} */}
+                <div 
+                    className="d-flex justify-content-between align-items-center px-4 py-3 mb-4 w-100" 
+                    style={{ 
+                        backgroundColor: isDark ? '#1e293b' : '#f1f5f9', 
+                        borderRadius: '12px',
+                        border: isDark ? '1px solid #334155' : '1px solid #e2e8f0'
+                    }}
+                >
+                    {/* {t("productDetail.lowestPrice", "Lowest Price")} */}
+                    <div className="d-flex flex-column align-items-center flex-fill position-relative">
+                        <div 
+                            className="rounded-circle d-flex align-items-center justify-content-center mb-2 shadow-sm bg-white" 
+                            style={{ width: '56px', height: '56px' }}
+                        >
+                            <FaTag style={{ color: '#10b981', fontSize: '24px' }} />
+                        </div>
+                        <span className="fw-bold text-center" style={{ fontSize: '13px', color: isDark ? '#f1f5f9' : '#334155' }}>
+                            {t("productDetail.lowestPrice", "Lowest Price")}
+                        </span>
+                    </div>
+
+                    {/* Divider */}
+                    <div style={{ width: '1px', height: '40px', backgroundColor: isDark ? '#334155' : '#cbd5e1' }}></div>
+
+                    {/* Cash on Delivery */}
+                    <div className="d-flex flex-column align-items-center flex-fill position-relative">
+                        <div 
+                            className="rounded-circle d-flex align-items-center justify-content-center mb-2 shadow-sm bg-white" 
+                            style={{ width: '56px', height: '56px' }}
+                        >
+                            <FaHandHoldingUsd style={{ color: '#10b981', fontSize: '28px' }} />
+                        </div>
+                        <span className="fw-bold text-center" style={{ fontSize: '13px', color: isDark ? '#f1f5f9' : '#334155' }}>{t("productDetail.cashOnDelivery", "Cash on Delivery")}</span>
+                    </div>
+
+                    {/* Divider */}
+                    <div style={{ width: '1px', height: '40px', backgroundColor: isDark ? '#334155' : '#cbd5e1' }}></div>
+
+                    {/* {t("productDetail.sevenDayReturns", "7-day Returns")} */}
+                    <div className="d-flex flex-column align-items-center flex-fill position-relative">
+                        <div 
+                            className="rounded-circle d-flex align-items-center justify-content-center mb-2 shadow-sm bg-white" 
+                            style={{ width: '56px', height: '56px' }}
+                        >
+                            <FaBoxOpen style={{ color: '#f59e0b', fontSize: '26px' }} />
+                        </div>
+                        <span className="fw-bold text-center" style={{ fontSize: '13px', color: isDark ? '#f1f5f9' : '#334155' }}>
+                            {t("productDetail.sevenDayReturns", "7-day Returns")}
+                        </span>
+                    </div>
                 </div>
             </div>
 
-            {/* Delivery & Terms Information Section */}
-            {(hasDeliveryInfo || hasTermsInfo) && (
-                <Card className="mb-5 border-0 shadow-sm">
-                    <Card.Body className="p-4">
-                        <h3 className="fw-bold mb-4">
-                            <FaShieldAlt className="text-primary me-2" />
-                            Product Policies
-                        </h3>
-
-                        <Row>
-                            {/* Delivery Information */}
-                            {hasDeliveryInfo && (
-                                <Col md={6} className="mb-4 mb-md-0">
-                                    <div className="border rounded p-4 h-100">
-                                        <div className="d-flex align-items-center mb-3">
-                                            <div className="bg-primary bg-opacity-10 p-3 rounded-circle me-3">
-                                                <FaTruck className="text-primary" size={24} />
-                                            </div>
-                                            <h5 className="mb-0 fw-bold">Delivery Information</h5>
-                                        </div>
-                                        <div className="ms-5">
-                                            <div className="alert alert-success border-0 bg-success bg-opacity-10">
-                                                <FaCalendarAlt className="me-2" />
-                                                <span className="fw-semibold">
-                                                    {deliveryTerms.deliveryDate.includes("day") || deliveryTerms.deliveryDate.includes("Day")
-                                                        ? deliveryTerms.deliveryDate
-                                                        : `Delivery within ${deliveryTerms.deliveryDate} days`}
-                                                </span>
-                                            </div>
-                                            <p className="text-muted small mb-0">
-                                                <FaTruck className="me-1" />
-                                                This information is provided by the seller
-                                            </p>
-                                        </div>
-                                    </div>
-                                </Col>
-                            )}
-
-                            {/* Terms & Conditions */}
-                            {hasTermsInfo && (
-                                <Col md={hasDeliveryInfo ? 6 : 12}>
-                                    <div className="border rounded p-4 h-100">
-                                        <div className="d-flex align-items-center mb-3">
-                                            <div className="bg-warning bg-opacity-10 p-3 rounded-circle me-3">
-                                                <FaFileContract className="text-warning" size={24} />
-                                            </div>
-                                            <h5 className="mb-0 fw-bold">Terms & Conditions</h5>
-                                        </div>
-                                        <div className="ms-5">
-                                            <div className="terms-content" style={{ maxHeight: '200px', overflowY: 'auto' }}>
-                                                {parseTermsConditions(deliveryTerms.termsConditions).map((term, index) => (
-                                                    <div key={index} className="mb-2 d-flex">
-                                                        <span className="text-primary me-2">•</span>
-                                                        <span>{term.trim()}</span>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                            <p className="text-muted small mb-0 mt-2">
-                                                <FaShieldAlt className="me-1" />
-                                                Please review these terms before purchasing
-                                            </p>
-                                        </div>
-                                    </div>
-                                </Col>
-                            )}
-                        </Row>
-                    </Card.Body>
-                </Card>
-            )}
-
             {/* Reviews Section */}
-            <Card className="border-0 shadow-sm mb-5">
+            <Card className="border shadow-sm mb-5" style={{ backgroundColor: isDark ? '#1e293b' : '#ffffff', borderColor: isDark ? 'rgba(255,255,255,0.08)' : '#e2e8f0', color: isDark ? '#f8fafc' : '#212529', borderRadius: '16px' }}>
                 <Card.Body className="p-4">
                     <Row>
-                        <Col md={4} className="border-end">
-                            <h3 className="fw-bold mb-4">Ratings & Reviews</h3>
+                        <Col md={4} className="border-end" style={{ borderColor: isDark ? 'rgba(255,255,255,0.08)' : '#dee2e6' }}>
+                            <h3 className="fw-bold mb-4" style={{ color: isDark ? '#f8fafc' : '#111' }}>{t("productDetail.ratingsAndReviews", "Ratings & Reviews")}</h3>
 
                             {/* Average Rating */}
                             <div className="text-center mb-4">
-                                <span className="display-1 fw-bold">{reviewsData.averageRating.toFixed(1)}</span>
+                                <span className="display-1 fw-bold" style={{ color: isDark ? '#ffffff' : '#111' }}>{reviewsData.averageRating.toFixed(1)}</span>
                                 <div className="my-2">
                                     {[...Array(5)].map((_, i) => (
                                         i < Math.round(reviewsData.averageRating) ?
@@ -1857,7 +1853,7 @@ function ProductDetailPage() {
                                             <FaRegStar key={i} className="text-muted mx-1" size={20} />
                                     ))}
                                 </div>
-                                <p className="text-muted mb-0">{reviewsData.totalRatings} total ratings</p>
+                                <p className="mb-0" style={{ color: isDark ? '#94a3b8' : '#6c757d' }}>{reviewsData.totalRatings} {t("productDetail.totalRatings", "total ratings")}</p>
                             </div>
 
                             {/* Rating Distribution */}
@@ -1867,13 +1863,13 @@ function ProductDetailPage() {
                                     const percentage = reviewsData.totalRatings > 0 ? (count / reviewsData.totalRatings) * 100 : 0;
                                     return (
                                         <div key={star} className="d-flex align-items-center mb-2">
-                                            <span className="me-2" style={{ minWidth: '40px' }}>{star} <FaStar className="text-warning ms-1" size={12} /></span>
+                                            <span className="me-2" style={{ minWidth: '40px', color: isDark ? '#cbd5e1' : '#4a5568' }}>{star} <FaStar className="text-warning ms-1" size={12} /></span>
                                             <div className="flex-grow-1 mx-2">
-                                                <div style={styles.ratingBar}>
+                                                <div style={{ ...styles.ratingBar, backgroundColor: isDark ? '#334155' : '#e2e8f0' }}>
                                                     <div style={{ ...styles.ratingBarFill, width: `${percentage}%` }}></div>
                                                 </div>
                                             </div>
-                                            <span className="text-muted small" style={{ minWidth: '40px' }}>{count}</span>
+                                            <span className="small" style={{ minWidth: '40px', color: isDark ? '#94a3b8' : '#6c757d' }}>{count}</span>
                                         </div>
                                     );
                                 })}
@@ -1881,10 +1877,10 @@ function ProductDetailPage() {
 
                             {/* Write Review Button */}
                             <div className="text-center">
-                                <h5 className="fw-bold mb-3">Share Your Experience</h5>
-                                <p className="text-muted small mb-3">Help other customers make better decisions</p>
+                                <h5 className="fw-bold mb-3" style={{ color: isDark ? '#f8fafc' : '#111' }}>Share Your Experience</h5>
+                                <p className="small mb-3" style={{ color: isDark ? '#94a3b8' : '#6c757d' }}>Help other customers make better decisions</p>
                                 <Button
-                                    variant="dark"
+                                    variant={isDark ? "primary" : "dark"}
                                     size="lg"
                                     onClick={handleWriteReviewClick}
                                     className="px-5 rounded-pill"
@@ -1896,18 +1892,18 @@ function ProductDetailPage() {
 
                         {/* Reviews List */}
                         <Col md={8} className="ps-md-5">
-                            <h3 className="fw-bold mb-4">Customer Reviews</h3>
+                            <h3 className="fw-bold mb-4" style={{ color: isDark ? '#f8fafc' : '#111' }}>{t("productDetail.customerReviews", "Customer Reviews")}</h3>
 
                             {reviewsData.reviews.length === 0 ? (
-                                <div className="text-center py-5 bg-light rounded">
-                                    <FaRegStar size={40} className="text-muted mb-3" />
-                                    <h5 className="text-muted">No reviews yet</h5>
-                                    <p className="text-muted small">Be the first to review this product</p>
+                                <div className="text-center py-5 rounded" style={{ backgroundColor: isDark ? '#0f172a' : '#f8f9fa', border: isDark ? '1px solid #334155' : 'none' }}>
+                                    <FaRegStar size={40} className="mb-3" style={{ color: isDark ? '#64748b' : '#6c757d' }} />
+                                    <h5 style={{ color: isDark ? '#94a3b8' : '#6c757d' }}>{t("productDetail.noReviewsYet", "No reviews yet")}</h5>
+                                    <p className="small" style={{ color: isDark ? '#64748b' : '#6c757d' }}>{t("productDetail.beFirstToReview", "Be the first to review this product")}</p>
                                 </div>
                             ) : (
                                 <div style={{ maxHeight: '600px', overflowY: 'auto' }}>
                                     {reviewsData.reviews.map((review, index) => (
-                                        <div key={index} className="border-bottom pb-4 mb-4">
+                                        <div key={index} className="border-bottom pb-4 mb-4" style={{ borderColor: isDark ? 'rgba(255,255,255,0.08)' : '#dee2e6' }}>
                                             <div className="d-flex justify-content-between align-items-start mb-2">
                                                 <div>
                                                     <div className="d-flex align-items-center mb-2">
@@ -1918,11 +1914,11 @@ function ProductDetailPage() {
                                                         ))}
                                                     </div>
                                                     <div className="d-flex align-items-center">
-                                                        <div className="bg-secondary bg-opacity-10 rounded-circle p-2 me-2">
-                                                            <FaUser size={14} className="text-secondary" />
+                                                        <div className="rounded-circle p-2 me-2" style={{ backgroundColor: isDark ? '#334155' : 'rgba(108, 117, 125, 0.1)' }}>
+                                                            <FaUser size={14} style={{ color: isDark ? '#94a3b8' : '#6c757d' }} />
                                                         </div>
-                                                        <span className="fw-semibold me-2">{review.userName || 'Customer'}</span>
-                                                        <span className="text-muted small">
+                                                        <span className="fw-semibold me-2" style={{ color: isDark ? '#f8fafc' : '#212529' }}>{review.userName || 'Customer'}</span>
+                                                        <span className="small" style={{ color: isDark ? '#94a3b8' : '#6c757d' }}>
                                                             {new Date(review.date).toLocaleDateString('en-US', {
                                                                 year: 'numeric',
                                                                 month: 'short',
@@ -1957,7 +1953,7 @@ function ProductDetailPage() {
                                                 )}
                                             </div>
 
-                                            <p className="mb-3" style={{ lineHeight: '1.8' }}>{review.comment}</p>
+                                            <p className="mb-3" style={{ lineHeight: '1.8', color: isDark ? '#cbd5e1' : '#212529' }}>{review.comment}</p>
 
                                             {/* Display Review Images */}
                                             {review.images && review.images.length > 0 && (
@@ -1987,6 +1983,12 @@ function ProductDetailPage() {
                 </Card.Body>
             </Card>
 
+            {/* {t("productDetail.frequentlyBoughtTogether", "Frequently Bought Together")} */}
+            {product && <FrequentlyBoughtTogether currentProduct={product} />}
+
+            {/* Recently Viewed Products */}
+            <RecentlyViewed currentProductId={id} />
+
             {/* Similar Products */}
             {product && (
                 <ProductSuggestions
@@ -2001,62 +2003,56 @@ function ProductDetailPage() {
             {/* Explore more like this */}
             {exploreProducts.length > 0 && (
                 <div className="mt-5 mb-5 explore-more-container">
-                    <h3 className="fw-bold mb-3">Explore more like this</h3>
-                    
+                    <h3 className="fw-bold mb-3" style={{ color: isDark ? '#f8fafc' : '#111' }}>{t("productDetail.exploreMore", "Explore more like this")}</h3>
+
                     {/* Filter Pills */}
                     <div className="d-flex gap-3 mb-4 flex-wrap">
-                        <button 
+                        <button
                             onClick={() => setExploreFilter("value")}
                             type="button"
                             className="btn btn-light d-flex align-items-center gap-2 px-3 py-2 rounded shadow-sm border"
-                            style={{ 
-                                backgroundColor: exploreFilter === "value" ? "#eff6ff" : "#fff",
-                                borderColor: exploreFilter === "value" ? "#3b82f6" : "#e5e7eb",
-                                color: exploreFilter === "value" ? "#1e40af" : "#4b5563",
+                            style={{
+                                backgroundColor: exploreFilter === "value" ? (isDark ? '#1e3a8a' : "#eff6ff") : (isDark ? '#1e293b' : "#fff"),
+                                borderColor: exploreFilter === "value" ? "#3b82f6" : (isDark ? '#334155' : "#e5e7eb"),
+                                color: exploreFilter === "value" ? (isDark ? '#93c5fd' : "#1e40af") : (isDark ? '#f8fafc' : "#4b5563"),
                                 fontSize: '13px',
                                 fontWeight: '600'
                             }}
                         >
-                            <i className="fas fa-th-large" style={{ color: '#3b82f6' }}></i>
-                            Value 365
-                        </button>
+                            <i className="fas fa-th-large" style={{ color: '#3b82f6' }}></i> {t("productDetail.value365", "Value 365")} </button>
 
-                        <button 
+                        <button
                             onClick={() => setExploreFilter("trends")}
                             type="button"
                             className="btn btn-light d-flex align-items-center gap-2 px-3 py-2 rounded shadow-sm border"
-                            style={{ 
-                                backgroundColor: exploreFilter === "trends" ? "#faf5ff" : "#fff",
-                                borderColor: exploreFilter === "trends" ? "#a855f7" : "#e5e7eb",
-                                color: exploreFilter === "trends" ? "#6b21a8" : "#4b5563",
+                            style={{
+                                backgroundColor: exploreFilter === "trends" ? (isDark ? '#581c87' : "#faf5ff") : (isDark ? '#1e293b' : "#fff"),
+                                borderColor: exploreFilter === "trends" ? "#a855f7" : (isDark ? '#334155' : "#e5e7eb"),
+                                color: exploreFilter === "trends" ? (isDark ? '#e9d5ff' : "#6b21a8") : (isDark ? '#f8fafc' : "#4b5563"),
                                 fontSize: '13px',
                                 fontWeight: '600'
                             }}
                         >
-                            <i className="fas fa-fire" style={{ color: '#a855f7' }}></i>
-                            Latest Trends
-                        </button>
+                            <i className="fas fa-fire" style={{ color: '#a855f7' }}></i> {t("productDetail.latestTrends", "Latest Trends")} </button>
 
-                        <button 
+                        <button
                             onClick={() => setExploreFilter("rated")}
                             type="button"
                             className="btn btn-light d-flex align-items-center gap-2 px-3 py-2 rounded shadow-sm border"
-                            style={{ 
-                                backgroundColor: exploreFilter === "rated" ? "#fefcbf" : "#fff",
-                                borderColor: exploreFilter === "rated" ? "#eab308" : "#e5e7eb",
-                                color: exploreFilter === "rated" ? "#854d0e" : "#4b5563",
+                            style={{
+                                backgroundColor: exploreFilter === "rated" ? (isDark ? '#713f12' : "#fefcbf") : (isDark ? '#1e293b' : "#fff"),
+                                borderColor: exploreFilter === "rated" ? "#eab308" : (isDark ? '#334155' : "#e5e7eb"),
+                                color: exploreFilter === "rated" ? (isDark ? '#fef08a' : "#854d0e") : (isDark ? '#f8fafc' : "#4b5563"),
                                 fontSize: '13px',
                                 fontWeight: '600'
                             }}
                         >
-                            <i className="fas fa-star" style={{ color: '#eab308' }}></i>
-                            Top Rated
-                        </button>
+                            <i className="fas fa-star" style={{ color: '#eab308' }}></i> {t("productDetail.topRated", "Top Rated")} </button>
                     </div>
 
                     {/* Grid Layout of 5 columns */}
-                    <div className="row g-4 row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5">
-                        {sortedExploreProducts.map((p) => {
+                    <div className="row g-4 row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 row-cols-xl-5 row-cols-xxl-5">
+                        {sortedExploreProducts.slice(0, 10).map((p) => {
                             const finalPrice = Number(p.offerprice || p.price || 0);
                             const originalPrice = p.price && p.offerprice ? Number(p.price) : Math.round(finalPrice * 1.5);
                             const discountPercent = Math.round(((originalPrice - finalPrice) / originalPrice) * 100);
@@ -2070,10 +2066,10 @@ function ProductDetailPage() {
 
                             return (
                                 <div key={p.id} className="col">
-                                    <Card className="h-100 border-0 shadow-sm" style={{ borderRadius: '16px', overflow: 'hidden' }}>
-                                        <Link to={`/product/${p.id}`} className="text-decoration-none text-dark" onClick={() => window.scrollTo(0, 0)}>
+                                    <Card className="h-100 border shadow-sm" style={{ borderRadius: '16px', overflow: 'hidden', backgroundColor: isDark ? '#1e293b' : '#ffffff', borderColor: isDark ? 'rgba(255,255,255,0.08)' : '#e5e7eb' }}>
+                                        <Link to={`/product/${p.id}`} className="text-decoration-none" onClick={() => window.scrollTo(0, 0)}>
                                             {/* Image container */}
-                                            <div className="d-flex justify-content-center align-items-center p-3" style={{ height: "180px", backgroundColor: '#f3f4f6' }}>
+                                            <div className="d-flex justify-content-center align-items-center p-3" style={{ height: "180px", backgroundColor: '#ffffff', borderRadius: '12px 12px 0 0' }}>
                                                 <Card.Img
                                                     src={getExploreImage(p)}
                                                     style={{ height: "140px", width: 'auto', objectFit: "contain" }}
@@ -2081,27 +2077,51 @@ function ProductDetailPage() {
                                             </div>
 
                                             {/* Card body */}
-                                            <Card.Body className="p-3 bg-white">
-                                                <Card.Title className="fw-semibold text-truncate mb-1 text-dark" style={{ fontSize: '0.85rem', color: '#333' }}>
-                                                    {p.name || p.title}
-                                                </Card.Title>
-                                                
-                                                <div className="d-flex align-items-center gap-2 mt-2">
-                                                    {/* Down arrow icon and discount percentage */}
-                                                    <span className="fw-bold text-success" style={{ fontSize: '12px' }}>
-                                                        ↓{discountPercent}%
-                                                    </span>
-                                                    
-                                                    {/* Original struck price */}
-                                                    <span className="text-muted text-decoration-line-through" style={{ fontSize: '11px' }}>
-                                                        ₹{originalPrice.toLocaleString()}
-                                                    </span>
-                                                    
-                                                    {/* Bold final price */}
-                                                    <span className="fw-bold text-dark" style={{ fontSize: '13px' }}>
-                                                        ₹{finalPrice.toLocaleString()}
-                                                    </span>
+                                            <Card.Body className="p-3 d-flex flex-column justify-content-between" style={{ backgroundColor: isDark ? '#1e293b' : '#ffffff' }}>
+                                                <div>
+                                                    <Card.Title className="fw-bold mb-1" style={{ fontSize: '0.88rem', color: isDark ? '#f8fafc' : '#0f172a', fontWeight: '800', lineHeight: '1.35', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', height: '2.4em' }}>
+                                                        {p.name || p.title}
+                                                    </Card.Title>
+
+                                                    <div className="d-flex align-items-baseline gap-2 mt-2">
+                                                        {/* Bold final price */}
+                                                        <span className="fw-bold" style={{ fontSize: '1rem', fontWeight: '800', color: isDark ? '#ffffff' : '#0f172a' }}>
+                                                            ₹{finalPrice.toLocaleString()}
+                                                        </span>
+
+                                                        {/* Original struck price */}
+                                                        {originalPrice > finalPrice && (
+                                                            <span className="text-decoration-line-through" style={{ fontSize: '0.78rem', color: isDark ? '#94a3b8' : '#64748b' }}>
+                                                                ₹{originalPrice.toLocaleString()}
+                                                            </span>
+                                                        )}
+
+                                                        {/* Down arrow icon and discount percentage */}
+                                                        {discountPercent > 0 && (
+                                                            <span className="fw-bold" style={{ fontSize: '0.75rem', color: isDark ? '#34d399' : '#059669' }}>
+                                                                ↓{discountPercent}%
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </div>
+
+                                                <button
+                                                    className="sc-add-btn mt-2 w-100"
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        dispatch(addToCart({
+                                                            id: p.id,
+                                                            title: p.name || p.title,
+                                                            price: finalPrice,
+                                                            image: getExploreImage(p),
+                                                            quantity: 1,
+                                                        }));
+                                                        toast.success(`Added ${p.name || p.title} to cart!`, { position: "bottom-right", autoClose: 2000 });
+                                                    }}
+                                                >
+                                                    <i className="fas fa-shopping-cart me-1"></i> {t("addToCart", "Add to Cart")}
+                                                </button>
                                             </Card.Body>
                                         </Link>
                                     </Card>
@@ -2520,7 +2540,7 @@ function ProductDetailPage() {
             {/* Share Modal */}
             <Modal show={showShareModal} onHide={() => setShowShareModal(false)} centered size="md">
                 <Modal.Header closeButton className="border-0">
-                    <Modal.Title className="fw-bold" style={{ fontSize: '18px' }}>Share</Modal.Title>
+                    <Modal.Title className="fw-bold" style={{ fontSize: '18px' }}>{t("productDetail.share", "Share")}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body className="pt-0">
                     {product && (
@@ -2710,6 +2730,11 @@ function ProductDetailPage() {
         @media (min-width: 992px) {
           .border-start-lg {
             border-left: 1px solid rgba(0,0,0,0.1) !important;
+          }
+          .explore-more-container .row > .col {
+            flex: 0 0 20% !important;
+            max-width: 20% !important;
+            width: 20% !important;
           }
         }
         .custom-premium-range {

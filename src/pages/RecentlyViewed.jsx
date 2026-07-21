@@ -7,8 +7,10 @@ import { useDispatch } from "react-redux";
 import { addToCart } from "../redux/cartSlice";
 import { Toast, ToastContainer } from "react-bootstrap";
 import "./Home.css"; // Reuse the card styling from Home.css
+import { useTranslation } from "react-i18next";
 
 function RecentlyViewed() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -62,7 +64,7 @@ function RecentlyViewed() {
       image: product.images?.[0] || product.image || "",
       quantity: 1,
     }));
-    setToastMsg(`${product.name || product.title || "Product"} added to cart ✓`);
+    setToastMsg(t("addedToCartMsg", "Added {{name}} to cart!", { name: product.name || product.title || "Product" }).replace("{{name}}", product.name || product.title || "Product"));
     setShowToast(true);
   };
 
@@ -70,17 +72,17 @@ function RecentlyViewed() {
   return (
     <div className="container my-5" style={{ minHeight: "60vh" }}>
       <h2 className="mb-4" style={{ fontWeight: "700", color: "var(--text-dark, #333)" }}>
-        Recently Viewed
+        {t("recentlyViewed", "Recently Viewed")}
       </h2>
-      
+
       {products.length === 0 ? (
         <div className="text-center py-5">
-          <p className="text-muted" style={{ fontSize: "1.1rem" }}>You haven't viewed any products yet.</p>
-          <button 
+          <p className="text-muted" style={{ fontSize: "1.1rem" }}>{t("noRecentlyViewed", "You haven't viewed any products yet.")}</p>
+          <button
             className="btn btn-primary mt-3"
             onClick={() => navigate('/')}
           >
-            Start Shopping
+            {t("startShopping", "Start Shopping")}
           </button>
         </div>
       ) : (
@@ -103,11 +105,11 @@ function RecentlyViewed() {
                 <button
                   className="wishlist-btn"
                   onClick={(e) => toggleWishlist(e, product)}
-                  aria-label="Wishlist"
+                  aria-label={t("wishlistLabel", "Wishlist")}
                 >
                   {wishlisted[product.id] ? <Heart size={20} fill="#ff4081" color="#ff4081" /> : <Heart size={20} strokeWidth={2.5} color="#555" />}
                 </button>
-                {discount > 0 && <span className="bs-discount-tag">{discount}% OFF</span>}
+                {discount > 0 && <span className="bs-discount-tag">{discount}% {t("off", "OFF")}</span>}
 
                 <div className="bs-img-wrap">
                   <img src={image} alt={name} loading="lazy" />
@@ -138,7 +140,7 @@ function RecentlyViewed() {
                   className="bs-add-btn"
                   onClick={(e) => handleAddToCart(e, product)}
                 >
-                  <ShoppingCart size={15} color="#94a3b8" /> Add to Cart
+                  <ShoppingCart size={15} color="#94a3b8" /> {t("addToCart", "Add to Cart")}
                 </button>
               </div>
             );

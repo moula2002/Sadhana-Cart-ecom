@@ -496,3 +496,33 @@
         margin: 0 10px 12px;
     }
 }
+
+/* ── Dark Mode Overrides for Second Header ── */
+.dark-theme .second-header-wrapper,
+[data-bs-theme="dark"] .second-header-wrapper,
+[data-theme="dark"] .second-header-wrapper {
+    background-color: #1e293b !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+}
+
+.dark-theme .category-name,
+[data-bs-theme="dark"] .category-name,
+[data-theme="dark"] .category-name {
+    color: #f8fafc !important;
+}
+
+.dark-theme .category-image,
+[data-bs-theme="dark"] .category-image,
+[data-theme="dark"] .category-image {
+    border-color: rgba(255, 255, 255, 0.15) !important;
+    background: #ffffff !important;
+}
+
+.dark-theme .more-categories-icon,
+[data-bs-theme="dark"] .more-categories-icon,
+[data-theme="dark"] .more-categories-icon {
+    background: #334155 !important;
+    border-color: #475569 !important;
+    color: #f8fafc !important;
+}

@@ -218,26 +218,27 @@
   text-decoration: underline !important;
 }
 
-/* ================= FORCE TEXT COLORS IN DARK THEME ================= */
-.dark-theme * {
-  color: inherit !important;
+/* ================= SCOPED TEXT COLORS IN DARK THEME ================= */
+.dark-theme .checkout-page *,
+.dark-theme .theme-container * {
+  color: inherit;
 }
 
-.dark-theme .form-control,
-.dark-theme .form-label,
-.dark-theme .form-text,
-.dark-theme .text-muted,
-.dark-theme .text-secondary,
-.dark-theme p,
-.dark-theme h1,
-.dark-theme h2,
-.dark-theme h3,
-.dark-theme h4,
-.dark-theme h5,
-.dark-theme h6,
-.dark-theme small,
-.dark-theme span {
-  color: inherit !important;
+.dark-theme .checkout-page .form-control,
+.dark-theme .checkout-page .form-label,
+.dark-theme .checkout-page .form-text,
+.dark-theme .checkout-page .text-muted,
+.dark-theme .checkout-page .text-secondary,
+.dark-theme .checkout-page p,
+.dark-theme .checkout-page h1,
+.dark-theme .checkout-page h2,
+.dark-theme .checkout-page h3,
+.dark-theme .checkout-page h4,
+.dark-theme .checkout-page h5,
+.dark-theme .checkout-page h6,
+.dark-theme .checkout-page small,
+.dark-theme .checkout-page span {
+  color: inherit;
 }
 
 /* ================= FORM CHECK RADIO CUSTOM COLORS ================= */

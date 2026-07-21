@@ -308,7 +308,7 @@ const CartItems = ({ items, onIncrease, onDecrease, onRemove }) => {
                     <div style={styles.price}>{formatPrice(item.price)}</div>
                     {item.stock <= 5 && item.stock > 0 && (
                       <span style={styles.lowStockBadge}>
-                        Only {item.stock} left in stock
+                        {t("lowStock", "Only {{count}} left in stock", { count: item.stock })}
                       </span>
                     )}
                   </Col>
@@ -316,7 +316,7 @@ const CartItems = ({ items, onIncrease, onDecrease, onRemove }) => {
                   {/* Quantity */}
                   <Col xs={6} md={3}>
                     <div style={styles.quantitySection}>
-                      <span style={styles.quantityLabel}>Quantity</span>
+                      <span style={styles.quantityLabel}>{t("quantity", "Quantity")}</span>
                       <div style={styles.quantityControls}>
                         <button
                           style={{
@@ -361,7 +361,7 @@ const CartItems = ({ items, onIncrease, onDecrease, onRemove }) => {
                         </button>
                       </div>
                       {isMaxQuantity && (
-                        <span style={styles.maxStockText}>Max stock reached</span>
+                        <span style={styles.maxStockText}>{t("maxStockReached", "Max stock reached")}</span>
                       )}
                     </div>
                   </Col>
@@ -369,7 +369,7 @@ const CartItems = ({ items, onIncrease, onDecrease, onRemove }) => {
                   {/* Subtotal & Remove */}
                   <Col xs={6} md={4}>
                     <div style={styles.subtotal}>
-                      <span style={styles.subtotalLabel}>Subtotal</span>
+                      <span style={styles.subtotalLabel}>{t("subtotal", "Subtotal")}</span>
                       <span style={styles.subtotalValue}>
                         {formatPrice(item.price * item.quantity)}
                       </span>
@@ -390,7 +390,7 @@ const CartItems = ({ items, onIncrease, onDecrease, onRemove }) => {
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
                         </svg>
-                        {t("cart.remove")}
+                        {t("remove", "Remove")}
                       </button>
                     </div>
                   </Col>

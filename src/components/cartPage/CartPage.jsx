@@ -7,16 +7,7 @@ import {
   clearCartError,
 } from "../../redux/cartSlice";
 
-import {
-  Container,
-  Row,
-  Col,
-  Card,
-  Button,
-  Toast,
-  ToastContainer,
-} from "react-bootstrap";
-
+import { Container, Row, Col, Toast, ToastContainer } from "react-bootstrap";
 import { useNavigate, Link } from "react-router-dom";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
@@ -24,6 +15,9 @@ import { db } from "../../firebase";
 
 import CartItems from "./CartItems";
 import { useTranslation } from "react-i18next";
+import { ShoppingBag, ArrowRight, Trash2, ShieldCheck, Truck, Lock } from "lucide-react";
+import logoImg from "../../Images/Sadhanacart1.png";
+import "./CartPage.css";
 
 const CartPage = () => {
   const { t } = useTranslation();
@@ -181,111 +175,146 @@ const CartPage = () => {
 
   if (cartItems.length === 0)
     return (
-      <Container className="empty-cart-container py-5">
-        <div className="empty-cart-wrapper">
-          <div className="empty-cart-icon">
-            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.70711 15.2929C4.07714 15.9229 4.52331 17 5.41421 17H17M17 17C15.8954 17 15 17.8954 15 19C15 20.1046 15.8954 21 17 21C18.1046 21 19 20.1046 19 19C19 17.8954 18.1046 17 17 17ZM9 19C9 20.1046 8.10457 21 7 21C5.89543 21 5 20.1046 5 19C5 17.8954 5.89543 17 7 17C8.10457 17 9 17.8954 9 19Z" 
-              stroke="#6366F1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+      <div className="cart-page-wrapper">
+        <Container className="empty-cart-container py-5">
+          <div className="empty-cart-card">
+            <div className="empty-cart-icon-wrap">
+              <img src={logoImg} alt="Sadhana Cart" style={{ maxWidth: "65px", maxHeight: "65px", objectFit: "contain" }} />
+            </div>
+            <h2>{t("cart.emptyTitle") || "Your Cart is Empty"}</h2>
+            <p>{t("cart.emptySubtitle") || "Looks like you haven't added anything to your cart yet."}</p>
+            <Link to="/" className="start-shopping-btn">
+              {t("cart.startShopping") || "Start Shopping"}
+              <ArrowRight size={18} />
+            </Link>
           </div>
-          <h2 className="empty-cart-title">{t("cart.emptyTitle")}</h2>
-          <p className="empty-cart-subtitle">{t("cart.emptySubtitle")}</p>
-          <Link to="/" className="shop-now-btn">
-            {t("cart.startShopping")}
-          </Link>
-        </div>
-      </Container>
+        </Container>
+      </div>
     );
 
   /* ---------------- Cart UI ---------------- */
 
   return (
     <div className="cart-page-wrapper">
-      <Container className="py-5">
-        {/* Header with gradient */}
-        <div className="cart-header text-center mb-5">
+      <Container className="py-4">
+        {/* Step Progress Indicator */}
+        <div className="checkout-steps-container">
+          <div className="step-item active">
+            <span className="step-number">1</span>
+            <span className="step-title">{t("shoppingCart", "Shopping Cart")}</span>
+          </div>
+          <div className="step-divider"></div>
+          <div className="step-item">
+            <span className="step-number">2</span>
+            <span className="step-title">{t("checkout", "Checkout")}</span>
+          </div>
+          <div className="step-divider"></div>
+          <div className="step-item">
+            <span className="step-number">3</span>
+            <span className="step-title">{t("orderComplete", "Order Complete")}</span>
+          </div>
+        </div>
+
+        {/* Page Header */}
+        <div className="cart-header d-flex justify-content-between align-items-center">
           <h1 className="cart-main-title">
-            <span className="cart-icon">🛒</span> 
-            {t("cart.heading")}
+            {t("shoppingCart", "Shopping Cart")}
+            <span className="cart-title-badge">
+              {cartItems.length} {cartItems.length === 1 ? "item" : "items"}
+            </span>
           </h1>
         </div>
 
-        {/* Main Content */}
+        {/* Main Content Grid */}
         <Row className="g-4">
-          {/* Cart Items Section */}
+          {/* Left Column: Cart Items List */}
           <Col lg={8}>
-            <div className="cart-items-container">
-              <CartItems
-                items={cartItems.map((i) => ({
-                  ...i,
-                  stock: stockData[i.id] ?? 0,
-                }))}
-                onIncrease={handleIncrease}
-                onDecrease={handleDecrease}
-                onRemove={handleRemove}
-              />
-            </div>
+            <CartItems
+              items={cartItems.map((i) => ({
+                ...i,
+                stock: stockData[i.id] ?? 0,
+              }))}
+              onIncrease={handleIncrease}
+              onDecrease={handleDecrease}
+              onRemove={handleRemove}
+            />
           </Col>
 
-          {/* Order Summary Section */}
+          {/* Right Column: Order Summary Sidebar */}
           <Col lg={4}>
             <div className="order-summary-sticky">
-              <Card className="order-summary-card">
-                <Card.Header className="summary-header">
-                  <h3>Order Summary</h3>
-                </Card.Header>
-                <Card.Body>
-                  <div className="summary-details">
-                    <div className="summary-row">
-                      <span>Subtotal ({cartItems.length} items)</span>
-                      <span className="amount">{formatPrice(totalPrice)}</span>
+              <div className="order-summary-card">
+                <div className="summary-card-header">
+                  <h3>{t("orderSummary", "Order Summary")}</h3>
+                </div>
+
+                <div className="summary-card-body">
+
+
+                  {/* Pricing Breakdown */}
+                  <div className="summary-rows">
+                    <div className="summary-row-item">
+                      <span className="label-title">Subtotal ({cartItems.length} items)</span>
+                      <span className="val-amount">{formatPrice(totalPrice)}</span>
                     </div>
-                    <div className="summary-row">
-                      <span>Shipping</span>
-                      <span className="amount free-shipping">Free</span>
+
+                    <div className="summary-row-item">
+                      <span className="label-title">{t("deliveryCharges", "Delivery Charges")}</span>
+                      <span className="val-amount free-tag">{t("free", "FREE")}</span>
                     </div>
-                    <div className="summary-row">
-                      <span>Tax</span>
-                      <span className="amount">Calculated at checkout</span>
+
+                    <div className="summary-row-item">
+                      <span className="label-title">{t("estimatedTax", "Estimated Tax")}</span>
+                      <span className="val-amount text-muted">{t("included", "Included")}</span>
                     </div>
-                    <div className="summary-divider"></div>
-                    <div className="summary-row total">
-                      <span>Total Amount</span>
-                      <span className="total-amount">{formatPrice(totalPrice)}</span>
+
+                    <div className="summary-divider-line"></div>
+
+                    <div className="summary-total-row">
+                      <span className="total-title-text">{t("totalAmount", "Total Amount")}</span>
+                      <span className="total-val-amount">{formatPrice(totalPrice)}</span>
                     </div>
                   </div>
 
-                  <div className="checkout-section">
-                    <Button 
-                      className="checkout-btn-modern" 
+                  {/* Primary CTA Buttons */}
+                  <div className="summary-actions">
+                    <button
+                      className="btn-proceed-checkout"
                       onClick={handleCheckout}
                     >
-                      <span>Proceed to Checkout</span>
-                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                        <path d="M4.16666 10H15.8333M15.8333 10L11.6667 5.83337M15.8333 10L11.6667 14.1667" 
-                        stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </Button>
+                      <span>{t("proceedToCheckout", "Proceed to Checkout")}</span>
+                      <ArrowRight size={20} />
+                    </button>
 
-                    <Button className="clear-cart-modern" onClick={handleClear}>
-                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path d="M2.25 4.5H3.75H15.75M6 4.5V3C6 2.60218 6.15804 2.22064 6.43934 1.93934C6.72064 1.65804 7.10218 1.5 7.5 1.5H10.5C10.8978 1.5 11.2794 1.65804 11.5607 1.93934C11.842 2.22064 12 2.60218 12 3V4.5M14.25 4.5V15C14.25 15.3978 14.092 15.7794 13.8107 16.0607C13.5294 16.342 13.1478 16.5 12.75 16.5H5.25C4.85218 16.5 4.47064 16.342 4.18934 16.0607C3.90804 15.7794 3.75 15.3978 3.75 15V4.5H14.25Z" 
-                        stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                      Clear Cart
-                    </Button>
+                    <button className="btn-clear-cart-outlined" onClick={handleClear}>
+                      <Trash2 size={16} />
+                      {t("clearShoppingCart", "Clear Shopping Cart")}
+                    </button>
                   </div>
-                </Card.Body>
-              </Card>
+                </div>
+              </div>
 
-          
+              {/* Payment Trust & Security Badges */}
+              <div className="trust-badges-card">
+                <div className="trust-item">
+                  <Lock size={18} className="text-primary trust-icon" />
+                  <span>{t("cart.sslEncrypted", "256-Bit SSL Encrypted Checkout")}</span>
+                </div>
+                <div className="trust-item">
+                  <Truck size={18} className="text-success trust-icon" />
+                  <span>{t("cart.freeDelivery", "Free & Express Delivery Available")}</span>
+                </div>
+                <div className="trust-item">
+                  <ShieldCheck size={18} className="text-indigo trust-icon" />
+                  <span>{t("cart.authenticGuaranteed", "100% Authentic Products Guaranteed")}</span>
+                </div>
+              </div>
             </div>
           </Col>
         </Row>
       </Container>
 
-      {/* Toast message */}
+      {/* Stock Toast Notification */}
       <ToastContainer position="bottom-center" className="toast-container-custom">
         <Toast
           show={showToast}
@@ -295,7 +324,6 @@ const CartPage = () => {
           className="stock-toast-modern"
         >
           <Toast.Header closeButton={false}>
-            <div className="toast-icon">⚠️</div>
             <strong className="me-auto">{t("cart.stockLimit")}</strong>
           </Toast.Header>
           <Toast.Body>{toastMessage}</Toast.Body>

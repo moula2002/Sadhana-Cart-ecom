@@ -5,6 +5,7 @@ import { FaArrowLeft } from "react-icons/fa";
 import { collection, query, where, onSnapshot, doc, getDoc } from "firebase/firestore";
 import { db, auth } from "../../firebase";
 import { updateDoc } from "firebase/firestore";
+import { useTheme } from "../../context/ThemeContext";
 
 const formatCurrency = (val) =>
   new Intl.NumberFormat("en-IN", {
@@ -81,7 +82,7 @@ function OrderDetails() {
   const [productImage, setProductImage] = useState(null);
   const [formattedDate, setFormattedDate] = useState("N/A");
 
-  const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const { isDark } = useTheme();
 
   useEffect(() => {
     if (!auth.currentUser || !orderData || !firstProduct) {
@@ -280,7 +281,7 @@ function OrderDetails() {
       <div
         style={{
           padding: "20px 16px",
-          borderBottom: "1px solid #e0e0e0",
+          borderBottom: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e0e0e0",
           display: "flex",
           alignItems: "center",
           gap: "16px",
@@ -301,15 +302,28 @@ function OrderDetails() {
 
           <Card
             key={index}
+            className="shadow-sm"
             style={{
-              borderRadius: "12px",
+              borderRadius: "16px",
               marginBottom: "25px",
+              background: isDark ? "#1e293b" : "#ffffff",
+              borderColor: isDark ? "rgba(255, 255, 255, 0.08)" : "#e2e8f0",
+              color: isDark ? "#f8fafc" : "#212529",
             }}
           >
 
             <Card.Body style={{ padding: "20px" }}>
 
-              <div style={{ textAlign: "center", marginBottom: "20px" }}>
+              <div
+                style={{
+                  textAlign: "center",
+                  marginBottom: "20px",
+                  background: isDark ? "#ffffff" : "#f8fafc",
+                  borderRadius: "12px",
+                  padding: "12px",
+                  boxShadow: isDark ? "inset 0 0 0 1px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.15)" : "none",
+                }}
+              >
                 <Image
                   src={
                     product?.image ||
@@ -320,7 +334,7 @@ function OrderDetails() {
                   style={{
                     maxHeight: "250px",
                     objectFit: "contain",
-                    borderRadius: "10px",
+                    borderRadius: "8px",
                   }}
                 />
               </div>

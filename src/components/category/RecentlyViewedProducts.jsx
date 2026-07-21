@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useEffect, useState } from "react";
 import { Heart, ShoppingCart } from "lucide-react";
 import { useWishlist } from "../../hooks/useWishlist";
@@ -8,7 +9,8 @@ import { addToCart } from "../../redux/cartSlice";
 import { Toast, ToastContainer } from "react-bootstrap";
 import "../../pages/Home.css";
 
-function RecentlyViewedProducts({ showCart = true }) {
+function RecentlyViewedProducts({ showCart = true }) { 
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -80,8 +82,6 @@ function RecentlyViewedProducts({ showCart = true }) {
             const price = product.price || 0;
             const offerprice = product.offerprice || price;
             const discount = calcDiscount(price, offerprice);
-            const rating = product.rating || 4.2;
-            const reviews = product.reviewCount || Math.floor(Math.random() * 3000 + 100);
 
             return (
               <div
@@ -127,7 +127,7 @@ function RecentlyViewedProducts({ showCart = true }) {
                     className="bs-add-btn"
                     onClick={(e) => handleAddToCart(e, product)}
                   >
-                    <ShoppingCart size={15} color="#94a3b8" /> Add to Cart
+                    <ShoppingCart size={15} color="#94a3b8" /> {t("addToCart", "Add to Cart")}
                   </button>
                 )}
               </div>

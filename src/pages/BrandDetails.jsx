@@ -1,16 +1,22 @@
 import React, { useEffect, useState } from "react";
-import { Heart } from "lucide-react";
+import { Heart, ShoppingCart } from "lucide-react";
 import { useWishlist } from "../hooks/useWishlist";
 import { useRatings } from "../hooks/useRatings";
 import { useParams, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { addToCart } from "../redux/cartSlice";
+import { toast } from "react-toastify";
 import { db } from "../firebase";
 import { doc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
 import "./BrandDetails.css";
 import Loading from "./Loading";
+import { useTranslation } from "react-i18next";
 
 function BrandDetails() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [brand, setBrand] = useState(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -58,7 +64,7 @@ function BrandDetails() {
   }, [id]);
 
   if (loading) return <Loading />;
-  if (!brand) return <div className="no-brand-found">Brand not found</div>;
+  if (!brand) return <div className="no-brand-found">{t("brandNotFound", "Brand not found")}</div>;
 
   const calculateDiscount = (price, oldPrice) => {
     if (!price || !oldPrice || oldPrice <= price) return 0;
@@ -87,13 +93,13 @@ function BrandDetails() {
         {/* Subcategories (if any) */}
         {brand.subCategories && brand.subCategories.length > 0 && (
           <div className="brand-subcategories">
-            <h3 className="subcats-title">Categories</h3>
+            <h3 className="subcats-title">{t("categories", "Categories")}</h3>
             <div className="subcats-chips">
               <span 
                 className={`subcat-chip ${selectedCategory === "All" ? "active" : ""}`}
                 onClick={() => setSelectedCategory("All")}
               >
-                All
+                {t("all", "All")}
               </span>
               {brand.subCategories.map((subcat, idx) => (
                 <span 
@@ -110,11 +116,11 @@ function BrandDetails() {
 
         {/* Brand Products */}
         <div className="brand-products-section">
-          <h2 className="brand-section-title">Products by {brand.name}</h2>
+          <h2 className="brand-section-title">{t("productsBy", "Products by {{name}}", { name: brand.name }).replace("{{name}}", brand.name)}</h2>
           
           {filteredProducts.length === 0 ? (
             <div className="no-products-msg">
-              <p>No products found for this category.</p>
+              <p>{t("noProductsFoundForCategory", "No products found for this category.")}</p>
             </div>
           ) : (
             <div className="brand-products-grid">
@@ -135,11 +141,11 @@ function BrandDetails() {
                     <button
                       className="wishlist-btn"
                       onClick={(e) => toggleWishlist(e, product)}
-                      aria-label="Wishlist"
+                      aria-label={t("wishlistLabel", "Wishlist")}
                     >
-                      {wishlisted[product.id] ? <Heart size={20} fill="#ff4081" color="#ff4081" /> : <Heart size={20} strokeWidth={2.5} color="#555" />}
+                      {wishlisted[product.id] ? <Heart size={16} fill="#ff4081" color="#ff4081" /> : <Heart size={16} color="#64748b" />}
                     </button>
-                    {discount > 0 && <span className="sc-discount-tag">{discount}% OFF</span>}
+                    {discount > 0 && <span className="sc-discount-tag">{discount}% {t("off", "OFF")}</span>}
                     <div className="img-box">
                       <img src={image} alt={name} loading="lazy" />
                     </div>
@@ -158,7 +164,25 @@ function BrandDetails() {
                     <div className="sc-price-row">
                       <span className="sc-offer">₹{price.toLocaleString()}</span>
                       {oldPrice > price && <span className="sc-mrp">₹{oldPrice.toLocaleString()}</span>}
+                      {discount > 0 && <span className="sc-off">{discount}% {t("off", "off")}</span>}
                     </div>
+
+                    <button
+                      className="sc-add-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        dispatch(addToCart({
+                          id: product.id,
+                          title: name,
+                          price: price,
+                          image: image,
+                          quantity: 1,
+                        }));
+                        toast.success(t("addedToCartMsg", "{{name}} added to cart!", { name }).replace("{{name}}", name), { position: "bottom-right", autoClose: 2000 });
+                      }}
+                    >
+                      <ShoppingCart size={14} /> {t("addToCart", "Add to Cart")}
+                    </button>
                   </div>
                 );
               })}

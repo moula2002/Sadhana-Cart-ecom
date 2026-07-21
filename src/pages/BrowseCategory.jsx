@@ -5,11 +5,17 @@ import { collection, getDocs, query, where, addDoc, serverTimestamp } from "fire
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useDispatch } from "react-redux";
+import { addToCart } from "../redux/cartSlice";
+import { Heart, ShoppingCart } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import "./BrowseCategory.css";
 import Loading from "./Loading";
 
 const BrowseCategory = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const location = useLocation();
   const selectedCatFromState = location.state?.selectedCategory;
 
@@ -129,7 +135,7 @@ const BrowseCategory = () => {
   const handleAddToWishlist = async (e, prod) => {
     e.stopPropagation();
     if (!currentUser) {
-      toast.error("Please login to add to wishlist", { position: "top-right", autoClose: 3000 });
+      toast.error(t("pleaseLoginWishlist", "Please login to add to wishlist"), { position: "top-right", autoClose: 3000 });
       navigate('/login', { state: { from: '/browse-categories' } });
       return;
     }
@@ -140,7 +146,7 @@ const BrowseCategory = () => {
       const querySnapshot = await getDocs(q);
 
       if (!querySnapshot.empty) {
-        toast.info("Product is already in your wishlist", { position: "top-right", autoClose: 3000 });
+        toast.info(t("alreadyInWishlist", "Product is already in your wishlist"), { position: "top-right", autoClose: 3000 });
         return;
       }
 
@@ -160,10 +166,10 @@ const BrowseCategory = () => {
       };
 
       await addDoc(wishlistRef, wishlistItem);
-      toast.success("Added to wishlist!", { position: "top-right", autoClose: 2000 });
+      toast.success(t("addedToWishlist", "Added to wishlist!"), { position: "top-right", autoClose: 2000 });
     } catch (error) {
       console.error("Error adding to wishlist:", error);
-      toast.error("Failed to add to wishlist", { position: "top-right", autoClose: 3000 });
+      toast.error(t("failedToAddWishlist", "Failed to add to wishlist"), { position: "top-right", autoClose: 3000 });
     }
   };
 
@@ -179,14 +185,14 @@ const BrowseCategory = () => {
         <button className="back-button" onClick={() => navigate(-1)}>
           <i className="fas fa-arrow-left"></i>
         </button>
-        <h2 className="header-title">{activeCategory?.name || "Categories"}</h2>
+        <h2 className="header-title">{activeCategory?.name || t("categories", "Categories")}</h2>
       </div>
 
       {/* Desktop Breadcrumb (Hidden on Mobile) */}
       <div className="desktop-breadcrumb d-none d-lg-flex container mt-3 mb-2">
-        <Link to="/" className="text-decoration-none text-secondary"><i className="fas fa-home"></i> Home</Link>
+        <Link to="/" className="text-decoration-none text-secondary"><i className="fas fa-home"></i> {t("homeLabel", "Home")}</Link>
         <i className="fas fa-chevron-right mx-2 text-secondary" style={{ fontSize: '0.8rem', marginTop: '4px' }}></i>
-        <span className="text-secondary">Categories</span>
+        <span className="text-secondary">{t("categories", "Categories")}</span>
         <i className="fas fa-chevron-right mx-2 text-secondary" style={{ fontSize: '0.8rem', marginTop: '4px' }}></i>
         <span className="fw-bold text-dark">{activeCategory?.name}</span>
       </div>
@@ -223,7 +229,7 @@ const BrowseCategory = () => {
                 className={`subcat-chip ${selectedSubCat === "All" ? "active" : ""}`}
                 onClick={() => handleSubCatClick("All")}
               >
-                {selectedSubCat === "All" && <i className="fas fa-check"></i>} All
+                {selectedSubCat === "All" && <i className="fas fa-check"></i>} {t("all", "All")}
               </button>
               {subcategories.map(sub => (
                 <button
@@ -240,44 +246,70 @@ const BrowseCategory = () => {
           {/* Products Grid */}
           <div className="browse-products-grid">
             {loadingProds ? (
-              <div className="loading-prods-wrapper">
-                <div className="spinner-border text-primary" role="status">
-                  <span className="visually-hidden">Loading...</span>
-                </div>
+              <div className="loading-prods-wrapper py-4">
+                <Loading minHeight="200px" />
               </div>
             ) : filteredProducts.length > 0 ? (
               filteredProducts.map((prod) => {
-                const offerPrice = prod.offerprice || prod.price || 0;
+                const price = Number(prod.price || 0);
+                const offerPrice = Number(prod.offerprice || price);
+                const discount = (price > offerPrice && price > 0) ? Math.round(((price - offerPrice) / price) * 100) : 0;
+
+                const handleCart = (e) => {
+                  e.stopPropagation();
+                  dispatch(addToCart({
+                    id: prod.id,
+                    title: prod.name || "Product",
+                    price: offerPrice,
+                    image: getProductImage(prod),
+                    quantity: 1,
+                  }));
+                  toast.success(`${prod.name || "Product"} ${t("addedToCart", "added to cart!")}`, {
+                    position: "bottom-right",
+                    autoClose: 2000,
+                  });
+                };
+
                 return (
                   <div
                     key={prod.id}
                     className="browse-prod-card"
                     onClick={() => navigate(`/product/${prod.id}`)}
                   >
+                    {discount > 0 && <span className="sc-discount-tag">{discount}% {t("off", "OFF")}</span>}
                     <div className="prod-img-box">
                       <img src={getProductImage(prod)} alt={prod.name} />
                       <button
                         className="browse-wishlist-btn"
                         onClick={(e) => handleAddToWishlist(e, prod)}
                       >
-                        <i className="far fa-heart"></i>
+                        <Heart size={16} color="#64748b" />
                       </button>
                     </div>
                     <div className="prod-info-box">
                       <h4 className="prod-title">{prod.name}</h4>
                       <div className="prod-price-row">
                         <span className="prod-offer-price">₹{offerPrice.toLocaleString()}</span>
-                        {prod.offerprice && prod.price && Number(prod.offerprice) < Number(prod.price) && (
-                          <span className="prod-original-price">₹{Number(prod.price).toLocaleString()}</span>
+                        {price > offerPrice && (
+                          <span className="prod-original-price">₹{price.toLocaleString()}</span>
+                        )}
+                        {discount > 0 && (
+                          <span className="sc-off">{discount}% {t("off", "OFF")}</span>
                         )}
                       </div>
+                      <button
+                        className="sc-add-btn"
+                        onClick={handleCart}
+                      >
+                        <ShoppingCart size={14} /> {t("addToCart", "Add to Cart")}
+                      </button>
                     </div>
                   </div>
                 );
               })
             ) : (
               <div className="no-prods-found">
-                <p>No products found in this category.</p>
+                <p>{t("noProductsFoundInCategory", "No products found in this category.")}</p>
               </div>
             )}
           </div>

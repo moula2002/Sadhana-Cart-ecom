@@ -14,19 +14,13 @@ import {
 import { useLocation, Link } from "react-router-dom";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebase";
-import { 
-  FaStar, 
-  FaRupeeSign, 
-  FaFilter, 
-  FaShoppingBag,
-  FaSearch,
-  FaBoxOpen,
-  FaFileImage 
-} from "react-icons/fa";
+import { FaStar, FaRupeeSign, FaFilter, FaShoppingBag, FaSearch, FaBoxOpen, FaFileImage } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import "./SearchResultsPage.css";
 
 const SearchResultsPage = () => {
+  const { t } = useTranslation();
   const location = useLocation();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -185,7 +179,7 @@ const SearchResultsPage = () => {
             transition={{ delay: 0.3 }}
             className="loading-text mt-3"
           >
-            Finding the best products for you...
+            {t("findingProducts", "Finding the best products for you...")}
           </motion.p>
         </motion.div>
       </div>
@@ -214,12 +208,12 @@ const SearchResultsPage = () => {
               </div>
               <div className="ms-3">
                 <h1 className="search-title mb-1">
-                  {category ? `${formatCategory(category)}` : "All Products"}
+                  {category ? `${formatCategory(category)}` : t("allProducts", "All Products")}
                 </h1>
                 <div className="search-breadcrumb">
-                  <span>Home</span>
+                  <span>{t("homeLabel", "Home")}</span>
                   <span className="mx-2">/</span>
-                  <span className="text-muted">Search Results</span>
+                  <span className="text-muted">{t("searchResults", "Search Results")}</span>
                 </div>
               </div>
             </div>
@@ -228,7 +222,7 @@ const SearchResultsPage = () => {
               <div className="filter-badge me-3">
                 <Badge bg="light" text="dark" className="px-3 py-2">
                   <FaShoppingBag className="me-2" />
-                  {products.length} {products.length === 1 ? 'Product' : 'Products'} Found
+                  {products.length} {products.length === 1 ? t("productSingular", "Product") : t("productsPlural", "Products")} {t("found", "Found")}
                 </Badge>
               </div>
               
@@ -238,8 +232,8 @@ const SearchResultsPage = () => {
                 onClick={() => setShowFilters(!showFilters)}
               >
                 <FaFilter className="me-2" />
-                Filters
-                {showFilters ? ' Hide' : ' Show'}
+                {t("filters", "Filters")}
+                {showFilters ? ` ${t("hide", "Hide")}` : ` ${t("show", "Show")}`}
               </Button>
             </div>
           </div>
@@ -251,29 +245,29 @@ const SearchResultsPage = () => {
               animate={{ height: 'auto', opacity: 1 }}
               className="active-filters mt-4"
             >
-              <span className="me-2 text-muted">Active Filters:</span>
+              <span className="me-2 text-muted">{t("activeFilters", "Active Filters:")}</span>
               {category && (
                 <Badge bg="primary" className="filter-tag me-2">
-                  Category: {formatCategory(category)}
+                  {t("categoryFilterLabel", "Category:")} {formatCategory(category)}
                 </Badge>
               )}
               {maxPrice && (
                 <Badge bg="success" className="filter-tag me-2">
                   <FaRupeeSign className="me-1" />
-                  Max: ₹{maxPrice}
+                  {t("maxPriceFilterLabel", "Max:")} ₹{maxPrice}
                 </Badge>
               )}
               {rating && (
                 <Badge bg="warning" text="dark" className="filter-tag me-2">
                   <FaStar className="me-1" />
-                  {rating}+ Stars
+                  {rating}+ {t("stars", "Stars")}
                 </Badge>
               )}
               {sortBy && (
                 <Badge bg="info" className="filter-tag me-2">
-                  Sort: {sortBy === 'priceLow' ? 'Price: Low to High' : 
-                         sortBy === 'priceHigh' ? 'Price: High to Low' : 
-                         sortBy === 'rating' ? 'Top Rated' : sortBy}
+                  {t("sortLabel", "Sort:")} {sortBy === 'priceLow' ? t("priceLowToHigh", "Price: Low to High") : 
+                         sortBy === 'priceHigh' ? t("priceHighToLow", "Price: High to Low") : 
+                         sortBy === 'rating' ? t("topRated", "Top Rated") : sortBy}
                 </Badge>
               )}
             </motion.div>
@@ -303,9 +297,9 @@ const SearchResultsPage = () => {
                 >
                   <FaBoxOpen className="empty-state-icon" />
                 </motion.div>
-                <h3 className="mt-4 fw-bold">No Products Found</h3>
+                <h3 className="mt-4 fw-bold">{t("noProductsFound", "No Products Found")}</h3>
                 <p className="text-muted mb-4">
-                  We couldn't find any products matching your criteria.
+                  {t("noProductsCriteria", "We couldn't find any products matching your criteria.")}
                 </p>
                 <Button 
                   as={Link} 
@@ -313,7 +307,7 @@ const SearchResultsPage = () => {
                   variant="primary" 
                   className="px-4 py-2"
                 >
-                  Browse All Products
+                  {t("browseAllProducts", "Browse All Products")}
                 </Button>
               </div>
             </Alert>
@@ -367,7 +361,7 @@ const SearchResultsPage = () => {
                               bg="danger" 
                               className="discount-badge"
                             >
-                              {product.discount}% OFF
+                              {product.discount}% {t("off", "OFF")}
                             </Badge>
                           )}
                           {product.stock && product.stock < 10 && (
@@ -376,7 +370,7 @@ const SearchResultsPage = () => {
                               text="dark" 
                               className="stock-badge"
                             >
-                              Only {product.stock} left
+                              {t("onlyNLeft", "Only {{count}} left", { count: product.stock }).replace("{{count}}", product.stock)}
                             </Badge>
                           )}
                         </div>
@@ -397,7 +391,7 @@ const SearchResultsPage = () => {
                           </div>
                           
                           <Card.Title className="product-title fw-bold mb-2">
-                            {product.name || "Product Name"}
+                            {product.name || t("productNameFallback", "Product Name")}
                           </Card.Title>
 
                           <div className="product-rating mb-2">
@@ -433,7 +427,7 @@ const SearchResultsPage = () => {
                               size="sm"
                               className="view-product-btn"
                             >
-                              View Details
+                              {t("viewDetails", "View Details")}
                             </Button>
                           </div>
                         </Card.Body>

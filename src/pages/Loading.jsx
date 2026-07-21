@@ -1,29 +1,57 @@
 import React from "react";
 
-function Loading() {
+function Loading({ inline = false, small = false, message = "", minHeight }) {
+  const containerStyle = inline
+    ? {
+        minHeight: "auto",
+        width: "auto",
+        display: "inline-flex",
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "transparent",
+        padding: "4px",
+      }
+    : {
+        minHeight: minHeight || "250px",
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "transparent",
+        padding: "20px",
+      };
+
+  const orbitScale = small ? 0.55 : 1;
+  const orbitWidth = small ? 48 : 80;
+  const orbitHeight = small ? 48 : 80;
+
   return (
-    <div className="loading-container">
-      <div className="orbit">
+    <div className="loading-container" style={containerStyle}>
+      <div
+        className="orbit"
+        style={{
+          width: `${orbitWidth}px`,
+          height: `${orbitHeight}px`,
+          transform: `scale(${orbitScale})`,
+          transformOrigin: "center center",
+        }}
+      >
         <span className="dot dot1"></span>
         <span className="dot dot2"></span>
         <span className="dot dot3"></span>
         <span className="dot dot4"></span>
       </div>
+      {message && <p className="mt-2 text-muted fw-bold small mb-0">{message}</p>}
 
       <style>{`
         .loading-container {
-          min-height: 300px;
-          width: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: #f1f3f5;
+          box-sizing: border-box;
         }
 
         .orbit {
           position: relative;
-          width: 80px;
-          height: 80px;
         }
 
         .dot {

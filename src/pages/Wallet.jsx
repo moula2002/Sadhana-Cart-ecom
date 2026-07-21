@@ -85,10 +85,10 @@ function Wallet() {
 
       {/* Wallet Coins */}
       <div
+        className="overview-card"
         style={{
           borderRadius: "14px",
           padding: "25px",
-          background: "#fff",
           boxShadow: "0 8px 25px rgba(0,0,0,0.1)",
           marginBottom: "20px",
         }}

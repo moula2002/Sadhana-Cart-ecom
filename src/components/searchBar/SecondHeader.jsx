@@ -3,11 +3,26 @@ import { useNavigate, useLocation } from "react-router-dom";
 import "./SecondHeader.css";
 import { FaBars, FaTimes, FaSpinner, FaChevronLeft, FaChevronRight, } from "react-icons/fa";
 import { db, collection, getDocs } from "../../firebase";
+import { useTranslation } from "react-i18next";
 
 const SecondHeader = () => {
+  const { t } = useTranslation();
   const [mobileMenu, setMobileMenu] = useState(false);
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [categories, setCategories] = useState(() => {
+    try {
+      const cached = sessionStorage.getItem("sc_cached_categories");
+      return cached ? JSON.parse(cached) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+  const [loading, setLoading] = useState(() => {
+    try {
+      return !sessionStorage.getItem("sc_cached_categories");
+    } catch (e) {
+      return true;
+    }
+  });
   const [activeCategory, setActiveCategory] = useState(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
@@ -17,71 +32,9 @@ const SecondHeader = () => {
   const location = useLocation();
   const scrollContainerRef = useRef(null);
 
-  // Check for dark mode
-  useEffect(() => {
-    const checkDarkMode = () => {
-      const isDark = document.body.classList.contains('dark-theme') ||
-        document.documentElement.getAttribute('data-bs-theme') === 'dark';
-      setIsDarkMode(isDark);
-
-      // Update CSS variables based on theme
-      updateThemeColors(isDark);
-    };
-
-    checkDarkMode();
-
-    const observer = new MutationObserver(checkDarkMode);
-    observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-bs-theme'] });
-
-    return () => observer.disconnect();
-  }, []);
-
-  const updateThemeColors = (isDark) => {
-    const root = document.documentElement;
-    if (isDark) {
-      root.style.setProperty('--sadhana-orange', '#f4a11a');
-      root.style.setProperty('--cart-blue', '#1a1a2e');
-      root.style.setProperty('--cart-blue-dark', '#0f0f1a');
-      root.style.setProperty('--cart-blue-light', '#2a2a4a');
-      root.style.setProperty('--text-white', '#e9ecef');
-      root.style.setProperty('--text-dark', '#f8f9fa');
-      root.style.setProperty('--hover-bg', 'rgba(255, 255, 255, 0.05)');
-    } else {
-      root.style.setProperty('--sadhana-orange', '#f4a11a');
-      root.style.setProperty('--cart-blue', '#0b1e6d');
-      root.style.setProperty('--cart-blue-dark', '#08154d');
-      root.style.setProperty('--cart-blue-light', '#1a2b8f');
-      root.style.setProperty('--text-white', '#ffffff');
-      root.style.setProperty('--text-dark', '#333333');
-      root.style.setProperty('--hover-bg', 'rgba(255, 255, 255, 0.1)');
-    }
-  };
-
-  const toggleDarkMode = () => {
-    const html = document.documentElement;
-    const body = document.body;
-
-    if (isDarkMode) {
-      // Switch to light mode
-      html.removeAttribute('data-bs-theme');
-      body.classList.remove('dark-theme');
-      html.style.setProperty('color-scheme', 'light');
-    } else {
-      // Switch to dark mode
-      html.setAttribute('data-bs-theme', 'dark');
-      body.classList.add('dark-theme');
-      html.style.setProperty('color-scheme', 'dark');
-    }
-
-    // Force re-check
-    setIsDarkMode(!isDarkMode);
-  };
-
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        setLoading(true);
         const categoriesRef = collection(db, "category");
         const snapshot = await getDocs(categoriesRef);
 
@@ -102,7 +55,15 @@ const SecondHeader = () => {
 
         const allCategories = [...categoriesList];
 
-        setCategories(allCategories);
+        if (allCategories.length > 0) {
+          setCategories(allCategories);
+          try {
+            sessionStorage.setItem(
+              "sc_cached_categories",
+              JSON.stringify(allCategories)
+            );
+          } catch (e) {}
+        }
       } catch (err) {
         console.error("Category fetch error:", err);
       } finally {
@@ -281,7 +242,7 @@ const SecondHeader = () => {
             {mobileMenu && (
               <>
                 <div className="mobile-menu-header theme-bg-dark">
-                  <h3 className="theme-text">All Categories</h3>
+                  <h3 className="theme-text">{t("allCategories", "All Categories")}</h3>
                   <button className="close-menu-btn theme-text" onClick={() => setMobileMenu(false)}>
                     <FaTimes />
                   </button>
@@ -289,7 +250,7 @@ const SecondHeader = () => {
                 <div className="mobile-menu-content">
                   {loading ? (
                     <div className="mobile-loading theme-text-secondary">
-                      <FaSpinner className="spinner" /> <span>Loading...</span>
+                      <FaSpinner className="spinner" /> <span>{t("loading", "Loading...")}</span>
                     </div>
                   ) : (
                     <ul className="mobile-menu-list">

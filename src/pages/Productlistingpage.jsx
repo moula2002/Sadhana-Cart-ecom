@@ -7,8 +7,11 @@ import { onAuthStateChanged } from "firebase/auth";
 import { useDispatch } from "react-redux";
 import { addToCart } from "../redux/cartSlice";
 import { toast } from "react-toastify";
+import Loading from "./Loading";
+import { useTranslation } from "react-i18next";
 
 const ProductListingPage = () => {
+    const { t } = useTranslation();
     const { categoryId } = useParams();
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -280,7 +283,7 @@ const ProductListingPage = () => {
 
     const toggleWishlist = async (p) => {
         if (!currentUser) {
-            toast.error("Please log in to add items to your wishlist.", { position: "top-center" });
+            toast.error(t("loginToWishlist", "Please log in to add items to your wishlist."), { position: "top-center" });
             navigate("/login", { state: { from: window.location.pathname } });
             return;
         }
@@ -299,10 +302,10 @@ const ProductListingPage = () => {
                     delete copy[pid];
                     return copy;
                 });
-                toast.success(`Removed "${p.name || p.title}" from wishlist`, { position: "bottom-right", autoClose: 2000 });
+                toast.success(t("removedFromWishlist", "Removed '{{name}}' from wishlist", { name: p.name || p.title }).replace("{{name}}", p.name || p.title), { position: "bottom-right", autoClose: 2000 });
             } catch (error) {
                 console.error("Error removing from wishlist:", error);
-                toast.error("Failed to remove from wishlist");
+                toast.error(t("failedToRemoveFromWishlist", "Failed to remove from wishlist"));
             }
         } else {
             try {
@@ -321,10 +324,10 @@ const ProductListingPage = () => {
                     ...prev,
                     [pid]: newDoc.id
                 }));
-                toast.success(`Added "${p.name || p.title}" to wishlist!`, { position: "bottom-right", autoClose: 2000 });
+                toast.success(t("addedToWishlist", "Added '{{name}}' to wishlist!", { name: p.name || p.title }).replace("{{name}}", p.name || p.title), { position: "bottom-right", autoClose: 2000 });
             } catch (error) {
                 console.error("Error adding to wishlist:", error);
-                toast.error("Failed to add to wishlist");
+                toast.error(t("failedToAddToWishlist", "Failed to add to wishlist"));
             }
         }
     };
@@ -332,11 +335,11 @@ const ProductListingPage = () => {
     return (
         <Container fluid className="py-4 px-lg-5 mt-3">
             <div className="d-flex align-items-center mb-4 text-muted small">
-                <Link to="/" className="text-decoration-none text-muted">Home</Link>
+                <Link to="/" className="text-decoration-none text-muted">{t("home", "Home")}</Link>
                 <FaChevronRight className="mx-2" size={10} />
                 {categoryName && categoryName.toLowerCase().includes("fashion") && categoryName.toLowerCase() !== "fashion" && (
                     <>
-                        <span className="text-muted">Fashion</span>
+                        <span className="text-muted">{t("fashion", "Fashion")}</span>
                         <FaChevronRight className="mx-2" size={10} />
                     </>
                 )}
@@ -348,7 +351,7 @@ const ProductListingPage = () => {
                 <Col lg={3}>
                     <Card className="border shadow-sm p-3" style={{ borderRadius: '16px', position: 'sticky', top: '100px', maxHeight: 'calc(100vh - 120px)', overflowY: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                         <div className="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
-                            <h5 className="fw-bold mb-0 text-dark">Filters</h5>
+                            <h5 className="fw-bold mb-0 text-dark">{t("filters", "Filters")}</h5>
                             <button
                                 className="btn btn-sm btn-link text-primary text-decoration-none p-0 fw-bold"
                                 onClick={() => {
@@ -359,13 +362,13 @@ const ProductListingPage = () => {
                                     setSelectedBrands([]);
                                 }}
                             >
-                                Clear All
+                                {t("clearAll", "Clear All")}
                             </button>
                         </div>
 
                         {/* Category/Subcategory Filter */}
                         <div className="mb-4">
-                            <h6 className="fw-bold text-dark mb-3">Category</h6>
+                            <h6 className="fw-bold text-dark mb-3">{t("category", "Category")}</h6>
                             {subcategories.map((sub, idx) => (
                                 <Form.Check
                                     key={idx}
@@ -381,7 +384,7 @@ const ProductListingPage = () => {
 
                         {/* Age Group Filter */}
                         <div className="mb-4">
-                            <h6 className="fw-bold text-dark mb-3">Age Group</h6>
+                            <h6 className="fw-bold text-dark mb-3">{t("ageGroup", "Age Group")}</h6>
                             {["0-2 Years", "2-4 Years", "4-8 Years", "8-12 Years", "12+ Years"].map((age, idx) => (
                                 <Form.Check
                                     key={idx}
@@ -397,7 +400,7 @@ const ProductListingPage = () => {
 
                         {/* Price Slider */}
                         <div className="mb-4">
-                            <h6 className="fw-bold text-dark mb-2">Price</h6>
+                            <h6 className="fw-bold text-dark mb-2">{t("price", "Price")}</h6>
                             <div className="text-muted small mb-2 d-flex justify-content-between">
                                 <span>₹0</span>
                                 <span>₹{priceRange.toLocaleString()}</span>
@@ -416,13 +419,13 @@ const ProductListingPage = () => {
                                 className="w-100 rounded-pill fw-bold"
                                 onClick={() => setAppliedPriceRange(priceRange)}
                             >
-                                Apply
+                                {t("apply", "Apply")}
                             </Button>
                         </div>
 
                         {/* Brand Filter */}
                         <div className="mb-3">
-                            <h6 className="fw-bold text-dark mb-3">Brand</h6>
+                            <h6 className="fw-bold text-dark mb-3">{t("brand", "Brand")}</h6>
                             {allBrands.slice(0, 6).map((brand, idx) => (
                                 <Form.Check
                                     key={idx}
@@ -435,7 +438,7 @@ const ProductListingPage = () => {
                                 />
                             ))}
                             {allBrands.length > 6 && (
-                                <span className="text-primary small fw-bold cursor-pointer mt-2 d-block">+ View More</span>
+                                <span className="text-primary small fw-bold cursor-pointer mt-2 d-block">+ {t("viewMore", "View More")}</span>
                             )}
                         </div>
                     </Card>
@@ -447,13 +450,19 @@ const ProductListingPage = () => {
                         <div>
                             <h2 className="fw-bold text-dark mb-1">{categoryName}</h2>
                             <p className="text-muted small mb-0">
-                                Showing {filteredAndSortedProducts.length > 0 ? `${(currentPage - 1) * itemsPerPage + 1}-${Math.min(currentPage * itemsPerPage, filteredAndSortedProducts.length)}` : '0'} of {filteredAndSortedProducts.length} products
+                                {t("showingProducts", "Showing {{start}}-{{end}} of {{total}} products", {
+                                    start: filteredAndSortedProducts.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0,
+                                    end: Math.min(currentPage * itemsPerPage, filteredAndSortedProducts.length),
+                                    total: filteredAndSortedProducts.length
+                                }).replace("{{start}}", filteredAndSortedProducts.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0)
+                                  .replace("{{end}}", Math.min(currentPage * itemsPerPage, filteredAndSortedProducts.length))
+                                  .replace("{{total}}", filteredAndSortedProducts.length)}
                             </p>
                         </div>
 
                         {/* Sort Dropdown */}
                         <div className="d-flex align-items-center gap-2">
-                            <span className="text-muted small no-wrap">Sort by:</span>
+                            <span className="text-muted small no-wrap">{t("sortBy", "Sort by:")}</span>
                             <Form.Select
                                 size="sm"
                                 className="rounded-3 border shadow-sm px-3"
@@ -461,22 +470,21 @@ const ProductListingPage = () => {
                                 value={sortBy}
                                 onChange={(e) => setSortBy(e.target.value)}
                             >
-                                <option value="popularity">Popularity</option>
-                                <option value="price_low_high">Price: Low to High</option>
-                                <option value="price_high_low">Price: High to Low</option>
-                                <option value="customer_rating">Customer Rating</option>
+                                <option value="popularity">{t("popularity", "Popularity")}</option>
+                                <option value="price_low_high">{t("priceLowToHigh", "Price: Low to High")}</option>
+                                <option value="price_high_low">{t("priceHighToLow", "Price: High to Low")}</option>
+                                <option value="customer_rating">{t("customerRating", "Customer Rating")}</option>
                             </Form.Select>
                         </div>
                     </div>
 
                     {loading ? (
                         <div className="text-center py-5">
-                            <Spinner animation="border" variant="primary" />
-                            <p className="mt-3 text-muted">Loading products...</p>
+                            <Loading minHeight="200px" message={t("loadingProducts", "Loading products...")} />
                         </div>
                     ) : filteredAndSortedProducts.length === 0 ? (
                         <Alert variant="info" className="rounded-3 border-0 shadow-sm p-4 text-center">
-                            No products match your selected filters. Please try clearing some filters.
+                            {t("noProductsMatchFilters", "No products match your selected filters. Please try clearing some filters.")}
                         </Alert>
                     ) : (
                         <>
@@ -495,7 +503,7 @@ const ProductListingPage = () => {
                                                     {/* Discount Badge */}
                                                     {discountPercent > 0 && (
                                                         <Badge bg="danger" className="position-absolute top-0 start-0 m-2 px-2.5 py-1 rounded" style={{ fontSize: '0.7rem', fontWeight: '700' }}>
-                                                            {discountPercent}% OFF
+                                                            {discountPercent}% {t("off", "OFF")}
                                                         </Badge>
                                                     )}
                                                     {/* Heart/Wishlist Button */}
@@ -519,21 +527,28 @@ const ProductListingPage = () => {
                                                 <Card.Body className="p-3 bg-white d-flex flex-column justify-content-between">
                                                     <div>
                                                         <Card.Title
-                                                            className="fw-semibold text-truncate mb-1 text-dark cursor-pointer"
-                                                            style={{ fontSize: '0.9rem', color: '#1e293b' }}
+                                                            className="fw-bold mb-1 text-dark cursor-pointer"
+                                                            style={{ fontSize: '0.92rem', color: '#0f172a', fontWeight: '800', lineHeight: '1.35', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', height: '2.5em' }}
                                                             onClick={() => navigate(`/product/${p.id}`)}
                                                         >
                                                             {p.name || p.title}
                                                         </Card.Title>
 
                                                         {/* Pricing */}
-                                                        <div className="d-flex align-items-center gap-2 mb-2">
-                                                            <span className="fw-bold text-dark" style={{ fontSize: '15px' }}>
+                                                        <div className="d-flex align-items-baseline gap-2 mb-2">
+                                                            <span className="fw-bold" style={{ fontSize: '1.1rem', fontWeight: '800', color: '#0f172a' }}>
                                                                 ₹{finalPrice.toLocaleString()}
                                                             </span>
-                                                            <span className="text-muted text-decoration-line-through" style={{ fontSize: '13px' }}>
-                                                                ₹{originalPrice.toLocaleString()}
-                                                            </span>
+                                                            {originalPrice > finalPrice && (
+                                                                <span className="text-muted text-decoration-line-through" style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+                                                                    ₹{originalPrice.toLocaleString()}
+                                                                </span>
+                                                            )}
+                                                            {discountPercent > 0 && (
+                                                                <span className="fw-bold" style={{ fontSize: '0.78rem', color: '#059669' }}>
+                                                                    {discountPercent}% {t("off", "off")}
+                                                                </span>
+                                                            )}
                                                         </div>
 
                                                         {/* Rating */}
@@ -545,7 +560,8 @@ const ProductListingPage = () => {
                                                     </div>
 
                                                     {/* Add to Cart button */}
-                                                    <Button
+                                                    <button
+                                                        className="sc-add-btn"
                                                         onClick={() => {
                                                             dispatch(addToCart({
                                                                 id: p.id,
@@ -553,21 +569,14 @@ const ProductListingPage = () => {
                                                                 price: finalPrice,
                                                                 image: getProductImage(p),
                                                                 quantity: 1,
-                                                                sellerId: p.sellerId || "default_seller"
-                                                            }));
-                                                            toast.success(`Added ${p.name || p.title} to cart!`, { position: "bottom-right", autoClose: 2000 });
-                                                        }}
-                                                        variant="light"
-                                                        className="w-100 rounded-pill fw-bold border-0 py-2 add-to-cart-btn"
-                                                        style={{
-                                                            backgroundColor: '#eff6ff',
-                                                            color: '#2563eb',
-                                                            fontSize: '13px'
-                                                        }}
-                                                    >
-                                                        Add to Cart
-                                                    </Button>
-                                                </Card.Body>
+                                                            sellerId: p.sellerId || "default_seller"
+                                                                }));
+                                                                toast.success(t("addedToCartMsg", "Added {{name}} to cart!", { name: p.name || p.title }).replace("{{name}}", p.name || p.title), { position: "bottom-right", autoClose: 2000 });
+                                                            }}
+                                                        >
+                                                            <i className="fas fa-shopping-cart me-1"></i> {t("addToCart", "Add to Cart")}
+                                                        </button>
+                                                    </Card.Body>
                                             </Card>
                                         </Col>
                                     );
