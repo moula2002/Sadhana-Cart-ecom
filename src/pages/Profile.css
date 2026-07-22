@@ -1440,3 +1440,402 @@
 .dark-theme .order-product-thumbnail,
 [data-bs-theme="dark"] .order-product-thumbnail,
 [data-theme="dark"] .order-product-thumbnail { border-color: #475569; background-color: #0f172a; }
+
+/* Additional Dark Mode Overrides for bad contrast elements */
+.dark-theme .points-badge,
+[data-bs-theme="dark"] .points-badge,
+[data-theme="dark"] .points-badge {
+  background-color: #7c2d12 !important;
+  color: #fde047 !important;
+}
+
+.dark-theme .status-pill.delivered,
+[data-bs-theme="dark"] .status-pill.delivered,
+[data-theme="dark"] .status-pill.delivered {
+  background-color: #064e3b !important;
+  color: #6ee7b7 !important;
+}
+
+.dark-theme .status-pill.shipped,
+[data-bs-theme="dark"] .status-pill.shipped,
+[data-theme="dark"] .status-pill.shipped {
+  background-color: #1e3a8a !important;
+  color: #93c5fd !important;
+}
+
+.dark-theme .status-pill.processing,
+[data-bs-theme="dark"] .status-pill.processing,
+[data-theme="dark"] .status-pill.processing {
+  background-color: #78350f !important;
+  color: #fcd34d !important;
+}
+
+.dark-theme .status-pill.pending,
+[data-bs-theme="dark"] .status-pill.pending,
+[data-theme="dark"] .status-pill.pending {
+  background-color: #374151 !important;
+  color: #d1d5db !important;
+}
+
+.dark-theme .status-pill.cancelled,
+[data-bs-theme="dark"] .status-pill.cancelled,
+[data-theme="dark"] .status-pill.cancelled {
+  background-color: #7f1d1d !important;
+  color: #fca5a5 !important;
+}
+
+.dark-theme .detail-icon,
+[data-bs-theme="dark"] .detail-icon,
+[data-theme="dark"] .detail-icon {
+  background-color: #334155 !important;
+  color: #cbd5e1 !important;
+}
+
+/* ================= ADDRESS / REWARD PAGE LAYOUT FIXES ================= */
+.address-container {
+  overflow: hidden;
+}
+
+.profile-title-header.d-flex {
+  flex-wrap: wrap;
+}
+
+
+@media (max-width: 991px) {
+  .profile-dashboard-wrapper {
+    padding: 0 0 30px 0 !important;
+  }
+
+  .profile-dashboard-container {
+    padding: 0 10px;
+  }
+
+  /* Fix inline padding on address/reward title headers */
+  .profile-title-header {
+    padding: 12px 16px !important;
+    margin-bottom: 0 !important;
+  }
+
+  /* Fix inline padding on dashboard-main-content in address pages */
+  .address-container .dashboard-main-content,
+  .dashboard-main-content {
+    padding: 14px 12px !important;
+  }
+
+  .profile-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .stat-card {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .stat-icon-wrapper {
+    width: 36px;
+    height: 36px;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+
+  .stat-count {
+    font-size: 15px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+  }
+
+  .dashboard-grid-layout {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .dashboard-sidebar {
+    padding: 10px 12px 8px 12px;
+    min-height: auto !important;
+    border-radius: 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-top: none !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important;
+  }
+
+  .sidebar-title {
+    display: none !important;
+  }
+
+  .sidebar-menu-list {
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    gap: 6px;
+    padding-bottom: 2px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .sidebar-menu-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Make the li items look like proper pill chips */
+  .sidebar-menu-item {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 14px;
+    border-radius: 20px;
+    font-size: 12.5px;
+    font-weight: 600;
+    gap: 5px;
+    white-space: nowrap;
+    background-color: #f1f5f9;
+    color: #4a5568;
+    border: 1px solid #e2e8f0;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .sidebar-menu-item:hover {
+    background-color: #e8f0fe;
+    color: #2b6cb0;
+    border-color: #bee3f8;
+  }
+
+  .sidebar-menu-item.active {
+    background-color: #2b6cb0 !important;
+    color: #ffffff !important;
+    border-color: #2b6cb0 !important;
+  }
+
+  .sidebar-menu-item.active .menu-icon {
+    color: #ffffff !important;
+  }
+
+  /* Hide logout on mobile chip bar — too many items */
+  .sidebar-menu-item.logout-item {
+    display: none;
+  }
+
+  .sidebar-divider {
+    display: none;
+  }
+
+  .sidebar-menu-item .menu-icon {
+    font-size: 13px;
+    margin: 0;
+  }
+
+  .dashboard-main-content {
+    padding: 16px !important;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .form-group.full-width {
+    grid-column: span 1;
+  }
+
+  .profile-info-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .recent-order-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 16px 8px;
+  }
+
+  .order-item-right {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px dashed #edf2f7;
+    padding-top: 10px;
+  }
+
+  [data-bs-theme="dark"] .order-item-right,
+  [data-theme="dark"] .order-item-right,
+  .dark-theme .order-item-right {
+    border-top-color: #334155;
+  }
+
+  .rewards-card-body {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 16px;
+  }
+
+  .body-left {
+    align-items: center;
+  }
+
+  /* Address cards: full width on mobile */
+  .address-card {
+    flex: 1 1 100% !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    word-break: break-word;
+  }
+
+  /* Address page top Add button: full width */
+  .add-address-btn-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  /* Profile title padding */
+  .profile-title-header {
+    margin-bottom: 12px;
+  }
+
+  .profile-title-header h2 {
+    font-size: 20px;
+  }
+}
+
+/* Keep stats grid 2-col even on very small phones */
+@media (max-width: 480px) {
+  .profile-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .stat-card {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .stat-icon-wrapper {
+    width: 32px;
+    height: 32px;
+    font-size: 13px;
+  }
+
+  .stat-count {
+    font-size: 14px;
+  }
+
+  .stat-label {
+    font-size: 10px;
+  }
+}
+
+/* Dark mode mobile chip adjustments */
+@media (max-width: 991px) {
+  .dark-theme .sidebar-menu-item,
+  [data-bs-theme="dark"] .sidebar-menu-item,
+  [data-theme="dark"] .sidebar-menu-item {
+    background-color: #1e293b !important;
+    color: #94a3b8 !important;
+    border-color: #334155 !important;
+  }
+
+  .dark-theme .sidebar-menu-item:hover,
+  [data-bs-theme="dark"] .sidebar-menu-item:hover,
+  [data-theme="dark"] .sidebar-menu-item:hover {
+    background-color: #1e3a5f !important;
+    color: #93c5fd !important;
+    border-color: #3b82f6 !important;
+  }
+
+  .dark-theme .sidebar-menu-item.active,
+  [data-bs-theme="dark"] .sidebar-menu-item.active,
+  [data-theme="dark"] .sidebar-menu-item.active {
+    background-color: #2563eb !important;
+    color: #ffffff !important;
+    border-color: #2563eb !important;
+  }
+
+  .dark-theme .sidebar-menu-item.active .menu-icon,
+  [data-bs-theme="dark"] .sidebar-menu-item.active .menu-icon,
+  [data-theme="dark"] .sidebar-menu-item.active .menu-icon {
+    color: #ffffff !important;
+  }
+
+  .dark-theme .dashboard-sidebar,
+  [data-bs-theme="dark"] .dashboard-sidebar,
+  [data-theme="dark"] .dashboard-sidebar {
+    background-color: #1a1a2e !important;
+    border-color: #2d2d44 !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+  }
+}
+
+/* ================= REWARDS & ORDERS PAGE MOBILE OPTIMIZATIONS ================= */
+.rewards-blue-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.rewards-action-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.order-card-middle {
+  flex: 1;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 125px;
+}
+
+.order-card-right {
+  flex: 1;
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+  height: 125px;
+}
+
+@media (max-width: 991px) {
+  .rewards-blue-card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 16px;
+  }
+
+  .rewards-action-grid {
+    grid-template-columns: 1fr;
+    gap: 12px !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .order-card-middle,
+  .order-card-right {
+    height: auto !important;
+    text-align: left !important;
+    align-items: flex-start !important;
+    flex: none !important;
+    width: 100% !important;
+    gap: 8px;
+  }
+
+  .sidebar-divider {
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .sidebar-divider::-webkit-scrollbar {
+    display: none;
+  }
+}

@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { db } from "../firebase";
 import { collection, getDocs } from "firebase/firestore";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Container, Card, Button, Form, Alert, Row, Col, Spinner, Badge } from "react-bootstrap";
+import { Container, Card, Button, Form, Alert, Row, Col, Badge } from "react-bootstrap";
+import Loading from "./Loading";
 import { FaTag, FaArrowLeft, FaGift, FaUniversity, FaInfoCircle } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 
@@ -84,11 +85,7 @@ function Coupens() {
   };
 
   if (loading) {
-    return (
-      <Container className="text-center py-5">
-        <Spinner />
-      </Container>
-    );
+    return <Loading minHeight="300px" message={t("loadingCoupons", "Loading coupons...")} />;
   }
 
   return (

@@ -1952,6 +1952,7 @@ body {
     height: 44px;
     width: 100%;
     transition: border-color 0.2s;
+    position: relative;
 }
 
 .ref-search-bar:focus-within {
@@ -1964,7 +1965,7 @@ body {
     height: 100%;
     border: none;
     outline: none;
-    padding: 0 14px 0 60px;
+    padding: 0 14px 0 45px;
     font-size: 0.95rem;
     color: #697085;
     background: transparent;
@@ -1977,9 +1978,11 @@ body {
 
 .search-icon-left {
     position: absolute;
-    left: 14px;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
     color: #8a91a6;
-    font-size: 2.5rem;
+    font-size: 1.15rem;
     pointer-events: none;
     stroke-width: 2px;
 }
@@ -2111,8 +2114,8 @@ body {
 
 .ref-cart-badge {
     position: absolute;
-    top: -8px;
-    right: -10px;
+    top: -6px;
+    right: -8px;
     background: #0b1e6d;
     color: #fff;
     font-size: 0.6rem;

@@ -11,6 +11,8 @@ import {
 } from "react-icons/fa";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getFunctions, httpsCallable } from "firebase/functions";
+import { useTranslation } from "react-i18next";
+import Loading from "../../pages/Loading";
 import { app } from "../../firebase";
 
 /* ===============================
@@ -35,6 +37,7 @@ const formatDate = (date) => {
 ================================ */
 
 function TrackOrder() {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const order = location.state?.order;
@@ -74,15 +77,7 @@ function TrackOrder() {
       Loading & Error
   ================================= */
   if (loading) {
-    return (
-      <div className="bg-light" style={{ minHeight: "100vh" }}>
-        <Header navigate={navigate} />
-        <Container className="text-center py-5">
-          <Spinner animation="border" variant="primary" />
-          <p className="mt-3 text-body">Loading tracking...</p>
-        </Container>
-      </div>
-    );
+    return <Loading message={t("loadingTracking", "Loading tracking...")} minHeight="100vh" />;
   }
 
   if (error) {
@@ -91,10 +86,10 @@ function TrackOrder() {
         <Header navigate={navigate} />
         <Container className="text-center py-5">
           <FaExclamationTriangle size={50} color="red" />
-          <h5 className="mt-3 text-body">Unable to load tracking</h5>
+          <h5 className="mt-3 text-body">{t("unableToLoadTracking", "Unable to load tracking")}</h5>
           <p className="text-secondary">{error}</p>
           <Button onClick={() => window.location.reload()}>
-            Retry
+            {t("retry", "Retry")}
           </Button>
         </Container>
       </div>
@@ -111,14 +106,27 @@ function TrackOrder() {
         <Container className="text-center py-5">
           <FaTruck size={60} className="text-secondary" />
           <h5 className="mt-3 text-body">
-            Tracking will be available soon
+            {t("trackingAvailableSoon", "Tracking will be available soon")}
           </h5>
         </Container>
       </div>
     );
   }
 
-  const status = shipment.current_status || "Order Placed";
+  const rawStatus = shipment.current_status || "Order Placed";
+  
+  // Localize order status badge if we have translations
+  const getLocalizedStatus = (statusStr) => {
+    const s = statusStr.toUpperCase();
+    if (s.includes("DELIVERED")) return t("delivered", "Delivered");
+    if (s.includes("OUT")) return t("inTransit", "In Transit");
+    if (s.includes("TRANSIT")) return t("inTransit", "In Transit");
+    if (s.includes("SHIP")) return t("shipped", "Shipped");
+    if (s.includes("PACK")) return t("packed", "Packed");
+    return t("orderConfirmed", "Order Confirmed");
+  };
+
+  const status = getLocalizedStatus(rawStatus);
   const awb = shipment.awb_code || "--";
   const eta = tracking?.etd;
   const courier = shipment.courier_name || "Delhivery";
@@ -129,7 +137,7 @@ function TrackOrder() {
   // Address info
   const address = order?.shippingAddress || order?.address || {};
   const name = address.fullName || address.name || order?.userName || "John Doe";
-  const line1 = address.addressLine1 || address.street || address.address || "Address details not found";
+  const line1 = address.addressLine1 || address.street || address.address || t("addressDetailsNotFound", "Address details not found");
   const city = address.city || "";
   const state = address.state || "";
   const pinCode = address.pinCode || address.pincode || address.zipCode || "";
@@ -143,7 +151,7 @@ function TrackOrder() {
             <FaArrowLeft />
         </div>
 
-        <h5 style={{ margin: 0, fontWeight: '600', fontSize: '1.15rem' }}>Order Tracking Page</h5>
+        <h5 style={{ margin: 0, fontWeight: '600', fontSize: '1.15rem' }}>{t("orderTrackingPage", "Order Tracking Page")}</h5>
       </div>
 
       <Container style={{ maxWidth: "850px" }} className="py-4 mt-3">
@@ -152,10 +160,10 @@ function TrackOrder() {
           <div className="d-flex justify-content-between align-items-start mb-4">
             <div>
               <h5 style={{ fontWeight: '700', fontSize: '1.05rem', color: '#111827', marginBottom: '8px' }}>
-                Order ID: #{order?.orderId || order?.shiprocketOrderId || 'SC12345678'}
+                {t("orderId", "Order ID")}: #{order?.orderId || order?.shiprocketOrderId || 'SC12345678'}
               </h5>
               <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: 0 }}>
-                Placed on {orderDate}
+                {t("placedOn", "Placed on {{date}}", { date: orderDate })}
               </p>
             </div>
             <div className="text-end">
@@ -164,7 +172,7 @@ function TrackOrder() {
               </span>
               {eta && (
                 <p style={{ fontSize: '0.9rem', color: '#111827', fontWeight: '600', margin: 0, marginTop: '12px' }}>
-                  Expected Delivery: {formatDate(eta)}
+                  {t("expectedDelivery", "Expected Delivery: {{date}}", { date: formatDate(eta) })}
                 </p>
               )}
             </div>
@@ -173,7 +181,7 @@ function TrackOrder() {
           <hr style={{ borderColor: '#f3f4f6', margin: '30px 0' }} />
 
           {/* ================= PROGRESS STEPPER ================= */}
-          <Stepper status={status} tracking={tracking} orderDate={orderDate} />
+          <Stepper status={rawStatus} tracking={tracking} orderDate={orderDate} />
 
         </div>
 
@@ -181,19 +189,19 @@ function TrackOrder() {
         <Row className="mt-4 g-4">
           <Col md={6}>
             <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '24px', height: '100%', boxShadow: '0 4px 15px rgba(0,0,0,0.03)' }}>
-              <h6 style={{ fontWeight: '700', color: '#111827', marginBottom: '24px', fontSize: '1rem' }}>Delivery Details</h6>
+              <h6 style={{ fontWeight: '700', color: '#111827', marginBottom: '24px', fontSize: '1rem' }}>{t("deliveryDetails", "Delivery Details")}</h6>
               
               <div style={{ marginBottom: '20px' }}>
-                <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: 0, marginBottom: '4px' }}>Delivery Partner</p>
+                <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: 0, marginBottom: '4px' }}>{t("deliveryPartner", "Delivery Partner")}</p>
                 <p style={{ fontWeight: '700', color: '#111827', margin: 0, fontSize: '0.95rem' }}>{courier}</p>
               </div>
 
               <div>
-                <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: 0, marginBottom: '4px' }}>Tracking ID</p>
+                <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: 0, marginBottom: '4px' }}>{t("trackingId", "Tracking ID")}</p>
                 <div className="d-flex align-items-center justify-content-between">
                   <p style={{ fontWeight: '700', color: '#111827', margin: 0, fontSize: '0.95rem' }}>{awb}</p>
                   <a href={`https://www.delhivery.com/track/package/${awb}`} target="_blank" rel="noreferrer" style={{ color: '#1a56db', fontSize: '0.85rem', fontWeight: '700', textDecoration: 'none' }}>
-                    Track on {courier}
+                    {t("trackOn", "Track on {{courier}}", { courier: courier })}
                   </a>
                 </div>
               </div>
@@ -201,7 +209,7 @@ function TrackOrder() {
           </Col>
           <Col md={6}>
             <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '24px', height: '100%', boxShadow: '0 4px 15px rgba(0,0,0,0.03)' }}>
-              <h6 style={{ fontWeight: '700', color: '#111827', marginBottom: '24px', fontSize: '1rem' }}>Shipping Address</h6>
+              <h6 style={{ fontWeight: '700', color: '#111827', marginBottom: '24px', fontSize: '1rem' }}>{t("shippingAddress", "Shipping Address")}</h6>
               
               <p style={{ fontWeight: '600', color: '#111827', margin: 0, marginBottom: '10px', fontSize: '0.95rem' }}>{name}</p>
               <p style={{ fontSize: '0.85rem', color: '#4b5563', margin: 0, lineHeight: '1.7' }}>
@@ -221,36 +229,40 @@ function TrackOrder() {
     Header Component (Fallback)
 ================================ */
 
-const Header = ({ navigate }) => (
-  <div
-    style={{
-      padding: "16px 20px",
-      display: "flex",
-      alignItems: "center",
-      gap: "10px",
-      backgroundColor: "#1a56db",
-      color: "white"
-    }}
-  >
-    <FaArrowLeft
-      style={{ cursor: "pointer" }}
-      onClick={() => navigate(-1)}
-    />
-    <h5 style={{ margin: 0, fontWeight: '600' }}>Track Order</h5>
-  </div>
-);
+const Header = ({ navigate }) => {
+  const { t } = useTranslation();
+  return (
+    <div
+      style={{
+        padding: "16px 20px",
+        display: "flex",
+        alignItems: "center",
+        gap: "10px",
+        backgroundColor: "#1a56db",
+        color: "white"
+      }}
+    >
+      <FaArrowLeft
+        style={{ cursor: "pointer" }}
+        onClick={() => navigate(-1)}
+      />
+      <h5 style={{ margin: 0, fontWeight: '600' }}>{t("trackOrder", "Track Order")}</h5>
+    </div>
+  );
+};
 
 /* ===============================
     Stepper (Horizontal)
 ================================ */
 
 const Stepper = ({ status, tracking, orderDate }) => {
+  const { t } = useTranslation();
   const steps = [
-    { title: "Order Confirmed", icon: <FaCheck />, date: orderDate },
-    { title: "Packed", icon: <FaBox />, date: "" },
-    { title: "Shipped", icon: <FaTruckLoading />, date: "" },
-    { title: "In Transit", icon: <FaTruck />, date: "" },
-    { title: "Delivered", icon: <FaMapMarkerAlt />, date: "" },
+    { title: t("orderConfirmed", "Order Confirmed"), icon: <FaCheck />, date: orderDate },
+    { title: t("packed", "Packed"), icon: <FaBox />, date: "" },
+    { title: t("shipped", "Shipped"), icon: <FaTruckLoading />, date: "" },
+    { title: t("inTransit", "In Transit"), icon: <FaTruck />, date: "" },
+    { title: t("delivered", "Delivered"), icon: <FaMapMarkerAlt />, date: "" },
   ];
 
   const getCurrentStep = () => {
@@ -267,7 +279,7 @@ const Stepper = ({ status, tracking, orderDate }) => {
 
   return (
     <div style={{ padding: '10px 0 20px', position: 'relative' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', position: 'relative', zIndex: 2 }}>
+      <div style={{ display: 'flex', justifycontent: 'space-between', position: 'relative', zIndex: 2 }}>
         {steps.map((step, i) => {
           const isCompleted = i < current;
           const isActive = i === current;

@@ -472,3 +472,62 @@
 .dark-theme .desktop-breadcrumb .text-dark {
   color: #f1f5f9 !important;
 }
+
+/* Mobile Optimization Override */
+@media (max-width: 767px) {
+  .browse-category-page-wrapper {
+    height: auto;
+    overflow: visible;
+  }
+
+  .browse-content-container {
+    flex-direction: row;
+    overflow: visible;
+    height: auto;
+    margin-top: 5px;
+    margin-bottom: 5px;
+  }
+
+  .category-sidebar-scroll {
+    width: 85px;
+    border-radius: 8px 0 0 8px;
+    padding-top: 10px;
+    height: calc(100vh - 120px);
+    position: sticky;
+    top: 60px;
+  }
+
+  .products-main-area {
+    padding: 10px;
+  }
+
+  .prod-img-box {
+    height: 110px !important;
+    min-height: 110px !important;
+  }
+
+  .prod-title {
+    font-size: 0.8rem !important;
+    height: 2.7em !important;
+  }
+
+  .prod-offer-price {
+    font-size: 0.95rem !important;
+  }
+
+  .prod-original-price {
+    font-size: 0.7rem !important;
+  }
+
+  .sc-add-btn {
+    font-size: 0.75rem !important;
+    padding: 6px 10px !important;
+  }
+
+  .sc-discount-tag {
+    font-size: 0.6rem !important;
+    padding: 2px 6px !important;
+    top: 8px !important;
+    left: 8px !important;
+  }
+}

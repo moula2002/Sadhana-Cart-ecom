@@ -12,7 +12,7 @@ import FilterOffcanvas from "./searchBar/FilterOffcanvas";
 
 
 import {
-  FiUser, FiMapPin, FiPackage, FiHeart, FiCreditCard,
+  FiUser, FiMapPin, FiPackage, FiHeart, FiCreditCard, FiShoppingCart,
   FiGrid, FiList, FiTag, FiStar, FiHelpCircle, FiMessageCircle,
   FiPhone, FiInfo, FiShield, FiFileText, FiRefreshCcw,
   FiMoon, FiSun, FiInstagram, FiFacebook, FiYoutube, FiLogOut, FiSearch, FiLock
@@ -35,16 +35,16 @@ const EMPTY_ARRAY = [];
 const LoginConfirmationModal = ({ show, onClose, userName }) => {
   const { t } = useTranslation();
 
-  const [greeting, setGreeting] = useState({ text: "Welcome", icon: "👋" });
+  const [greeting, setGreeting] = useState({ key: "greeting.welcome", text: "Welcome", icon: "👋" });
 
   useEffect(() => {
     const hour = new Date().getHours();
     if (hour < 12) {
-      setGreeting({ text: "Good Morning", icon: "🌅" });
+      setGreeting({ key: "greeting.goodMorning", text: "Good Morning", icon: "🌅" });
     } else if (hour < 17) {
-      setGreeting({ text: "Good Afternoon", icon: "☀️" });
+      setGreeting({ key: "greeting.goodAfternoon", text: "Good Afternoon", icon: "☀️" });
     } else {
-      setGreeting({ text: "Good Evening", icon: "🌙" });
+      setGreeting({ key: "greeting.goodEvening", text: "Good Evening", icon: "🌙" });
     }
   }, [show]);
 
@@ -68,11 +68,11 @@ const LoginConfirmationModal = ({ show, onClose, userName }) => {
                 {greeting.icon}
               </motion.div>
               <h3 className="mb-2 fw-bolder text-dark">
-                {greeting.text}, <span className="text-primary">{userName || "User"}</span>!
+                {t(greeting.key, greeting.text)}, <span className="text-primary">{userName || t("greeting.user", "User")}</span>!
               </h3>
               <p className="text-muted mt-3 mb-0">
-                You have successfully signed in. <br />
-                Ready to explore new deals?
+                {t("loginModal.successText", "You have successfully signed in.")} <br />
+                {t("loginModal.exploreText", "Ready to explore new deals?")}
               </p>
             </Modal.Body>
           </motion.div>
@@ -84,16 +84,16 @@ const LoginConfirmationModal = ({ show, onClose, userName }) => {
 
 const LogoutConfirmationModal = ({ show, onClose, userName }) => {
   const { t } = useTranslation();
-  const [greeting, setGreeting] = useState({ text: "Goodbye", icon: "👋" });
+  const [greeting, setGreeting] = useState({ key: "logoutModal.goodbye", text: "Goodbye", icon: "👋" });
 
   useEffect(() => {
     const hour = new Date().getHours();
     if (hour < 12) {
-      setGreeting({ text: "Have a great Morning", icon: "🌅" });
+      setGreeting({ key: "logoutModal.morning", text: "Have a great Morning", icon: "🌅" });
     } else if (hour < 17) {
-      setGreeting({ text: "Have a great Afternoon", icon: "☀️" });
+      setGreeting({ key: "logoutModal.afternoon", text: "Have a great Afternoon", icon: "☀️" });
     } else {
-      setGreeting({ text: "Good Night", icon: "🌙" });
+      setGreeting({ key: "logoutModal.night", text: "Good Night", icon: "🌙" });
     }
   }, [show]);
 
@@ -117,11 +117,11 @@ const LogoutConfirmationModal = ({ show, onClose, userName }) => {
                 {greeting.icon}
               </motion.div>
               <h3 className="mb-2 fw-bold text-danger">
-                {greeting.text}, {userName || "User"}!
+                {t(greeting.key, greeting.text)}, {userName || t("greeting.user", "User")}!
               </h3>
               <p className="text-muted mt-3 mb-0">
-                You have been successfully logged out. <br />
-                See you next time!
+                {t("logoutModal.successText", "You have been successfully logged out.")} <br />
+                {t("logoutModal.seeYou", "See you next time!")}
               </p>
             </Modal.Body>
           </motion.div>
@@ -548,6 +548,7 @@ const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal, se
   const { theme, toggleTheme } = useTheme();
   const [savedAddresses, setSavedAddresses] = useState([]);
   const [profileImage, setProfileImage] = useState(null);
+  const [userName, setUserName] = useState("");
 
   // Listen to user data in real-time
   useEffect(() => {
@@ -560,6 +561,7 @@ const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal, se
           setWalletBalance(userData.walletBalance || 0);
           setWalletCoins(userData.walletCoins || 0);
           setProfileImage(userData.profileImage || null);
+          setUserName(userData.name || "");
 
           // Fetch saved addresses
           if (userData.addresses) {
@@ -654,7 +656,7 @@ const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal, se
           {currentUser ? (
             <>
               <span style={{ fontSize: '0.8rem', color: '#888', lineHeight: '1.2' }}>
-                {currentUser.displayName || currentUser.email?.split("@")[0] || "User"}
+                {userName || currentUser.displayName || currentUser.email?.split("@")[0] || "User"}
               </span>
               <div className="d-flex align-items-center">
                 <span style={{ fontSize: '0.9rem', fontWeight: '700', color: '#212121', lineHeight: '1.2' }}>
@@ -734,7 +736,7 @@ const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal, se
                   </motion.div>
                 )}
                 <div>
-                  <h6 className="mb-0 fw-bold text-dark">{currentUser.displayName || currentUser.email?.split("@")[0] || "User"}</h6>
+                  <h6 className="mb-0 fw-bold text-dark">{userName || currentUser.displayName || currentUser.email?.split("@")[0] || "User"}</h6>
                   <small className="text-muted">{currentUser.email}</small>
                 </div>
               </div>
@@ -769,7 +771,7 @@ const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal, se
                 </a>
 
                 <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); navigate("/cart"); setDropdownOpen(false); }}>
-                  <HoverCartIcon src={cartGif} alt={t("cart", "Cart")} style={{ width: '20px', height: '20px', objectFit: 'contain', marginRight: '8px' }} />
+                  <FiShoppingCart className="menu-icon-svg text-secondary" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
                   <span className="fw-bold text-dark">{t("cart", "Cart")}</span>
                   <i className="fas fa-chevron-right ms-auto menu-chevron"></i>
                 </a>
@@ -777,9 +779,9 @@ const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal, se
                 <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); handleWalletClick(); }}>
                   <FiCreditCard className="menu-icon-svg text-success" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
                   <span className="fw-bold text-dark">{t("walletRewards")}</span>
-                  {walletBalance > 0 && (
-                    <span className="badge rounded-pill bg-danger ms-2" style={{ fontSize: '0.6rem' }}>
-                      ₹{walletBalance}
+                  {walletCoins > 0 && (
+                    <span className="badge rounded-pill bg-danger ms-2" style={{ fontSize: '0.65rem', padding: '4px 8px' }}>
+                      ₹{walletCoins}
                     </span>
                   )}
                   <i className="fas fa-chevron-right ms-auto menu-chevron"></i>
@@ -835,31 +837,31 @@ const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal, se
 
             <hr className="hamburger-divider" />
 
-            <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); navigate("/about"); setDropdownOpen(false); }}>
+            <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); navigate("/about-us"); setDropdownOpen(false); }}>
               <FiInfo className="menu-icon-svg text-primary" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
               <span className="fw-bold text-dark">{t("aboutUs", "About Us")}</span>
               <i className="fas fa-chevron-right ms-auto menu-chevron"></i>
             </a>
 
-            <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); navigate("/policies"); setDropdownOpen(false); }}>
+            <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); navigate("/shipping-policy"); setDropdownOpen(false); }}>
               <FiShield className="menu-icon-svg text-secondary" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
               <span className="fw-bold text-dark">{t("footer.policies", "Store Policies")}</span>
               <i className="fas fa-chevron-right ms-auto menu-chevron"></i>
             </a>
 
-            <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); navigate("/privacy"); setDropdownOpen(false); }}>
+            <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); navigate("/privacy-policy"); setDropdownOpen(false); }}>
               <FiLock className="menu-icon-svg text-info" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
               <span className="fw-bold text-dark">{t("footer.privacyPolicy", "Privacy Policy")}</span>
               <i className="fas fa-chevron-right ms-auto menu-chevron"></i>
             </a>
 
-            <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); navigate("/terms"); setDropdownOpen(false); }}>
+            <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); navigate("/terms-and-conditions"); setDropdownOpen(false); }}>
               <FiFileText className="menu-icon-svg text-secondary" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
               <span className="fw-bold text-dark">{t("term's", "Terms & Conditions")}</span>
               <i className="fas fa-chevron-right ms-auto menu-chevron"></i>
             </a>
 
-            <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); navigate("/returns"); setDropdownOpen(false); }}>
+            <a href="#" className="hamburger-menu-item" onClick={(e) => { e.preventDefault(); navigate("/return-policy"); setDropdownOpen(false); }}>
               <FiRefreshCcw className="menu-icon-svg text-warning" style={{ width: '28px', fontSize: '1.2rem', marginRight: '15px' }} />
               <span className="fw-bold text-dark">{t("returnPolicy", "Return & Refund Policy")}</span>
               <i className="fas fa-chevron-right ms-auto menu-chevron"></i>
@@ -1063,7 +1065,7 @@ export default function Header() {
             </div>
 
             {/* RIGHT ACTIONS — All Screen Sizes */}
-            <div className="navbar-right-group d-flex align-items-center gap-1 gap-sm-2 gap-md-3">
+            <div className="navbar-right-group d-flex align-items-center gap-3 gap-md-4">
 
               {/* Language Switcher */}
               <div className="ref-deliver-wrap d-flex align-items-center">

@@ -121,7 +121,7 @@ function BestArrivals({ showCart = false }) {
           </div>
         </div>
         <div className="d-flex align-items-center gap-3">
-          <a className="sc-view-all" href="#">{t("home.viewAllDeals", "View All Deals →")}</a>
+          <a className="sc-view-all" href="#" onClick={(e) => { e.preventDefault(); navigate("/flash-deals"); }}>{t("home.viewAllDeals", "View All Deals →")}</a>
         </div>
       </div>
 

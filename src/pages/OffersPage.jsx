@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Spinner } from 'react-bootstrap';
+import { Container, Row, Col } from 'react-bootstrap';
+import Loading from "./Loading";
 import { FaTag } from "react-icons/fa";
 import { HiLightningBolt } from "react-icons/hi";
 import { AiOutlineBank } from "react-icons/ai";
@@ -79,9 +80,7 @@ const OffersPage = () => {
             </div>
 
             {loading ? (
-              <div className="text-center py-4">
-                <Spinner animation="border" variant="primary" />
-              </div>
+              <Loading message={t("loadingSpecialOffers", "Loading special offers...")} minHeight="200px" />
             ) : offers.length === 0 ? (
               <p className="text-muted text-center py-4 offers-empty-text">{t("noOffersAvailable", "No offers available at the moment.")}</p>
             ) : (

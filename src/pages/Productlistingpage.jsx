@@ -335,7 +335,7 @@ const ProductListingPage = () => {
     return (
         <Container fluid className="py-4 px-lg-5 mt-3">
             <div className="d-flex align-items-center mb-4 text-muted small">
-                <Link to="/" className="text-decoration-none text-muted">{t("home", "Home")}</Link>
+                <Link to="/" className="text-decoration-none text-muted">{t("homeLabel", "Home")}</Link>
                 <FaChevronRight className="mx-2" size={10} />
                 {categoryName && categoryName.toLowerCase().includes("fashion") && categoryName.toLowerCase() !== "fashion" && (
                     <>
@@ -368,7 +368,7 @@ const ProductListingPage = () => {
 
                         {/* Category/Subcategory Filter */}
                         <div className="mb-4">
-                            <h6 className="fw-bold text-dark mb-3">{t("category", "Category")}</h6>
+                            <h6 className="fw-bold text-dark mb-3">{t("categoryLabel", "Category")}</h6>
                             {subcategories.map((sub, idx) => (
                                 <Form.Check
                                     key={idx}
@@ -489,7 +489,7 @@ const ProductListingPage = () => {
                     ) : (
                         <>
                             {/* Product Grid */}
-                            <Row className="g-4 row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4">
+                            <Row className="g-4 row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-4">
                                 {paginatedProducts.map((p) => {
                                     const finalPrice = Number(p.offerprice || p.price || 0);
                                     const originalPrice = p.price && p.offerprice ? Number(p.price) : Math.round(finalPrice * 1.5);

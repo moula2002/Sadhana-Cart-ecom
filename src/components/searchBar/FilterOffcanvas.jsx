@@ -4,8 +4,11 @@ import { FaTimes } from "react-icons/fa";
 import "./FilterOffcanvas.css";
 import { useTranslation } from "react-i18next";
 
+import { useTheme } from "../../context/ThemeContext";
+
 const FilterOffcanvas = ({ show, onHide, onApply }) => {
   const { t } = useTranslation();
+  const { isDark } = useTheme();
   const [activeTab, setActiveTab] = useState("Price");
   const [filters, setFilters] = useState({
     minPrice: "",
@@ -19,7 +22,7 @@ const FilterOffcanvas = ({ show, onHide, onApply }) => {
 
   const tabs = [
     { id: "Price", label: t("price", "Price") },
-    { id: "Category", label: t("category", "Category") },
+    { id: "Category", label: t("categoryLabel", "Category") },
     { id: "Gender", label: t("gender", "Gender") },
     { id: "Brand", label: t("brand", "Brand") },
     { id: "Size", label: t("size", "Size") },
@@ -40,12 +43,12 @@ const FilterOffcanvas = ({ show, onHide, onApply }) => {
       case "Price":
         return (
           <div className="filter-content-pane">
-            <h5 className="fw-bold mb-3">{t("priceRange", "Price Range")}</h5>
+            <h5 className="fw-bold mb-3" style={{ color: isDark ? '#f8fafc' : '#1a202c' }}>{t("priceRange", "Price Range")}</h5>
             
             <div className="d-flex align-items-center gap-2 mb-4">
-              <div className="price-input-box">
+              <div className="price-input-box" style={{ borderColor: isDark ? '#334155' : '#ced4da', backgroundColor: isDark ? '#0f172a' : '#ffffff' }}>
                 <span className="text-muted small">{t("min", "Min")}</span>
-                <div className="d-flex align-items-center fw-bold">
+                <div className="d-flex align-items-center fw-bold" style={{ color: isDark ? '#f8fafc' : '#1a202c' }}>
                   <span>₹</span>
                   <input 
                     type="number" 
@@ -53,13 +56,14 @@ const FilterOffcanvas = ({ show, onHide, onApply }) => {
                     value={filters.minPrice}
                     onChange={(e) => setFilters({...filters, minPrice: e.target.value})}
                     placeholder="168"
+                    style={{ color: isDark ? '#f8fafc' : '#1a202c' }}
                   />
                 </div>
               </div>
               <span className="fw-bold text-muted">-</span>
-              <div className="price-input-box">
+              <div className="price-input-box" style={{ borderColor: isDark ? '#334155' : '#ced4da', backgroundColor: isDark ? '#0f172a' : '#ffffff' }}>
                 <span className="text-muted small">{t("max", "Max")}</span>
-                <div className="d-flex align-items-center fw-bold">
+                <div className="d-flex align-items-center fw-bold" style={{ color: isDark ? '#f8fafc' : '#1a202c' }}>
                   <span>₹</span>
                   <input 
                     type="number" 
@@ -67,6 +71,7 @@ const FilterOffcanvas = ({ show, onHide, onApply }) => {
                     value={filters.maxPrice}
                     onChange={(e) => setFilters({...filters, maxPrice: e.target.value})}
                     placeholder="12899"
+                    style={{ color: isDark ? '#f8fafc' : '#1a202c' }}
                   />
                 </div>
               </div>
@@ -103,17 +108,17 @@ const FilterOffcanvas = ({ show, onHide, onApply }) => {
         return <div className="filter-content-pane text-muted p-3">{t("categoriesFilterComingSoon", "Categories filter coming soon.")}</div>;
       // Implement other tabs as needed...
       default:
-        return <div className="filter-content-pane text-muted p-3">{t("filterComingSoon", "{{tab}} filter coming soon.", { tab: activeTab }).replace("{{tab}}", activeTab)}</div>;
+        return <div className="filter-content-pane text-muted p-3">{t("filterComingSoon", "{{tab}} filter coming soon.", { tab: t(activeTab.toLowerCase(), activeTab) })}</div>;
     }
   };
 
   return (
     <Offcanvas show={show} onHide={onHide} placement="end" className="custom-filter-offcanvas">
       <Offcanvas.Header className="filter-header border-bottom">
-        <Button variant="link" onClick={onHide} className="text-dark p-0 me-3">
+        <Button variant="link" onClick={onHide} className={`p-0 me-3 ${isDark ? 'text-light' : 'text-dark'}`}>
           <FaTimes size={20} />
         </Button>
-        <Offcanvas.Title className="fw-bold flex-grow-1 text-center pe-4">
+        <Offcanvas.Title className={`fw-bold flex-grow-1 text-center pe-4 ${isDark ? 'text-light' : 'text-dark'}`}>
           {t("filters", "Filters")}
         </Offcanvas.Title>
       </Offcanvas.Header>

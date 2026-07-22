@@ -122,3 +122,19 @@
     padding: 25px;
   }
 }
+
+/* --- Dark Mode Override --- */
+.dark-theme .privacy-container,
+[data-bs-theme="dark"] .privacy-container,
+[data-theme="dark"] .privacy-container {
+  --page-bg: #0f172a;
+  --header-bg: #1e293b;
+  --header-text: #f8fafc;
+  --card-bg: #1e293b;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --primary-orange: #ff6a00;
+  --secondary-orange: #ff8533;
+  --shadow-color: rgba(0, 0, 0, 0.4);
+}

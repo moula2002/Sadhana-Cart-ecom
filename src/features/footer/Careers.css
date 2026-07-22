@@ -1,0 +1,162 @@
+.careers-page-wrapper {
+  background-color: var(--body-bg, #f8f9fa);
+  color: var(--text-dark, #2d3748);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+}
+
+.careers-hero {
+  background: linear-gradient(135deg, #1a56db 0%, #0d3897 100%);
+  color: white;
+  border-bottom: 5px solid #fb641b;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 6px 16px;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.careers-hero h1 {
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  font-weight: 800;
+}
+
+.careers-hero .lead {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
+}
+
+.section-title-styled {
+  position: relative;
+  display: inline-block;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 50px;
+}
+
+.section-title-styled::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 25%;
+  width: 50%;
+  height: 4px;
+  background-color: #fb641b;
+  border-radius: 2px;
+}
+
+.value-card {
+  background-color: white;
+  border-radius: 16px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.value-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+
+.icon-circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bg-light-styled {
+  background-color: #f1f5f9;
+  border-top: 1px solid #e2e8f0;
+}
+
+.job-card {
+  background-color: white;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 16px !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.job-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  border-color: #1a56db !important;
+}
+
+.apply-btn {
+  border-radius: 8px !important;
+  font-weight: 700;
+  padding: 10px 24px !important;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.apply-btn:hover {
+  background-color: #1140ad !important;
+}
+
+.apply-btn:active {
+  transform: scale(0.98);
+}
+
+/* Dark theme overrides */
+.dark-theme .careers-page-wrapper {
+  background-color: #0f172a;
+  color: #cbd5e1;
+}
+
+.dark-theme .bg-light-styled {
+  background-color: #1e293b;
+  border-color: #334155;
+}
+
+.dark-theme .value-card,
+.dark-theme .job-card {
+  background-color: #1e293b;
+  border-color: #334155 !important;
+  color: #f8fafc;
+}
+
+.dark-theme .value-card h5,
+.dark-theme .job-card h4 {
+  color: #f8fafc !important;
+}
+
+.dark-theme .value-card p,
+.dark-theme .job-card p,
+.dark-theme .job-card .text-muted {
+  color: #94a3b8 !important;
+}
+
+.dark-theme .job-card {
+  background-color: #1e293b;
+}
+
+.dark-theme .modal-content {
+  background-color: #1e293b;
+  color: #f8fafc;
+  border: 1px solid #334155;
+}
+
+.dark-theme .modal-content input,
+.dark-theme .modal-content textarea {
+  background-color: #0f172a;
+  border-color: #334155;
+  color: #f8fafc;
+}
+
+.dark-theme .modal-content input::placeholder,
+.dark-theme .modal-content textarea::placeholder {
+  color: #475569;
+}
+
+.dark-theme .modal-content label {
+  color: #cbd5e1;
+}

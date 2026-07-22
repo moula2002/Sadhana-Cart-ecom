@@ -4,8 +4,11 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
 import { collection, query, where, onSnapshot, doc, getDoc } from "firebase/firestore";
 import { db, auth } from "../../firebase";
+import { onAuthStateChanged } from "firebase/auth";
 import { updateDoc } from "firebase/firestore";
 import { useTheme } from "../../context/ThemeContext";
+import { useTranslation } from "react-i18next";
+import Loading from "../../pages/Loading";
 
 const formatCurrency = (val) =>
   new Intl.NumberFormat("en-IN", {
@@ -49,24 +52,25 @@ const formatOrderDate = (dateValue) => {
   }
 };
 
-const getDisplayStatusFromDbStatus = (status) => {
-  if (!status) return "Order Placed";
+const getDisplayStatusFromDbStatus = (status, t) => {
+  if (!status) return t("orderStatus.placed", "Order Placed");
 
   const statusLower = status.toLowerCase();
 
-  if (statusLower === "request_completed") return "Return Requested";
-  if (statusLower === "return_approved") return "Return Approved";
-  if (statusLower === "refund_completed" || statusLower === "refunded") return "Refund Completed";
-  if (statusLower === "cancelled") return "Order Cancelled";
-  if (statusLower === "delivered") return "Order Delivered";
-  if (statusLower === "shipped") return "Shipped";
-  if (statusLower === "processing") return "Processing";
-  if (statusLower === "pending") return "Order Placed";
+  if (statusLower === "request_completed") return t("orderStatus.returnRequested", "Return Requested");
+  if (statusLower === "return_approved") return t("orderStatus.returnApproved", "Return Approved");
+  if (statusLower === "refund_completed" || statusLower === "refunded") return t("orderStatus.refundCompleted", "Refund Completed");
+  if (statusLower === "cancelled") return t("orderStatus.cancelled", "Order Cancelled");
+  if (statusLower === "delivered") return t("orderStatus.delivered", "Order Delivered");
+  if (statusLower === "shipped") return t("orderStatus.shipped", "Shipped");
+  if (statusLower === "processing") return t("orderStatus.processing", "Processing");
+  if (statusLower === "pending") return t("orderStatus.placed", "Order Placed");
 
   return status;
 };
 
 function OrderDetails() {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const orderData = location.state;
@@ -84,8 +88,17 @@ function OrderDetails() {
 
   const { isDark } = useTheme();
 
+  const [currentUser, setCurrentUser] = useState(auth.currentUser);
+
   useEffect(() => {
-    if (!auth.currentUser || !orderData || !firstProduct) {
+    const unsubAuth = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+    });
+    return () => unsubAuth();
+  }, []);
+
+  useEffect(() => {
+    if (!currentUser || !orderData || !firstProduct) {
       setLoadingReturn(false);
       setLoadingOrder(false);
       return;
@@ -203,14 +216,14 @@ function OrderDetails() {
     });
 
     return () => unsubscribe();
-  }, [orderData, firstProduct]);
+  }, [orderData, firstProduct, currentUser]);
 
   if (!orderData) {
     return (
       <div className="text-center py-5">
-        <h3>No Order Found</h3>
+        <h3>{t("orderDetails.noOrder", "No Order Found")}</h3>
         <Button variant="primary" onClick={() => navigate("/orders")}>
-          Go Back to Orders
+          {t("orderDetails.goBack", "Go Back to Orders")}
         </Button>
       </div>
     );
@@ -219,21 +232,16 @@ function OrderDetails() {
   if (!products.length) {
     return (
       <div className="text-center py-5">
-        <h3>No Product Found in Order</h3>
+        <h3>{t("orderDetails.noProduct", "No Product Found in Order")}</h3>
         <Button variant="primary" onClick={() => navigate("/orders")}>
-          Go Back to Orders
+          {t("orderDetails.goBack", "Go Back to Orders")}
         </Button>
       </div>
     );
   }
 
   if (loadingOrder) {
-    return (
-      <div className="text-center py-5">
-        <Spinner animation="border" variant="primary" />
-        <p className="mt-3">Loading order details...</p>
-      </div>
-    );
+    return <Loading message={t("orderDetails.loading", "Loading order details...")} minHeight="400px" />;
   }
 
   const displayOrderData = firebaseOrderData || orderData;
@@ -242,7 +250,7 @@ function OrderDetails() {
     ? returnStatus
     : orderStatus || displayOrderData.orderStatus || displayOrderData.status || "pending";
 
-  const displayStatus = getDisplayStatusFromDbStatus(finalStatus);
+  const displayStatus = getDisplayStatusFromDbStatus(finalStatus, t);
 
   const isCancelled = finalStatus.toLowerCase() === "cancelled";
   const isDelivered = finalStatus.toLowerCase() === "delivered";
@@ -292,7 +300,7 @@ function OrderDetails() {
           onClick={() => navigate(-1)}
         />
         <h1 style={{ fontSize: "20px", fontWeight: "600", margin: 0 }}>
-          Order Details
+          {t("orderDetails.title", "Order Details")}
         </h1>
       </div>
 
@@ -344,19 +352,19 @@ function OrderDetails() {
               </h3>
 
               <div className="d-flex justify-content-between mb-2">
-                <span>Subtotal</span>
+                <span>{t("orderDetails.subtotal", "Subtotal")}</span>
                 <span>
                   {formatCurrency(product.price * (product.quantity || 1))}
                 </span>
               </div>
 
               <div className="d-flex justify-content-between mb-2">
-                <span>Quantity</span>
+                <span>{t("orderDetails.quantity", "Quantity")}</span>
                 <span>{product.quantity || 1}</span>
               </div>
 
               <div className="d-flex justify-content-between mb-3">
-                <span>Order Date</span>
+                <span>{t("orderDetails.orderDate", "Order Date")}</span>
                 <span>{formattedDate}</span>
               </div>
 
@@ -386,15 +394,15 @@ function OrderDetails() {
                   }}
                 >
                   <h6 style={{ color: "#28a745", marginBottom: "5px" }}>
-                    ✅ Returned Successfully
+                    ✅ {t("orderDetails.returnedSuccess", "Returned Successfully")}
                   </h6>
 
                   <p style={{ margin: 0, fontSize: "14px", color: "#155724" }}>
-                    Your refund has been credited to your wallet 💰
+                    {t("orderDetails.refundWallet", "Your refund has been credited to your wallet 💰")}
                   </p>
 
                   <small style={{ color: "#555" }}>
-                    You can check your updated balance in Wallet
+                    {t("orderDetails.checkWalletBalance", "You can check your updated balance in Wallet")}
                   </small>
                 </div>
               )}
@@ -405,25 +413,25 @@ function OrderDetails() {
                   className="w-100 mb-2"
                   onClick={() => handleTrackOrder(product)}
                 >
-                  Track Order
+                  {t("orderDetails.trackOrder", "Track Order")}
                 </Button>
               )}
 
               {isReturned ? null : isCancelled ? (
                 <Button disabled variant="danger" className="w-100">
-                  Order Cancelled
+                  {t("orderStatus.cancelled", "Order Cancelled")}
                 </Button>
               ) : isRefundCompleted ? (
                 <Button disabled variant="success" className="w-100">
-                  Refund Completed
+                  {t("orderStatus.refundCompleted", "Refund Completed")}
                 </Button>
               ) : isReturnRequested ? (
                 <Button disabled variant="primary" className="w-100">
-                  Return Requested
+                  {t("orderStatus.returnRequested", "Return Requested")}
                 </Button>
               ) : isReturnApproved ? (
                 <Button disabled variant="info" className="w-100">
-                  Return Approved
+                  {t("orderStatus.returnApproved", "Return Approved")}
                 </Button>
               ) : isDelivered ? (
                 <Button
@@ -438,7 +446,7 @@ function OrderDetails() {
                     })
                   }
                 >
-                  Return Order
+                  {t("orderDetails.returnOrder", "Return Order")}
                 </Button>
               ) : (
                 <Button
@@ -453,7 +461,7 @@ function OrderDetails() {
                     })
                   }
                 >
-                  Cancel Order
+                  {t("orderDetails.cancelOrder", "Cancel Order")}
                 </Button>
               )}
 

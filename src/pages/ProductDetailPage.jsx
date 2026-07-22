@@ -1877,15 +1877,15 @@ function ProductDetailPage() {
 
                             {/* Write Review Button */}
                             <div className="text-center">
-                                <h5 className="fw-bold mb-3" style={{ color: isDark ? '#f8fafc' : '#111' }}>Share Your Experience</h5>
-                                <p className="small mb-3" style={{ color: isDark ? '#94a3b8' : '#6c757d' }}>Help other customers make better decisions</p>
+                                <h5 className="fw-bold mb-3" style={{ color: isDark ? '#f8fafc' : '#111' }}>{t("shareYourExperience", "Share Your Experience")}</h5>
+                                <p className="small mb-3" style={{ color: isDark ? '#94a3b8' : '#6c757d' }}>{t("helpOtherCustomers", "Help other customers make better decisions")}</p>
                                 <Button
                                     variant={isDark ? "primary" : "dark"}
                                     size="lg"
                                     onClick={handleWriteReviewClick}
                                     className="px-5 rounded-pill"
                                 >
-                                    Write a Review
+                                    {t("writeAReview", "Write a Review")}
                                 </Button>
                             </div>
                         </Col>
@@ -2238,12 +2238,12 @@ function ProductDetailPage() {
             {/* Write Review Modal */}
             <Modal show={showReviewModal} onHide={handleCloseReviewModal} centered size="lg">
                 <Modal.Header closeButton className="border-0">
-                    <Modal.Title className="fw-bold">Write a Review</Modal.Title>
+                    <Modal.Title className="fw-bold">{t("writeAReview", "Write a Review")}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form onSubmit={handleSubmitReview}>
                         <Form.Group className="mb-4">
-                            <Form.Label className="fw-bold">Your Rating</Form.Label>
+                            <Form.Label className="fw-bold">{t("yourRating", "Your Rating")}</Form.Label>
                             <div className="d-flex gap-2">
                                 {[1, 2, 3, 4, 5].map((star) => (
                                     <span
@@ -2261,11 +2261,11 @@ function ProductDetailPage() {
                         </Form.Group>
 
                         <Form.Group className="mb-4">
-                            <Form.Label className="fw-bold">Your Review</Form.Label>
+                            <Form.Label className="fw-bold">{t("yourReview", "Your Review")}</Form.Label>
                             <Form.Control
                                 as="textarea"
                                 rows={4}
-                                placeholder="What did you like or dislike about the product? Share your experience..."
+                                placeholder={t("placeholderReview", "What did you like or dislike about the product? Share your experience...")}
                                 value={reviewText}
                                 onChange={(e) => setReviewText(e.target.value)}
                                 required
@@ -2276,7 +2276,7 @@ function ProductDetailPage() {
                         <Form.Group className="mb-4">
                             <Form.Label className="fw-bold">
                                 <FaCamera className="me-2" />
-                                Add Images (Optional)
+                                {t("addImagesOptional", "Add Images (Optional)")}
                             </Form.Label>
                             <Form.Control
                                 type="file"
@@ -2286,7 +2286,7 @@ function ProductDetailPage() {
                                 disabled={uploadingImages}
                             />
                             <Form.Text className="text-muted">
-                                You can upload up to 5 images. Supported formats: JPG, PNG, GIF
+                                {t("uploadImagesLimit", "You can upload up to 5 images. Supported formats: JPG, PNG, GIF")}
                             </Form.Text>
 
                             {/* Image Preview */}
@@ -2313,7 +2313,7 @@ function ProductDetailPage() {
                             {uploadingImages && (
                                 <div className="mt-3 text-center">
                                     <Spinner animation="border" size="sm" />
-                                    <span className="ms-2">Uploading images...</span>
+                                    <span className="ms-2">{t("uploadingImages", "Uploading images...")}</span>
                                 </div>
                             )}
                         </Form.Group>
@@ -2325,10 +2325,10 @@ function ProductDetailPage() {
                                 disabled={userRating === 0 || uploadingImages}
                                 className="px-4"
                             >
-                                {uploadingImages ? 'Uploading...' : 'Submit Review'}
+                                {uploadingImages ? t("uploading", "Uploading...") : t("submitReview", "Submit Review")}
                             </Button>
                             <Button variant="outline-secondary" onClick={handleCloseReviewModal}>
-                                Cancel
+                                {t("cancel", "Cancel")}
                             </Button>
                         </div>
                     </Form>
@@ -2338,12 +2338,12 @@ function ProductDetailPage() {
             {/* Edit Review Modal */}
             <Modal show={showEditModal} onHide={handleCloseEditModal} centered size="lg">
                 <Modal.Header closeButton className="border-0">
-                    <Modal.Title className="fw-bold">Edit Review</Modal.Title>
+                    <Modal.Title className="fw-bold">{t("editReview", "Edit Review")}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form onSubmit={handleSubmitEditReview}>
                         <Form.Group className="mb-4">
-                            <Form.Label className="fw-bold">Your Rating</Form.Label>
+                            <Form.Label className="fw-bold">{t("yourRating", "Your Rating")}</Form.Label>
                             <div className="d-flex gap-2">
                                 {[1, 2, 3, 4, 5].map((star) => (
                                     <span
@@ -2361,7 +2361,7 @@ function ProductDetailPage() {
                         </Form.Group>
 
                         <Form.Group className="mb-4">
-                            <Form.Label className="fw-bold">Your Review</Form.Label>
+                            <Form.Label className="fw-bold">{t("yourReview", "Your Review")}</Form.Label>
                             <Form.Control
                                 as="textarea"
                                 rows={4}
@@ -2375,7 +2375,7 @@ function ProductDetailPage() {
                         <Form.Group className="mb-4">
                             <Form.Label className="fw-bold">
                                 <FaCamera className="me-2" />
-                                Review Images
+                                {t("reviewImagesLabel", "Review Images")}
                             </Form.Label>
                             <Form.Control
                                 type="file"
@@ -2385,7 +2385,7 @@ function ProductDetailPage() {
                                 disabled={uploadingImages}
                             />
                             <Form.Text className="text-muted">
-                                Add new images or remove existing ones
+                                {t("editImagesInstructions", "Add new images or remove existing ones")}
                             </Form.Text>
 
                             {/* Current Images with Delete Option */}
@@ -2414,14 +2414,14 @@ function ProductDetailPage() {
                             {deletingImages.length > 0 && (
                                 <Alert variant="warning" className="mt-3 py-2">
                                     <FaTrash className="me-2" />
-                                    {deletingImages.length} image(s) will be deleted
+                                    {t("imagesWillBeDeleted", "{{count}} image(s) will be deleted", { count: deletingImages.length })}
                                 </Alert>
                             )}
 
                             {uploadingImages && (
                                 <div className="mt-3 text-center">
                                     <Spinner animation="border" size="sm" />
-                                    <span className="ms-2">Uploading images...</span>
+                                    <span className="ms-2">{t("uploadingImages", "Uploading images...")}</span>
                                 </div>
                             )}
                         </Form.Group>
@@ -2433,10 +2433,10 @@ function ProductDetailPage() {
                                 disabled={editRating === 0 || uploadingImages}
                                 className="px-4"
                             >
-                                {uploadingImages ? 'Uploading...' : 'Update Review'}
+                                {uploadingImages ? t("uploading", "Uploading...") : t("updateReview", "Update Review")}
                             </Button>
                             <Button variant="outline-secondary" onClick={handleCloseEditModal}>
-                                Cancel
+                                {t("cancel", "Cancel")}
                             </Button>
                         </div>
                     </Form>

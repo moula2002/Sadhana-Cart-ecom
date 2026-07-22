@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import Loading from "../../pages/Loading";
 import React, { useState, useEffect } from "react";
 import {
   Container,
@@ -308,11 +309,7 @@ function ViewOrderDetails() {
   ];
 
   if (loading) {
-    return (
-      <div className="d-flex justify-content-center align-items-center vh-100">
-        <Spinner animation="border" variant="primary" />
-      </div>
-    );
+    return <Loading message={t("loadingOrders", "Loading orders...")} minHeight="100vh" />;
   }
 
   const handleLogoutClick = () => {
@@ -405,7 +402,7 @@ function ViewOrderDetails() {
                   className="mb-4 overview-card"
                   style={{ borderRadius: "12px" }}
                 >
-                  <Card.Body className="p-4 d-flex justify-content-between align-items-center">
+                  <Card.Body className="p-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                     {/* Left Column: ID and Images */}
                     <div style={{ flex: "1" }}>
                       <div className="order-num-id fw-bold mb-3" style={{ fontSize: "14px" }}>
@@ -428,7 +425,7 @@ function ViewOrderDetails() {
                     </div>
 
                     {/* Middle Column: Date and Items count */}
-                    <div style={{ flex: "1", textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "space-between", height: "125px" }}>
+                    <div className="order-card-middle">
                       <div className="order-item-date" style={{ fontSize: "14px", marginTop: "2px" }}>
                         {order.date}
                       </div>
@@ -438,7 +435,7 @@ function ViewOrderDetails() {
                     </div>
 
                     {/* Right Column: Status and Details link */}
-                    <div style={{ flex: "1", textAlign: "right", display: "flex", flexDirection: "column", justifyContent: "space-between", alignItems: "flex-end", height: "125px" }}>
+                    <div className="order-card-right">
                       <div>
                         <Badge
                           style={{

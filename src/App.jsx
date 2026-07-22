@@ -31,6 +31,7 @@ const SearchPage = lazy(() => import("./pages/SearchPage"));
 const BrowseCategory = lazy(() => import("./pages/BrowseCategory"));
 const BestProductsPage = lazy(() => import("./pages/BestProductsPage"));
 const NewArrivalsPage = lazy(() => import("./pages/NewArrivalsPage"));
+const FlashDealsPage = lazy(() => import("./pages/FlashDealsPage"));
 const MapPage = lazy(() => import("./components/Map"));
 
 /* ===== Cart & Checkout ===== */
@@ -52,6 +53,8 @@ const AboutUs = lazy(() => import("./features/footer/AboutUs"));
 const Faqs = lazy(() => import("./features/footer/Faqs"));
 const ContactForm = lazy(() => import("./features/footer/ContactSupport"));
 const PrivacyPolicy = lazy(() => import("./features/PrivacyPolicy"));
+const Careers = lazy(() => import("./features/footer/Careers"));
+const Blog = lazy(() => import("./features/footer/Blog"));
 
 /* ===== User Pages ===== */
 const ProfilePage = lazy(() => import("./pages/Profile"));
@@ -139,6 +142,8 @@ const AppContent = () => {
             <Route path="/contact" element={<ContactForm />} />
             <Route path="/coupens" element={<Coupens />} />
             <Route path="/sitemap" element={<MapPage />} />
+            <Route path="/careers" element={<Careers />} />
+            <Route path="/blog" element={<Blog />} />
 
             {/* 🔹 404 */}
             <Route
@@ -156,6 +161,7 @@ const AppContent = () => {
             <Route path="/offers" element={<OffersPage />} />
             <Route path="/best-sellers" element={<BestProductsPage />} />
             <Route path="/new-arrivals" element={<NewArrivalsPage />} />
+            <Route path="/flash-deals" element={<FlashDealsPage />} />
           </Routes>
         </Suspense>
       </main>

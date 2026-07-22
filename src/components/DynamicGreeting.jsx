@@ -1,19 +1,36 @@
 import React, { useState, useEffect } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { db } from "../firebase";
+import { doc, getDoc } from "firebase/firestore";
 import { Modal } from "react-bootstrap";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import "./DynamicGreeting.css";
 
 const DynamicGreeting = () => {
+  const { t } = useTranslation();
   const [user, setUser] = useState(null);
+  const [dbName, setDbName] = useState("");
   const [greeting, setGreeting] = useState("");
   const [icon, setIcon] = useState("");
   const [show, setShow] = useState(false);
 
   useEffect(() => {
     const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
+      if (currentUser) {
+        try {
+          const docSnap = await getDoc(doc(db, "users", currentUser.uid));
+          if (docSnap.exists()) {
+            setDbName(docSnap.data().name || "");
+          }
+        } catch (e) {
+          console.error("Error fetching user name for dynamic greeting:", e);
+        }
+      } else {
+        setDbName("");
+      }
     });
     return () => unsubscribe();
   }, []);
@@ -29,13 +46,13 @@ const DynamicGreeting = () => {
 
     const hour = new Date().getHours();
     if (hour < 12) {
-      setGreeting("Good Morning");
+      setGreeting("greeting.goodMorning");
       setIcon("🌅");
     } else if (hour < 17) {
-      setGreeting("Good Afternoon");
+      setGreeting("greeting.goodAfternoon");
       setIcon("☀️");
     } else {
-      setGreeting("Good Evening");
+      setGreeting("greeting.goodEvening");
       setIcon("🌙");
     }
 
@@ -46,7 +63,15 @@ const DynamicGreeting = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const userName = user?.displayName || user?.email?.split("@")[0] || "Guest";
+  const userName = dbName || user?.displayName || user?.email?.split("@")[0] || t("greeting.guest", "Guest");
+
+  // Get the default text for the greeting fallback
+  const getGreetingDefaultText = () => {
+    if (greeting === "greeting.goodMorning") return "Good Morning";
+    if (greeting === "greeting.goodAfternoon") return "Good Afternoon";
+    if (greeting === "greeting.goodEvening") return "Good Evening";
+    return "";
+  };
 
   return (
     <Modal 
@@ -82,19 +107,21 @@ const DynamicGreeting = () => {
                 </motion.div>
                 
                 <h3 className="greeting-text-modal fw-bolder text-dark mb-2">
-                  {greeting}, <br/>
+                  {greeting ? t(greeting, getGreetingDefaultText()) : ""}, <br/>
                   <span className="greeting-name-modal">{userName}</span>!
                 </h3>
                 
                 <p className="greeting-subtext-modal text-muted mt-3 mb-4">
-                  {user ? "Welcome back! Ready to explore new deals?" : "Log in to see personalized offers."}
+                  {user 
+                    ? t("greeting.welcomeBack", "Welcome back! Ready to explore new deals?") 
+                    : t("greeting.logInText", "Log in to see personalized offers.")}
                 </p>
                 
                 <button 
                   className="btn btn-primary rounded-pill px-5 fw-bold" 
                   onClick={() => setShow(false)}
                 >
-                  Let's Go!
+                  {t("greeting.letsGo", "Let's Go!")}
                 </button>
               </div>
             </Modal.Body>
@@ -106,3 +133,4 @@ const DynamicGreeting = () => {
 };
 
 export default DynamicGreeting;
+

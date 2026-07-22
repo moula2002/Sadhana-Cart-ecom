@@ -48,23 +48,9 @@
 *::after {
   box-sizing: border-box;
 }
-
-body {
-  font-family: 'Inter', 'Segoe UI', sans-serif;
-  background: var(--bg-main);
-  color: var(--text-primary);
-  margin: 0;
-  padding: 0;
-  background-image: none !important;
-  transition: background 0.25s ease, color 0.25s ease;
-}
-
-.dark-theme {
-  background-color: var(--bg-main) !important;
-}
-
 .homepage-content {
-  background: var(--bg-main);
+  background: var(--bg-gradient) !important;
+  background-attachment: fixed !important;
   min-height: 100vh;
   overflow-x: hidden;
 }

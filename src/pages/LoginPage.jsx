@@ -24,7 +24,8 @@ import {
   signInWithPopup,
   signInWithPhoneNumber,
   signInWithCustomToken,
-  onAuthStateChanged
+  onAuthStateChanged,
+  sendPasswordResetEmail
 } from "firebase/auth";
 
 import {
@@ -59,10 +60,34 @@ export default function LoginPage({ onClose, initialMode = "login" }) {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [timer, setTimer] = useState(0);
   const [canResend, setCanResend] = useState(false);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
 
   const showToast = (msg) => {
     setToast(msg);
     setTimeout(() => setToast(""), 2000);
+  };
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
+
+    if (!email) {
+      setError(t("auth.invalidEmail", "Please enter your email address first."));
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      await sendPasswordResetEmail(auth, email);
+      showToast(t("auth.resetEmailSent", "Password reset link sent to your email! Check your inbox. 📧"));
+      setIsForgotPassword(false);
+    } catch (err) {
+      console.error("Forgot Password Error:", err);
+      setError(err.message || getFirebaseErrorMessage(err.code));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   /* Generate unique referral code */
@@ -265,10 +290,11 @@ export default function LoginPage({ onClose, initialMode = "login" }) {
     }
   };
 
-  /* ================= GOOGLE LOGIN ================= */
   const handleGoogleLogin = async () => {
     setError("");
     setGoogleLoading(true);
+    console.log("auth instance:", auth);
+    console.log("googleProvider instance:", googleProvider);
 
     try {
       const res = await signInWithPopup(auth, googleProvider);
@@ -319,7 +345,8 @@ export default function LoginPage({ onClose, initialMode = "login" }) {
       navigate("/", { replace: true });
 
     } catch (err) {
-      setError(getFirebaseErrorMessage(err.code));
+      console.error("Google Login Error:", err);
+      setError(err.message || getFirebaseErrorMessage(err.code));
     } finally {
       setGoogleLoading(false);
       setReferralCode(""); // Clear referral code after use
@@ -465,6 +492,7 @@ export default function LoginPage({ onClose, initialMode = "login" }) {
   /* Reset form when switching between login/signup */
   const toggleLoginMode = () => {
     setIsLogin(!isLogin);
+    setIsForgotPassword(false);
     setError("");
     setName("");
     setEmail("");
@@ -487,15 +515,15 @@ export default function LoginPage({ onClose, initialMode = "login" }) {
           {/* LEFT PANEL */}
           <div className="auth-left">
             <div>
-              <h2>{isLogin ? t("auth.login") : t("auth.joinUs")}</h2>
+              <h2>{isForgotPassword ? t("auth.resetPassword", "Reset Password") : (isLogin ? t("auth.login") : t("auth.joinUs"))}</h2>
               <p>
-                {isLogin
-                  ? t("auth.accessText")
-                  : t("auth.signupText")
+                {isForgotPassword
+                  ? t("auth.resetText", "Reset your password to regain access to your account")
+                  : (isLogin ? t("auth.accessText") : t("auth.signupText"))
                 }
               </p>
               {!isLogin && (
-                <motion.div 
+                <motion.div
                   className="referral-benefit"
                   initial={{ opacity: 0, y: 15, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -538,184 +566,240 @@ export default function LoginPage({ onClose, initialMode = "login" }) {
               </Alert>
             )}
 
-            <Form onSubmit={handleSubmit}>
-              {!isLogin && (
-                <>
+            {isForgotPassword ? (
+              <Form onSubmit={handleForgotPassword}>
+                <p className="mb-3 text-muted small" style={{ fontSize: "13px" }}>
+                  {t("auth.forgotPasswordInstructions", "Enter your registered email below and we'll send you a link to reset your password.")}
+                </p>
+                <Form.Group className="mb-3">
+                  <Form.Control
+                    type="email"
+                    placeholder={t("auth.email")}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="custom-input"
+                  />
+                </Form.Group>
+
+                <Button
+                  type="submit"
+                  className="w-100 mb-3 auth-btn"
+                  disabled={isLoading}
+                >
+                  {isLoading ? t("auth.processing") : t("auth.sendResetLink", "Send Reset Link")}
+                </Button>
+
+                <div className="text-center">
+                  <Button
+                    variant="link"
+                    className="toggle-mode-btn"
+                    onClick={() => {
+                      setIsForgotPassword(false);
+                      setError("");
+                    }}
+                  >
+                    {t("auth.backToLogin", "Back to Login")}
+                  </Button>
+                </div>
+              </Form>
+            ) : (
+              <>
+                <Form onSubmit={handleSubmit}>
+                  {!isLogin && (
+                    <>
+                      <Form.Group className="mb-3">
+                        <Form.Control
+                          placeholder={t("auth.fullName")}
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          required
+                          className="custom-input"
+                        />
+                      </Form.Group>
+
+                      <Form.Group className="mb-3">
+                        <Form.Control
+                          placeholder={t("auth.referralCode")}
+                          value={referralCode}
+                          onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                          className="custom-input"
+                        />
+                        {referralCode && (
+                          <small className="referral-success">
+                            🎉 You'll get ₹50 bonus after signup!
+                          </small>
+                        )}
+                      </Form.Group>
+                    </>
+                  )}
+
                   <Form.Group className="mb-3">
                     <Form.Control
-                      placeholder={t("auth.fullName")}
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
+                      type="email"
+                      placeholder={t("auth.email")}
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                       required
                       className="custom-input"
                     />
                   </Form.Group>
 
-                  <Form.Group className="mb-3">
+                  <Form.Group className="mb-3 position-relative">
                     <Form.Control
-                      placeholder={t("auth.referralCode")}
-                      value={referralCode}
-                      onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                      type={showPassword ? "text" : "password"}
+                      placeholder={t("auth.password")}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      minLength={6}
                       className="custom-input"
                     />
-                    {referralCode && (
-                      <small className="referral-success">
-                        🎉 You'll get ₹50 bonus after signup!
-                      </small>
-                    )}
-                  </Form.Group>
-                </>
-              )}
-
-              <Form.Group className="mb-3">
-                <Form.Control
-                  type="email"
-                  placeholder={t("auth.email")}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="custom-input"
-                />
-              </Form.Group>
-
-              <Form.Group className="mb-3 position-relative">
-                <Form.Control
-                  type={showPassword ? "text" : "password"}
-                  placeholder={t("auth.password")}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={6}
-                  className="custom-input"
-                />
-                <span
-                  className="pass-toggle cursor-pointer"
-                  onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? <BsEyeSlash /> : <BsEye />}
-                </span>
-              </Form.Group>
-
-              <Button
-                type="submit"
-                className="w-100 mb-3 auth-btn"
-                disabled={isLoading}
-              >
-                {isLoading
-                  ? t("auth.processing")
-                  : (isLogin ? t("auth.login") : t("auth.signup"))}
-
-              </Button>
-            </Form>
-
-            <div className="text-center separator-or">{t("auth.or")}</div>
-
-            {/* PHONE OTP */}
-            <div className="mb-3">
-              <Form.Control
-                placeholder="Mobile Number"
-                className="custom-input mb-2"
-                value={phone}
-                maxLength={10}
-                onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
-              />
-
-              {!isLogin && (
-                <Form.Control
-                  placeholder="Referral Code (Optional)"
-                  className="custom-input mb-2"
-                  value={referralCode}
-                  onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
-                />
-              )}
-
-              {!confirmation ? (
-                <Button
-                  className="w-100 otp-btn"
-                  onClick={sendOtp}
-                  disabled={!phone || phone.length !== 10}
-                >
-                  Request OTP
-                </Button>
-              ) : (
-                <>
-                  <Form.Control
-                    placeholder="Enter 6-digit OTP"
-                    className="custom-input mb-2"
-                    value={otp}
-                    maxLength={6}
-                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                  />
-
-                  {/* 🔥 TIMER */}
-                  {!canResend ? (
-                    <div className="text-center mb-2">
-                      ⏳ Resend OTP in {timer}s
-                    </div>
-                  ) : (
-                    <Button
-                      variant="link"
-                      className="w-100 text-primary"
-                      onClick={sendOtp}
+                    <span
+                      className="pass-toggle cursor-pointer"
+                      onClick={() => setShowPassword(!showPassword)}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
                     >
-                      🔁 Resend OTP
-                    </Button>
+                      {showPassword ? <BsEyeSlash /> : <BsEye />}
+                    </span>
+                  </Form.Group>
+
+                  {isLogin && (
+                    <div className="text-end mb-3">
+                      <Button
+                        variant="link"
+                        className="p-0 text-decoration-none small forgot-password-link"
+                        style={{ fontSize: "12.5px", color: "#0a45bd", fontWeight: "600" }}
+                        onClick={() => {
+                          setIsForgotPassword(true);
+                          setError("");
+                        }}
+                      >
+                        {t("auth.forgotPassword", "Forgot Password?")}
+                      </Button>
+                    </div>
                   )}
 
-                  <div className="d-flex gap-2">
+                  <Button
+                    type="submit"
+                    className="w-100 mb-3 auth-btn"
+                    disabled={isLoading}
+                  >
+                    {isLoading
+                      ? t("auth.processing")
+                      : (isLogin ? t("auth.login") : t("auth.signup"))}
+                  </Button>
+                </Form>
+
+                <div className="text-center separator-or">{t("auth.or")}</div>
+
+                {/* PHONE OTP */}
+                <div className="mb-3">
+                  <Form.Control
+                    placeholder="Mobile Number"
+                    className="custom-input mb-2"
+                    value={phone}
+                    maxLength={10}
+                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
+                  />
+
+                  {!isLogin && (
+                    <Form.Control
+                      placeholder="Referral Code (Optional)"
+                      className="custom-input mb-2"
+                      value={referralCode}
+                      onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                    />
+                  )}
+
+                  {!confirmation ? (
                     <Button
-                      variant="outline-secondary"
-                      onClick={() => {
-                        setConfirmation(null);
-                        setOtp("");
-                        setTimer(0);
-                      }}
+                      className="w-100 otp-btn"
+                      onClick={sendOtp}
+                      disabled={!phone || phone.length !== 10}
                     >
-                      Change Number
+                      Request OTP
                     </Button>
+                  ) : (
+                    <>
+                      <Form.Control
+                        placeholder="Enter 6-digit OTP"
+                        className="custom-input mb-2"
+                        value={otp}
+                        maxLength={6}
+                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                      />
 
-                    <Button
-                      className="auth-btn"
-                      onClick={verifyOtp}
-                      disabled={!otp || otp.length !== 6}
-                    >
-                      Verify OTP
-                    </Button>
-                  </div>
-                </>
-              )}
-            </div>
+                      {/* 🔥 TIMER */}
+                      {!canResend ? (
+                        <div className="text-center mb-2">
+                          ⏳ Resend OTP in {timer}s
+                        </div>
+                      ) : (
+                        <Button
+                          variant="link"
+                          className="w-100 text-primary"
+                          onClick={sendOtp}
+                        >
+                          🔁 Resend OTP
+                        </Button>
+                      )}
 
-            {/* GOOGLE BUTTON */}
-            <Button
-              variant="outline-secondary"
-              className="w-100 mb-3 d-flex align-items-center justify-content-center gap-2 google-btn"
-              onClick={handleGoogleLogin}
-              disabled={googleLoading}
-            >
-              <FcGoogle size={20} />
-              {googleLoading ? "Signing in..." : t("auth.continueGoogle")}
-            </Button>
+                      <div className="d-flex gap-2">
+                        <Button
+                          variant="outline-secondary"
+                          onClick={() => {
+                            setConfirmation(null);
+                            setOtp("");
+                            setTimer(0);
+                          }}
+                        >
+                          Change Number
+                        </Button>
 
-            <div className="text-center">
-              <Button
-                variant="link"
-                className="toggle-mode-btn"
-                onClick={toggleLoginMode}
-              >
-                {isLogin
-                  ? t("auth.newUser")
-                  : t("auth.alreadyUser")
-                }
-              </Button>
-            </div>
+                        <Button
+                          className="auth-btn"
+                          onClick={verifyOtp}
+                          disabled={!otp || otp.length !== 6}
+                        >
+                          Verify OTP
+                        </Button>
+                      </div>
+                    </>
+                  )}
+                </div>
 
-            <div className="mt-3 text-center">
-              <small className="terms-text">
-                {t("auth.termsText")}
-              </small>
-            </div>
+                {/* GOOGLE BUTTON */}
+                <Button
+                  variant="outline-secondary"
+                  className="w-100 mb-3 d-flex align-items-center justify-content-center gap-2 google-btn"
+                  onClick={handleGoogleLogin}
+                  disabled={googleLoading}
+                >
+                  <FcGoogle size={20} />
+                  {googleLoading ? "Signing in..." : t("auth.continueGoogle")}
+                </Button>
+
+                <div className="text-center">
+                  <Button
+                    variant="link"
+                    className="toggle-mode-btn"
+                    onClick={toggleLoginMode}
+                  >
+                    {isLogin
+                      ? t("auth.newUser")
+                      : t("auth.alreadyUser")
+                    }
+                  </Button>
+                </div>
+
+                <div className="mt-3 text-center">
+                  <small className="terms-text">
+                    {t("auth.termsText")}
+                  </small>
+                </div>
+              </>
+            )}
           </div>
         </motion.div>
       </AnimatePresence>

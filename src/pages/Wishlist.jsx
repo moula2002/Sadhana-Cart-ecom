@@ -20,9 +20,11 @@ import {
     FaChevronRight
 } from 'react-icons/fa';
 import { db } from "../firebase";
-import { collection, getDocs, deleteDoc, doc, setDoc } from "firebase/firestore";
+import { collection, getDocs, deleteDoc, doc, setDoc, query, limit } from "firebase/firestore";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import { useTranslation } from "react-i18next";
+
+import Loading from "./Loading";
 
 const auth = getAuth();
 
@@ -52,6 +54,7 @@ function Wishlist() {
         if (!currentUser) return;
 
         const fetchData = async () => {
+            let favData = [];
             try {
                 setLoading(true);
 
@@ -59,15 +62,23 @@ function Wishlist() {
                 const snapshot = await getDocs(
                     collection(db, "users", currentUser.uid, "favorites")
                 );
-                const favData = snapshot.docs.map((doc) => ({
+                favData = snapshot.docs.map((doc) => ({
                     id: doc.id,
                     ...doc.data(),
                 }));
                 setFavorites(favData);
+            } catch (error) {
+                console.error("Error fetching wishlist data:", error);
+                toast.error(t("failedToLoadWishlistItems", "Failed to load wishlist items"));
+            } finally {
+                setLoading(false);
+            }
 
-                // Fetch Suggestions (popular products from database)
+            // Fetch Suggestions (popular products from database) asynchronously and quickly
+            try {
                 const prodRef = collection(db, "products");
-                const prodSnap = await getDocs(prodRef);
+                const q = query(prodRef, limit(15));
+                const prodSnap = await getDocs(q);
                 const prodList = prodSnap.docs.map(doc => ({
                     id: doc.id,
                     ...doc.data()
@@ -83,12 +94,9 @@ function Wishlist() {
                 } else {
                     setSuggestions(filteredSuggestions.slice(0, 10));
                 }
-
             } catch (error) {
-                console.error("Error fetching wishlist data:", error);
-                toast.error(t("failedToLoadWishlistItems", "Failed to load wishlist items"));
-            } finally {
-                setLoading(false);
+                console.error("Error fetching suggestions:", error);
+                setSuggestions(getDummySuggestions());
             }
         };
 
@@ -205,12 +213,7 @@ function Wishlist() {
     };
 
     if (loading) {
-        return (
-            <Container className="py-5 text-center">
-                <Spinner animation="border" variant="primary" />
-                <p className="mt-3 text-muted">{t("loadingWishlist", "Loading your wishlist...")}</p>
-            </Container>
-        );
+        return <Loading message={t("loadingWishlist", "Loading your wishlist...")} minHeight="400px" />;
     }
 
     return (
@@ -618,6 +621,44 @@ function Wishlist() {
                 [data-theme="dark"] .text-dark,
                 .dark-theme .text-dark {
                     color: #f8fafc !important;
+                }
+
+                @media (max-width: 991px) {
+                    .wishlist-sidebar {
+                        padding: 12px 16px !important;
+                    }
+                    .wishlist-sidebar-title {
+                        display: none !important;
+                    }
+                    .wishlist-sidebar .d-flex.flex-column {
+                        flex-direction: row !important;
+                        overflow-x: auto;
+                        overflow-y: hidden;
+                        white-space: nowrap;
+                        gap: 8px;
+                        padding-bottom: 4px;
+                        -webkit-overflow-scrolling: touch;
+                        scrollbar-width: none;
+                    }
+                    .wishlist-sidebar .d-flex.flex-column::-webkit-scrollbar {
+                        display: none;
+                    }
+                    .wishlist-sidebar .sidebar-link,
+                    .wishlist-sidebar .active-sidebar-link {
+                        display: inline-flex !important;
+                        padding: 8px 16px !important;
+                        border-radius: 20px !important;
+                        font-size: 13px !important;
+                        gap: 6px !important;
+                        white-space: nowrap;
+                    }
+                    .wishlist-sidebar .active-sidebar-link {
+                        background-color: #eff4ff !important;
+                        color: #2b6cb0 !important;
+                    }
+                    .wishlist-sidebar .logout-link {
+                        margin-top: 0 !important;
+                    }
                 }
             `}</style>
         </Container>

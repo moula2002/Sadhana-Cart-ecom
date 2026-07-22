@@ -4,6 +4,7 @@ import { collection, getDocs } from "firebase/firestore";
 import { Card, Badge, Spinner, Row, Col, Alert, Button } from "react-bootstrap";
 import { FaTag, FaUniversity, FaInfoCircle, FaGift, FaCopy } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
+import Loading from "./Loading";
 
 function RazorpayOffers({ hideApplyButton = false }) {
   const { t } = useTranslation();
@@ -56,14 +57,7 @@ function RazorpayOffers({ hideApplyButton = false }) {
   }, []);
 
   if (loading) {
-    return (
-      <div className="d-flex justify-content-center align-items-center py-5">
-        <Spinner animation="border" variant="primary" />
-        <span className="ms-3 fw-semibold fs-5 text-primary">
-          {t("loadingSpecialOffers", "Loading special offers...")}
-        </span>
-      </div>
-    );
+    return <Loading message={t("loadingSpecialOffers", "Loading special offers...")} minHeight="200px" />;
   }
 
   return (

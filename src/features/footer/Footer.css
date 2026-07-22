@@ -252,7 +252,7 @@
 .sc-badge-svg,
 .sc-badge-img {
   display: block;
-  height: 48px;
+  height: 38px;
   width: auto;
   object-fit: contain;
 }

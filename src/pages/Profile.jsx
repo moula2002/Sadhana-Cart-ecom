@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { auth, storage, db } from "../firebase";
-import { updateProfile, onAuthStateChanged, signOut, deleteUser } from "firebase/auth";
+import { updateProfile, onAuthStateChanged, signOut, deleteUser, updatePassword } from "firebase/auth";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import {
   doc,
@@ -76,10 +76,19 @@ function Profile() {
 
   const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [previewPhoto, setPreviewPhoto] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [focusedField, setFocusedField] = useState(null);
   const [docId, setDocId] = useState("");
+
+  useEffect(() => {
+    if (!isEditing) {
+      setNewPassword("");
+      setConfirmPassword("");
+    }
+  }, [isEditing]);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
   const [showLogoutConfirmModal, setShowLogoutConfirmModal] = useState(false);
@@ -146,9 +155,7 @@ function Profile() {
             setJoinedOn("Joined recently");
           }
 
-          if (data.rewardsPoints !== undefined) {
-            setRewardsPoints(data.rewardsPoints);
-          }
+          setRewardsPoints(data.walletCoins !== undefined ? data.walletCoins : (data.rewardsPoints || 0));
 
           setPhoto(data.profileImage || user.photoURL || "");
           setPreviewPhoto(data.profileImage || user.photoURL || "");
@@ -193,7 +200,18 @@ function Profile() {
         
         const products = orderData.products || [];
         const firstProduct = products[0] || {};
-        const image = firstProduct.image || firstProduct.productImage || "https://via.placeholder.com/60?text=Product";
+        let image = "";
+        if (firstProduct.images && Array.isArray(firstProduct.images) && firstProduct.images.length > 0) {
+          image = firstProduct.images[0];
+        } else if (firstProduct.image) {
+          image = firstProduct.image;
+        } else if (firstProduct.productImage) {
+          image = firstProduct.productImage;
+        } else if (firstProduct.thumbnail) {
+          image = firstProduct.thumbnail;
+        } else {
+          image = "https://via.placeholder.com/60?text=Product";
+        }
         
         return {
           id: doc.id,
@@ -404,6 +422,36 @@ function Profile() {
 
     try {
       setLoading(true);
+
+      // Handle password update if provided
+      if (newPassword) {
+        if (newPassword.length < 6) {
+          toast.error("Password must be at least 6 characters long");
+          setLoading(false);
+          return;
+        }
+        if (newPassword !== confirmPassword) {
+          toast.error("Passwords do not match");
+          setLoading(false);
+          return;
+        }
+        try {
+          await updatePassword(currentUser, newPassword);
+          toast.success("Password updated successfully!");
+        } catch (pwError) {
+          console.error("Password update error:", pwError);
+          if (pwError.code === "auth/requires-recent-login") {
+            toast.error("For security, changing password requires a recent login. Please log out and log back in, then try again.");
+            setLoading(false);
+            return;
+          } else {
+            toast.error(pwError.message || "Failed to update password.");
+            setLoading(false);
+            return;
+          }
+        }
+      }
+
       let finalPhotoURL = photo;
 
       if (selectedFile) {
@@ -502,7 +550,6 @@ function Profile() {
       setLoading(false);
     }
   };
-
   const formatCurrency = (val) =>
     new Intl.NumberFormat("en-IN", {
       style: "currency",
@@ -510,6 +557,38 @@ function Profile() {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(Number(val || 0));
+
+  const getOrderStatusDisplay = (status) => {
+    const statusLower = status?.toLowerCase() || "";
+    if (statusLower === "pending" || statusLower === "order placed") {
+      return t("orderStatus.placed", "Order Placed");
+    }
+    if (statusLower === "placed") {
+      return t("orderStatus.placed", "Order Placed");
+    }
+    if (statusLower === "return_requested" || statusLower === "returnrequested") {
+      return t("orderStatus.returnRequested", "Return Requested");
+    }
+    if (statusLower === "return_approved" || statusLower === "returnapproved") {
+      return t("orderStatus.returnApproved", "Return Approved");
+    }
+    if (statusLower === "refund_completed" || statusLower === "refundcompleted" || statusLower === "refunded") {
+      return t("orderStatus.refundCompleted", "Refund Completed");
+    }
+    if (statusLower === "cancelled") {
+      return t("orderStatus.cancelled", "Order Cancelled");
+    }
+    if (statusLower === "delivered") {
+      return t("orderStatus.delivered", "Order Delivered");
+    }
+    if (statusLower === "shipped") {
+      return t("orderStatus.shipped", "Shipped");
+    }
+    if (statusLower === "processing") {
+      return t("orderStatus.processing", "Processing");
+    }
+    return t(`orderStatus.${statusLower}`, status);
+  };
 
   if (authLoading) {
     return <Loading />;
@@ -858,7 +937,7 @@ function Profile() {
                         </div>
                         <div className="order-item-right">
                           <span className={`status-pill ${order.status.toLowerCase()}`}>
-                            {t(`orderStatus.${order.status.toLowerCase()}`, order.status)}
+                            {getOrderStatusDisplay(order.status)}
                           </span>
                           <span className="order-item-date">{order.date}</span>
                         </div>
@@ -958,6 +1037,29 @@ function Profile() {
                       onChange={(e) => setDob(e.target.value)} 
                     />
                   </div>
+
+                  {currentUser?.providerData?.some(p => p.providerId === 'password') && (
+                    <>
+                      <div className="form-group">
+                        <label>{t("newPassword", "New Password (Optional)")}</label>
+                        <input 
+                          type="password" 
+                          value={newPassword} 
+                          onChange={(e) => setNewPassword(e.target.value)} 
+                          placeholder="Min 6 characters"
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label>{t("confirmPassword", "Confirm New Password")}</label>
+                        <input 
+                          type="password" 
+                          value={confirmPassword} 
+                          onChange={(e) => setConfirmPassword(e.target.value)} 
+                          placeholder="Confirm password"
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 <div className="form-action-buttons">

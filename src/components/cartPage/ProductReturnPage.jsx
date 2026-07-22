@@ -15,6 +15,7 @@ import {
 import { doc, collection, setDoc, updateDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import { db, auth } from "../../firebase";
 import { useLocation, useNavigate } from "react-router-dom";
+import Loading from "../../pages/Loading";
 
 const ProductReturnPage = () => {
   const location = useLocation();
@@ -72,11 +73,7 @@ const ProductReturnPage = () => {
   }
 
   if (loading) {
-    return (
-      <div className="text-center py-5">
-        <Spinner animation="border" variant="primary" />
-      </div>
-    );
+    return <Loading minHeight="300px" />;
   }
 
   // Safe ID extraction with fallbacks

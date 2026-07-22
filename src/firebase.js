@@ -22,8 +22,7 @@ import {
 import { getStorage } from "firebase/storage";
 
 import {
-  initializeAuth,
-  browserLocalPersistence,
+  getAuth,
   GoogleAuthProvider,
   RecaptchaVerifier,
 } from "firebase/auth";
@@ -45,9 +44,7 @@ const app = initializeApp(firebaseConfig);
 /* ================= SERVICES ================= */
 const db = getFirestore(app);
 const storage = getStorage(app);
-const auth = initializeAuth(app, {
-  persistence: browserLocalPersistence
-});
+const auth = getAuth(app);
 
 
 

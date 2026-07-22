@@ -7,25 +7,25 @@
   --auth-text-secondary: #878787;
   --auth-text-muted: #666666;
   --auth-border: #e0e0e0;
-  --auth-primary: #2874f0;
-  --auth-accent: #fb641b;
-  --auth-accent-hover: #f4511e;
+  --auth-primary: #0b1c7c; /* Deep navy blue from Cart logo */
+  --auth-accent: linear-gradient(180deg, #ffe325 0%, #faba13 50%, #e87c00 100%); /* Glossy 'S' icon yellow-to-orange gradient */
+  --auth-accent-hover: linear-gradient(180deg, #ffd200 0%, #e09f0c 50%, #cc6a00 100%);
   --auth-success: #28a745;
   --auth-danger: #dc3545;
   --auth-input-bg: #ffffff;
   --auth-input-text: #000000;
   --auth-input-placeholder: #878787;
   --auth-shadow: rgba(0, 0, 0, 0.1);
-  --auth-left-panel-bg: #2874f0;
+  --auth-left-panel-bg: #0b1c7c; /* Deep navy blue */
   --auth-left-panel-text: #ffffff;
   --auth-otp-btn-bg: #ffffff;
-  --auth-otp-btn-text: #2874f0;
+  --auth-otp-btn-text: #0b1c7c;
   --auth-otp-btn-border: #e0e0e0;
   --auth-google-btn-bg: #ffffff;
   --auth-google-btn-text: #000000;
   --auth-google-btn-border: #e0e0e0;
   --auth-google-btn-hover-bg: #f8f8f8;
-  --auth-referral-bg: linear-gradient(45deg, #28a745, #20c997);
+  --auth-referral-bg: linear-gradient(45deg, #ca8a04, #a16207);
   --auth-referral-text: #ffffff;
   --auth-alert-bg: #dc3545;
   --auth-alert-text: #ffffff;
@@ -39,25 +39,25 @@
   --auth-text-secondary: #b0b0b0;
   --auth-text-muted: #888888;
   --auth-border: #333333;
-  --auth-primary: #4a90e2;
-  --auth-accent: #ff7b42;
-  --auth-accent-hover: #ff6b2e;
+  --auth-primary: #3b82f6; /* Brighter royal blue */
+  --auth-accent: #fbbf24; /* Brighter gold */
+  --auth-accent-hover: #d97706;
   --auth-success: #4caf50;
   --auth-danger: #f44336;
   --auth-input-bg: #2d2d2d;
   --auth-input-text: #ffffff;
   --auth-input-placeholder: #999999;
   --auth-shadow: rgba(0, 0, 0, 0.3);
-  --auth-left-panel-bg: #1a56db;
+  --auth-left-panel-bg: #1e3a8a; /* Darker royal blue */
   --auth-left-panel-text: #ffffff;
   --auth-otp-btn-bg: #2d2d2d;
-  --auth-otp-btn-text: #4a90e2;
+  --auth-otp-btn-text: #3b82f6;
   --auth-otp-btn-border: #333333;
   --auth-google-btn-bg: #2d2d2d;
   --auth-google-btn-text: #ffffff;
   --auth-google-btn-border: #333333;
   --auth-google-btn-hover-bg: #363636;
-  --auth-referral-bg: linear-gradient(45deg, #2e7d32, #1b5e20);
+  --auth-referral-bg: linear-gradient(45deg, #fbbf24, #d97706);
   --auth-referral-text: #ffffff;
   --auth-alert-bg: #f44336;
   --auth-alert-text: #ffffff;
@@ -184,25 +184,27 @@
 
 /* Buttons */
 .auth-btn {
-  background-color: var(--auth-accent) !important;
+  background: var(--auth-accent) !important;
   border: none !important;
   border-radius: 8px !important;
   padding: 10px !important;
   font-weight: bold !important;
   font-size: 14px !important;
-  color: white !important;
+  color: #0b1c7c !important; /* Deep navy blue for high contrast and to match 'Cart' in logo */
   box-shadow: 0 1px 2px 0 var(--auth-shadow);
   transition: all 0.3s ease;
 }
 
 .auth-btn:hover {
-  background-color: var(--auth-accent-hover) !important;
+  background: var(--auth-accent-hover) !important;
+  color: #0b1c7c !important;
   transform: translateY(-1px);
   box-shadow: 0 2px 4px 0 var(--auth-shadow);
 }
 
 .auth-btn:disabled {
-  background-color: #ff9f6d !important;
+  background: #ffe39a !important;
+  color: #9ea4ca !important;
   cursor: not-allowed;
   transform: none;
 }

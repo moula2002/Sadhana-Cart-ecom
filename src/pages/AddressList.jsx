@@ -11,6 +11,7 @@ import {
 import { db } from "../firebase";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import Loading from "./Loading";
 import { 
   FaUser, 
   FaShoppingBag, 
@@ -103,15 +104,11 @@ function AddressList() {
   };
 
   if (loading) {
-    return (
-      <div className="d-flex justify-content-center align-items-center vh-100">
-        <Spinner animation="border" variant="primary" />
-      </div>
-    );
+    return <Loading message={t("loadingAddresses", "Loading addresses...")} minHeight="100vh" />;
   }
 
   return (
-    <div className="profile-dashboard-wrapper" style={{ padding: "20px" }}>
+    <div className="profile-dashboard-wrapper">
       <div className="profile-dashboard-container address-container" style={{ maxWidth: "1200px", margin: "0 auto", borderRadius: "10px", overflow: "hidden" }}>
         
         {/* Title */}
@@ -165,7 +162,7 @@ function AddressList() {
           {/* Main Dashboard Section */}
           <div className="dashboard-main-content" style={{ padding: "32px", width: "100%", display: "block" }}>
             
-            <div className="d-flex justify-content-between align-items-center mb-4">
+            <div className="d-flex justify-content-between align-items-center mb-4 add-address-btn-row">
               <h4 className="fw-bold m-0" style={{ fontSize: "18px", color: '#111827' }}>{t("myAddresses", "My Addresses")}</h4>
               <Button 
                 variant="outline-primary"
@@ -176,7 +173,7 @@ function AddressList() {
               </Button>
             </div>
 
-            <div className="d-flex flex-wrap gap-4">
+            <div className="d-flex flex-wrap gap-3">
               {addresses.length === 0 ? (
                  <div className="text-center w-100 py-5 empty-address-view" style={{ borderRadius: '8px' }}>
                    {t("noAddressesFound", "No addresses found. Click \"Add New Address\" to add one!")}

@@ -188,3 +188,70 @@
   color: #aaa;
   font-size: 1.1rem;
 }
+
+/* Dark Theme Overrides */
+.dark-theme .mobile-search-container,
+.dark-theme .search-page-container {
+  background-color: #0f172a !important;
+  color: #cbd5e1;
+}
+
+.dark-theme .mobile-search-header {
+  background-color: #1e3a8a !important;
+}
+
+.dark-theme .search-input-wrapper {
+  background-color: #0f172a !important;
+  border: 1px solid #334155;
+}
+
+.dark-theme .mobile-search-input {
+  color: #f8fafc !important;
+}
+
+.dark-theme .mobile-search-body {
+  background-color: #0f172a !important;
+}
+
+.dark-theme .trending-title {
+  color: #f8fafc !important;
+}
+
+.dark-theme .trending-pill {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #60a5fa !important;
+}
+
+.dark-theme .trending-pill:hover {
+  background-color: #334155 !important;
+}
+
+.dark-theme .suggestion-row {
+  border-bottom-color: #334155 !important;
+  color: #cbd5e1 !important;
+}
+
+.dark-theme .suggestion-row:active {
+  background-color: #1e293b !important;
+}
+
+.dark-theme .suggestion-thumb-wrapper {
+  background-color: #ffffff !important;
+}
+
+.dark-theme .suggestion-title {
+  color: #f8fafc !important;
+}
+
+.dark-theme .suggestion-category {
+  color: #94a3b8 !important;
+}
+
+.dark-theme .suggestion-price {
+  color: #60a5fa !important;
+}
+
+.dark-theme .suggestion-arrow {
+  color: #64748b !important;
+}

@@ -35,6 +35,7 @@ import { getFunctions, httpsCallable } from "firebase/functions";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useTheme } from "../../context/ThemeContext";
+import { useTranslation } from "react-i18next";
 
 const formatCurrency = (val) =>
   new Intl.NumberFormat("en-IN", {
@@ -43,6 +44,7 @@ const formatCurrency = (val) =>
   }).format(Number(val || 0));
 
 function CancelOrderPage() {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const { order, product } = location.state || {};
@@ -73,13 +75,13 @@ function CancelOrderPage() {
   const shipmentId = order.shipmentId;
 
   const cancelReasons = [
-    "Ordered by mistake",
-    "Found cheaper elsewhere",
-    "Delivery taking too long",
-    "Need to change address/phone",
-    "Change of mind",
-    "Ordered wrong product",
-    "Other"
+    { key: "cancelOrder.reasons.mistake", value: "Ordered by mistake" },
+    { key: "cancelOrder.reasons.cheaper", value: "Found cheaper elsewhere" },
+    { key: "cancelOrder.reasons.tooLong", value: "Delivery taking too long" },
+    { key: "cancelOrder.reasons.changeAddress", value: "Need to change address/phone" },
+    { key: "cancelOrder.reasons.changeOfMind", value: "Change of mind" },
+    { key: "cancelOrder.reasons.wrongProduct", value: "Ordered wrong product" },
+    { key: "cancelOrder.reasons.other", value: "Other" }
   ];
 
   const isCancelled =
@@ -304,7 +306,7 @@ function CancelOrderPage() {
           onClick={() => navigate("/orders")}
           style={{ cursor: "pointer" }}
         />
-        <h5 style={{ margin: 0 }}>Cancel Order</h5>
+        <h5 style={{ margin: 0 }}>{t("cancelOrder.title", "Cancel Order")}</h5>
       </div>
 
       <Container className="py-4" style={{ maxWidth: "600px" }}>
@@ -328,7 +330,7 @@ function CancelOrderPage() {
             <h6>{product?.name}</h6>
 
             <div className="d-flex justify-content-between mt-3">
-              <span>Subtotal</span>
+              <span>{t("cancelOrder.subtotal", "Subtotal")}</span>
               <strong>
                 {formatCurrency(order.payableAmount || order.total || order.amount)}
               </strong>
@@ -349,16 +351,16 @@ function CancelOrderPage() {
           <Card>
             <Card.Body>
               <Form.Group>
-                <Form.Label>Select Reason</Form.Label>
+                <Form.Label>{t("cancelOrder.selectReasonLabel", "Select Reason")}</Form.Label>
                 <Form.Select
                   value={selectedReason}
                   onChange={(e) =>
                     setSelectedReason(e.target.value)
                   }
                 >
-                  <option value="">Select reason</option>
+                  <option value="">{t("cancelOrder.selectReasonPlaceholder", "Select reason")}</option>
                   {cancelReasons.map((r) => (
-                    <option key={r}>{r}</option>
+                    <option key={r.value} value={r.value}>{t(r.key, r.value)}</option>
                   ))}
                 </Form.Select>
               </Form.Group>
@@ -381,7 +383,7 @@ function CancelOrderPage() {
                   disabled={!selectedReason || loading}
                   onClick={() => setShowConfirm(true)}
                 >
-                  Cancel Order
+                  {t("cancelOrder.title", "Cancel Order")}
                 </Button>
               </div>
             </Card.Body>
@@ -391,17 +393,17 @@ function CancelOrderPage() {
 
       <Modal show={showConfirm} onHide={() => setShowConfirm(false)} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Confirm Cancel</Modal.Title>
+          <Modal.Title>{t("cancelOrder.confirmTitle", "Confirm Cancel")}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          Are you sure you want to cancel this order?
+          {t("cancelOrder.confirmBody", "Are you sure you want to cancel this order?")}
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowConfirm(false)}>
-            No
+            {t("cancelOrder.confirmNo", "No")}
           </Button>
           <Button variant="danger" onClick={handleCancelOrder}>
-            {loading ? <Spinner size="sm" /> : "Yes, Cancel Order"}
+            {loading ? <Spinner size="sm" /> : t("cancelOrder.confirmYes", "Yes, Cancel Order")}
           </Button>
         </Modal.Footer>
       </Modal>

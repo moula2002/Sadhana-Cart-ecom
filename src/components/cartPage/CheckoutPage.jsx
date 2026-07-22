@@ -523,12 +523,11 @@ const CheckoutPage = () => {
         setLocationStatusMessage(null);
       } else {
         setCoordinates({ lat: null, lng: null });
-        toast.error("Address could not be accurately located. Please check the spelling.");
+        console.warn("Address could not be accurately located.");
       }
     } catch (error) {
       console.error("Error during Nominatim API call:", error);
       setCoordinates({ lat: null, lng: null });
-      toast.error("Failed to connect to geocoding service (Network Error).");
     }
   }, []);
 
@@ -821,6 +820,41 @@ const CheckoutPage = () => {
     }
   };
 
+  const applyCashback = async (appliedCoins, orderDocId, orderWorth) => {
+    if (!userId || appliedCoins <= 0) return;
+
+    try {
+      const cashbackCoins = Math.round(appliedCoins * 0.1);
+      if (cashbackCoins <= 0) return;
+
+      const userRef = doc(db, "users", userId);
+      const userSnap = await getDoc(userRef);
+
+      if (userSnap.exists()) {
+        const userData = userSnap.data();
+        const currentCoins = userData.walletCoins || 0;
+
+        await updateDoc(userRef, {
+          walletCoins: currentCoins + cashbackCoins
+        });
+
+        const transRef = collection(db, "users", userId, "wallet_transactions");
+        await addDoc(transRef, {
+          coins: cashbackCoins,
+          createdAt: serverTimestamp(),
+          orderId: orderDocId,
+          reason: "Order Cashback",
+          rupees: orderWorth,
+          type: "credit"
+        });
+
+        console.log(`Cashback of ${cashbackCoins} coins added successfully.`);
+      }
+    } catch (error) {
+      console.error("Error applying cashback:", error);
+    }
+  };
+
   const saveOrderToFirestore = async (
     paymentMethod,
     status = "Pending",
@@ -890,6 +924,10 @@ const CheckoutPage = () => {
 
       // Save to Firestore
       const userOrderDocRef = await addDoc(ordersRef, orderData);
+
+      if (coinsToUse > 0) {
+        await applyCashback(coinsToUse, userOrderDocRef.id, totalPrice);
+      }
 
       // 🔥 SEND TO SHIPROCKET (Same as CashOnDelivery component)
       try {
@@ -1491,12 +1529,12 @@ const CheckoutPage = () => {
 
           <Card className="shadow-lg border-0 p-4 theme-card">
             {walletCoins > 0 && (
-              <div className="mb-4 p-4 rounded theme-wallet-section">
-                <div className="d-flex align-items-center justify-content-between mb-3">
+              <div className="mb-4 p-4 rounded-4 theme-wallet-section shadow-sm" style={{ border: '2px solid #fbbf24', background: 'linear-gradient(135deg, #fffbeb, #ffffff)' }}>
+                <div className="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
                   <div className="d-flex align-items-center">
-                    <FaCoins size={22} className="me-2 theme-coin-icon" />
-                    <h6 className="fw-bold mb-0 theme-text-primary">
-                      {t("checkout.useCoins")}
+                    <FaCoins size={22} className="me-2 text-warning animate-bounce" />
+                    <h6 className="fw-bold mb-0 text-dark" style={{ letterSpacing: '0.5px' }}>
+                      {t("checkout.walletPoints", "Wallet Points")}
                     </h6>
                   </div>
 
@@ -1504,46 +1542,50 @@ const CheckoutPage = () => {
                   <Form.Check
                     type="switch"
                     id="use-coins-toggle"
-                    label={useCoins ? "ON" : "OFF"}
+                    label={useCoins ? t("checkout.useCoinsOn", "ON") : t("checkout.useCoinsOff", "OFF")}
                     checked={useCoins}
                     onChange={(e) => setUseCoins(e.target.checked)}
+                    className="fw-bold"
                   />
                 </div>
 
-                <p className="small mb-2 theme-text-secondary">
-                  {t("checkout.availableCoins")}: <strong className="theme-text-primary">{walletCoins}</strong> (1 coin = ₹1)
-                </p>
-                <p className="small mb-3 theme-text-secondary">
-                  {t("checkout.orderAmount")}: <strong className="theme-text-primary">₹{totalPrice}</strong>
-                </p>
+                <div className="d-flex align-items-center justify-content-between mb-3">
+                  <span className="small text-muted fw-semibold">
+                    {t("checkout.availablePoints", "Available")}:
+                  </span>
+                  <span className="badge bg-warning text-dark fw-bold px-3 py-2 rounded-pill" style={{ fontSize: '14px' }}>
+                    {walletCoins} {t("checkout.pointsLabel", "Points")}
+                  </span>
+                </div>
 
-                <Form.Group>
-                  <Form.Label className="fw-semibold theme-form-label">
-                    {t("checkout.coinsApplied")}
-                  </Form.Label>
+                {useCoins && (
+                  <>
+                    <Form.Group className="mb-3 d-flex align-items-center justify-content-between">
+                      <Form.Label className="fw-bold mb-0 text-muted small">
+                        {t("checkout.pointsToUse", "Points to Use")}:
+                      </Form.Label>
+                      <div className="d-flex align-items-center gap-2" style={{ maxWidth: '120px' }}>
+                        <Form.Control
+                          type="text"
+                          value={coinsToUse}
+                          readOnly
+                          className="theme-form-control fw-extrabold text-center bg-light"
+                          style={{ borderRadius: '8px', border: '1px solid #d1d5db' }}
+                        />
+                      </div>
+                    </Form.Group>
 
-                  <div className="d-flex align-items-center gap-2">
-                    <FaCoins className="theme-coin-icon" />
-                    <Form.Control
-                      type="text"
-                      value={`${coinsToUse} Coins  (₹${coinsToUse})`}
-                      readOnly
-                      className="theme-form-control"
-                    />
-                  </div>
-
-                  <Form.Text className="text-muted theme-text-muted">
-                    {t("checkout.autoApplied")}
-                  </Form.Text>
-                </Form.Group>
-
-                {coinsToUse > 0 && (
-                  <Alert variant="success" className="mt-3 py-2 mb-0 theme-alert-success">
-                    <small>
-                      <FaCoins className="me-1" />
-                      Using {coinsToUse} coins (₹{coinsToUse} discount applied)
-                    </small>
-                  </Alert>
+                    <div className="mt-3 p-3 rounded-4" style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', color: '#15803d' }}>
+                      <div className="fw-bold mb-2 d-flex align-items-center gap-2" style={{ fontSize: '14px' }}>
+                        <span className="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center" style={{ width: '18px', height: '18px', fontSize: '10px' }}>✓</span>
+                        {t("checkout.discountMessage", "Discount: ₹{{amount}}", { amount: coinsToUse })}
+                      </div>
+                      <div className="d-flex align-items-center gap-2 fw-semibold" style={{ fontSize: '13px', color: '#16a34a' }}>
+                        <FaCoins className="text-warning animate-bounce" />
+                        {t("checkout.cashbackMessage", "Cashback After Order: +{{cashback}} Coins", { cashback: Math.floor(coinsToUse * 0.1) })}
+                      </div>
+                    </div>
+                  </>
                 )}
               </div>
             )}

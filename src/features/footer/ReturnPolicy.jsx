@@ -38,11 +38,11 @@ function ReturnPolicy() {
                     </div>
 
                     <h1 className="display-4 fw-bold animate__text">
-                        {t("returnPolicy.title")}
+                        {t("returnPolicyObj.title")}
                     </h1>
 
                     <h3 className="fw-normal">
-                        {t("returnPolicy.subtitle")}
+                        {t("returnPolicyObj.subtitle")}
                     </h3>
                 </Container>
             </div>
@@ -51,11 +51,11 @@ function ReturnPolicy() {
 
                 {/* Intro */}
                 <h2 className="text-orange fw-bold mb-3 policy-intro-title">
-                    {t("returnPolicy.title")}
+                    {t("returnPolicyObj.title")}
                 </h2>
 
                 <p className="lead mb-5 text-muted theme-text">
-                    {t("returnPolicy.intro")}
+                    {t("returnPolicyObj.intro")}
                 </p>
 
                 <div className="policy-sections">
@@ -65,13 +65,13 @@ function ReturnPolicy() {
                         <Card.Body>
                             <h4 className="card-title text-orange mb-3 d-flex align-items-center">
                                 <i className="far fa-calendar-alt fa-fw me-3"></i>
-                                {t("returnPolicy.section1.title")}
+                                {t("returnPolicyObj.section1.title")}
                             </h4>
 
                             <ul className="policy-list">
-                                <li className="theme-text">{t("returnPolicy.section1.point1")}</li>
-                                <li className="theme-text">{t("returnPolicy.section1.point2")}</li>
-                                <li className="theme-text">{t("returnPolicy.section1.point3")}</li>
+                                <li className="theme-text">{t("returnPolicyObj.section1.point1")}</li>
+                                <li className="theme-text">{t("returnPolicyObj.section1.point2")}</li>
+                                <li className="theme-text">{t("returnPolicyObj.section1.point3")}</li>
                             </ul>
                         </Card.Body>
                     </Card>
@@ -81,14 +81,14 @@ function ReturnPolicy() {
                         <Card.Body>
                             <h4 className="card-title text-red-light mb-3 d-flex align-items-center">
                                 <i className="fas fa-ban fa-fw me-3"></i>
-                                {t("returnPolicy.section2.title")}
+                                {t("returnPolicyObj.section2.title")}
                             </h4>
 
                             <ul className="policy-list red-bullets">
-                                <li className="theme-text">{t("returnPolicy.section2.point1")}</li>
-                                <li className="theme-text">{t("returnPolicy.section2.point2")}</li>
-                                <li className="theme-text">{t("returnPolicy.section2.point3")}</li>
-                                <li className="theme-text">{t("returnPolicy.section2.point4")}</li>
+                                <li className="theme-text">{t("returnPolicyObj.section2.point1")}</li>
+                                <li className="theme-text">{t("returnPolicyObj.section2.point2")}</li>
+                                <li className="theme-text">{t("returnPolicyObj.section2.point3")}</li>
+                                <li className="theme-text">{t("returnPolicyObj.section2.point4")}</li>
                             </ul>
                         </Card.Body>
                     </Card>
@@ -98,14 +98,14 @@ function ReturnPolicy() {
                         <Card.Body>
                             <h4 className="card-title text-orange mb-3 d-flex align-items-center">
                                 <i className="fas fa-redo-alt fa-fw me-3"></i>
-                                {t("returnPolicy.section3.title")}
+                                {t("returnPolicyObj.section3.title")}
                             </h4>
 
                             <ul className="policy-list">
-                                <li className="theme-text">{t("returnPolicy.section3.point1")}</li>
-                                <li className="theme-text">{t("returnPolicy.section3.point2")}</li>
-                                <li className="theme-text">{t("returnPolicy.section3.point3")}</li>
-                                <li className="theme-text">{t("returnPolicy.section3.point4")}</li>
+                                <li className="theme-text">{t("returnPolicyObj.section3.point1")}</li>
+                                <li className="theme-text">{t("returnPolicyObj.section3.point2")}</li>
+                                <li className="theme-text">{t("returnPolicyObj.section3.point3")}</li>
+                                <li className="theme-text">{t("returnPolicyObj.section3.point4")}</li>
                             </ul>
                         </Card.Body>
                     </Card>
@@ -115,14 +115,14 @@ function ReturnPolicy() {
                         <Card.Body>
                             <h4 className="card-title text-orange mb-3 d-flex align-items-center">
                                 <i className="fas fa-wallet fa-fw me-3"></i>
-                                {t("returnPolicy.section4.title")}
+                                {t("returnPolicyObj.section4.title")}
                             </h4>
 
                             <ul className="policy-list">
-                                <li className="theme-text">{t("returnPolicy.section4.point1")}</li>
-                                <li className="theme-text">{t("returnPolicy.section4.point2")}</li>
-                                <li className="theme-text">{t("returnPolicy.section4.point3")}</li>
-                                <li className="theme-text">{t("returnPolicy.section4.point4")}</li>
+                                <li className="theme-text">{t("returnPolicyObj.section4.point1")}</li>
+                                <li className="theme-text">{t("returnPolicyObj.section4.point2")}</li>
+                                <li className="theme-text">{t("returnPolicyObj.section4.point3")}</li>
+                                <li className="theme-text">{t("returnPolicyObj.section4.point4")}</li>
                             </ul>
                         </Card.Body>
                     </Card>
@@ -132,14 +132,14 @@ function ReturnPolicy() {
                         <Card.Body>
                             <h4 className="card-title text-orange mb-3 d-flex align-items-center">
                                 <i className="fas fa-exchange-alt fa-fw me-3"></i>
-                                {t("returnPolicy.section5.title")}
+                                {t("returnPolicyObj.section5.title")}
                             </h4>
 
                             <ul className="policy-list">
-                                <li className="theme-text">{t("returnPolicy.section5.point1")}</li>
-                                <li className="theme-text">{t("returnPolicy.section5.point2")}</li>
-                                <li className="theme-text">{t("returnPolicy.section5.point3")}</li>
-                                <li className="theme-text">{t("returnPolicy.section5.point4")}</li>
+                                <li className="theme-text">{t("returnPolicyObj.section5.point1")}</li>
+                                <li className="theme-text">{t("returnPolicyObj.section5.point2")}</li>
+                                <li className="theme-text">{t("returnPolicyObj.section5.point3")}</li>
+                                <li className="theme-text">{t("returnPolicyObj.section5.point4")}</li>
                             </ul>
                         </Card.Body>
                     </Card>
@@ -149,14 +149,14 @@ function ReturnPolicy() {
                         <Card.Body>
                             <h4 className="card-title text-danger mb-3 d-flex align-items-center">
                                 <i className="fas fa-exclamation-triangle fa-fw me-3"></i>
-                                {t("returnPolicy.section6.title")}
+                                {t("returnPolicyObj.section6.title")}
                             </h4>
 
                             <ul className="policy-list red-bullets">
-                                <li className="theme-text">{t("returnPolicy.section6.point1")}</li>
-                                <li className="theme-text">{t("returnPolicy.section6.point2")}</li>
-                                <li className="theme-text">{t("returnPolicy.section6.point3")}</li>
-                                <li className="theme-text">{t("returnPolicy.section6.point4")}</li>
+                                <li className="theme-text">{t("returnPolicyObj.section6.point1")}</li>
+                                <li className="theme-text">{t("returnPolicyObj.section6.point2")}</li>
+                                <li className="theme-text">{t("returnPolicyObj.section6.point3")}</li>
+                                <li className="theme-text">{t("returnPolicyObj.section6.point4")}</li>
                             </ul>
                         </Card.Body>
                     </Card>
@@ -166,11 +166,11 @@ function ReturnPolicy() {
                         <Card.Body>
 
                             <h4 className="fw-bold mb-3 theme-text">
-                                {t("returnPolicy.help.title")}
+                                {t("returnPolicyObj.help.title")}
                             </h4>
 
                             <p className="mb-3 theme-text">
-                                {t("returnPolicy.help.description")}
+                                {t("returnPolicyObj.help.description")}
                             </p>
 
                             <p className="fw-bold mb-4 text-orange">
@@ -184,7 +184,7 @@ function ReturnPolicy() {
                                 className="btn contact-button"
                                 style={contactButtonStyle}
                             >
-                                {t("returnPolicy.help.contactButton")}
+                                {t("returnPolicyObj.help.contactButton")}
                             </a>
 
                         </Card.Body>

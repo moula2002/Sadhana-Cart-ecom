@@ -9,6 +9,7 @@ import { useDispatch } from "react-redux";
 import { addToCart } from "../redux/cartSlice";
 import { useTheme } from "../context/ThemeContext";
 import { useTranslation } from "react-i18next";
+import Loading from "./Loading";
 
 // Helper to get the first valid image URL (consistent with CategoryProducts.jsx)
 const getFirstImage = (product) => {
@@ -162,12 +163,7 @@ function ProductSuggestions({ currentProductId, category, subcategory }) {
     }, [suggestions, sortBy, filterPrice]);
 
     if (loading) {
-        return (
-            <div className="text-center py-5">
-                <Spinner animation="border" variant="primary" />
-                <p className="mt-3 text-muted">{t("findingSimilarProducts", "Finding similar products...")}</p>
-            </div>
-        );
+        return <Loading message={t("findingSimilarProducts", "Finding similar products...")} minHeight="200px" />;
     }
 
     if (error || suggestions.length === 0) {

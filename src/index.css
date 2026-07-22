@@ -27,6 +27,7 @@
   
   /* Background Colors */
   --bg-body: #ffffff;
+  --bg-gradient: linear-gradient(135deg, #e0f2fe 0%, #ffffff 100%);
   --bg-card: #ffffff;
   --bg-modal: #ffffff;
   --bg-table-striped: rgba(0, 0, 0, 0.02);
@@ -111,6 +112,7 @@
   
   /* Background Colors - Slate 900 body & Slate 800 cards */
   --bg-body: #0f172a;
+  --bg-gradient: linear-gradient(135deg, #070f1e 0%, #0f172a 50%, #1e293b 100%);
   --bg-card: #1e293b;
   --bg-modal: #1e293b;
   --bg-table-striped: rgba(255, 255, 255, 0.03);

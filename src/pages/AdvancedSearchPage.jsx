@@ -12,6 +12,7 @@ import {
   Badge,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import Loading from "./Loading";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebase";
 import { 
@@ -98,32 +99,7 @@ const AdvancedSearchPage = () => {
   };
 
   if (loading) {
-    return (
-      <div className="advanced-search-loading">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-          className="text-center"
-        >
-          <div className="loading-spinner-advanced">
-            <Spinner 
-              animation="border" 
-              variant="primary" 
-              className="advanced-spinner"
-            />
-          </div>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="loading-text-advanced mt-3"
-          >
-            {t("loadingCategories", "Loading categories...")}
-          </motion.p>
-        </motion.div>
-      </div>
-    );
+    return <Loading message={t("loadingCategories", "Loading categories...")} minHeight="100vh" />;
   }
 
   return (
@@ -306,7 +282,7 @@ const AdvancedSearchPage = () => {
                             <div className="filter-label-wrapper">
                               <FaTag className="filter-icon" />
                               <Form.Label className="filter-label">
-                                {t("category", "Category")}
+                                {t("categoryLabel", "Category")}
                               </Form.Label>
                             </div>
                             <Form.Select

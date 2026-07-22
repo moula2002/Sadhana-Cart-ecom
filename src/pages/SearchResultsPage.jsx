@@ -12,6 +12,7 @@ import {
   Button,
 } from "react-bootstrap";
 import { useLocation, Link } from "react-router-dom";
+import Loading from "./Loading";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebase";
 import { FaStar, FaRupeeSign, FaFilter, FaShoppingBag, FaSearch, FaBoxOpen, FaFileImage } from "react-icons/fa";
@@ -158,32 +159,7 @@ const SearchResultsPage = () => {
   };
 
   if (loading) {
-    return (
-      <div className="search-loading-container">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-          className="text-center"
-        >
-          <div className="loading-spinner-wrapper">
-            <Spinner 
-              animation="border" 
-              variant="primary" 
-              className="search-spinner"
-            />
-          </div>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="loading-text mt-3"
-          >
-            {t("findingProducts", "Finding the best products for you...")}
-          </motion.p>
-        </motion.div>
-      </div>
-    );
+    return <Loading message={t("findingProducts", "Finding the best products for you...")} minHeight="100vh" />;
   }
 
   return (
@@ -316,7 +292,7 @@ const SearchResultsPage = () => {
           <Row>
             <AnimatePresence>
               {products.map((product, index) => (
-                <Col md={4} key={product.id} className="mb-4">
+                <Col xs={6} md={4} key={product.id} className="mb-4">
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}

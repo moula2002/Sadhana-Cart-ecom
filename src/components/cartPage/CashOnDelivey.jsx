@@ -305,6 +305,41 @@ function CashOnDelivery() {
       throw error;
     }
   };
+  const applyCashback = async (appliedCoins, orderDocId, orderWorth) => {
+    if (!userId || appliedCoins <= 0) return;
+
+    try {
+      const cashbackCoins = Math.round(appliedCoins * 0.1);
+      if (cashbackCoins <= 0) return;
+
+      const userRef = doc(db, "users", userId);
+      const userSnap = await getDoc(userRef);
+
+      if (userSnap.exists()) {
+        const userData = userSnap.data();
+        const currentCoins = userData.walletCoins || 0;
+
+        await updateDoc(userRef, {
+          walletCoins: currentCoins + cashbackCoins
+        });
+
+        const transRef = collection(db, "users", userId, "wallet_transactions");
+        await addDoc(transRef, {
+          coins: cashbackCoins,
+          createdAt: serverTimestamp(),
+          orderId: orderDocId,
+          reason: "Order Cashback",
+          rupees: orderWorth,
+          type: "credit"
+        });
+
+        console.log(`Cashback of ${cashbackCoins} coins added successfully.`);
+      }
+    } catch (error) {
+      console.error("Error applying cashback:", error);
+    }
+  };
+
   // Save order to Firestore (MATCHES FLUTTER STRUCTURE EXACTLY)
   const saveOrderToFirestore = async (paymentMethod, status = "pending") => {
     if (!userId) {
@@ -415,6 +450,10 @@ function CashOnDelivery() {
       console.log("ORDER DATA", JSON.stringify(orderData, null, 2));
 
       const userOrderDocRef = await addDoc(ordersRef, orderData);
+
+      if (coinsToUse > 0) {
+        await applyCashback(coinsToUse, userOrderDocRef.id, totalPrice);
+      }
 
       // Update the document with its own ID as orderId 
       await updateDoc(userOrderDocRef, {

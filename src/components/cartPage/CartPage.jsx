@@ -181,10 +181,10 @@ const CartPage = () => {
             <div className="empty-cart-icon-wrap">
               <img src={logoImg} alt="Sadhana Cart" style={{ maxWidth: "65px", maxHeight: "65px", objectFit: "contain" }} />
             </div>
-            <h2>{t("cart.emptyTitle") || "Your Cart is Empty"}</h2>
-            <p>{t("cart.emptySubtitle") || "Looks like you haven't added anything to your cart yet."}</p>
+            <h2>{t("cart.emptyTitle", "Your Cart is Empty")}</h2>
+            <p>{t("cart.emptySubtitle", "Looks like you haven't added anything to your cart yet.")}</p>
             <Link to="/" className="start-shopping-btn">
-              {t("cart.startShopping") || "Start Shopping"}
+              {t("cart.startShopping", "Start Shopping")}
               <ArrowRight size={18} />
             </Link>
           </div>

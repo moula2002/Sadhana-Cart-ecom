@@ -104,9 +104,9 @@ const Footer = () => {
             <div className="col-xl-2 col-lg-2 col-md-3 col-sm-6 col-6 mb-5">
               <h6 className="sc-col-heading">{t("footer.customerService", "CUSTOMER SERVICE")}</h6>
               <ul className="sc-link-list">
-                <li><Link to="/help-center">{t("footer.helpCenter", "Help Center")}</Link></li>
+                <li><Link to="/support">{t("footer.helpCenter", "Help Center")}</Link></li>
                 <li><Link to="/track-order">{t("footer.trackOrder", "Track Order")}</Link></li>
-                <li><Link to="/contact-us">{t("footer.contactUs", "Contact Us")}</Link></li>
+                <li><Link to="/contact">{t("footer.contactUs", "Contact Us")}</Link></li>
                 <li><Link to="/faqs">{t("footer.faqs", "FAQs")}</Link></li>
               </ul>
             </div>
@@ -128,7 +128,7 @@ const Footer = () => {
               <ul className="sc-link-list">
                 <li><Link to="/about-us">{t("aboutUs", "About Us")}</Link></li>
                 <li><Link to="/careers">{t("footer.careers", "Careers")}</Link></li>
-                <li><Link to="/become-a-seller">{t("home.becomeSeller", "Become a Seller")}</Link></li>
+                <li><a href="https://sadhana-cart-seller-panel1.vercel.app/seller/login" target="_blank" rel="noopener noreferrer">{t("home.becomeSeller", "Become a Seller")}</a></li>
                 <li><Link to="/blog">{t("footer.blog", "Blog")}</Link></li>
               </ul>
             </div>

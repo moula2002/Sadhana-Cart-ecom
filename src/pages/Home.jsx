@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import "./Home.css";
 import SecondHeader from "../components/searchBar/SecondHeader";
@@ -24,6 +25,7 @@ import DynamicGreeting from "../components/DynamicGreeting";
 
 function Home() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   return (
     <div className="homepage-content">
@@ -52,7 +54,7 @@ function Home() {
           <div className="sc-title-row">
             <h2 className="sc-title">{t("home.newArrivals", "New Arrivals")}</h2>
           </div>
-          <a className="sc-view-all" href="#">{t("home.viewAllDeals", "View All Deals →")}</a>
+          <a className="sc-view-all" href="#" onClick={(e) => { e.preventDefault(); navigate("/new-arrivals"); }}>{t("home.viewAllDeals", "View All Deals →")}</a>
         </div>
         <FeatureProducts showCart={true} />
       </section>
@@ -63,7 +65,6 @@ function Home() {
       <section className="sc-section home-section-animated">
         <div className="sc-header">
           <h2 className="sc-title">{t("home.recommended", "Recommended For You")}</h2>
-          <a className="sc-view-all" href="#">{t("home.viewAll", "View All →")}</a>
         </div>
         <RecommendedProduct showCart={true} />
       </section>
@@ -130,7 +131,7 @@ function Home() {
             <p className="promo-desc">
               {t("home.earnPoints", "Earn points on every order")}<br />{t("home.redeemSave", "Redeem & save more!")}
             </p>
-            <button className="promo-cta-btn rewards-cta">{t("home.joinNow", "Join Now")}</button>
+            <button className="promo-cta-btn rewards-cta" onClick={() => navigate("/rewards")}>{t("home.joinNow", "Join Now")}</button>
           </div>
           <div className="promo-card-img-wrap">
             <img src={rewardsPromo} alt={t("home.sadhanaRewardsPromo", "Sadhana Rewards")} className="promo-card-image" />

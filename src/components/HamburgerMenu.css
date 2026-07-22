@@ -15,6 +15,12 @@
   overflow: hidden;
 }
 
+@media (max-width: 480px) {
+  .hamburger-offcanvas, .login-offcanvas {
+    width: 290px !important;
+  }
+}
+
 .hamburger-header {
   padding: 30px 20px 20px 20px;
   border-bottom: none;
@@ -74,10 +80,11 @@
 .hamburger-menu-item {
   display: flex;
   align-items: center;
-  padding: 12px 24px;
+  padding: 14px 24px;
   text-decoration: none !important;
   color: #1a1a1a;
   transition: background-color 0.2s ease;
+  border-bottom: 1px solid #f8fafc;
 }
 
 .hamburger-menu-item:hover {
@@ -144,6 +151,7 @@
 [data-theme="dark"] .hamburger-menu-item {
   color: #e2e8f0 !important;
   background-color: transparent !important;
+  border-bottom-color: #243047 !important;
 }
 
 .dark-theme .hamburger-menu-item span,

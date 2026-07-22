@@ -35,7 +35,7 @@ const SearchPage = () => {
       { name: t("jackets", "Jackets"), icon: <FiTrendingUp /> },
       { name: t("kurti", "Kurti"), icon: <PiDressFill /> },
       { name: t("pants", "Pants"), icon: <PiPantsFill /> },
-      { name: t("personalCare", "Personal..."), icon: <GiMonsteraLeaf /> }
+      { name: t("personalCaretitle", "Personal Care"), icon: <GiMonsteraLeaf /> }
     ]);
   }, []);
 

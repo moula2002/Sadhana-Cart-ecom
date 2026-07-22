@@ -9,10 +9,12 @@ import { collection, addDoc, doc, updateDoc, getDocs, serverTimestamp } from "fi
 import { db } from "../firebase";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useTheme } from "../context/ThemeContext";
 import "./Profile.css"; // Reuse dashboard layout styles
 
 function SaveAddress() {
   const { t } = useTranslation();
+  const { isDark } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const existingAddress = location.state?.address || null;
@@ -135,7 +137,7 @@ function SaveAddress() {
   }
 
   return (
-    <div className="profile-dashboard-wrapper" style={{ padding: "20px" }}>
+    <div className="profile-dashboard-wrapper">
       <div className="profile-dashboard-container address-container" style={{ maxWidth: "1200px", margin: "0 auto", borderRadius: "10px", overflow: "hidden" }}>
         
         {/* Title */}
@@ -207,11 +209,11 @@ function SaveAddress() {
                       onClick={() => setAddressType(type.key)}
                       style={{
                         padding: "10px 24px",
-                        border: addressType === type ? "1px solid #0a45bd" : "1px solid #e5e7eb",
+                        border: addressType === type.key ? "1px solid #3b82f6" : (isDark ? "1px solid #374151" : "1px solid #e5e7eb"),
                         borderRadius: "8px",
                         cursor: "pointer",
-                        backgroundColor: addressType === type.key ? "#eff4ff" : "white",
-                        color: addressType === type.key ? "#0a45bd" : "#4b5563",
+                        backgroundColor: addressType === type.key ? (isDark ? "#1e3a8a" : "#eff4ff") : (isDark ? "#1f2937" : "white"),
+                        color: addressType === type.key ? (isDark ? "#93c5fd" : "#0a45bd") : (isDark ? "#d1d5db" : "#4b5563"),
                         fontWeight: "600",
                         fontSize: "14px",
                         display: "flex",
