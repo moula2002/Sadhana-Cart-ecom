@@ -10,6 +10,7 @@ import { addToCart } from "../redux/cartSlice";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Loading from "../pages/Loading";
+import SkeletonGrid from "../components/SkeletonGrid";
 import { useTranslation } from "react-i18next";
 
 function FlashDealsPage() {
@@ -77,7 +78,9 @@ function FlashDealsPage() {
           </div>
 
           {loading ? (
-            <Loading />
+            <div className="py-2 w-100">
+               <SkeletonGrid count={6} />
+            </div>
           ) : products.length === 0 ? (
             <div className="text-center py-5 text-muted">
               <h3>{t("home.noDeals", "No Flash Deals Available Right Now")}</h3>

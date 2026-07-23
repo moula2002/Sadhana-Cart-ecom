@@ -186,12 +186,11 @@ function RecommendedProduct({ showCart = true }) {
         })}
 
         {loading && (
-          <div
-            className="sc-product-card"
-            style={{ alignItems: "center", justifyContent: "center", minWidth: 100 }}
-          >
-            <Loading small inline />
-          </div>
+          <>
+            <div className="sc-product-card skeleton-card" style={{ height: "280px", minWidth: "180px", flexShrink: 0 }}></div>
+            <div className="sc-product-card skeleton-card" style={{ height: "280px", minWidth: "180px", flexShrink: 0 }}></div>
+            <div className="sc-product-card skeleton-card" style={{ height: "280px", minWidth: "180px", flexShrink: 0 }}></div>
+          </>
         )}
       </div>
 

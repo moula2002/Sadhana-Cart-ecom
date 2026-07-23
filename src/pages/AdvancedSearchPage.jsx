@@ -13,6 +13,7 @@ import {
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import Loading from "./Loading";
+import SkeletonGrid from "../components/SkeletonGrid";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebase";
 import { 
@@ -99,7 +100,13 @@ const AdvancedSearchPage = () => {
   };
 
   if (loading) {
-    return <Loading message={t("loadingCategories", "Loading categories...")} minHeight="100vh" />;
+    return (
+      <Container fluid className="px-4 py-5">
+        <div className="py-2 w-100">
+           <SkeletonGrid count={4} />
+        </div>
+      </Container>
+    );
   }
 
   return (

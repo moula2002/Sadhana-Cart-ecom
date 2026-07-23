@@ -8,6 +8,7 @@ import { useDispatch } from "react-redux";
 import { addToCart } from "../redux/cartSlice";
 import { toast } from "react-toastify";
 import Loading from "./Loading";
+import SkeletonGrid from "../components/SkeletonGrid";
 import { useTranslation } from "react-i18next";
 
 const ProductListingPage = () => {
@@ -479,8 +480,8 @@ const ProductListingPage = () => {
                     </div>
 
                     {loading ? (
-                        <div className="text-center py-5">
-                            <Loading minHeight="200px" message={t("loadingProducts", "Loading products...")} />
+                        <div className="py-2 w-100">
+                            <SkeletonGrid count={8} />
                         </div>
                     ) : filteredAndSortedProducts.length === 0 ? (
                         <Alert variant="info" className="rounded-3 border-0 shadow-sm p-4 text-center">

@@ -4,6 +4,7 @@ import { useParams, useLocation, useNavigate, Link } from "react-router-dom";
 import { db, collection, getDocs, query, where } from "../../firebase";
 import "./CategoryProducts.css";
 import Loading from "../../pages/Loading"; 
+import SkeletonGrid from "../SkeletonGrid";
 import { FaHome, FaSpinner, FaSearch, FaTag, FaChevronRight, FaTimes, FaFileImage } from "react-icons/fa";
 
 import { useDispatch } from "react-redux";
@@ -348,7 +349,9 @@ const CategoryProducts = () => {
       <div className="divider"></div>
 
       {loading ? (
-  <Loading />
+  <div className="py-2 w-100">
+    <SkeletonGrid count={8} />
+  </div>
 ) : filteredProducts.length > 0 ? (
         <>
 

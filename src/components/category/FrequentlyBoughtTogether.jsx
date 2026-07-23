@@ -17,6 +17,7 @@ import { useDispatch } from "react-redux";
 import { addToCart } from "../../redux/cartSlice";
 import { toast } from "react-toastify";
 import Loading from "../../pages/Loading";
+import SkeletonGrid from "../SkeletonGrid";
 import "./FrequentlyBoughtTogether.css";
 
 const FrequentlyBoughtTogether = ({ currentProduct }) => {
@@ -220,7 +221,11 @@ const FrequentlyBoughtTogether = ({ currentProduct }) => {
   };
 
   if (loading) {
-    return <Loading minHeight="140px" message={`Loading ${t("productDetail.frequentlyBoughtTogether", "Frequently Bought Together")}...`} />;
+    return (
+      <div className="py-2 w-100">
+        <SkeletonGrid count={4} />
+      </div>
+    );
   }
 
   if (recommendedProducts.length === 0) {

@@ -13,6 +13,7 @@ import {
 } from "react-bootstrap";
 import { useLocation, Link } from "react-router-dom";
 import Loading from "./Loading";
+import SkeletonGrid from "../components/SkeletonGrid";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebase";
 import { FaStar, FaRupeeSign, FaFilter, FaShoppingBag, FaSearch, FaBoxOpen, FaFileImage } from "react-icons/fa";
@@ -159,7 +160,13 @@ const SearchResultsPage = () => {
   };
 
   if (loading) {
-    return <Loading message={t("findingProducts", "Finding the best products for you...")} minHeight="100vh" />;
+    return (
+      <Container className="py-5">
+        <div className="py-2 w-100">
+           <SkeletonGrid count={8} />
+        </div>
+      </Container>
+    );
   }
 
   return (

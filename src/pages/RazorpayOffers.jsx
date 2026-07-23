@@ -5,6 +5,7 @@ import { Card, Badge, Spinner, Row, Col, Alert, Button } from "react-bootstrap";
 import { FaTag, FaUniversity, FaInfoCircle, FaGift, FaCopy } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import Loading from "./Loading";
+import SkeletonGrid from "../components/SkeletonGrid";
 
 function RazorpayOffers({ hideApplyButton = false }) {
   const { t } = useTranslation();
@@ -57,7 +58,11 @@ function RazorpayOffers({ hideApplyButton = false }) {
   }, []);
 
   if (loading) {
-    return <Loading message={t("loadingSpecialOffers", "Loading special offers...")} minHeight="200px" />;
+    return (
+      <div className="py-4 px-2 w-100">
+        <SkeletonGrid count={3} />
+      </div>
+    );
   }
 
   return (

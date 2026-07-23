@@ -11,6 +11,7 @@ import { useDispatch } from "react-redux";
 import { addToCart } from "../../redux/cartSlice";
 import { Toast, ToastContainer } from "react-bootstrap";
 import Loading from "../../pages/Loading";
+import SkeletonGrid from "../SkeletonGrid";
 import { useTranslation } from "react-i18next";
 
 function BestProducts() {
@@ -184,7 +185,7 @@ function BestProducts() {
         })}
       </div>
 
-      {loading && products.length === 0 && <Loading />}
+      {loading && products.length === 0 && <SkeletonGrid count={8} wrapperClass="mt-2" />}
       {loading && products.length > 0 && (
         <div style={{ textAlign: "center", padding: "16px" }}>
           <Loading small inline />

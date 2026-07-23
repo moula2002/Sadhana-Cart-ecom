@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import Loading from "./Loading";
+import SkeletonGrid from "../components/SkeletonGrid";
 import { FaTag } from "react-icons/fa";
 import { HiLightningBolt } from "react-icons/hi";
 import { AiOutlineBank } from "react-icons/ai";
@@ -80,7 +81,9 @@ const OffersPage = () => {
             </div>
 
             {loading ? (
-              <Loading message={t("loadingSpecialOffers", "Loading special offers...")} minHeight="200px" />
+              <div className="py-2 w-100">
+                <SkeletonGrid count={4} />
+              </div>
             ) : offers.length === 0 ? (
               <p className="text-muted text-center py-4 offers-empty-text">{t("noOffersAvailable", "No offers available at the moment.")}</p>
             ) : (

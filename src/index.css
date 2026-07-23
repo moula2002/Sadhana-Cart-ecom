@@ -884,3 +884,50 @@ textarea {
     display: block !important;
   }
 }
+
+/* ==========================================================================
+   Global Skeleton Loader Styles
+   ========================================================================== */
+@keyframes shimmer {
+  0% { background-position: -468px 0; }
+  100% { background-position: 468px 0; }
+}
+
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 20px;
+  width: 100%;
+}
+
+.skeleton-card {
+  background: #f6f7f8;
+  background-image: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+  background-repeat: no-repeat;
+  background-size: 800px 100%;
+  animation-duration: 1.5s;
+  animation-fill-mode: forwards;
+  animation-iteration-count: infinite;
+  animation-name: shimmer;
+  animation-timing-function: linear;
+  border-radius: 12px;
+  height: 280px;
+  border: 1px solid #eee;
+  width: 100%;
+}
+
+.dark-theme .skeleton-card {
+  background: #25253e;
+  background-image: linear-gradient(to right, #25253e 0%, #353554 20%, #25253e 40%, #25253e 100%);
+  border-color: #353554;
+}
+
+@media (max-width: 767px) {
+  .skeleton-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .skeleton-card {
+    height: 200px;
+  }
+}

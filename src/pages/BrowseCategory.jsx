@@ -12,6 +12,10 @@ import { useTranslation } from "react-i18next";
 import "./BrowseCategory.css";
 import Loading from "./Loading";
 
+// In-memory cache to make Browse Categories lightning fast
+let cachedCategories = null;
+const cachedCategoryData = {}; // key: categoryName, value: { subcategories, products }
+
 const BrowseCategory = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -44,6 +48,21 @@ const BrowseCategory = () => {
     const fetchCategories = async () => {
       try {
         setLoadingCats(true);
+
+        if (cachedCategories) {
+          setCategories(cachedCategories);
+          if (cachedCategories.length > 0) {
+            if (selectedCatFromState) {
+              const found = cachedCategories.find(c => c.name === selectedCatFromState);
+              setActiveCategory(found || cachedCategories[0]);
+            } else {
+              setActiveCategory(cachedCategories[0]);
+            }
+          }
+          setLoadingCats(false);
+          return;
+        }
+
         const catRef = collection(db, "category");
         const snap = await getDocs(catRef);
         const catList = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -51,6 +70,7 @@ const BrowseCategory = () => {
         // Sort categories logically if needed
         catList.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
 
+        cachedCategories = catList; // Cache it
         setCategories(catList);
         if (catList.length > 0) {
           if (selectedCatFromState) {
@@ -78,24 +98,41 @@ const BrowseCategory = () => {
       setLoadingProds(true);
       setSelectedSubCat("All");
       try {
-        // Fetch Subcategories for chips
+        // Use cached data if available
+        if (cachedCategoryData[activeCategory.name]) {
+          const data = cachedCategoryData[activeCategory.name];
+          setSubcategories(data.subcategories);
+          setProducts(data.products);
+          setFilteredProducts(data.products);
+          setLoadingProds(false);
+          return;
+        }
+
+        // Fetch Subcategories and Products in parallel for faster loading
         const subCatRef = collection(db, "subcategory");
         const subQ = query(subCatRef, where("category", "==", activeCategory.name));
-        const subSnap = await getDocs(subQ);
-        const subList = subSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setSubcategories(subList);
-
-        // Fetch Products
+        
         const prodRef = collection(db, "products");
-        // We fetch by category name based on previous implementations
         const prodQ = query(prodRef, where("category", "==", activeCategory.name));
-        const prodSnap = await getDocs(prodQ);
 
+        const [subSnap, prodSnap] = await Promise.all([
+          getDocs(subQ),
+          getDocs(prodQ)
+        ]);
+
+        const subList = subSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        
         let prodList = prodSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
         // Filter out inactive products
         prodList = prodList.filter((p) => p.isActive !== false);
 
+        // Cache the result
+        cachedCategoryData[activeCategory.name] = {
+          subcategories: subList,
+          products: prodList
+        };
+
+        setSubcategories(subList);
         setProducts(prodList);
         setFilteredProducts(prodList);
       } catch (err) {
@@ -246,9 +283,9 @@ const BrowseCategory = () => {
           {/* Products Grid */}
           <div className="browse-products-grid">
             {loadingProds ? (
-              <div className="loading-prods-wrapper py-4">
-                <Loading minHeight="200px" />
-              </div>
+              Array.from({ length: 6 }).map((_, index) => (
+                <div key={`skeleton-${index}`} className="skeleton-card"></div>
+              ))
             ) : filteredProducts.length > 0 ? (
               filteredProducts.map((prod) => {
                 const price = Number(prod.price || 0);

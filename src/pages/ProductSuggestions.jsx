@@ -10,6 +10,7 @@ import { addToCart } from "../redux/cartSlice";
 import { useTheme } from "../context/ThemeContext";
 import { useTranslation } from "react-i18next";
 import Loading from "./Loading";
+import SkeletonGrid from "../components/SkeletonGrid";
 
 // Helper to get the first valid image URL (consistent with CategoryProducts.jsx)
 const getFirstImage = (product) => {
@@ -163,7 +164,11 @@ function ProductSuggestions({ currentProductId, category, subcategory }) {
     }, [suggestions, sortBy, filterPrice]);
 
     if (loading) {
-        return <Loading message={t("findingSimilarProducts", "Finding similar products...")} minHeight="200px" />;
+        return (
+            <div className="py-2 w-100">
+                <SkeletonGrid count={4} />
+            </div>
+        );
     }
 
     if (error || suggestions.length === 0) {
