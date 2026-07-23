@@ -486,7 +486,7 @@ function Wishlist() {
                 </Col>
             </Row>
 
-            <style jsx>{`
+            <style>{`
                 .sidebar-link {
                     transition: all 0.15s ease;
                     color: #4a5568 !important;

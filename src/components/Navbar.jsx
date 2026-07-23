@@ -1108,17 +1108,8 @@ export default function Header() {
           </div>
 
           {/* SEARCH BAR — Mobile / Tablet (<1200px) */}
-          <div className="navbar-mobile-search-row d-xl-none w-100 mt-2">
-            <div className="ref-search-bar w-100" onClick={() => navigate("/search")} style={{ cursor: 'pointer' }}>
-              <FiSearch className="search-icon-left" />
-              <input
-                type="text"
-                className="ref-search-input"
-                placeholder={t("searchPlaceholder", "Try Saree, Kurti or Search by Product Code")}
-                style={{ pointerEvents: 'none' }}
-                readOnly
-              />
-            </div>
+          <div className="navbar-mobile-search-row d-xl-none w-100 mt-2 position-relative" style={{ zIndex: 100 }}>
+            <SearchBar onFilterClick={() => navigate("/search")} />
           </div>
 
         </div>
@@ -1128,8 +1119,17 @@ export default function Header() {
           <div className="sub-navbar-inner">
             <div
               className="sub-nav-all-cat"
-              onMouseEnter={() => setShowCategoryDropdown(true)}
-              onMouseLeave={() => setShowCategoryDropdown(false)}
+              onClick={() => setShowCategoryDropdown(prev => !prev)}
+              onMouseEnter={() => {
+                if (window.matchMedia("(hover: hover)").matches) {
+                  setShowCategoryDropdown(true);
+                }
+              }}
+              onMouseLeave={() => {
+                if (window.matchMedia("(hover: hover)").matches) {
+                  setShowCategoryDropdown(false);
+                }
+              }}
             >
               <i className="fas fa-th sub-nav-grid-icon"></i>
               <span>{t("allCategories", "All Categories")}</span>
@@ -1137,13 +1137,34 @@ export default function Header() {
 
               {/* Mega Menu Dropdown */}
               {showCategoryDropdown && (
-                <div className="all-categories-dropdown">
+                <div className="all-categories-dropdown" onClick={(e) => e.stopPropagation()}>
+                  {/* Pull handle line for bottom sheet indicator */}
+                  <div className="bottom-sheet-handle d-md-none"></div>
+
+                  {/* Bottom sheet header for mobile */}
+                  <div className="all-categories-dropdown-header d-md-none">
+                    <span>{t("allCategories", "All Categories")}</span>
+                    <button 
+                      className="close-btn" 
+                      onClick={(e) => { 
+                        e.stopPropagation(); 
+                        setShowCategoryDropdown(false); 
+                      }}
+                    >
+                      &times;
+                    </button>
+                  </div>
+
                   {categories.length > 0 ? (
                     categories.map(cat => (
                       <div
                         key={cat.id}
                         className="cat-dropdown-item"
-                        onClick={() => navigate('/browse-categories', { state: { selectedCategory: cat.name } })}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowCategoryDropdown(false);
+                          navigate('/browse-categories', { state: { selectedCategory: cat.name } });
+                        }}
                       >
                         {cat.image ? (
                           <img src={cat.image} alt={cat.name} className="cat-dropdown-img" />

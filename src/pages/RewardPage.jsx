@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import { useTheme } from "../context/ThemeContext";
 import rewardsGiftBox from "../Images/rewards_gift_box.png";
 import { Modal } from "react-bootstrap";
+import "./Profile.css";
 
 const RewardPage = () => {
   const { t } = useTranslation();

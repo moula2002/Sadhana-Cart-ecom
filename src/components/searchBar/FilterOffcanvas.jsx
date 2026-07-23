@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Offcanvas, Button, Form } from "react-bootstrap";
 import { FaTimes } from "react-icons/fa";
 import "./FilterOffcanvas.css";
 import { useTranslation } from "react-i18next";
+import { db } from "../../firebase";
+import { collection, getDocs, limit, query } from "firebase/firestore";
 
 import { useTheme } from "../../context/ThemeContext";
 
@@ -19,6 +21,60 @@ const FilterOffcanvas = ({ show, onHide, onApply }) => {
     size: "",
     rating: ""
   });
+  
+  const [options, setOptions] = useState({
+    Category: [],
+    Gender: [],
+    Brand: [],
+    Size: [],
+    Rating: ["4 & above", "3 & above", "2 & above", "1 & above"]
+  });
+  const [loadingOptions, setLoadingOptions] = useState(false);
+
+  useEffect(() => {
+    if (!show || options.Category.length > 0) return;
+
+    const fetchOptions = async () => {
+      setLoadingOptions(true);
+      try {
+        const q = query(collection(db, "products"), limit(500));
+        const snap = await getDocs(q);
+        
+        const catSet = new Set();
+        const genSet = new Set();
+        const brandSet = new Set();
+        const sizeSet = new Set();
+        
+        snap.forEach(doc => {
+          const data = doc.data();
+          if (data.category) catSet.add(data.category);
+          if (data.gender) genSet.add(data.gender);
+          if (data.brand) brandSet.add(data.brand);
+          if (data.size) {
+            if (Array.isArray(data.size)) {
+              data.size.forEach(s => sizeSet.add(s));
+            } else {
+              sizeSet.add(data.size);
+            }
+          }
+        });
+        
+        setOptions(prev => ({
+          ...prev,
+          Category: Array.from(catSet).sort(),
+          Gender: Array.from(genSet).sort(),
+          Brand: Array.from(brandSet).sort(),
+          Size: Array.from(sizeSet).sort()
+        }));
+      } catch (err) {
+        console.error("Error fetching filter options:", err);
+      } finally {
+        setLoadingOptions(false);
+      }
+    };
+
+    fetchOptions();
+  }, [show, options.Category.length]);
 
   const tabs = [
     { id: "Price", label: t("price", "Price") },
@@ -105,8 +161,45 @@ const FilterOffcanvas = ({ show, onHide, onApply }) => {
           </div>
         );
       case "Category":
-        return <div className="filter-content-pane text-muted p-3">{t("categoriesFilterComingSoon", "Categories filter coming soon.")}</div>;
-      // Implement other tabs as needed...
+      case "Gender":
+      case "Brand":
+      case "Size":
+      case "Rating":
+        const list = options[activeTab] || [];
+        const filterKey = activeTab.toLowerCase();
+        const title = t(filterKey, activeTab);
+
+        if (loadingOptions) {
+          return <div className="filter-content-pane text-muted p-3">{t("loading", "Loading...")}</div>;
+        }
+        
+        if (list.length === 0) {
+          return <div className="filter-content-pane text-muted p-3">{t("noOptions", "No options available.")}</div>;
+        }
+
+        return (
+          <div className="filter-content-pane">
+            <h5 className="fw-bold mb-3" style={{ color: isDark ? '#f8fafc' : '#1a202c' }}>{title}</h5>
+            <div className="d-flex flex-column gap-3">
+              {list.map((item, idx) => {
+                const isChecked = filters[filterKey] === item;
+                return (
+                  <label key={idx} className="d-flex align-items-center gap-3" style={{ cursor: 'pointer', color: isDark ? '#cbd5e1' : '#4a5568' }}>
+                    <input 
+                      type="checkbox" 
+                      checked={isChecked}
+                      onChange={() => {
+                        setFilters({...filters, [filterKey]: isChecked ? "" : item});
+                      }}
+                      style={{ accentColor: '#3b82f6', width: '20px', height: '20px' }}
+                    />
+                    <span style={{ fontSize: '15px' }}>{item}</span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+        );
       default:
         return <div className="filter-content-pane text-muted p-3">{t("filterComingSoon", "{{tab}} filter coming soon.", { tab: t(activeTab.toLowerCase(), activeTab) })}</div>;
     }

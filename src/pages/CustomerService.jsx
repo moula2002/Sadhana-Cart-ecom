@@ -71,7 +71,7 @@ const CustomerSupportCenter = () => {
             <h5 className="fw-bold mb-3 cs-text-dark" style={{ fontSize: "16px" }}>{t("popularTopics", "Popular Topics")}</h5>
             
             {/* Topics Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', maxWidth: '550px', marginBottom: '40px' }}>
+            <div className="cs-topics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', maxWidth: '550px', marginBottom: '40px' }}>
               {popularTopics.map((topic, idx) => (
                 <div key={idx} className="cs-topic-card">
                   <div className="cs-topic-icon-bg">
@@ -89,7 +89,7 @@ const CustomerSupportCenter = () => {
               <h5 className="fw-bold mb-1" style={{ color: '#1e3a8a', fontSize: '16px' }}>{t("stillNeedHelp", "Still need help?")}</h5>
               <p className="cs-help-box-text">{t("supportTeamHere", "Our support team is here for you")}</p>
               
-              <div style={{ display: 'flex', gap: '16px' }}>
+              <div className="cs-help-actions" style={{ display: 'flex', gap: '16px' }}>
                 <button style={{ 
                   background: '#0a45bd', 
                   color: 'white', 
@@ -334,6 +334,82 @@ const CustomerSupportCenter = () => {
           background: #0f172a;
           color: #60a5fa;
           border: 1px solid #334155;
+        }
+
+        /* ── Mobile & Tablet Responsiveness ── */
+        @media (max-width: 991px) {
+          .cs-wrapper {
+            padding: 12px 10px !important;
+          }
+          .cs-container {
+            border-radius: 8px !important;
+          }
+          .cs-dashboard-layout {
+            flex-direction: column !important;
+            align-items: stretch !important;
+          }
+          .cs-sidebar {
+            border-right: none !important;
+            border-bottom: 1px solid #e0e0e0 !important;
+            padding: 12px !important;
+            min-height: auto !important;
+            min-width: 100% !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+          }
+          .cs-sidebar-title {
+            margin-bottom: 12px !important;
+            font-size: 14px !important;
+            padding-left: 4px !important;
+          }
+          .sidebar-menu-list {
+            display: flex !important;
+            flex-direction: row !important;
+            overflow-x: auto !important;
+            overflow-y: hidden !important;
+            white-space: nowrap !important;
+            gap: 8px !important;
+            padding: 4px 0 !important;
+            scrollbar-width: none !important;
+            -webkit-overflow-scrolling: touch !important;
+          }
+          .sidebar-menu-list::-webkit-scrollbar {
+            display: none !important;
+          }
+          .cs-menu-item,
+          .cs-menu-item-active {
+            display: inline-flex !important;
+            align-items: center !important;
+            padding: 8px 16px !important;
+            border-radius: 20px !important;
+            font-size: 13px !important;
+            white-space: nowrap !important;
+            gap: 6px !important;
+          }
+          .cs-main-content {
+            padding: 24px 16px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+          }
+          .cs-help-box {
+            padding: 20px !important;
+            max-width: 100% !important;
+          }
+        }
+        @media (max-width: 576px) {
+          .cs-topics-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 12px !important;
+            max-width: 100% !important;
+          }
+          .cs-help-actions {
+            flex-direction: column !important;
+            gap: 10px !important;
+            width: 100% !important;
+          }
+          .cs-help-actions button {
+            width: 100% !important;
+          }
         }
       `}</style>
     </div>

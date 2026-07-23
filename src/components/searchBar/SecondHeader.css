@@ -42,10 +42,21 @@
 }
 
 /* THEME UTILS */
-.theme-text { color: var(--text-dark) }
-.theme-text-secondary { color: var(--text-secondary) }
-.theme-bg { background: var(--bg-primary) }
-.theme-border { border-color: var(--border-color) }
+.theme-text {
+    color: var(--text-dark)
+}
+
+.theme-text-secondary {
+    color: var(--text-secondary)
+}
+
+.theme-bg {
+    background: var(--bg-primary)
+}
+
+.theme-border {
+    border-color: var(--border-color)
+}
 
 .theme-hover:hover {
     background: var(--hover-bg)
@@ -215,12 +226,17 @@
     justify-content: center;
     cursor: pointer;
     z-index: 10;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     transition: all 0.2s ease;
 }
 
-.left-arrow { left: 0 }
-.right-arrow { right: 0 }
+.left-arrow {
+    left: 0
+}
+
+.right-arrow {
+    right: 0
+}
 
 .scroll-arrow:hover {
     background: var(--sadhana-orange);
@@ -283,6 +299,15 @@
         justify-content: center;
         overflow: hidden;
         border: 1.5px solid var(--border-color);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+        transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .mobile-category-card:hover .mobile-category-img-wrapper,
+    .mobile-category-card:active .mobile-category-img-wrapper {
+        transform: scale(1.06);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        border-color: var(--primary-color, #0a45bd);
     }
 
     .mobile-category-img {
@@ -292,14 +317,21 @@
     }
 
     .mobile-category-title {
-        margin-top: 5px;
+        margin-top: 6px;
         font-size: 11px;
+        font-weight: 500;
         text-align: center;
         color: var(--text-dark);
-        max-width: 64px;
+        max-width: 76px;
         overflow: hidden;
         text-overflow: ellipsis;
-        white-space: nowrap;
+        white-space: normal;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        line-height: 1.25;
+        height: 2.5em;
+        /* Ensure all titles have uniform height for perfect vertical alignment */
     }
 }
 
@@ -377,6 +409,7 @@
     0% {
         transform: rotate(0deg) translateX(15px) rotate(0deg);
     }
+
     100% {
         transform: rotate(360deg) translateX(15px) rotate(-360deg);
     }
@@ -413,6 +446,7 @@
 .dark-theme .mobile-category-title {
     color: #e9ecef;
 }
+
 /* ============================================================ */
 /* SECOND HEADER — styled as card below banner (reference UI)   */
 /* ============================================================ */
@@ -420,8 +454,8 @@
     background-color: #ffffff;
     border: 1px solid #e8e8e8;
     border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    margin: 0 40px 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    margin: 16px 40px 16px;
     max-width: 1320px;
     margin-left: auto;
     margin-right: auto;
@@ -493,7 +527,11 @@
 
 @media (max-width: 768px) {
     .second-header-wrapper {
-        margin: 0 10px 12px;
+        margin: 10px 0 12px !important;
+        border-radius: 0 !important;
+        border-left: none !important;
+        border-right: none !important;
+        width: 100% !important;
     }
 }
 

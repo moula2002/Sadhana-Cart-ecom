@@ -117,6 +117,9 @@
 }
 
 @media (max-width: 768px) {
+  .brand-content-wrapper {
+    padding: 16px 12px;
+  }
   .brand-banner-container {
     height: 200px;
   }
@@ -136,5 +139,23 @@
   .brand-products-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
+  }
+  .brand-products-grid .sc-product-card {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+  .subcats-chips {
+    gap: 8px;
+  }
+  .subcat-chip {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .brand-content-wrapper {
+    padding: 12px 8px;
   }
 }

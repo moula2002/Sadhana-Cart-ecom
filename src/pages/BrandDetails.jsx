@@ -130,7 +130,7 @@ function BrandDetails() {
                 const price = product.price || 0;
                 const oldPrice = product.oldPrice || 0;
                 const discount = calculateDiscount(price, oldPrice);
-                const image = product.images?.[0] || "";
+                const image = product.images?.[0] || null;
 
                 return (
                   <div 
@@ -147,7 +147,13 @@ function BrandDetails() {
                     </button>
                     {discount > 0 && <span className="sc-discount-tag">{discount}% {t("off", "OFF")}</span>}
                     <div className="img-box">
-                      <img src={image} alt={name} loading="lazy" />
+                      {image ? (
+                        <img src={image} alt={name} loading="lazy" />
+                      ) : (
+                        <div className="sc-product-placeholder-img d-flex align-items-center justify-content-center h-100 bg-light rounded text-muted">
+                          <i className="fas fa-image fa-2x"></i>
+                        </div>
+                      )}
                     </div>
                     <div className="sc-name">{name}</div>
 

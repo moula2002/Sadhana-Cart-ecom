@@ -315,7 +315,7 @@ function ProductSuggestions({ currentProductId, category, subcategory }) {
                 </div>
             )}
 
-            <style jsx>{`
+            <style>{`
                 .custom-horizontal-scroller::-webkit-scrollbar {
                     display: none;
                 }

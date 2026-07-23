@@ -635,7 +635,7 @@ const ProductListingPage = () => {
                 </Col>
             </Row>
 
-            <style jsx>{`
+            <style>{`
                 .product-card-hover {
                     transition: transform 0.2s ease, box-shadow 0.2s ease;
                 }

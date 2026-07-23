@@ -1554,7 +1554,7 @@ function ProductDetailPage() {
                             </div>
                         </div>
                         {/* Call to Action Buttons */}
-                        <div className="d-flex gap-3 mb-4">
+                        <div className="d-flex flex-column flex-sm-row gap-3 mb-4">
                             <Button
                                 size="lg"
                                 className="fw-bold"
@@ -1599,7 +1599,7 @@ function ProductDetailPage() {
                         </div>
 
                         {/* Action Links Footer */}
-                        <div className="d-flex align-items-center gap-4 pt-2 border-top" style={{ fontSize: '13px', color: isDark ? '#cbd5e1' : '#4a5568', borderColor: isDark ? 'rgba(255,255,255,0.08)' : '#dee2e6' }}>
+                        <div className="d-flex align-items-center justify-content-between flex-wrap gap-3 pt-3 border-top" style={{ fontSize: '13px', color: isDark ? '#cbd5e1' : '#4a5568', borderColor: isDark ? 'rgba(255,255,255,0.08)' : '#dee2e6' }}>
                             <div className="d-flex align-items-center gap-2" style={{ cursor: 'pointer' }} onClick={toggleWishlist}>
                                 {isInWishlist ? (
                                     <FaHeart className="text-danger" />
@@ -2684,7 +2684,7 @@ function ProductDetailPage() {
 
 
             {/* Custom CSS for hover effects */}
-            <style jsx>{`
+            <style>{`
         .hover-shadow {
           transition: all 0.3s ease;
         }

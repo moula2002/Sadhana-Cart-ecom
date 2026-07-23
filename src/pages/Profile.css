@@ -1503,7 +1503,7 @@
 
 @media (max-width: 991px) {
   .profile-dashboard-wrapper {
-    padding: 0 0 30px 0 !important;
+    padding: 12px 0 30px 0 !important;
   }
 
   .profile-dashboard-container {
@@ -1548,8 +1548,11 @@
   }
 
   .dashboard-grid-layout {
-    grid-template-columns: 1fr;
-    gap: 0;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
   }
 
   .dashboard-sidebar {
@@ -1560,6 +1563,8 @@
     border-right: none !important;
     border-top: none !important;
     box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   .sidebar-title {
@@ -1629,7 +1634,19 @@
   }
 
   .dashboard-main-content {
+    display: flex !important;
+    flex-direction: column !important;
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
     padding: 16px !important;
+  }
+
+  .content-left-block,
+  .content-right-block {
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 20px !important;
   }
 
   .form-grid {
@@ -1701,6 +1718,43 @@
 
   .profile-title-header h2 {
     font-size: 20px;
+  }
+
+  /* Custom mobile identity card styles */
+  .user-identity-card {
+    flex-direction: column !important;
+    gap: 24px !important;
+    padding: 20px !important;
+    align-items: center !important;
+    text-align: center !important;
+    width: 100% !important;
+  }
+
+  .avatar-side {
+    border-right: none !important;
+    border-bottom: 1px solid #edf2f7 !important;
+    padding-right: 0 !important;
+    padding-bottom: 24px !important;
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+
+  .details-side {
+    width: 100% !important;
+    padding-left: 0 !important;
+    gap: 16px !important;
+  }
+
+  .detail-row {
+    justify-content: center !important;
+    text-align: left !important;
+  }
+
+  .account-overview-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
   }
 }
 

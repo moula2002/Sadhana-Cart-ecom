@@ -352,3 +352,29 @@
   color: #34d399 !important;
   border-color: rgba(5, 150, 105, 0.4) !important;
 }
+
+/* Mobile Layout for Frequently Bought Together */
+@media (max-width: 576px) {
+  .fbt-container {
+    padding: 16px !important;
+  }
+  .fbt-title {
+    font-size: 1.15rem !important;
+  }
+  .fbt-subtitle {
+    font-size: 0.8rem !important;
+  }
+  .fbt-products-row {
+    flex-direction: column !important;
+    align-items: center !important;
+    width: 100% !important;
+    gap: 8px !important;
+  }
+  .fbt-product-card {
+    width: 100% !important;
+    max-width: 280px !important;
+  }
+  .fbt-plus-divider {
+    margin: 4px 0 !important;
+  }
+}
