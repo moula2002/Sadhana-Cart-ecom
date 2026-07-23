@@ -11,7 +11,7 @@ import {
   Image,
   Badge,
 } from "react-bootstrap";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -1212,7 +1212,7 @@ const CheckoutPage = () => {
 
   return (
     <Container className="py-5 checkout-container theme-container">
-      <ToastContainer position="top-right" autoClose={3000} />
+      
       <Row>
         <Col md={7}>
           <h3 className="fw-bold mb-4 border-bottom pb-2 theme-title">

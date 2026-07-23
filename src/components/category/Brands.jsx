@@ -14,6 +14,12 @@ function Brands() {
 
   useEffect(() => {
     const fetchBrands = async () => {
+      // Check cache first for instant loading
+      const cachedBrands = sessionStorage.getItem("sadhana_brands");
+      if (cachedBrands) {
+        setBrands(JSON.parse(cachedBrands));
+      }
+
       try {
         const querySnapshot = await getDocs(collection(db, "brands"));
         const list = querySnapshot.docs.map((doc) => ({
@@ -21,6 +27,7 @@ function Brands() {
           ...doc.data(),
         }));
         setBrands(list);
+        sessionStorage.setItem("sadhana_brands", JSON.stringify(list));
       } catch (error) {
         console.error("Error fetching brands:", error);
       }
@@ -89,7 +96,7 @@ function Brands() {
               onClick={() => navigate(`/brand/${brand.id}`)}
             >
               <div className="brand-img-wrap">
-                <img src={brand.image} alt={brand.name} loading="lazy" />
+                <img src={brand.image} alt={brand.name} />
               </div>
               <p className="brand-name">{brand.name}</p>
             </div>

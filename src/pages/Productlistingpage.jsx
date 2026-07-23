@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Container, Row, Col, Card, Form, Button, Alert, Spinner, Badge } from "react-bootstrap";
-import { FaStar, FaHeart, FaRegHeart, FaChevronRight, FaThLarge } from "react-icons/fa";
+import { FaStar, FaHeart, FaRegHeart, FaChevronRight, FaThLarge, FaShoppingCart, FaFileImage } from "react-icons/fa";
 import { db, collection, getDocs, query, where, auth, addDoc, deleteDoc, doc } from "../firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { useDispatch } from "react-redux";
@@ -303,7 +303,7 @@ const ProductListingPage = () => {
                     delete copy[pid];
                     return copy;
                 });
-                toast.success(t("removedFromWishlist", "Removed '{{name}}' from wishlist", { name: p.name || p.title }).replace("{{name}}", p.name || p.title), { position: "bottom-right", autoClose: 2000 });
+                toast.success(t("removedFromWishlist", "Removed '{{name}}' from wishlist", { name: p.name || p.title }).replace("{{name}}", p.name || p.title));
             } catch (error) {
                 console.error("Error removing from wishlist:", error);
                 toast.error(t("failedToRemoveFromWishlist", "Failed to remove from wishlist"));
@@ -325,7 +325,7 @@ const ProductListingPage = () => {
                     ...prev,
                     [pid]: newDoc.id
                 }));
-                toast.success(t("addedToWishlist", "Added '{{name}}' to wishlist!", { name: p.name || p.title }).replace("{{name}}", p.name || p.title), { position: "bottom-right", autoClose: 2000 });
+                toast.success(t("addedToWishlist", "Added '{{name}}' to wishlist!", { name: p.name || p.title }).replace("{{name}}", p.name || p.title));
             } catch (error) {
                 console.error("Error adding to wishlist:", error);
                 toast.error(t("failedToAddToWishlist", "Failed to add to wishlist"));
@@ -494,14 +494,14 @@ const ProductListingPage = () => {
                     ) : (
                         <>
                             {/* Product Grid */}
-                            <Row className="g-4 row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-4">
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '1rem' }} className="product-listing-grid">
                                 {paginatedProducts.map((p) => {
                                     const finalPrice = Number(p.offerprice || p.price || 0);
                                     const originalPrice = p.price && p.offerprice ? Number(p.price) : Math.round(finalPrice * 1.5);
                                     const discountPercent = Math.round(((originalPrice - finalPrice) / originalPrice) * 100);
 
                                     return (
-                                        <Col key={p.id}>
+                                        <div key={p.id}>
                                             <Card className="h-100 border shadow-sm p-2 product-card-hover" style={{ borderRadius: '16px', overflow: 'hidden' }}>
                                                 {/* Image Container with Badges */}
                                                 <div className="d-flex justify-content-center align-items-center p-3 position-relative rounded-3" style={{ height: "200px", backgroundColor: '#f8fafc' }}>
@@ -529,64 +529,45 @@ const ProductListingPage = () => {
                                                 </div>
 
                                                 {/* Details */}
-                                                <Card.Body className="p-3 bg-white d-flex flex-column justify-content-between">
-                                                    <div>
-                                                        <Card.Title
-                                                            className="fw-bold mb-1 text-dark cursor-pointer"
-                                                            style={{ fontSize: '0.92rem', color: '#0f172a', fontWeight: '800', lineHeight: '1.35', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', height: '2.5em' }}
-                                                            onClick={() => navigate(`/product/${p.id}`)}
-                                                        >
-                                                            {p.name || p.title}
-                                                        </Card.Title>
+                                                <Card.Body className="d-flex flex-column p-3">
+                                                    <Card.Title className="fw-bold mb-2 text-dark" style={{ fontSize: '0.95rem', display: '-webkit-box', WebkitLineClamp: '2', WebkitBoxOrient: 'vertical', overflow: 'hidden', height: '2.8rem' }} onClick={() => navigate(`/product/${p.id}`)}>
+                                                        {p.name || p.title || t("productNameFallback", "Product Name")}
+                                                    </Card.Title>
 
-                                                        {/* Pricing */}
-                                                        <div className="d-flex align-items-baseline gap-2 mb-2">
-                                                            <span className="fw-bold" style={{ fontSize: '1.1rem', fontWeight: '800', color: '#0f172a' }}>
-                                                                ₹{finalPrice.toLocaleString()}
-                                                            </span>
-                                                            {originalPrice > finalPrice && (
-                                                                <span className="text-muted text-decoration-line-through" style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
-                                                                    ₹{originalPrice.toLocaleString()}
-                                                                </span>
-                                                            )}
-                                                            {discountPercent > 0 && (
-                                                                <span className="fw-bold" style={{ fontSize: '0.78rem', color: '#059669' }}>
-                                                                    {discountPercent}% {t("off", "off")}
-                                                                </span>
-                                                            )}
-                                                        </div>
-
-                                                        {/* Rating */}
-                                                        <div className="d-flex align-items-center gap-1.5 mb-3 text-warning" style={{ fontSize: '12px', fontWeight: '600' }}>
-                                                            <FaStar />
-                                                            <span className="text-dark">{(p.rating?.rate || 4.5).toFixed(1)}</span>
-                                                            <span className="text-muted font-normal">({p.rating?.count || 128})</span>
-                                                        </div>
+                                                    <div className="d-flex align-items-center mb-3">
+                                                        <span className="fw-bold text-dark fs-5">₹{finalPrice.toLocaleString()}</span>
+                                                        {discountPercent > 0 && (
+                                                            <>
+                                                                <span className="text-muted text-decoration-line-through ms-2 small">₹{originalPrice.toLocaleString()}</span>
+                                                                <span className="ms-2 fw-bold" style={{ color: '#059669', fontSize: '0.85rem' }}>{discountPercent}% off</span>
+                                                            </>
+                                                        )}
                                                     </div>
 
-                                                    {/* Add to Cart button */}
-                                                    <button
-                                                        className="sc-add-btn"
-                                                        onClick={() => {
+                                                    <Button 
+                                                        variant="light" 
+                                                        className="w-100 fw-bold mt-auto d-flex align-items-center justify-content-center" 
+                                                        style={{ color: '#2563eb', backgroundColor: '#eff6ff', borderRadius: '8px', border: 'none' }}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
                                                             dispatch(addToCart({
                                                                 id: p.id,
                                                                 title: p.name || p.title,
                                                                 price: finalPrice,
                                                                 image: getProductImage(p),
                                                                 quantity: 1,
-                                                            sellerId: p.sellerId || "default_seller"
-                                                                }));
-                                                                toast.success(t("addedToCartMsg", "Added {{name}} to cart!", { name: p.name || p.title }).replace("{{name}}", p.name || p.title), { position: "bottom-right", autoClose: 2000 });
-                                                            }}
-                                                        >
-                                                            <i className="fas fa-shopping-cart me-1"></i> {t("addToCart", "Add to Cart")}
-                                                        </button>
-                                                    </Card.Body>
+                                                            }));
+                                                            toast.success(t("addedToCartMsg", "Added {{name}} to cart!", { name: p.name || p.title }).replace("{{name}}", p.name || p.title));
+                                                        }}
+                                                    >
+                                                        <FaShoppingCart className="me-2" /> {t("addToCart", "Add to Cart")}
+                                                    </Button>
+                                                </Card.Body>
                                             </Card>
-                                        </Col>
+                                        </div>
                                     );
                                 })}
-                            </Row>
+                            </div>
 
                             {/* Pagination Row */}
                             {totalPages > 1 && (

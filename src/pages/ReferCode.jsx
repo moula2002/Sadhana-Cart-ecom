@@ -8,7 +8,7 @@ import {
   FaEnvelope, FaCommentAlt, FaLinkedinIn, FaGoogle, FaEllipsisH 
 } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Loading from "../pages/Loading";
 import { useNavigate } from "react-router-dom";
@@ -131,7 +131,7 @@ function ReferCode() {
 
   return (
     <div className="referral-page-wrapper py-5">
-      <ToastContainer />
+      
       <div className="container" style={{ maxWidth: '950px' }}>
         
         {/* Header Header */}

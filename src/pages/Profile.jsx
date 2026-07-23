@@ -18,7 +18,7 @@ import {
   deleteDoc
 } from "firebase/firestore";
 import { motion, AnimatePresence } from "framer-motion";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Loading from "../pages/Loading";
 import {
@@ -596,7 +596,7 @@ function Profile() {
 
   return (
     <div className="profile-dashboard-wrapper">
-      <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
+      
 
       {/* Main container */}
       <div className="profile-dashboard-container">

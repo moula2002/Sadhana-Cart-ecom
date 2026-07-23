@@ -3,7 +3,7 @@ import { useNavigate, useLocation, Link } from "react-router-dom";
 import { db } from "../firebase";
 import { collection, getDocs, query, where, addDoc, serverTimestamp } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useDispatch } from "react-redux";
 import { addToCart } from "../redux/cartSlice";
@@ -203,10 +203,11 @@ const BrowseCategory = () => {
       };
 
       await addDoc(wishlistRef, wishlistItem);
-      toast.success(t("addedToWishlist", "Added to wishlist!"), { position: "top-right", autoClose: 2000 });
+      const productName = prod.name || prod.title || "Product";
+      toast.success(`${productName} added to wishlist!`);
     } catch (error) {
       console.error("Error adding to wishlist:", error);
-      toast.error(t("failedToAddWishlist", "Failed to add to wishlist"), { position: "top-right", autoClose: 3000 });
+      toast.error("Failed to add to wishlist");
     }
   };
 
@@ -216,7 +217,7 @@ const BrowseCategory = () => {
 
   return (
     <div className="browse-category-page-wrapper">
-      <ToastContainer />
+      
       {/* Mobile Header (Hidden on Desktop) */}
       <div className="mobile-browse-header d-lg-none">
         <button className="back-button" onClick={() => navigate(-1)}>

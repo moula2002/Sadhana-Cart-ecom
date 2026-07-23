@@ -107,7 +107,7 @@ function Wishlist() {
         try {
             await deleteDoc(doc(db, "users", currentUser.uid, "favorites", favId));
             setFavorites(favorites.filter((item) => item.id !== favId));
-            toast.success(t("removedFromWishlist", "Removed '{{name}}' from wishlist", { name: productName }).replace("{{name}}", productName), { position: "bottom-right", autoClose: 2000 });
+            toast.success(t("removedFromWishlist", "Removed '{{name}}' from wishlist", { name: productName }).replace("{{name}}", productName));
         } catch (error) {
             console.error("Error removing from wishlist:", error);
             toast.error(t("failedToRemoveItem", "Failed to remove item"));
@@ -137,7 +137,7 @@ function Wishlist() {
             setSuggestions(suggestions.filter(s => s.id !== product.id));
             setFavorites([...favorites, { id: product.id, ...newFav }]);
             
-            toast.success(t("addedToWishlist", "Added '{{name}}' to wishlist!", { name: product.name || product.title }).replace("{{name}}", product.name || product.title), { position: "bottom-right", autoClose: 2000 });
+            toast.success(t("addedToWishlist", "Added '{{name}}' to wishlist!", { name: product.name || product.title }).replace("{{name}}", product.name || product.title));
         } catch (error) {
             console.error("Error adding to wishlist:", error);
             toast.error(t("failedToAddToWishlist", "Failed to add to wishlist"));
@@ -184,7 +184,7 @@ function Wishlist() {
                 await deleteDoc(doc(db, "users", currentUser.uid, "favorites", item.id));
             }
             setFavorites([]);
-            toast.success(t("wishlistCleared", "Wishlist cleared successfully"), { position: "bottom-right", autoClose: 2000 });
+            toast.success(t("wishlistCleared", "Wishlist cleared successfully"));
         } catch (error) {
             console.error("Error clearing wishlist:", error);
             toast.error(t("failedToClearWishlist", "Failed to clear wishlist"));
@@ -219,8 +219,8 @@ function Wishlist() {
     return (
         <Container fluid className="py-4 px-lg-5 mt-3">
             <Row className="g-4 align-items-start">
-                {/* Left Sidebar - Account Menu */}
-                <Col lg={3}>
+                {/* Left Sidebar - Account Menu (hidden on mobile) */}
+                <Col lg={3} className="d-none d-lg-block">
                     <div style={{ position: 'sticky', top: '100px' }}>
                         <Card className="border shadow-sm p-4 wishlist-sidebar">
                             <h4 className="fw-bolder mb-4 px-2 wishlist-sidebar-title">{t("myAccount", "My Account")}</h4>
@@ -268,17 +268,18 @@ function Wishlist() {
 
                 {/* Right Main Content - Wishlist Grid */}
                 <Col lg={9}>
-                    <div className="d-flex justify-content-between align-items-center mb-4">
-                        <h3 className="fw-bold mb-0 text-dark">
+                    {/* Header - mobile friendly wrapping */}
+                    <div className="d-flex justify-content-between align-items-start align-items-sm-center flex-wrap gap-2 mb-4">
+                        <h3 className="fw-bold mb-0 text-dark" style={{ fontSize: 'clamp(1.1rem, 4vw, 1.5rem)' }}>
                             {t("myWishlistTitle", "My Wishlist")} <span className="text-muted fs-6 fw-normal">({favorites.length} {t("items", "Items")})</span>
                         </h3>
                         {favorites.length > 0 && (
-                            <div className="d-flex gap-2">
+                            <div className="d-flex gap-2 flex-wrap">
                                 <Button
                                     variant="outline-primary"
                                     size="sm"
                                     className="px-3 py-2 fw-semibold"
-                                    style={{ fontSize: '13px' }}
+                                    style={{ fontSize: '12px' }}
                                     onClick={handleMoveAllToCart}
                                 >
                                     {t("moveAllToCart", "Move All to Cart")}
@@ -287,7 +288,7 @@ function Wishlist() {
                                     variant="outline-danger"
                                     size="sm"
                                     className="px-3 py-2 fw-semibold"
-                                    style={{ fontSize: '13px' }}
+                                    style={{ fontSize: '12px' }}
                                     onClick={handleClearWishlist}
                                 >
                                     {t("removeAll", "Remove All")}
@@ -308,12 +309,7 @@ function Wishlist() {
                             </Card.Body>
                         </Card>
                     ) : (
-                        <div style={{
-                            display: 'flex',
-                            flexWrap: 'wrap',
-                            gap: '16px',
-                            marginBottom: '24px'
-                        }}>
+                        <div className="wishlist-items-grid">
                             {favorites.map((item) => {
                                 const finalPrice = Number(item.price || 0);
                                 const originalPrice = Number(item.originalPrice || Math.round(finalPrice * 1.5));
@@ -323,15 +319,6 @@ function Wishlist() {
                                     <div
                                         key={item.id}
                                         className="wishlist-item-card"
-                                        style={{
-                                            width: '200px',
-                                            flexShrink: 0,
-                                            borderRadius: '16px',
-                                            boxShadow: '0 2px 12px rgba(0,0,0,0.07)',
-                                            overflow: 'hidden',
-                                            display: 'flex',
-                                            flexDirection: 'column'
-                                        }}
                                     >
                                         {/* Image */}
                                         <div style={{ position: 'relative', background: 'linear-gradient(135deg,#f8faff,#f0f4ff)', height: '160px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>

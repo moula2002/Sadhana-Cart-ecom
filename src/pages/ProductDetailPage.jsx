@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { Container, Row, Col, Spinner, Alert, Card, Button, Form, InputGroup, Modal, Badge, Accordion, Image } from "react-bootstrap";
 import { useDispatch } from "react-redux";
 import { addToCart } from "../redux/cartSlice";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Loading from "../pages/Loading";
 import {
@@ -521,14 +521,12 @@ function ProductDetailPage() {
             setWishlistId(docRef.id);
             setIsInWishlist(true);
 
-            toast.success("Added to wishlist!", {
-                position: "top-right",
-                autoClose: 2000
-            });
+            const productName = product?.name || product?.title || "Product";
+            toast.success(`${productName} added to wishlist!`);
 
         } catch (error) {
             console.error("Error adding to wishlist:", error);
-            toast.error("Failed to add to wishlist", { position: "top-right", autoClose: 3000 });
+            toast.error("Failed to add to wishlist");
         } finally {
             setWishlistLoading(false);
         }
@@ -543,10 +541,11 @@ function ProductDetailPage() {
             await deleteDoc(doc(db, "users", currentUser.uid, "favorites", wishlistId));
             setWishlistId(null);
             setIsInWishlist(false);
-            toast.success("Removed from wishlist", { position: "top-right", autoClose: 2000 });
+            const productName = product?.name || product?.title || "Product";
+            toast.success(`${productName} removed from wishlist`);
         } catch (error) {
             console.error("Error removing from wishlist:", error);
-            toast.error("Failed to remove from wishlist", { position: "top-right", autoClose: 3000 });
+            toast.error("Failed to remove from wishlist");
         } finally {
             setWishlistLoading(false);
         }
@@ -1376,7 +1375,7 @@ function ProductDetailPage() {
     return (
         <Container className="py-4">
 
-            <ToastContainer position="top-right" autoClose={3000} theme="colored" />
+            
             {showLogin && (
                 <LoginPage onClose={() => setShowLogin(false)} />
             )}

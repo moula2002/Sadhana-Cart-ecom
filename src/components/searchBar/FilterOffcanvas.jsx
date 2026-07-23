@@ -167,7 +167,8 @@ const FilterOffcanvas = ({ show, onHide, onApply }) => {
       case "Rating":
         const list = options[activeTab] || [];
         const filterKey = activeTab.toLowerCase();
-        const title = t(filterKey, activeTab);
+        const tabInfo = tabs.find(t => t.id === activeTab);
+        const title = tabInfo ? tabInfo.label : activeTab;
 
         if (loadingOptions) {
           return <div className="filter-content-pane text-muted p-3">{t("loading", "Loading...")}</div>;

@@ -89,7 +89,7 @@ const RewardPage = () => {
         </div>
 
         {/* Outer Dashboard Grid */}
-        <div className="dashboard-grid-layout" style={{ margin: 0, borderRadius: "0 0 10px 10px", gap: 0 }}>
+        <div className="dashboard-grid-layout" style={{ margin: 0, borderRadius: "0 0 10px 10px", gap: '30px' }}>
           
           {/* Sidebar Menu */}
           <div className="dashboard-sidebar" style={{ padding: "24px 16px", minHeight: "600px", borderRadius: 0, marginTop: 0 }}>
@@ -146,7 +146,7 @@ const RewardPage = () => {
                 <img src={rewardsGiftBox} alt="rewards box" style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
               </div>
             </div>            {/* 3 Action Cards */}
-            <div className="rewards-action-grid" style={{ gap: '20px', maxWidth: '550px', marginBottom: '40px' }}>
+            <div className="rewards-action-grid" style={{ gap: '20px', width: '100%', marginBottom: '40px' }}>
               <div className="overview-card" style={{ borderRadius: '12px', padding: '24px 16px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                 <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: '#ecfdf5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', color: '#10b981' }}>💎</div>
                 <h5 className="card-info" style={{ fontSize: '14px', fontWeight: 'bold', margin: '0' }}>{t("howToEarnPoints", "How to Earn Points")}</h5>
@@ -167,7 +167,7 @@ const RewardPage = () => {
             <h5 className="fw-bold mb-3 order-num-id" style={{ fontSize: "16px" }}>{t("recentTransactions", "Recent Transactions")}</h5>
             
             {/* Transaction List */}
-            <div style={{ maxWidth: '550px', marginBottom: '30px' }}>
+            <div style={{ width: '100%', marginBottom: '30px' }}>
               {loading ? (
                 <div className="text-center py-4">{t("loadingTransactions", "Loading transactions...")}</div>
               ) : transactions.length === 0 ? (
@@ -222,7 +222,6 @@ const RewardPage = () => {
                 className="overview-card" 
                 style={{ 
                   width: '100%', 
-                  maxWidth: '550px',
                   padding: '14px', 
                   borderRadius: '8px',
                   fontWeight: '600',

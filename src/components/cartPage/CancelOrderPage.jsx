@@ -32,7 +32,7 @@ import {
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { getFunctions, httpsCallable } from "firebase/functions";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useTheme } from "../../context/ThemeContext";
 import { useTranslation } from "react-i18next";
@@ -407,7 +407,7 @@ function CancelOrderPage() {
           </Button>
         </Modal.Footer>
       </Modal>
-      <ToastContainer position="top-center" autoClose={3000} />
+      
     </div>
   );
 }

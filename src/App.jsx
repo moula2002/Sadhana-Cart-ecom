@@ -9,7 +9,9 @@ import {
 import "bootstrap/dist/css/bootstrap.min.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
+import "react-toastify/dist/ReactToastify.css";
 import "./pages/Home.css";
+import { ToastContainer } from "react-toastify";
 
 /* ===== Common Components & Loader ===== */
 import Header from "./components/Navbar";
@@ -167,6 +169,23 @@ const AppContent = () => {
       </main>
 
       {!hideLayout && <Footer />}
+
+      {/* Global Toast Notifications */}
+      <ToastContainer
+        position="bottom-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        toastClassName="sc-toast"
+        bodyClassName="sc-toast-body"
+        progressClassName="sc-toast-progress"
+      />
     </>
   );
 };

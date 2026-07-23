@@ -75,20 +75,22 @@ export const useWishlist = () => {
         notifyListeners();
 
         try {
+            const productName = product.name || product.title || "Product";
+            
             if (isWishlisted) {
                 await deleteDoc(favRef);
-                toast.success(`Removed from wishlist`, { position: "bottom-right", autoClose: 2000 });
+                toast.success(`${productName} removed from wishlist`);
             } else {
                 const newFav = {
                     productId: id,
-                    name: product.name || product.title || "Product",
+                    name: productName,
                     price: product.offerprice || product.price || 0,
                     originalPrice: product.price || 0,
                     image: (Array.isArray(product.images) && product.images[0]) || product.image || "https://via.placeholder.com/150",
                     addedAt: new Date().toISOString()
                 };
                 await setDoc(favRef, newFav);
-                toast.success(`Added to wishlist!`, { position: "bottom-right", autoClose: 2000 });
+                toast.success(`${productName} added to wishlist!`);
             }
         } catch (error) {
             console.error("Wishlist toggle error", error);

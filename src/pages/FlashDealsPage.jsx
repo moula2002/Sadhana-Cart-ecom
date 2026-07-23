@@ -7,7 +7,7 @@ import { collection, getDocs } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { addToCart } from "../redux/cartSlice";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Loading from "../pages/Loading";
 import SkeletonGrid from "../components/SkeletonGrid";
@@ -70,7 +70,7 @@ function FlashDealsPage() {
 
   return (
     <div className="fdp-page-wrapper">
-      <ToastContainer position="bottom-right" autoClose={2000} hideProgressBar />
+      
       <div className="fdp-inner">
         <div className="fdp-card">
           <div className="fdp-header">

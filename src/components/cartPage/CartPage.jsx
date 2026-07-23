@@ -8,6 +8,7 @@ import {
 } from "../../redux/cartSlice";
 
 import { Container, Row, Col, Toast, ToastContainer } from "react-bootstrap";
+import { toast } from "react-toastify";
 import { useNavigate, Link } from "react-router-dom";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
@@ -139,12 +140,15 @@ const CartPage = () => {
 
   const handleRemove = (item) => {
     dispatch(removeFromCart({ id: item.id, size: item.size }));
+    const productName = item.title || item.name || "Product";
+    toast.success(`${productName} removed from cart!`);
   };
 
   /* ---------------- Clear cart ---------------- */
 
   const handleClear = () => {
     dispatch(clearCart());
+    toast.success("Shopping cart cleared!");
   };
 
   /* ---------------- Total price ---------------- */

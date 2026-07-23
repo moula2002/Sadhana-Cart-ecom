@@ -16,17 +16,25 @@ import Loading from "./Loading";
 import SkeletonGrid from "../components/SkeletonGrid";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebase";
-import { FaStar, FaRupeeSign, FaFilter, FaShoppingBag, FaSearch, FaBoxOpen, FaFileImage } from "react-icons/fa";
+import { FaStar, FaRupeeSign, FaFilter, FaShoppingBag, FaSearch, FaBoxOpen, FaFileImage, FaHeart, FaShoppingCart } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import { useDispatch } from "react-redux";
+import { addToCart } from "../redux/cartSlice";
+import { useWishlist } from "../hooks/useWishlist";
+import { toast } from "react-toastify";
 import "./SearchResultsPage.css";
 
 const SearchResultsPage = () => {
   const { t } = useTranslation();
   const location = useLocation();
+  const dispatch = useDispatch();
+  const { wishlisted, toggleWishlist } = useWishlist();
+  
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(20);
 
   const params = new URLSearchParams(location.search);
   const category = params.get("category");
@@ -101,6 +109,11 @@ const SearchResultsPage = () => {
     };
 
     fetchProducts();
+  }, [location.search]);
+
+  // Reset visible count when filters change
+  useEffect(() => {
+    setVisibleCount(20);
   }, [location.search]);
 
   // Helper function to format category name
@@ -296,131 +309,120 @@ const SearchResultsPage = () => {
             </Alert>
           </motion.div>
         ) : (
-          <Row>
-            <AnimatePresence>
-              {products.map((product, index) => (
-                <Col xs={6} md={4} key={product.id} className="mb-4">
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    whileHover={{ y: -8 }}
-                    className="h-100"
-                  >
-                    <Link
-                      to={`/product/${product.id}`}
-                      className="text-decoration-none"
+          <>
+            <div className="search-results-grid">
+              <AnimatePresence>
+                {products.slice(0, visibleCount).map((product, index) => {
+                  const price = product.price || 0;
+                  const offerprice = product.offerprice || price;
+                  const discount = price > offerprice ? Math.round(((price - offerprice) / price) * 100) : 0;
+                  
+                  return (
+                  <div key={product.id}>
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      whileHover={{ y: -8 }}
+                      className="h-100"
                     >
-                      <Card className="product-card h-100 shadow-sm">
-                        <div className="product-image-wrapper">
+                      <Card className="product-card h-100 shadow-sm border-0 position-relative" style={{ borderRadius: '16px', cursor: 'pointer' }} onClick={() => window.location.href = `/product/${product.id}`}>
+                        {/* Badges */}
+                        <div style={{ position: 'absolute', top: '12px', left: '12px', zIndex: 1 }}>
+                          {discount > 0 && (
+                            <Badge bg="danger" className="px-2 py-1" style={{ fontSize: '0.75rem', fontWeight: 'bold', borderRadius: '4px' }}>
+                              {discount}% OFF
+                            </Badge>
+                          )}
+                        </div>
+                        
+                        {/* Wishlist Heart */}
+                        <div style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 1 }}>
+                          <button 
+                            className="btn btn-light rounded-circle p-2 shadow-sm d-flex align-items-center justify-content-center" 
+                            style={{ width: '32px', height: '32px' }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleWishlist(e, product);
+                            }}
+                          >
+                            <FaHeart color={wishlisted[product.id] ? "#ff4081" : "#cbd5e1"} size={14} />
+                          </button>
+                        </div>
+
+                        <div className="product-image-wrapper p-3 d-flex align-items-center justify-content-center" style={{ backgroundColor: '#f8f9fa', borderTopLeftRadius: '16px', borderTopRightRadius: '16px', height: '200px' }}>
                           {getFirstImage(product).toLowerCase().includes(".emf") ? (
-                            <div className="emf-placeholder" style={{ 
-                              display: "flex", 
-                              flexDirection: "column", 
-                              alignItems: "center", 
-                              justifyContent: "center", 
-                              height: "280px", 
-                              background: "#f8fafc",
-                              padding: "10px",
-                              textAlign: "center"
-                            }}>
+                            <div className="emf-placeholder" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", width: "100%", background: "#f8fafc" }}>
                               <FaFileImage size={42} color="#2563eb" />
-                              <span style={{ fontSize: "11px", marginTop: "10px", color: "#1e293b", fontWeight: "700" }}>EMF VECTOR</span>
                             </div>
                           ) : (
                             <Card.Img
                               variant="top"
                               src={getFirstImage(product)}
-                              height="280"
-                              className="product-image"
+                              style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }}
                               onError={(e) => {
                                 e.target.onerror = null;
                                 e.target.src = "https://placehold.jp/300x300.png?text=Format+Not+Supported";
                               }}
                             />
                           )}
-                          {product.discount && (
-                            <Badge 
-                              bg="danger" 
-                              className="discount-badge"
-                            >
-                              {product.discount}% {t("off", "OFF")}
-                            </Badge>
-                          )}
-                          {product.stock && product.stock < 10 && (
-                            <Badge 
-                              bg="warning" 
-                              text="dark" 
-                              className="stock-badge"
-                            >
-                              {t("onlyNLeft", "Only {{count}} left", { count: product.stock }).replace("{{count}}", product.stock)}
-                            </Badge>
-                          )}
                         </div>
                         
-                        <Card.Body className="d-flex flex-column">
-                          <div className="mb-2">
-                            {product.category && (
-                              <Badge 
-                                bg="light" 
-                                text="secondary" 
-                                className="category-badge"
-                              >
-                                {typeof product.category === 'object' 
-                                  ? product.category.category 
-                                  : product.category}
-                              </Badge>
-                            )}
-                          </div>
-                          
-                          <Card.Title className="product-title fw-bold mb-2">
+                        <Card.Body className="d-flex flex-column p-3">
+                          <Card.Title className="fw-bold mb-2 text-dark" style={{ fontSize: '0.95rem', display: '-webkit-box', WebkitLineClamp: '2', WebkitBoxOrient: 'vertical', overflow: 'hidden', height: '2.8rem' }}>
                             {product.name || t("productNameFallback", "Product Name")}
                           </Card.Title>
 
-                          <div className="product-rating mb-2">
-                            <div className="d-flex align-items-center">
-                              <div className="rating-stars">
-                                {[...Array(5)].map((_, i) => (
-                                  <FaStar
-                                    key={i}
-                                    className={`star-icon ${
-                                      i < Math.floor(product.rating || 0)
-                                        ? "filled"
-                                        : "empty"
-                                    }`}
-                                  />
-                                ))}
-                              </div>
-                              <span className="rating-value ms-2">
-                                {product.rating || 0}
-                              </span>
-                            </div>
+                          <div className="d-flex align-items-center mb-3">
+                            <span className="fw-bold text-dark fs-5">&#8377;{offerprice.toLocaleString()}</span>
+                            {discount > 0 && (
+                              <>
+                                <span className="text-muted text-decoration-line-through ms-2 small">&#8377;{price.toLocaleString()}</span>
+                                <span className="ms-2 fw-bold" style={{ color: '#059669', fontSize: '0.85rem' }}>{discount}% off</span>
+                              </>
+                            )}
                           </div>
 
-                          <div className="product-price-wrapper mt-auto">
-                            <div className="d-flex align-items-center">
-                              <FaRupeeSign className="price-icon" />
-                              <span className="product-price fw-bold">
-                                {product.price || 0}
-                              </span>
-                            </div>
-                            
-                            <Button 
-                              variant="outline-primary" 
-                              size="sm"
-                              className="view-product-btn"
-                            >
-                              {t("viewDetails", "View Details")}
-                            </Button>
-                          </div>
+                          <Button 
+                            variant="light" 
+                            className="w-100 fw-bold mt-auto d-flex align-items-center justify-content-center" 
+                            style={{ color: '#2563eb', backgroundColor: '#eff6ff', borderRadius: '8px', border: 'none' }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              dispatch(addToCart({
+                                id: product.id,
+                                title: product.name || "Product",
+                                price: offerprice,
+                                image: getFirstImage(product),
+                                quantity: 1,
+                              }));
+                              toast.success(`${product.name || 'Item'} added to cart!`);
+                            }}
+                          >
+                            <FaShoppingCart className="me-2" /> {t("addToCart", "Add to Cart")}
+                          </Button>
                         </Card.Body>
                       </Card>
-                    </Link>
-                  </motion.div>
-                </Col>
-              ))}
-            </AnimatePresence>
-          </Row>
+                    </motion.div>
+                  </div>
+                  );
+                })}
+              </AnimatePresence>
+            </div>
+
+            {/* View More Button */}
+            {visibleCount < products.length && (
+              <div className="d-flex justify-content-center mt-5 mb-4">
+                <button
+                  className="btn btn-outline-primary px-5 py-2 fw-bold rounded-pill"
+                  style={{ fontSize: '1rem', borderWidth: '2px' }}
+                  onClick={() => setVisibleCount(prev => prev + 20)}
+                >
+                  {t("viewMore", "View More")} &#40;{products.length - visibleCount} {t("remaining", "remaining")}&#41;
+                </button>
+              </div>
+            )}
+          </>
         )}
       </Container>
     </motion.div>

@@ -931,3 +931,187 @@ textarea {
     height: 200px;
   }
 }
+
+/* Product Listing Grid - strict 5 columns on desktop */
+.product-listing-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 1400px) {
+  .product-listing-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 992px) {
+  .product-listing-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .product-listing-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+}
+
+/* Search Results Grid - strict 5 columns on desktop, no sidebar */
+.search-results-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 1200px) {
+  .search-results-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 992px) {
+  .search-results-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .search-results-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+}
+
+/* ===== Wishlist Items Grid ===== */
+.wishlist-items-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.wishlist-item-card {
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+}
+
+@media (max-width: 1200px) {
+  .wishlist-items-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .wishlist-items-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+}
+
+@media (max-width: 400px) {
+  .wishlist-items-grid {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+
+/* =============================================
+   🔔 CUSTOM TOAST NOTIFICATIONS
+   ============================================= */
+
+/* Override Toastify container positioning */
+.Toastify__toast-container--bottom-right {
+  bottom: 24px !important;
+  right: 24px !important;
+}
+
+/* Base toast card style */
+.sc-toast {
+  border-radius: 14px !important;
+  padding: 0 !important;
+  min-height: unset !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.14), 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+  overflow: hidden !important;
+  backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255,255,255,0.2) !important;
+}
+
+/* Toast body */
+.sc-toast-body {
+  padding: 16px 20px !important;
+  font-family: 'Poppins', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+  color: #0f172a !important; /* Dark text */
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+/* Base Toast Background - Premium Glossy Light Theme */
+.sc-toast {
+  background: linear-gradient(145deg, #ffffff 0%, #f0f9ff 100%) !important;
+  border: 1px solid rgba(56, 189, 248, 0.3) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 12px 35px -10px rgba(2, 132, 199, 0.2), 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Progress bar */
+.sc-toast-progress {
+  height: 4px !important;
+  border-radius: 0 0 16px 16px !important;
+  background: linear-gradient(to right, #38bdf8, #2563eb) !important;
+  bottom: 0 !important;
+}
+
+/* Icon - Floating Circle Style */
+.sc-toast .Toastify__toast-icon {
+  width: 28px !important;
+  height: 28px !important;
+  background: #e0f2fe !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.2) !important;
+}
+
+.sc-toast .Toastify__toast-icon svg {
+  fill: #0284c7 !important;
+  width: 16px !important;
+  height: 16px !important;
+}
+
+/* Close button */
+.sc-toast .Toastify__close-button {
+  color: #94a3b8 !important;
+  opacity: 1 !important;
+  padding: 12px !important;
+  align-self: flex-start !important;
+  transition: all 0.2s ease !important;
+}
+.sc-toast .Toastify__close-button:hover {
+  color: #0f172a !important;
+  transform: scale(1.1) !important;
+}
+
+
+/* Mobile */
+@media (max-width: 576px) {
+  .Toastify__toast-container--bottom-right {
+    bottom: 12px !important;
+    right: 12px !important;
+    left: 12px !important;
+    width: auto !important;
+  }
+  .sc-toast {
+    border-radius: 12px !important;
+  }
+}
