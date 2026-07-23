@@ -58,6 +58,11 @@ function BestArrivals({ showCart = false }) {
 
   useEffect(() => {
     const fetchProducts = async () => {
+      const cached = sessionStorage.getItem("sadhana_flash_deals");
+      if (cached) {
+        setProducts(JSON.parse(cached));
+      }
+
       try {
         const querySnapshot = await getDocs(collection(db, "bestArrivals"));
         const list = querySnapshot.docs.map((doc) => ({
@@ -65,6 +70,7 @@ function BestArrivals({ showCart = false }) {
           ...doc.data(),
         }));
         setProducts(list);
+        sessionStorage.setItem("sadhana_flash_deals", JSON.stringify(list));
       } catch (error) {
         console.error("Error fetching best arrivals:", error);
       }
@@ -214,7 +220,7 @@ function BestArrivals({ showCart = false }) {
 
               {/* Image */}
               <div className="img-box">
-                <img src={image} alt={name} loading="lazy" />
+                <img src={image} alt={name} />
               </div>
 
               {/* Name */}
