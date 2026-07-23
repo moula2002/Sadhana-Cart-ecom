@@ -335,16 +335,20 @@ const ProductListingPage = () => {
 
     return (
         <Container fluid className="py-4 px-lg-5 mt-3">
-            <div className="d-flex align-items-center mb-4 text-muted small">
-                <Link to="/" className="text-decoration-none text-muted">{t("homeLabel", "Home")}</Link>
-                <FaChevronRight className="mx-2" size={10} />
+            <div className="d-flex align-items-center mb-4 small" style={{ fontSize: '0.9rem', fontWeight: '500' }}>
+                <Link to="/" className="text-decoration-none text-secondary custom-breadcrumb-link" style={{ transition: 'color 0.3s' }}>
+                    {t("homeLabel", "Home")}
+                </Link>
+                <FaChevronRight className="mx-2 text-muted opacity-50" size={10} />
                 {categoryName && categoryName.toLowerCase().includes("fashion") && categoryName.toLowerCase() !== "fashion" && (
                     <>
-                        <span className="text-muted">{t("fashion", "Fashion")}</span>
-                        <FaChevronRight className="mx-2" size={10} />
+                        <span className="text-secondary">{t("fashionTitle", "Fashion")}</span>
+                        <FaChevronRight className="mx-2 text-muted opacity-50" size={10} />
                     </>
                 )}
-                <span className="text-dark fw-semibold">{categoryName}</span>
+                <span className="text-primary fw-semibold px-3 py-1 rounded-pill shadow-sm" style={{ background: 'rgba(13, 110, 253, 0.1)', color: '#0d6efd' }}>
+                    {categoryName}
+                </span>
             </div>
 
             <Row className="g-4">
