@@ -27,7 +27,17 @@ const RecentlyViewed = ({ currentProductId }) => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       try {
-        setLoading(true);
+        const cached = sessionStorage.getItem("sadhana_rv_cache");
+        if (cached) {
+          const cachedFiltered = currentProductId
+            ? JSON.parse(cached).filter((item) => item.id !== currentProductId && item.productId !== currentProductId)
+            : JSON.parse(cached);
+          setProducts(cachedFiltered);
+          setLoading(false);
+        } else {
+          setLoading(true);
+        }
+        
         const items = await getRecentlyViewed(user);
 
         // Filter out current product if on ProductDetailPage
@@ -36,6 +46,7 @@ const RecentlyViewed = ({ currentProductId }) => {
           : items;
 
         setProducts(filtered);
+        sessionStorage.setItem("sadhana_rv_cache", JSON.stringify(items));
       } catch (err) {
         console.error("Error loading recently viewed products:", err);
       } finally {
@@ -150,7 +161,6 @@ const RecentlyViewed = ({ currentProductId }) => {
                 <img
                   src={product.image || "https://placehold.jp/200x200.png?text=Product"}
                   alt={product.name}
-                  loading="lazy"
                 />
               </div>
 
