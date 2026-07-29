@@ -693,7 +693,6 @@
   justify-content: space-between;
   padding: 26px 24px;
   min-height: 168px;
-  overflow: hidden;
   position: relative;
   border-right: 1px solid rgba(255, 255, 255, 0.15);
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);

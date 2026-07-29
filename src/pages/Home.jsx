@@ -16,6 +16,7 @@ import appStoreIcon from "../Images/app store .icon.jpg";
 import rewardsPromo from "../Images/rewards_promo.png";
 import appPromo from "../Images/app_promo.png";
 import sellerPromo from "../Images/seller_promo.jpg";
+import promotingApp from "../Images/Promoting.png";
 import {
   FaTruck, FaMedal, FaUndoAlt, FaHeadphones,
   FaSmileBeam, FaCheckCircle, FaBoxOpen, FaCreditCard,
@@ -44,6 +45,43 @@ function Home() {
 
       {/* ── FLASH DEALS ── */}
       <BestArrivals showCart={true} />
+
+      {/* ── PROMOTE APP AFTER FLASH DEALS ── */}
+      <div className="promote-app-banner" style={{ margin: "20px -16px", width: "calc(100% + 32px)", position: "relative" }}>
+        <img src={promotingApp} alt="Promote App" style={{ width: "100%", maxHeight: "400px", display: "block", objectFit: "fill" }} />
+        {/* Invisible click zone — Google Play button in image */}
+        <a
+          href="https://play.google.com/store/apps/details?id=com.innomatrics.sadhana_cart"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Get it on Google Play"
+          style={{
+            position: "absolute",
+            bottom: "8%",
+            left: "8%",
+            width: "20%",
+            height: "18%",
+            cursor: "pointer",
+            zIndex: 10,
+          }}
+        />
+        {/* Invisible click zone — App Store button in image */}
+        <a
+          href="https://apps.apple.com/in/app/sadhana-cart-online-shopping/id6751406762"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Download on the App Store"
+          style={{
+            position: "absolute",
+            bottom: "8%",
+            left: "29%",
+            width: "20%",
+            height: "18%",
+            cursor: "pointer",
+            zIndex: 10,
+          }}
+        />
+      </div>
 
       {/* ── RECENTLY VIEWED PRODUCTS ── */}
       <RecentlyViewed />
@@ -146,20 +184,24 @@ function Home() {
             <p className="promo-desc">
               {t("home.exclusiveDeals1", "Get exclusive app-only")}<br />{t("home.exclusiveDeals2", "deals & offers")}
             </p>
-            <div className="store-btns-row">
+            <div className="store-btns-row" style={{ position: "relative", zIndex: 10 }}>
               <a
                 href="https://play.google.com/store/apps/details?id=com.innomatrics.sadhana_cart"
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 className="store-badge-link"
+                aria-label="Get it on Google Play"
+                onClick={(e) => { e.stopPropagation(); window.open('https://play.google.com/store/apps/details?id=com.innomatrics.sadhana_cart', '_blank'); }}
               >
-                <img src={googlePlayBadge} alt="Google Play" className="store-badge-img" />
+                <img src={googlePlayBadge} alt="Get it on Google Play" className="store-badge-img" />
               </a>
               <a
                 href="https://apps.apple.com/in/app/sadhana-cart-online-shopping/id6751406762"
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 className="store-badge-link"
+                aria-label="Download on the App Store"
+                onClick={(e) => { e.stopPropagation(); window.open('https://apps.apple.com/in/app/sadhana-cart-online-shopping/id6751406762', '_blank'); }}
               >
                 <img src={appStoreIcon} alt="App Store" className="store-badge-img" />
               </a>

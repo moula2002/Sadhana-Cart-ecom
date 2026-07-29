@@ -1115,3 +1115,76 @@ textarea {
     border-radius: 12px !important;
   }
 }
+
+/* =============================================
+   🌙 DARK MODE TOAST OVERRIDES
+   ============================================= */
+
+/* Dark theme toast card */
+.dark-theme .sc-toast,
+[data-theme="dark"] .sc-toast,
+[data-bs-theme="dark"] .sc-toast {
+  background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%) !important;
+  border: 1px solid rgba(56, 189, 248, 0.2) !important;
+  box-shadow: 0 12px 40px -10px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255,255,255,0.05) !important;
+}
+
+/* Dark theme toast text */
+.dark-theme .sc-toast-body,
+[data-theme="dark"] .sc-toast-body,
+[data-bs-theme="dark"] .sc-toast-body {
+  color: #f1f5f9 !important;
+}
+
+/* Dark theme progress bar — glowing blue */
+.dark-theme .sc-toast-progress,
+[data-theme="dark"] .sc-toast-progress,
+[data-bs-theme="dark"] .sc-toast-progress {
+  background: linear-gradient(to right, #38bdf8, #818cf8) !important;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.6) !important;
+}
+
+/* Dark theme icon circle */
+.dark-theme .sc-toast .Toastify__toast-icon,
+[data-theme="dark"] .sc-toast .Toastify__toast-icon,
+[data-bs-theme="dark"] .sc-toast .Toastify__toast-icon {
+  background: rgba(56, 189, 248, 0.15) !important;
+  border: 1px solid rgba(56, 189, 248, 0.3) !important;
+  box-shadow: 0 2px 6px rgba(56, 189, 248, 0.2) !important;
+}
+
+/* Dark theme icon svg */
+.dark-theme .sc-toast .Toastify__toast-icon svg,
+[data-theme="dark"] .sc-toast .Toastify__toast-icon svg,
+[data-bs-theme="dark"] .sc-toast .Toastify__toast-icon svg {
+  fill: #38bdf8 !important;
+}
+
+/* Dark theme close button */
+.dark-theme .sc-toast .Toastify__close-button,
+[data-theme="dark"] .sc-toast .Toastify__close-button,
+[data-bs-theme="dark"] .sc-toast .Toastify__close-button {
+  color: #64748b !important;
+}
+
+.dark-theme .sc-toast .Toastify__close-button:hover,
+[data-theme="dark"] .sc-toast .Toastify__close-button:hover,
+[data-bs-theme="dark"] .sc-toast .Toastify__close-button:hover {
+  color: #f1f5f9 !important;
+}
+
+/* react-toastify built-in dark theme polish */
+.Toastify__toast-theme--dark.sc-toast {
+  background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%) !important;
+  color: #f1f5f9 !important;
+  border: 1px solid rgba(56, 189, 248, 0.2) !important;
+  box-shadow: 0 12px 40px -10px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.05) !important;
+}
+
+.Toastify__toast-theme--dark .sc-toast-body {
+  color: #f1f5f9 !important;
+}
+
+.Toastify__toast-theme--dark .sc-toast-progress {
+  background: linear-gradient(to right, #38bdf8, #818cf8) !important;
+}
