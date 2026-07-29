@@ -25,6 +25,7 @@ import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import { useTranslation } from "react-i18next";
 
 import Loading from "./Loading";
+import HoverImageCarousel from "../components/HoverImageCarousel";
 
 const auth = getAuth();
 
@@ -132,11 +133,11 @@ function Wishlist() {
             };
 
             await setDoc(doc(db, "users", currentUser.uid, "favorites", product.id), newFav);
-            
+
             // Remove from suggestions and add to favorites list locally to update UI immediately
             setSuggestions(suggestions.filter(s => s.id !== product.id));
             setFavorites([...favorites, { id: product.id, ...newFav }]);
-            
+
             toast.success(t("addedToWishlist", "Added '{{name}}' to wishlist!", { name: product.name || product.title }).replace("{{name}}", product.name || product.title));
         } catch (error) {
             console.error("Error adding to wishlist:", error);
@@ -430,17 +431,20 @@ function Wishlist() {
                                         >
                                             <Card className="h-100 border shadow-sm p-2 product-card-hover wishlist-sug-card" style={{ borderRadius: '16px', overflow: 'hidden' }}>
                                                 <div className="d-flex justify-content-center align-items-center p-3 position-relative rounded-3 wishlist-sug-img-bg" style={{ height: "160px" }}>
+                                                    {/* Discount Badge */}
+                                                    {/* (Note: there is no discount badge in this section of Wishlist.jsx suggestions) */}
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); addToWishlist(p); }}
                                                         className="suggestion-wishlist-btn"
-                                                        style={{ position: 'absolute', top: 8, right: 8, width: 28, height: 28, borderRadius: '50%', background: '#fff', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.12)', zIndex: 2 }}
+                                                        style={{ position: 'absolute', top: 8, right: 8, width: 28, height: 28, borderRadius: '50%', background: '#fff', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.12)', zIndex: 10 }}
                                                     >
                                                         <FaHeart className="suggestion-heart-icon" size={12} color="#cbd5e1" />
                                                     </button>
-                                                    <Card.Img
-                                                        src={(Array.isArray(p.images) && p.images[0]) || p.image || "https://via.placeholder.com/150"}
+                                                    <HoverImageCarousel
+                                                        images={p.images}
+                                                        fallbackImage={(Array.isArray(p.images) && p.images[0]) || p.image || "https://via.placeholder.com/150"}
+                                                        alt={p.name || p.title}
                                                         style={{ height: "120px", width: 'auto', objectFit: "contain" }}
-                                                        className="cursor-pointer"
                                                         onClick={() => navigate(`/product/${p.id}`)}
                                                     />
                                                 </div>

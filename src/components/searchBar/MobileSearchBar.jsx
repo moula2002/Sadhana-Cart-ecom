@@ -8,10 +8,10 @@ import "./MobileSearchBar.css";
 import { useTranslation } from "react-i18next";
 
 // React icons
-import { FaArrowLeft, FaSearch, FaMicrophone, FaTimes } from "react-icons/fa";
+import { FaChevronLeft, FaSearch, FaMicrophone, FaTimes } from "react-icons/fa";
 import { HiOutlineAdjustmentsHorizontal } from "react-icons/hi2";
 import { FiTrendingUp } from "react-icons/fi";
-import { BsArrowUpLeft } from "react-icons/bs";
+import { BsArrowUpRight } from "react-icons/bs";
 
 // Category Icons for Trending Now
 import { 
@@ -57,35 +57,49 @@ const MobileSearchBar = ({ onBack }) => {
 
     try {
       const productsRef = collection(db, "products");
-      const q = query(
+      const firstWord = searchTerms[0];
+
+      // 1. Prefix query by name_lower
+      const qName = query(
         productsRef,
-        where("searchkeywords", "array-contains", firstWord),
-        limit(50)
+        where("name_lower", ">=", value.toLowerCase()),
+        where("name_lower", "<=", value.toLowerCase() + "\uf8ff"),
+        limit(15)
       );
 
-      const snap = await getDocs(q);
-      let results = snap.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
+      // 2. Query by searchkeywords
+      const qKeywords = query(
+        productsRef,
+        where("searchkeywords", "array-contains", firstWord),
+        limit(15)
+      );
 
-      if (searchTerms.length > 1) {
+      const [snapName, snapKeywords] = await Promise.all([
+        getDocs(qName),
+        getDocs(qKeywords)
+      ]);
+
+      const mergedDocs = new Map();
+      snapName.docs.forEach(doc => mergedDocs.set(doc.id, { id: doc.id, ...doc.data() }));
+      snapKeywords.docs.forEach(doc => mergedDocs.set(doc.id, { id: doc.id, ...doc.data() }));
+
+      let results = Array.from(mergedDocs.values());
+
+      if (results.length === 0) {
+        const allSnap = await getDocs(query(productsRef, limit(30)));
+        results = allSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      }
+
+      // Strictly filter based on name_lower and searchkeywords without RegExp pattern
+      if (searchTerms.length > 0) {
         results = results.filter(p => {
-          const keywords = p.searchkeywords || [];
-          const textToSearch = (p.name + " " + (p.pattern || "") + " " + (p.category || "") + " " + keywords.join(" ")).toLowerCase();
+          const keywords = Array.isArray(p.searchkeywords) ? p.searchkeywords.map(t => t.toLowerCase()) : [];
+          const nameStr = (p.name_lower || "").toLowerCase();
+          const textToSearch = [nameStr, ...keywords].filter(Boolean).join(" ");
           return searchTerms.every(term => textToSearch.includes(term));
         });
       }
 
-      if (results.length === 0) {
-        const allSnap = await getDocs(query(productsRef, limit(30)));
-        results = allSnap.docs
-          .map(doc => ({ id: doc.id, ...doc.data() }))
-          .filter(p => {
-            const textToSearch = (p.name + " " + (p.pattern || "") + " " + (p.category || "")).toLowerCase();
-            return searchTerms.every(term => textToSearch.includes(term));
-          });
-      }
       setSuggestions(results.slice(0, 8));
     } catch (error) {
       console.error("Search error:", error);
@@ -102,7 +116,7 @@ const MobileSearchBar = ({ onBack }) => {
   }, [searchTerm]);
 
   const handleSelect = (product) => {
-    const term = product.pattern || product.name || "";
+    const term = product.name || product.title || "";
     setSearchTerm(term);
     navigate(`/product/${product.id}`);
   };
@@ -121,7 +135,7 @@ const MobileSearchBar = ({ onBack }) => {
       {/* Blue Header */}
       <div className="mobile-search-header bg-primary">
         <button className="icon-btn text-white" onClick={onBack}>
-          <FaArrowLeft />
+          <FaChevronLeft />
         </button>
         
         <div className="search-input-wrapper">
@@ -131,7 +145,7 @@ const MobileSearchBar = ({ onBack }) => {
             className="mobile-search-input"
             placeholder={t("searchPlaceholder", "Search...")}
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => setSearchTerm(e.target.value.toLowerCase())}
             autoFocus
           />
           {searchTerm && (
@@ -139,13 +153,14 @@ const MobileSearchBar = ({ onBack }) => {
               <FaTimes />
             </button>
           )}
-          <button className="mic-btn">
-            <FaMicrophone />
-          </button>
         </div>
         
-        <button className="icon-btn filter-btn text-white" onClick={() => setShowFilter(true)}>
-          <HiOutlineAdjustmentsHorizontal size={24} />
+        <button className="icon-btn mic-btn-external">
+          <FaMicrophone />
+        </button>
+        
+        <button className="icon-btn filter-btn-external text-white" onClick={() => setShowFilter(true)}>
+          <HiOutlineAdjustmentsHorizontal size={22} />
         </button>
       </div>
 
@@ -175,17 +190,17 @@ const MobileSearchBar = ({ onBack }) => {
                   <div className="suggestion-thumb-wrapper">
                     <img 
                       src={p.image || p.thumbnail || p.images?.[0] || "https://via.placeholder.com/50"} 
-                      alt={p.name} 
+                      alt={p.name_lower || p.name} 
                       className="suggestion-thumb" 
                     />
                   </div>
                   <div className="suggestion-info">
-                    <div className="suggestion-title">{p.pattern || p.name}</div>
+                    <div className="suggestion-title">{p.name_lower || p.name}</div>
                     <div className="suggestion-category">{t("inCategory", "in {{category}}", { category: p.category?.toLowerCase() || 'fashion' }).replace("{{category}}", p.category?.toLowerCase() || 'fashion')}</div>
                   </div>
                   <div className="suggestion-action">
                     <div className="suggestion-price">₹{p.offerprice || p.mrp || 209}</div>
-                    <BsArrowUpLeft className="suggestion-arrow" />
+                    <BsArrowUpRight className="suggestion-arrow" />
                   </div>
                 </div>
               ))

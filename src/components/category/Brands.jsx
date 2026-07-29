@@ -5,6 +5,7 @@ import { collection, getDocs } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import "./Brands.css";
+import HoverImageCarousel from "../HoverImageCarousel";
 
 function Brands() {
   const { t } = useTranslation();
@@ -96,7 +97,12 @@ function Brands() {
               onClick={() => navigate(`/brand/${brand.id}`)}
             >
               <div className="brand-img-wrap">
-                <img src={brand.image} alt={brand.name} />
+                <HoverImageCarousel
+                    images={brand.images || [brand.image]}
+                    fallbackImage={brand.image}
+                    alt={brand.name}
+                    style={{ height: "100%", width: '100%', objectFit: "contain" }}
+                />
               </div>
               <p className="brand-name">{brand.name}</p>
             </div>

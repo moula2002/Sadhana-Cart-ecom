@@ -275,37 +275,51 @@ const SearchBar = ({ onFilterClick }) => {
     try {
       const productsRef = collection(db, "products");
       
-      // Query Firebase using the first keyword to narrow down
-      const q = query(
+      // 1. Prefix query by name_lower
+      const qName = query(
         productsRef,
-        where("searchkeywords", "array-contains", firstWord),
-        limit(50) // fetch more for local filtering
+        where("name_lower", ">=", value.toLowerCase()),
+        where("name_lower", "<=", value.toLowerCase() + "\uf8ff"),
+        limit(15)
       );
 
-      const snap = await getDocs(q);
-      let results = snap.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-
-      // Filter locally to ensure ALL search terms are present (AND logic)
-      if (searchTerms.length > 1) {
-        results = results.filter(p => {
-          const keywords = p.searchkeywords || [];
-          const textToSearch = (p.name + " " + (p.pattern || "") + " " + (p.category || "") + " " + keywords.join(" ")).toLowerCase();
-          return searchTerms.every(term => textToSearch.includes(term));
-        });
+      // 2. Query by searchkeywords
+      const keywordTerms = [firstWord];
+      if (firstWord.endsWith('s') && firstWord.length > 3) {
+          keywordTerms.push(firstWord.substring(0, firstWord.length - 1));
+      } else if (!firstWord.endsWith('s') && firstWord.length > 3) {
+          keywordTerms.push(`${firstWord}s`);
       }
+      const qKeywords = query(
+        productsRef,
+        where("searchkeywords", "array-contains-any", keywordTerms),
+        limit(15)
+      );
 
-      // Fallback if no exact array-contains matches found
+      const [snapName, snapKeywords] = await Promise.all([
+        getDocs(qName),
+        getDocs(qKeywords)
+      ]);
+
+      const mergedDocs = new Map();
+      snapName.docs.forEach(doc => mergedDocs.set(doc.id, { id: doc.id, ...doc.data() }));
+      snapKeywords.docs.forEach(doc => mergedDocs.set(doc.id, { id: doc.id, ...doc.data() }));
+
+      let results = Array.from(mergedDocs.values());
+
       if (results.length === 0) {
         const allSnap = await getDocs(query(productsRef, limit(30)));
-        results = allSnap.docs
-          .map(doc => ({ id: doc.id, ...doc.data() }))
-          .filter(p => {
-            const textToSearch = (p.name + " " + (p.pattern || "") + " " + (p.category || "")).toLowerCase();
-            return searchTerms.every(term => textToSearch.includes(term));
-          });
+        results = allSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      }
+
+      // Strictly filter based on name_lower and searchkeywords without RegExp pattern
+      if (searchTerms.length > 0) {
+        results = results.filter(p => {
+          const keywords = Array.isArray(p.searchkeywords) ? p.searchkeywords.map(t => t.toLowerCase()) : [];
+          const nameStr = (p.name_lower || "").toLowerCase();
+          const textToSearch = [nameStr, ...keywords].filter(Boolean).join(" ");
+          return searchTerms.every(term => textToSearch.includes(term));
+        });
       }
 
       setSuggestions(results.slice(0, 8));
@@ -345,7 +359,7 @@ const SearchBar = ({ onFilterClick }) => {
   };
 
   const handleSelect = (product) => {
-    const term = product.pattern || product.name || "";
+    const term = product.name_lower || product.name || "";
     saveRecentSearch(term);
     setSearchTerm(term);
     setShowDropdown(false);
@@ -402,7 +416,7 @@ const SearchBar = ({ onFilterClick }) => {
           className="ref-search-input"
           placeholder={t("searchPlaceholder", "Try Saree, Kurti or Search by Product Code")}
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e) => setSearchTerm(e.target.value.toLowerCase())}
           onClick={() => setShowDropdown(true)}
           onFocus={() => setShowDropdown(true)}
           onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
@@ -449,14 +463,14 @@ const SearchBar = ({ onFilterClick }) => {
                   <div className="suggestion-thumb-wrapper">
                     <img
                       src={p.image || p.thumbnail || p.images?.[0] || "https://via.placeholder.com/50"}
-                      alt={p.pattern || p.name}
+                      alt={p.name_lower || p.name}
                       className="suggestion-thumb"
                       onError={(e) => e.target.src = "https://via.placeholder.com/50"}
                     />
                   </div>
-                  <div className="suggestion-info">
-                    <div className="suggestion-title">
-                      {highlightText(p.pattern || p.name, searchTerm)}
+                  <div className="suggestion-info" style={{ minWidth: 0, overflow: "hidden" }}>
+                    <div className="suggestion-title" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                      {highlightText(p.name_lower || p.name, searchTerm)}
                     </div>
                     <div className="suggestion-category">
                       in {p.category?.toLowerCase() || 'fashion'}
@@ -524,7 +538,7 @@ const SearchBar = ({ onFilterClick }) => {
                       onClick={() => handleSelect(p)}
                     >
                       <i className="fas fa-search trending-icon text-muted"></i>
-                      <span>{p.pattern || p.name}</span>
+                      <span>{p.name_lower || p.name}</span>
                     </div>
                   ))}
                 </>

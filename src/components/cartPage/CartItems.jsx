@@ -88,22 +88,22 @@ const CartItems = ({ items, onIncrease, onDecrease, onRemove }) => {
 
     title: {
       fontSize: '1rem',
-      fontWeight: 600,
+      fontWeight: 500,
       color: '#1a1a1a',
-      marginBottom: '4px',
+      marginBottom: '6px',
       lineHeight: 1.4,
     },
 
     size: {
-      fontSize: '0.85rem',
+      fontSize: '0.9rem',
       color: '#666666',
-      marginBottom: '8px',
+      marginBottom: '12px',
     },
 
     price: {
       fontSize: '1.1rem',
       fontWeight: 600,
-      color: '#2e7d32',
+      color: '#1e7b45',
       marginBottom: '4px',
     },
 
@@ -164,35 +164,44 @@ const CartItems = ({ items, onIncrease, onDecrease, onRemove }) => {
 
     subtotal: {
       textAlign: 'right',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'flex-end',
     },
 
     subtotalLabel: {
-      fontSize: '0.75rem',
+      fontSize: '0.8rem',
       color: '#666666',
-      display: 'block',
-      marginBottom: '2px',
+      textTransform: 'uppercase',
+      letterSpacing: '0.5px',
+      marginBottom: '10px',
+    },
+
+    subtotalRow: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '12px',
     },
 
     subtotalValue: {
-      fontSize: '1.1rem',
+      fontSize: '1.2rem',
       fontWeight: 600,
       color: '#1a1a1a',
     },
 
     removeBtn: {
-      backgroundColor: 'transparent',
+      backgroundColor: '#ffffff',
       border: '1px solid #ffcdd2',
       color: '#d32f2f',
-      padding: '6px 16px',
+      padding: '6px 12px',
       borderRadius: '6px',
-      fontSize: '0.85rem',
+      fontSize: '0.9rem',
       fontWeight: 500,
       display: 'inline-flex',
       alignItems: 'center',
       gap: '6px',
       cursor: 'pointer',
       transition: 'all 0.1s ease',
-      marginTop: '8px',
     },
 
     stockBar: {
@@ -300,10 +309,10 @@ const CartItems = ({ items, onIncrease, onDecrease, onRemove }) => {
                   </Col>
 
                   {/* Product Info */}
-                  <Col xs={12} md={3}>
-                    <h6 style={styles.title}>{item.title}</h6>
+                  <Col xs={12} md={4}>
+                    <div style={styles.title}>{item.title}</div>
                     <div style={styles.size}>
-                      {t("cart.size")}: <span style={{ fontWeight: 500 }}>{item.size}</span>
+                      {t("cart.size", "Size")}: <span>{item.size}</span>
                     </div>
                     <div style={styles.price}>{formatPrice(item.price)}</div>
                     {item.stock <= 5 && item.stock > 0 && (
@@ -314,7 +323,7 @@ const CartItems = ({ items, onIncrease, onDecrease, onRemove }) => {
                   </Col>
 
                   {/* Quantity */}
-                  <Col xs={6} md={3}>
+                  <Col xs={6} md={2}>
                     <div style={styles.quantitySection}>
                       <span style={styles.quantityLabel}>{t("quantity", "Quantity")}</span>
                       <div style={styles.quantityControls}>
@@ -325,16 +334,6 @@ const CartItems = ({ items, onIncrease, onDecrease, onRemove }) => {
                           }}
                           onClick={() => onDecrease(item)}
                           disabled={item.quantity <= 1}
-                          onMouseEnter={(e) => {
-                            if (item.quantity > 1) {
-                              e.currentTarget.style.backgroundColor = '#f5f5f5';
-                              e.currentTarget.style.borderColor = '#999999';
-                            }
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor = '#ffffff';
-                            e.currentTarget.style.borderColor = '#e0e0e0';
-                          }}
                         >
                           −
                         </button>
@@ -346,16 +345,6 @@ const CartItems = ({ items, onIncrease, onDecrease, onRemove }) => {
                           }}
                           onClick={() => handleIncreaseClick(item)}
                           disabled={isMaxQuantity}
-                          onMouseEnter={(e) => {
-                            if (!isMaxQuantity) {
-                              e.currentTarget.style.backgroundColor = '#f5f5f5';
-                              e.currentTarget.style.borderColor = '#999999';
-                            }
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor = '#ffffff';
-                            e.currentTarget.style.borderColor = '#e0e0e0';
-                          }}
                         >
                           +
                         </button>
@@ -370,28 +359,26 @@ const CartItems = ({ items, onIncrease, onDecrease, onRemove }) => {
                   <Col xs={6} md={4}>
                     <div style={styles.subtotal}>
                       <span style={styles.subtotalLabel}>{t("subtotal", "Subtotal")}</span>
-                      <span style={styles.subtotalValue}>
-                        {formatPrice(item.price * item.quantity)}
-                      </span>
-                      <button
-                        style={styles.removeBtn}
-                        onClick={() => onRemove(item)}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = '#d32f2f';
-                          e.currentTarget.style.borderColor = '#d32f2f';
-                          e.currentTarget.style.color = '#ffffff';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = 'transparent';
-                          e.currentTarget.style.borderColor = '#ffcdd2';
-                          e.currentTarget.style.color = '#d32f2f';
-                        }}
-                      >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
-                        </svg>
-                        {t("remove", "Remove")}
-                      </button>
+                      <div style={styles.subtotalRow}>
+                        <span style={styles.subtotalValue}>
+                          {formatPrice(item.price * item.quantity)}
+                        </span>
+                        <button
+                          style={styles.removeBtn}
+                          onClick={() => onRemove(item)}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#fff5f5';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = '#ffffff';
+                          }}
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                          </svg>
+                          {t("remove", "Remove")}
+                        </button>
+                      </div>
                     </div>
                   </Col>
                 </Row>

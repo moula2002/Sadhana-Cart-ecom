@@ -13,6 +13,7 @@ import { Toast, ToastContainer } from "react-bootstrap";
 import Loading from "../../pages/Loading";
 import SkeletonGrid from "../SkeletonGrid";
 import { useTranslation } from "react-i18next";
+import HoverImageCarousel from "../HoverImageCarousel";
 
 function BestProducts() {
   const { t } = useTranslation();
@@ -147,7 +148,12 @@ function BestProducts() {
               {discount > 0 && <span className="bs-discount-tag">{discount}% OFF</span>}
 
               <div className="bs-img-wrap">
-                <img src={image} alt={name} loading="lazy" />
+                <HoverImageCarousel
+                    images={product.images || [image]}
+                    fallbackImage={image}
+                    alt={name}
+                    style={{ height: "100%", width: '100%', objectFit: "contain" }}
+                />
               </div>
 
               {/* Name */}

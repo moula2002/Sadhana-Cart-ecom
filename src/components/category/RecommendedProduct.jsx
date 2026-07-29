@@ -11,6 +11,7 @@ import { useDispatch } from "react-redux";
 import { addToCart } from "../../redux/cartSlice";
 import Loading from "../../pages/Loading";
 import { useTranslation } from "react-i18next";
+import HoverImageCarousel from "../HoverImageCarousel";
 
 function RecommendedProduct({ showCart = true }) {
   const { t } = useTranslation();
@@ -145,7 +146,12 @@ function RecommendedProduct({ showCart = true }) {
 
               {/* Image */}
               <div className="img-box">
-                <img src={image} alt={name} loading="lazy" />
+                <HoverImageCarousel
+                    images={product.images || [image]}
+                    fallbackImage={image}
+                    alt={name}
+                    style={{ height: "100%", width: '100%', objectFit: "contain" }}
+                />
               </div>
 
               {/* Name */}

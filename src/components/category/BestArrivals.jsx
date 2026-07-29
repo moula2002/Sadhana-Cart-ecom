@@ -9,6 +9,7 @@ import { useDispatch } from "react-redux";
 import { addToCart } from "../../redux/cartSlice";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
+import HoverImageCarousel from "../HoverImageCarousel";
 
 function BestArrivals({ showCart = false }) {
   const { t } = useTranslation();
@@ -220,7 +221,12 @@ function BestArrivals({ showCart = false }) {
 
               {/* Image */}
               <div className="img-box">
-                <img src={image} alt={name} />
+                <HoverImageCarousel
+                    images={product.images || [image]}
+                    fallbackImage={image}
+                    alt={name}
+                    style={{ height: "100%", width: '100%', objectFit: "contain" }}
+                />
               </div>
 
               {/* Name */}

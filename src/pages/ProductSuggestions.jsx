@@ -11,6 +11,7 @@ import { useTheme } from "../context/ThemeContext";
 import { useTranslation } from "react-i18next";
 import Loading from "./Loading";
 import SkeletonGrid from "../components/SkeletonGrid";
+import HoverImageCarousel from "../components/HoverImageCarousel";
 
 // Helper to get the first valid image URL (consistent with CategoryProducts.jsx)
 const getFirstImage = (product) => {
@@ -255,62 +256,64 @@ function ProductSuggestions({ currentProductId, category, subcategory }) {
                                             <div className="d-flex justify-content-center align-items-center p-3 position-relative" style={{ height: "200px", backgroundColor: '#ffffff', borderRadius: '12px 12px 0 0' }}>
                                                 {/* Bestseller Badge */}
                                                 {p.rating?.rate >= 4.0 && (
-                                                    <Badge bg="primary" className="position-absolute top-0 start-0 m-2 px-2 py-1 rounded" style={{ fontSize: '0.65rem', fontWeight: '800' }}>
+                                                    <Badge bg="primary" className="position-absolute top-0 start-0 m-2 px-2 py-1 rounded" style={{ fontSize: '0.65rem', fontWeight: '800', zIndex: 10 }}>
                                                         {t("bestseller", "Bestseller")}
                                                     </Badge>
                                                 )}
                                                 {/* Circular/Square Rating Badge at bottom-left */}
-                                                <div className="position-absolute bottom-0 start-0 m-2 px-2 py-0.5 rounded border d-flex align-items-center gap-1 shadow-sm" style={{ fontSize: '0.75rem', fontWeight: 'bold', backgroundColor: isDark ? '#0f172a' : '#ffffff', borderColor: isDark ? '#334155' : '#dee2e6', color: isDark ? '#f8fafc' : '#212529' }}>
+                                                <div className="position-absolute bottom-0 start-0 m-2 px-2 py-0.5 rounded border d-flex align-items-center gap-1 shadow-sm" style={{ fontSize: '0.75rem', fontWeight: 'bold', backgroundColor: isDark ? '#0f172a' : '#ffffff', borderColor: isDark ? '#334155' : '#dee2e6', color: isDark ? '#f8fafc' : '#212529', zIndex: 10 }}>
                                                     <span>{(p.rating?.rate || 4.1).toFixed(1)}</span>
                                                     <FaStar className="text-success" size={10} />
                                                 </div>
-                                                <Card.Img
-                                                    src={getFirstImage(p)}
+                                                <HoverImageCarousel
+                                                    images={p.images}
+                                                    fallbackImage={getFirstImage(p)}
+                                                    alt={p.name || p.title || "Product"}
                                                     style={{ height: "160px", width: 'auto', objectFit: "contain" }}
                                                 />
                                             </div>
 
                                             {/* Card Details */}
                                             <Card.Body className="p-3 d-flex flex-column justify-content-between" style={{ backgroundColor: isDark ? '#1e293b' : '#ffffff' }}>
-                                                 <Card.Title className="fw-bold mb-1" style={{ fontSize: '0.92rem', color: isDark ? '#f8fafc' : '#0f172a', fontWeight: '800', lineHeight: '1.35', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', height: '2.5em' }}>
-                                                     {p.name || p.title}
-                                                 </Card.Title>
+                                                <Card.Title className="fw-bold mb-1" style={{ fontSize: '0.92rem', color: isDark ? '#f8fafc' : '#0f172a', fontWeight: '800', lineHeight: '1.35', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', height: '2.5em' }}>
+                                                    {p.name || p.title}
+                                                </Card.Title>
 
-                                                 {/* Pricing row */}
-                                                 <div className="d-flex align-items-baseline gap-2 mb-2">
-                                                     <span className="fw-bold" style={{ fontSize: '1.1rem', fontWeight: '800', color: isDark ? '#ffffff' : '#0f172a' }}>
-                                                         ₹{finalPrice.toLocaleString()}
-                                                     </span>
-                                                     {originalPrice > finalPrice && (
-                                                         <span className="text-decoration-line-through" style={{ fontSize: '0.8rem', color: isDark ? '#94a3b8' : '#64748b' }}>
-                                                             ₹{originalPrice.toLocaleString()}
-                                                         </span>
-                                                     )}
-                                                     {discountPercent > 0 && (
-                                                         <span className="fw-bold" style={{ fontSize: '0.78rem', color: isDark ? '#34d399' : '#059669' }}>
-                                                             {discountPercent}% {t("off", "off")}
-                                                         </span>
-                                                     )}
-                                                 </div>
+                                                {/* Pricing row */}
+                                                <div className="d-flex align-items-baseline gap-2 mb-2">
+                                                    <span className="fw-bold" style={{ fontSize: '1.1rem', fontWeight: '800', color: isDark ? '#ffffff' : '#0f172a' }}>
+                                                        ₹{finalPrice.toLocaleString()}
+                                                    </span>
+                                                    {originalPrice > finalPrice && (
+                                                        <span className="text-decoration-line-through" style={{ fontSize: '0.8rem', color: isDark ? '#94a3b8' : '#64748b' }}>
+                                                            ₹{originalPrice.toLocaleString()}
+                                                        </span>
+                                                    )}
+                                                    {discountPercent > 0 && (
+                                                        <span className="fw-bold" style={{ fontSize: '0.78rem', color: isDark ? '#34d399' : '#059669' }}>
+                                                            {discountPercent}% {t("off", "off")}
+                                                        </span>
+                                                    )}
+                                                </div>
 
-                                                 <button
-                                                     className="sc-add-btn mt-2"
-                                                     onClick={(e) => {
-                                                         e.preventDefault();
-                                                         e.stopPropagation();
-                                                         dispatch(addToCart({
-                                                             id: p.id,
-                                                             title: p.name || p.title,
-                                                             price: finalPrice,
-                                                             image: getFirstImage(p),
-                                                             quantity: 1,
-                                                         }));
-                                                         toast.success(t("addedToCartMsg", "Added {{name}} to cart!", { name: p.name || p.title }).replace("{{name}}", p.name || p.title), { position: "bottom-right", autoClose: 2000 });
-                                                     }}
-                                                 >
-                                                     <i className="fas fa-shopping-cart me-1"></i> {t("addToCart", "Add to Cart")}
-                                                 </button>
-                                             </Card.Body>
+                                                <button
+                                                    className="sc-add-btn mt-2"
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        dispatch(addToCart({
+                                                            id: p.id,
+                                                            title: p.name || p.title,
+                                                            price: finalPrice,
+                                                            image: getFirstImage(p),
+                                                            quantity: 1,
+                                                        }));
+                                                        toast.success(t("addedToCartMsg", "Added {{name}} to cart!", { name: p.name || p.title }).replace("{{name}}", p.name || p.title), { position: "bottom-right", autoClose: 2000 });
+                                                    }}
+                                                >
+                                                    <i className="fas fa-shopping-cart me-1"></i> {t("addToCart", "Add to Cart")}
+                                                </button>
+                                            </Card.Body>
                                         </Link>
                                     </Card>
                                 </div>

@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { addToCart } from "../../redux/cartSlice";
 import { toast } from "react-toastify";
+import HoverImageCarousel from "../HoverImageCarousel";
 
 function FeatureProducts({ showCart = false }) { 
   const { t } = useTranslation();
@@ -156,7 +157,12 @@ function FeatureProducts({ showCart = false }) {
 
               {/* Image */}
               <div className="img-box">
-                <img src={image} alt={name} loading="lazy" />
+                <HoverImageCarousel
+                    images={product.images || [image]}
+                    fallbackImage={image}
+                    alt={name}
+                    style={{ height: "100%", width: '100%', objectFit: "contain" }}
+                />
               </div>
 
               {/* Name */}

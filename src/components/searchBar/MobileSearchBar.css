@@ -20,8 +20,8 @@
 .mobile-search-header {
   display: flex;
   align-items: center;
-  padding: 25px 15px 10px;
-  gap: 12px;
+  padding: 12px 10px 12px;
+  gap: 8px;
 }
 
 .icon-btn {
@@ -41,9 +41,9 @@
   display: flex;
   align-items: center;
   background: white;
-  border-radius: 20px;
+  border-radius: 12px;
   padding: 0 10px;
-  height: 40px;
+  height: 42px;
 }
 
 .search-icon-inside {
@@ -60,22 +60,49 @@
   color: #333;
 }
 
-.clear-btn,
-.mic-btn {
-  background: none;
+.clear-btn {
+  background: #ccc;
   border: none;
-  color: #888;
-  padding: 0 5px;
+  color: white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
 }
 
+.mic-btn-external {
+  background: white;
+  color: #333;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.filter-btn-external {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  border: 1px solid white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
 .mobile-search-body {
   flex-grow: 1;
   overflow-y: auto;
-  background: white;
+  background: #f4f6f8;
 }
 
 /* Trending Now */
@@ -123,7 +150,7 @@
   display: flex;
   align-items: center;
   padding: 12px 15px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #00000020;
   cursor: pointer;
 }
 
@@ -132,17 +159,16 @@
 }
 
 .suggestion-thumb-wrapper {
-  width: 50px;
-  height: 50px;
+  width: 45px;
+  height: 45px;
   background: white;
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 15px;
+  margin-right: 12px;
   flex-shrink: 0;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .suggestion-thumb {
@@ -158,7 +184,7 @@
 
 .suggestion-title {
   font-weight: 700;
-  color: #333;
+  color: #111;
   font-size: 0.95rem;
   white-space: nowrap;
   overflow: hidden;
@@ -179,13 +205,13 @@
 }
 
 .suggestion-price {
-  color: #0d6efd;
+  color: #1976d2;
   font-weight: 700;
   font-size: 0.95rem;
 }
 
 .suggestion-arrow {
-  color: #aaa;
+  color: #c4c4c4;
   font-size: 1.1rem;
 }
 
