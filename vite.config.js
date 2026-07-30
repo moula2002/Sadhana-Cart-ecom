@@ -15,19 +15,20 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+            // Use exact slashes to avoid matching 'react-icons', 'react-bootstrap', etc.
+            if (id.includes('/react/') || id.includes('/react-dom/') || id.includes('/react-router-dom/')) {
               return 'vendor-react';
             }
-            if (id.includes('firebase')) {
+            if (id.includes('/firebase/')) {
               return 'vendor-firebase';
             }
-            if (id.includes('bootstrap') || id.includes('react-bootstrap')) {
+            if (id.includes('/bootstrap/') || id.includes('/react-bootstrap/')) {
               return 'vendor-bootstrap';
             }
-            if (id.includes('framer-motion')) {
+            if (id.includes('/framer-motion/')) {
               return 'vendor-motion';
             }
-            return 'vendor-core'; // all other dependencies
+            return 'vendor-core';
           }
         }
       }
