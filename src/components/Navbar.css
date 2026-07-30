@@ -638,11 +638,17 @@ body {
 
 /* ==================== NAVBAR STYLES ==================== */
 .navbar-custom {
-    background-color: var(--shopclues-main-bg);
+    background: linear-gradient(90deg, #fff4e6 0%, #f0f4ff 100%);
     padding: 8px 0;
     transition: all 0.3s ease;
     z-index: 1020;
     border-bottom: 1px solid var(--border-color);
+}
+
+.dark-theme .navbar-custom,
+[data-bs-theme="dark"] .navbar-custom,
+[data-theme="dark"] .navbar-custom {
+    background: linear-gradient(135deg, #1a1a2e 0%, #1e1e32 100%) !important;
 }
 
 .brand-text-part {
