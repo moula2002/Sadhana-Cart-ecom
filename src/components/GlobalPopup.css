@@ -166,3 +166,36 @@
     padding: 24px 16px;
   }
 }
+
+/* Dark Theme Adjustments */
+.dark-theme .global-popup-container,
+[data-bs-theme="dark"] .global-popup-container,
+[data-theme="dark"] .global-popup-container {
+  background: linear-gradient(#1e293b, #1e293b) padding-box,
+              linear-gradient(135deg, #6366f1, #a855f7, #ec4899, #f59e0b) border-box;
+}
+
+.dark-theme .global-popup-image-container,
+[data-bs-theme="dark"] .global-popup-image-container,
+[data-theme="dark"] .global-popup-image-container {
+  background: #0f172a;
+}
+
+.dark-theme .global-popup-description,
+[data-bs-theme="dark"] .global-popup-description,
+[data-theme="dark"] .global-popup-description {
+  color: #94a3b8;
+}
+
+.dark-theme .global-popup-close,
+[data-bs-theme="dark"] .global-popup-close,
+[data-theme="dark"] .global-popup-close {
+  background: rgba(30, 41, 59, 0.9);
+  color: #f8fafc;
+}
+
+.dark-theme .global-popup-close:hover,
+[data-bs-theme="dark"] .global-popup-close:hover,
+[data-theme="dark"] .global-popup-close:hover {
+  background: #334155;
+}
