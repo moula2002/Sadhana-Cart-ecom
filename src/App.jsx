@@ -26,16 +26,17 @@ import ScrollToTop from "./components/ScrollToTop";
 import HomePage from "./pages/Home";
 import ProductDetailPage from "./pages/ProductDetailPage";
 
+import BrowseCategory from "./pages/BrowseCategory";
+import ProductListingPage from "./pages/Productlistingpage";
+
 /* ===== Lazy Loaded Pages ===== */
 const CustomerSupportCenter = lazy(() => import("./pages/CustomerService"));
 const RewardPage = lazy(() => import("./pages/RewardPage"));
 const OffersPage = lazy(() => import("./pages/OffersPage"));
 const AuthPage = lazy(() => import("./pages/LoginPage"));
-const ProductListingPage = lazy(() => import("./pages/Productlistingpage"));
 const AdvancedSearchPage = lazy(() => import("./pages/AdvancedSearchPage"));
 const SearchResultsPage = lazy(() => import("./pages/SearchResultsPage"));
 const SearchPage = lazy(() => import("./pages/SearchPage"));
-const BrowseCategory = lazy(() => import("./pages/BrowseCategory"));
 const BestProductsPage = lazy(() => import("./pages/BestProductsPage"));
 const NewArrivalsPage = lazy(() => import("./pages/NewArrivalsPage"));
 const FlashDealsPage = lazy(() => import("./pages/FlashDealsPage"));

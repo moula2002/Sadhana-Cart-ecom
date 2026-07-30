@@ -13,9 +13,9 @@ import "./BrowseCategory.css";
 import HoverImageCarousel from "../components/HoverImageCarousel";
 import Loading from "./Loading";
 
-// In-memory cache to make Browse Categories lightning fast
-let cachedCategories = null;
-const cachedCategoryData = {}; // key: categoryName, value: { subcategories, products }
+// Use sessionStorage cache to make Browse Categories lightning fast across hard reloads
+const getCachedCats = () => { try { return JSON.parse(sessionStorage.getItem("sc_browse_cats")); } catch { return null; } };
+const getCachedData = (name) => { try { return JSON.parse(sessionStorage.getItem("sc_browse_data_" + name)); } catch { return null; } };
 
 const BrowseCategory = () => {
   const { t } = useTranslation();
@@ -87,6 +87,7 @@ const BrowseCategory = () => {
       try {
         setLoadingCats(true);
 
+        const cachedCategories = getCachedCats();
         if (cachedCategories) {
           setCategories(cachedCategories);
           if (cachedCategories.length > 0) {
@@ -98,7 +99,7 @@ const BrowseCategory = () => {
             }
           }
           setLoadingCats(false);
-          return;
+          // Don't return, allow background fetch to silently update
         }
 
         const catRef = collection(db, "category");
@@ -108,7 +109,8 @@ const BrowseCategory = () => {
         // Sort categories logically if needed
         catList.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
 
-        cachedCategories = catList; // Cache it
+        // Cache it
+        try { sessionStorage.setItem("sc_browse_cats", JSON.stringify(catList)); } catch (e) {}
         setCategories(catList);
         if (catList.length > 0) {
           if (selectedCatFromState) {
@@ -136,14 +138,14 @@ const BrowseCategory = () => {
       setLoadingProds(true);
       setSelectedSubCat("All");
       try {
+        const cached = getCachedData(activeCategory.name);
         // Use cached data if available
-        if (cachedCategoryData[activeCategory.name]) {
-          const data = cachedCategoryData[activeCategory.name];
-          setSubcategories(data.subcategories);
-          setProducts(data.products);
-          setFilteredProducts(data.products);
+        if (cached) {
+          setSubcategories(cached.subcategories);
+          setProducts(cached.products);
+          setFilteredProducts(cached.products);
           setLoadingProds(false);
-          return;
+          // Don't return, allow background fetch to silently update
         }
 
         // Fetch Subcategories and Products in parallel for faster loading
@@ -164,11 +166,10 @@ const BrowseCategory = () => {
         // Filter out inactive products
         prodList = prodList.filter((p) => p.isActive !== false);
 
-        // Cache the result
-        cachedCategoryData[activeCategory.name] = {
-          subcategories: subList,
-          products: prodList
-        };
+        // Update Cache
+        try {
+          sessionStorage.setItem("sc_browse_data_" + activeCategory.name, JSON.stringify({ subcategories: subList, products: prodList }));
+        } catch (e) {}
 
         setSubcategories(subList);
         setProducts(prodList);

@@ -12,6 +12,9 @@ import SkeletonGrid from "../components/SkeletonGrid";
 import HoverImageCarousel from "../components/HoverImageCarousel";
 import { useTranslation } from "react-i18next";
 
+const getCachedListing = (key) => { try { return JSON.parse(sessionStorage.getItem("sc_list_" + key)); } catch { return null; } };
+const setCachedListing = (key, data) => { try { sessionStorage.setItem("sc_list_" + key, JSON.stringify(data)); } catch {} };
+
 const ProductListingPage = () => {
     const { t } = useTranslation();
     const { categoryId } = useParams();
@@ -75,6 +78,15 @@ const ProductListingPage = () => {
 
             setCategoryName(currentCategory);
 
+            const cacheKey = categoryId || "all";
+            const cached = getCachedListing(cacheKey);
+            if (cached) {
+                setProducts(cached.products);
+                setSubcategories(cached.subcategories);
+                setLoading(false);
+                // Don't return, let it fetch in background
+            }
+
             // Fetch products using merged strategies (categoryId vs Category Name)
             const prodRef = collection(db, "products");
             let list = [];
@@ -116,6 +128,9 @@ const ProductListingPage = () => {
 
             // Get subcategories
             const uniqueSub = [...new Set(formattedList.map(p => p.subcategory || p.subCategory).filter(Boolean))];
+            
+            setCachedListing(categoryId || "all", { products: formattedList, subcategories: uniqueSub });
+            
             setSubcategories(uniqueSub);
 
         } catch (err) {
