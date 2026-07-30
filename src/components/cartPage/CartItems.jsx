@@ -311,9 +311,15 @@ const CartItems = ({ items, onIncrease, onDecrease, onRemove }) => {
                   {/* Product Info */}
                   <Col xs={12} md={4}>
                     <div style={styles.title}>{item.title}</div>
-                    <div style={styles.size}>
-                      {t("cart.size", "Size")}: <span>{item.size}</span>
-                    </div>
+                    {item.size && 
+                     item.size.trim() !== "" && 
+                     item.size.toUpperCase() !== "N/A" && 
+                     item.size !== "null" && 
+                     item.size !== "undefined" && (
+                      <div style={styles.size}>
+                        {t("cart.size", "Size")}: <span>{item.size}</span>
+                      </div>
+                    )}
                     <div style={styles.price}>{formatPrice(item.price)}</div>
                     {item.stock <= 5 && item.stock > 0 && (
                       <span style={styles.lowStockBadge}>
