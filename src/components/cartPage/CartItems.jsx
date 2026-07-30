@@ -286,8 +286,8 @@ const CartItems = ({ items, onIncrease, onDecrease, onRemove }) => {
         {items.map((item) => {
           const isMaxQuantity =
             item.stock !== undefined && item.quantity >= item.stock;
-          const stockPercentage = item.stock 
-            ? (item.quantity / item.stock) * 100 
+          const stockPercentage = item.stock
+            ? (item.quantity / item.stock) * 100
             : 0;
 
           return (
@@ -311,15 +311,15 @@ const CartItems = ({ items, onIncrease, onDecrease, onRemove }) => {
                   {/* Product Info */}
                   <Col xs={12} md={4}>
                     <div style={styles.title}>{item.title}</div>
-                    {item.size && 
-                     item.size.trim() !== "" && 
-                     item.size.toUpperCase() !== "N/A" && 
-                     item.size !== "null" && 
-                     item.size !== "undefined" && (
-                      <div style={styles.size}>
-                        {t("cart.size", "Size")}: <span>{item.size}</span>
-                      </div>
-                    )}
+                    {item.size &&
+                      item.size.trim() !== "" &&
+                      item.size.toUpperCase() !== "N/A" &&
+                      item.size !== "null" &&
+                      item.size !== "undefined" && (
+                        <div style={styles.size}>
+                          {t("cart.size", "Size")}: <span>{item.size}</span>
+                        </div>
+                      )}
                     <div style={styles.price}>{formatPrice(item.price)}</div>
                     {item.stock <= 5 && item.stock > 0 && (
                       <span style={styles.lowStockBadge}>

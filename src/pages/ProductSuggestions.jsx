@@ -177,7 +177,7 @@ function ProductSuggestions({ currentProductId, category, subcategory }) {
     }
 
     return (
-        <div className="mt-5 mb-5 similar-products-container">
+        <div className="mt-5 mb-5 similar-products-container p-4 rounded-4" style={{ background: isDark ? '#1e293b' : 'linear-gradient(135deg, #FFF6E9 0%, #F4F7FF 30%, #EAF8FF 65%, #F3EEFF 100%)' }}>
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <h3 className="fw-bold mb-0" style={{ color: isDark ? '#f8fafc' : '#111' }}>{t("similarProducts", "Similar Products")}</h3>
             </div>

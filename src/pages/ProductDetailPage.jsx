@@ -2004,7 +2004,7 @@ function ProductDetailPage() {
 
             {/* Explore more like this */}
             {exploreProducts.length > 0 && (
-                <div className="mt-5 mb-5 explore-more-container">
+                <div className="mt-5 mb-5 explore-more-container p-4 rounded-4" style={{ background: isDark ? '#1e293b' : 'linear-gradient(135deg, #FFF6E9 0%, #F4F7FF 30%, #EAF8FF 65%, #F3EEFF 100%)' }}>
                     <h3 className="fw-bold mb-3" style={{ color: isDark ? '#f8fafc' : '#111' }}>{t("productDetail.exploreMore", "Explore more like this")}</h3>
 
                     {/* Filter Pills */}

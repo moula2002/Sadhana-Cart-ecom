@@ -63,6 +63,12 @@
   scroll-behavior: smooth;
   padding: 6px 4px 16px 4px;
   scrollbar-width: none;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.rv-products-grid .rv-card {
+  scroll-snap-align: start;
 }
 
 .rv-products-grid::-webkit-scrollbar {
@@ -70,8 +76,8 @@
 }
 
 .rv-card {
-  min-width: 210px;
-  max-width: 210px;
+  min-width: 230px;
+  max-width: 230px;
   background: #ffffff;
   border: none;
   border-radius: 24px;
@@ -220,12 +226,81 @@
   }
 
   .rv-card {
-    min-width: 170px;
-    max-width: 170px;
+    min-width: 175px;
+    max-width: 175px;
   }
 
   .rv-img-box {
     height: 120px;
+  }
+
+  .recently-viewed-scroll-controls {
+    display: none !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .recently-viewed-container {
+    padding: 14px 10px;
+    margin: 12px 0;
+    border-radius: 14px;
+  }
+
+  .recently-viewed-header {
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .recently-viewed-title {
+    font-size: 1.05rem;
+  }
+
+  .rv-card {
+    min-width: 165px;
+    max-width: 165px;
+    padding: 8px;
+    border-radius: 10px;
+  }
+
+  .rv-card .rv-img-box {
+    padding: 4px;
+    margin-bottom: 6px;
+  }
+
+  .rv-card .rv-wishlist-btn {
+    top: 10px !important;
+    right: 10px !important;
+    width: 26px !important;
+    height: 26px !important;
+  }
+
+  .rv-card .rv-discount-tag {
+    top: 10px !important;
+    left: 10px !important;
+    font-size: 0.62rem !important;
+    padding: 2px 5px !important;
+  }
+
+  .rv-card .rv-name {
+    font-size: 0.8rem !important;
+    line-height: 1.25 !important;
+    height: 2.3em !important;
+    margin-bottom: 4px !important;
+  }
+
+  .rv-card .rv-offer-price {
+    font-size: 0.92rem !important;
+  }
+
+  .rv-card .rv-original-price {
+    font-size: 0.72rem !important;
+  }
+
+  .rv-card .rv-add-btn {
+    padding: 6px 8px !important;
+    font-size: 0.75rem !important;
   }
 }
 

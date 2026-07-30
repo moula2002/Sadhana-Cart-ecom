@@ -102,32 +102,32 @@ const RecentlyViewed = ({ currentProductId }) => {
   }
 
   return (
-    <div className="recently-viewed-container">
+    <div className="recently-viewed-container position-relative">
       <div className="recently-viewed-header">
         <h3 className="recently-viewed-title">
           <Clock size={22} className="text-primary" />
           {t("home.recentlyViewed", "Recently Viewed Products")}
         </h3>
-
-        {products.length > 3 && (
-          <div className="recently-viewed-scroll-controls">
-            <button
-              className="rv-scroll-btn"
-              onClick={() => handleScroll("left")}
-              aria-label="Scroll left"
-            >
-              <ChevronLeft size={18} />
-            </button>
-            <button
-              className="rv-scroll-btn"
-              onClick={() => handleScroll("right")}
-              aria-label="Scroll right"
-            >
-              <ChevronRight size={18} />
-            </button>
-          </div>
-        )}
       </div>
+
+      {products.length > 3 && (
+        <>
+          <button
+            onClick={() => handleScroll("left")}
+            style={scrollBtnStyle("left")}
+            aria-label="Scroll left"
+          >
+            ‹
+          </button>
+          <button
+            onClick={() => handleScroll("right")}
+            style={scrollBtnStyle("right")}
+            aria-label="Scroll right"
+          >
+            ›
+          </button>
+        </>
+      )}
 
       <div className="rv-products-grid" ref={scrollRef}>
         {products.map((product) => {
@@ -197,5 +197,27 @@ const RecentlyViewed = ({ currentProductId }) => {
     </div>
   );
 };
+
+
+const scrollBtnStyle = (side) => ({
+  position: "absolute",
+  top: "55%",
+  transform: "translateY(-50%)",
+  [side === "left" ? "left" : "right"]: "-14px",
+  zIndex: 10,
+  width: "28px",
+  height: "60px",
+  background: "rgba(255,255,255,0.95)",
+  border: "1px solid #e0e0e0",
+  borderRadius: "4px",
+  cursor: "pointer",
+  fontSize: "1.2rem",
+  color: "#555",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+  transition: "background 0.2s",
+});
 
 export default RecentlyViewed;

@@ -72,34 +72,18 @@ function FeatureProducts({ showCart = false }) {
       {products.length > 3 && (
         <>
           <button
-            className="btn btn-light rounded-circle shadow-sm border position-absolute start-0 top-50 translate-middle-y d-flex align-items-center justify-content-center"
-            style={{
-              width: '38px',
-              height: '38px',
-              zIndex: 10,
-              left: '-10px',
-              backgroundColor: 'rgba(255, 255, 255, 0.95)',
-              cursor: 'pointer'
-            }}
             onClick={() => scroll("left")}
+            style={scrollBtnStyle("left")}
             aria-label="Scroll left"
           >
-            <ChevronLeft size={20} />
+            ‹
           </button>
           <button
-            className="btn btn-light rounded-circle shadow-sm border position-absolute end-0 top-50 translate-middle-y d-flex align-items-center justify-content-center"
-            style={{
-              width: '38px',
-              height: '38px',
-              zIndex: 10,
-              right: '-10px',
-              backgroundColor: 'rgba(255, 255, 255, 0.95)',
-              cursor: 'pointer'
-            }}
             onClick={() => scroll("right")}
+            style={scrollBtnStyle("right")}
             aria-label="Scroll right"
           >
-            <ChevronRight size={20} />
+            ›
           </button>
         </>
       )}
