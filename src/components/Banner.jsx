@@ -60,22 +60,8 @@ const Banner = () => {
   }, []);
 
   /* ==========================
-     AUTO SLIDE
+     AUTO SLIDE (Disabled per request)
   ========================== */
-
-  useEffect(()=>{
-
-    if(banners.length===0)return;
-
-    const interval=setInterval(()=>{
-
-      setIndex(prev=>(prev+1)%banners.length);
-
-    },4000);
-
-    return()=>clearInterval(interval);
-
-  },[banners]);
 
   /* ==========================
      NEXT
