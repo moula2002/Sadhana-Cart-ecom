@@ -28,6 +28,49 @@ function Home() {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
+  // Scroll Position Restoration Logic
+  useEffect(() => {
+    // 1. Try to restore scroll position if it exists
+    const savedScrollPos = sessionStorage.getItem('homeScrollPosition');
+    if (savedScrollPos) {
+      const targetY = parseInt(savedScrollPos, 10);
+      
+      // Since child components load data asynchronously, the page height might be 
+      // small initially. We use an interval to try scrolling down as content loads.
+      const maxAttempts = 20;
+      let attempts = 0;
+      
+      const scrollInterval = setInterval(() => {
+        attempts++;
+        if (document.documentElement.scrollHeight >= targetY || attempts >= maxAttempts) {
+          window.scrollTo({ top: targetY, behavior: 'instant' });
+          if (document.documentElement.scrollTop >= targetY - 100 || attempts >= maxAttempts) {
+            clearInterval(scrollInterval);
+          }
+        }
+      }, 100);
+      
+      return () => clearInterval(scrollInterval);
+    }
+  }, []);
+
+  useEffect(() => {
+    // 2. Save scroll position continuously while on the home page
+    const handleScroll = () => {
+      sessionStorage.setItem('homeScrollPosition', window.scrollY.toString());
+    };
+    
+    // Use a small timeout to avoid overriding with 0 during initial mount
+    const timeoutId = setTimeout(() => {
+      window.addEventListener('scroll', handleScroll, { passive: true });
+    }, 500);
+    
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
   return (
     <div className="homepage-content">
 

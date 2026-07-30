@@ -1036,9 +1036,8 @@ function ProductDetailPage() {
         );
 
         toast.success(`Added ${quantity} x "${itemTitle}" to cart!`, {
-            position: "top-right",
-            autoClose: 1000,
-            theme: "colored",
+            position: "bottom-right",
+            autoClose: 3000
         });
     };
 
@@ -2116,8 +2115,9 @@ function ProductDetailPage() {
                                                             image: getExploreImage(p),
                                                             quantity: 1,
                                                         }));
-                                                        toast.success(`Added ${p.name || p.title} to cart!`, { position: "bottom-right", autoClose: 2000 });
+                                                        toast.success(`Added ${p.name || p.title} to cart!`, { position: "bottom-right", autoClose: 3000 });
                                                     }}
+
                                                 >
                                                     <i className="fas fa-shopping-cart me-1"></i> {t("addToCart", "Add to Cart")}
                                                 </button>

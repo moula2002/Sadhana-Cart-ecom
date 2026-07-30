@@ -830,18 +830,7 @@ function Profile() {
                   <FaChevronRight className="chevron-right-icon" />
                 </div>
 
-                <div className="overview-card" onClick={() => toast.info("Notifications clicked")}>
-                  <div className="card-left">
-                    <div className="card-icon-container orange-bg">
-                      <FaBell />
-                    </div>
-                    <div className="card-info">
-                      <h4>{t("notifications", "Notifications")}</h4>
-                      <p>{t("manageNotifications", "Manage your notifications")}</p>
-                    </div>
-                  </div>
-                  <FaChevronRight className="chevron-right-icon" />
-                </div>
+
 
                 <div className="overview-card" onClick={() => navigate("/support")}>
                   <div className="card-left">

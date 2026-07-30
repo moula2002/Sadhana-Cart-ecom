@@ -44,6 +44,43 @@ const BrowseCategory = () => {
     return () => unsubscribe();
   }, []);
 
+  // Scroll Position Restoration Logic
+  useEffect(() => {
+    const savedScrollPos = sessionStorage.getItem('browseScrollPosition');
+    if (savedScrollPos) {
+      const targetY = parseInt(savedScrollPos, 10);
+      const maxAttempts = 20;
+      let attempts = 0;
+      
+      const scrollInterval = setInterval(() => {
+        attempts++;
+        if (document.documentElement.scrollHeight >= targetY || attempts >= maxAttempts) {
+          window.scrollTo({ top: targetY, behavior: 'instant' });
+          if (document.documentElement.scrollTop >= targetY - 100 || attempts >= maxAttempts) {
+            clearInterval(scrollInterval);
+          }
+        }
+      }, 100);
+      
+      return () => clearInterval(scrollInterval);
+    }
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      sessionStorage.setItem('browseScrollPosition', window.scrollY.toString());
+    };
+    
+    const timeoutId = setTimeout(() => {
+      window.addEventListener('scroll', handleScroll, { passive: true });
+    }, 500);
+    
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
   // 1. Fetch Categories
   useEffect(() => {
     const fetchCategories = async () => {

@@ -910,13 +910,13 @@ const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal, se
             <div className="px-4 py-3">
               <small className="text-muted fw-bold d-block mb-3">{t("footer.followUs", "FOLLOW US")}</small>
               <div className="d-flex align-items-center gap-3">
-                <a href="#" style={{ background: 'radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%)', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', transition: 'transform 0.2s' }} onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-3px)'} onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
+                <a href="https://www.instagram.com/sadhanacart?igsh=NHdzb3B0Zjcxcmlj" target="_blank" rel="noreferrer" style={{ background: 'radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%)', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', transition: 'transform 0.2s' }} onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-3px)'} onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
                   <FiInstagram color="white" size={22} />
                 </a>
-                <a href="#" style={{ backgroundColor: '#1877F2', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', transition: 'transform 0.2s' }} onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-3px)'} onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
+                <a href="https://www.facebook.com/profile.php?id=61575347044374" target="_blank" rel="noreferrer" style={{ backgroundColor: '#1877F2', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', transition: 'transform 0.2s' }} onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-3px)'} onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
                   <FiFacebook color="white" size={22} />
                 </a>
-                <a href="#" style={{ backgroundColor: '#FF0000', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', transition: 'transform 0.2s' }} onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-3px)'} onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
+                <a href="https://youtube.com/@sadhanacart?si=SfO1TlqNyNFYd5mM" target="_blank" rel="noreferrer" style={{ backgroundColor: '#FF0000', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', transition: 'transform 0.2s' }} onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-3px)'} onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
                   <FiYoutube color="white" size={22} />
                 </a>
               </div>
@@ -1064,7 +1064,11 @@ export default function Header() {
           <div className="d-flex align-items-center justify-content-between w-100 flex-xl-nowrap gap-2">
             {/* LOGO */}
             <div className="navbar-left-group">
-              <a href="/" className="navbar-brand-link">
+              <a 
+                href="/" 
+                className="navbar-brand-link"
+                onClick={() => sessionStorage.removeItem('homeScrollPosition')}
+              >
                 <img src={logo} alt="Sadhana Cart" className="logo-img" />
                 <div className="brand-text-wrap">
                   <span className="brand-name-gold">{t("sadhana", "Sadhana")}</span>
@@ -1177,6 +1181,8 @@ export default function Header() {
                         onClick={(e) => {
                           e.stopPropagation();
                           setShowCategoryDropdown(false);
+                          sessionStorage.removeItem('browseScrollPosition');
+                          sessionStorage.removeItem('categoryScrollPosition');
                           navigate('/browse-categories', { state: { selectedCategory: cat.name } });
                         }}
                       >
@@ -1201,8 +1207,8 @@ export default function Header() {
               )}
             </div>
             <nav className="sub-nav-links">
-              <a href="/" className="sub-nav-link sub-nav-active">{t("nav.home", "Home")}</a>
-              <a href="#" className="sub-nav-link" onClick={(e) => { e.preventDefault(); navigate("/browse-categories"); }}>{t("nav.browseCategory", "Browse Category")}</a>
+              <a href="/" className="sub-nav-link sub-nav-active" onClick={() => sessionStorage.removeItem('homeScrollPosition')}>{t("nav.home", "Home")}</a>
+              <a href="#" className="sub-nav-link" onClick={(e) => { e.preventDefault(); sessionStorage.removeItem('browseScrollPosition'); sessionStorage.removeItem('categoryScrollPosition'); navigate("/browse-categories"); }}>{t("nav.browseCategory", "Browse Category")}</a>
               <a href="#" className="sub-nav-link" onClick={(e) => { e.preventDefault(); navigate("/best-sellers"); }}>{t("nav.bestSellers", "Best Sellers")}</a>
               <a href="#" className="sub-nav-link" onClick={(e) => { e.preventDefault(); navigate("/new-arrivals"); }}>{t("nav.newArrivals", "New Arrivals")}</a>
               <a href="#" className="sub-nav-link" onClick={(e) => { e.preventDefault(); navigate("/rewards"); }}>

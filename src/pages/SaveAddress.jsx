@@ -23,6 +23,7 @@ function SaveAddress() {
   const [addressType, setAddressType] = useState("Home");
   const [loading, setLoading] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
+  const [emailError, setEmailError] = useState("");
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -79,11 +80,51 @@ function SaveAddress() {
     }
   };
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+  const handleChange = async (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    if (name === "zip" && value.length === 6) {
+      try {
+        const response = await fetch(`https://api.postalpincode.in/pincode/${value}`);
+        const data = await response.json();
+        if (data && data[0] && data[0].Status === "Success") {
+          const postOffice = data[0].PostOffice[0];
+          setFormData((prev) => ({
+            ...prev,
+            city: postOffice.District || prev.city,
+            state: postOffice.State || prev.state,
+            street: postOffice.Name || prev.street,
+          }));
+        }
+      } catch (error) {
+        console.error("Error fetching pincode data:", error);
+      }
+    }
+  };
+
+  const validateEmail = (emailStr) => {
+    if (!emailStr) return "Email Address is required.";
+    let email = emailStr.trim();
+    if (email.length > 254) return "Email cannot exceed 254 characters.";
+    if (email.includes(" ")) return "Email cannot contain spaces.";
+    if (email.split("@").length !== 2) return "Email must contain exactly one @ symbol.";
+    if (email.includes("..")) return "Consecutive dots (..) are not allowed.";
+    if (email.startsWith(".") || email.endsWith(".") || email.startsWith("@") || email.endsWith("@")) return "Email cannot start or end with a dot or @.";
+    const [localPart, domainPart] = email.split("@");
+    if (!localPart || !domainPart) return "Invalid email format.";
+    if (!domainPart.includes(".")) return "Domain must contain at least one dot (.) (e.g., .com).";
+    const regex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+    if (!regex.test(email)) return "Invalid email format.";
+    return ""; // valid
+  };
+
+  const handleEmailBlur = (e) => {
+    const errorMsg = validateEmail(e.target.value);
+    setEmailError(errorMsg);
   };
 
   const handleSave = async (e) => {
@@ -95,10 +136,23 @@ function SaveAddress() {
       return;
     }
 
+    const emailValidationMsg = validateEmail(formData.email);
+    if (emailValidationMsg) {
+      setEmailError(emailValidationMsg);
+      // Optional: alert(emailValidationMsg) if you still want the popup
+      return;
+    }
+    
+    setEmailError("");
+
+    // Trim the email before saving
+    const finalEmail = formData.email.trim();
+
     setLoading(true);
     try {
       const addressData = {
         ...formData,
+        email: finalEmail,
         addressType,
         updatedAt: serverTimestamp(),
       };
@@ -271,15 +325,24 @@ function SaveAddress() {
               <Row>
                 <Col md={6} className="mb-3">
                   <Form.Group className="form-group">
-                    <Form.Label>{t("emailOptional", "Email (Optional)")}</Form.Label>
+                    <Form.Label>{t("emailLabel", "Email Address")} *</Form.Label>
                     <Form.Control
                       type="email"
                       name="email"
                       value={formData.email}
-                      onChange={handleChange}
+                      onChange={(e) => {
+                        handleChange(e);
+                        if (emailError) setEmailError(validateEmail(e.target.value));
+                      }}
+                      onBlur={handleEmailBlur}
+                      required
+                      isInvalid={!!emailError}
                       placeholder={t("emailPlaceholder", "e.g. email@example.com")}
                       style={{ padding: "10px 14px", borderRadius: "6px", fontSize: "14px" }}
                     />
+                    <Form.Control.Feedback type="invalid">
+                      {emailError}
+                    </Form.Control.Feedback>
                   </Form.Group>
                 </Col>
                 <Col md={6} className="mb-3">

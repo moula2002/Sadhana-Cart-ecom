@@ -9,7 +9,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { addToCart } from "../../redux/cartSlice";
-import { Toast, ToastContainer } from "react-bootstrap";
+import { toast } from "react-toastify";
 import Loading from "../../pages/Loading";
 import SkeletonGrid from "../SkeletonGrid";
 import { useTranslation } from "react-i18next";
@@ -25,8 +25,6 @@ function BestProducts() {
   const ratings = useRatings();
   const [lastDoc, setLastDoc] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [showToast, setShowToast] = useState(false);
-  const [toastMsg, setToastMsg] = useState("");
   const [darkMode, setDarkMode] = useState(
     localStorage.getItem("theme") === "dark"
   );
@@ -115,8 +113,10 @@ function BestProducts() {
       image: product.images?.[0] || "",
       quantity: 1,
     }));
-    setToastMsg(`${product.name || "Product"} added to cart ✓`);
-    setShowToast(true);
+    toast.success(`${product.name || "Product"} added to cart!`, {
+      position: "bottom-right",
+      autoClose: 3000
+    });
   };
 
 
@@ -291,20 +291,6 @@ function BestProducts() {
           transition: transform 0.2s ease;
         }
       `}</style>
-
-      <ToastContainer position="bottom-end" className="p-3">
-        <Toast
-          show={showToast}
-          onClose={() => setShowToast(false)}
-          delay={3000}
-          autohide
-          bg={darkMode ? "dark" : "light"}
-        >
-          <Toast.Body style={{ color: darkMode ? "white" : "black" }}>
-            {toastMsg}
-          </Toast.Body>
-        </Toast>
-      </ToastContainer>
     </div>
   );
 }

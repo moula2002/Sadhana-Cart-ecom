@@ -34,10 +34,6 @@ const Footer = () => {
     return () => unsubscribe();
   }, [auth]);
 
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [location.pathname]);
-
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -225,9 +221,9 @@ const Footer = () => {
             <div className="col-lg-3 col-md-12 text-lg-end text-center">
               <p className="sc-section-label text-lg-end">{t("footer.followUs", "FOLLOW US")}</p>
               <div className="sc-socials justify-content-lg-end justify-content-center">
-                <a href="https://instagram.com" target="_blank" rel="noreferrer" className="sc-social sc-insta"><FaInstagram /></a>
-                <a href="https://facebook.com" target="_blank" rel="noreferrer" className="sc-social sc-fb"><FaFacebookF /></a>
-                <a href="https://youtube.com" target="_blank" rel="noreferrer" className="sc-social sc-yt"><FaYoutube /></a>
+                <a href="https://www.instagram.com/sadhanacart?igsh=NHdzb3B0Zjcxcmlj" target="_blank" rel="noreferrer" className="sc-social sc-insta"><FaInstagram /></a>
+                <a href="https://www.facebook.com/profile.php?id=61575347044374" target="_blank" rel="noreferrer" className="sc-social sc-fb"><FaFacebookF /></a>
+                <a href="https://youtube.com/@sadhanacart?si=SfO1TlqNyNFYd5mM" target="_blank" rel="noreferrer" className="sc-social sc-yt"><FaYoutube /></a>
               </div>
             </div>
           </div>
@@ -247,9 +243,6 @@ const Footer = () => {
               <span className="sc-sep">|</span>
               <Link to="/sitemap">{t("footer.sitemap", "Sitemap")}</Link>
             </div>
-            <button className="sc-back-top" onClick={scrollToTop} aria-label="Back to Top">
-              <FaArrowUp />
-            </button>
           </div>
 
         </div>

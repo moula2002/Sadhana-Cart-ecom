@@ -12,6 +12,7 @@ import { addToCart } from "../../redux/cartSlice";
 import Loading from "../../pages/Loading";
 import { useTranslation } from "react-i18next";
 import HoverImageCarousel from "../HoverImageCarousel";
+import { toast } from "react-toastify";
 
 function RecommendedProduct({ showCart = true }) {
   const { t } = useTranslation();
@@ -99,6 +100,10 @@ function RecommendedProduct({ showCart = true }) {
         quantity: 1,
       })
     );
+    toast.success(`${product.name || "Product"} added to cart!`, {
+      position: "bottom-right",
+      autoClose: 3000
+    });
   };
 
 

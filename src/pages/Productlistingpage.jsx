@@ -130,9 +130,12 @@ const ProductListingPage = () => {
         setCurrentPage(1);
     }, [categoryId, fetchData]);
 
-    // Scroll to top when page changes
+    // Scroll to top when page changes, but only if not just mounted/restoring
     useEffect(() => {
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        // Prevent scrolling to top if we are just loading or restoring scroll
+        if (!loading && sessionStorage.getItem('categoryScrollPosition') === null) {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
     }, [currentPage]);
 
     // Handle authentication state changes
@@ -141,6 +144,43 @@ const ProductListingPage = () => {
             setCurrentUser(user);
         });
         return () => unsubscribe();
+    }, []);
+
+    // Scroll Position Restoration Logic
+    useEffect(() => {
+        const savedScrollPos = sessionStorage.getItem('categoryScrollPosition');
+        if (savedScrollPos) {
+            const targetY = parseInt(savedScrollPos, 10);
+            const maxAttempts = 20;
+            let attempts = 0;
+            
+            const scrollInterval = setInterval(() => {
+                attempts++;
+                if (document.documentElement.scrollHeight >= targetY || attempts >= maxAttempts) {
+                    window.scrollTo({ top: targetY, behavior: 'instant' });
+                    if (document.documentElement.scrollTop >= targetY - 100 || attempts >= maxAttempts) {
+                        clearInterval(scrollInterval);
+                    }
+                }
+            }, 100);
+            
+            return () => clearInterval(scrollInterval);
+        }
+    }, [categoryId]);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            sessionStorage.setItem('categoryScrollPosition', window.scrollY.toString());
+        };
+        
+        const timeoutId = setTimeout(() => {
+            window.addEventListener('scroll', handleScroll, { passive: true });
+        }, 500);
+        
+        return () => {
+            clearTimeout(timeoutId);
+            window.removeEventListener('scroll', handleScroll);
+        };
     }, []);
 
     // Fetch user wishlist mapping from Firestore
