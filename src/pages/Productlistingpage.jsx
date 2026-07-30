@@ -611,13 +611,13 @@ const ProductListingPage = () => {
                                                         fallbackImage={getProductImage(p)}
                                                         alt={p.name || p.title || "Product"}
                                                         style={{ height: "160px", width: 'auto', objectFit: "contain" }}
-                                                        onClick={() => navigate(`/product/${p.id}`)}
+                                                        onClick={() => navigate(`/product/${p.id}`, { state: { product: p } })}
                                                     />
                                                 </div>
 
                                                 {/* Details */}
                                                 <Card.Body className="d-flex flex-column p-2 p-md-3">
-                                                    <Card.Title className="fw-bold mb-2 product-title" style={{ fontSize: '0.95rem', minHeight: '2.8rem' }} onClick={() => navigate(`/product/${p.id}`)}>
+                                                    <Card.Title className="fw-bold mb-2 product-title" style={{ fontSize: '0.95rem', minHeight: '2.8rem' }} onClick={() => navigate(`/product/${p.id}`, { state: { product: p } })}>
                                                         {p.name || p.title || t("productNameFallback", "Product Name")}
                                                     </Card.Title>
 

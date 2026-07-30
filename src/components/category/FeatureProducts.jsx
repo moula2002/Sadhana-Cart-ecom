@@ -139,7 +139,7 @@ function FeatureProducts({ showCart = false }) {
             <div
               key={product.id}
               className="sc-product-card"
-              onClick={() => navigate(`/product/${product.id}`)}
+              onClick={() => navigate(`/product/${product.id}`, { state: { product } })}
             >
               {/* Wishlist */}
               <button

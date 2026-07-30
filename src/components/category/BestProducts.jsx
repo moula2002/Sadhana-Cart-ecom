@@ -136,7 +136,7 @@ function BestProducts() {
             <div
               key={product.id}
               className="bs-card"
-              onClick={() => navigate(`/product/${product.id}`)}
+              onClick={() => navigate(`/product/${product.id}`, { state: { product } })}
             >
               <button
                 className="wishlist-btn"

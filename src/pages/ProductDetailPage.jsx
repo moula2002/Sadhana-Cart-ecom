@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo, useCallback, useRef } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { Container, Row, Col, Spinner, Alert, Card, Button, Form, InputGroup, Modal, Badge, Accordion, Image } from "react-bootstrap";
 import { useDispatch } from "react-redux";
 import { addToCart } from "../redux/cartSlice";
@@ -36,6 +36,7 @@ function ProductDetailPage() {
     const { id } = useParams();
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const location = useLocation();
 
     // Auth
     const [currentUser, setCurrentUser] = useState(null);
@@ -795,14 +796,17 @@ function ProductDetailPage() {
         window.scrollTo(0, 0);
         const fetchProductAndReviews = async () => {
             try {
-                setLoading(true);
-                const productRef = doc(db, "products", id);
-                const productSnap = await getDoc(productRef);
-
-                if (!productSnap.exists()) throw new Error(`Product with ID ${id} not found.`);
-
-                const data = { id: productSnap.id, ...productSnap.data() };
-                setProduct(data);
+                let data = location.state?.product;
+                
+                if (data) {
+                    setProduct(data);
+                } else {
+                    const productRef = doc(db, "products", id);
+                    const productSnap = await getDoc(productRef);
+                    if (!productSnap.exists()) throw new Error(`Product with ID ${id} not found.`);
+                    data = { id: productSnap.id, ...productSnap.data() };
+                    setProduct(data);
+                }
                 // Set Product States and unblock UI IMMEDIATELY
                 const fetchedVariants = Array.isArray(data.sizevariants) ? data.sizevariants : [];
                 setProductVariants(fetchedVariants);

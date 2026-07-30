@@ -22,9 +22,11 @@ import OfflineFallback from "./components/OfflineFallback";
 import Loading from "./pages/Loading";
 import ScrollToTop from "./components/ScrollToTop";
 
+/* ===== Eagerly Loaded Core Pages ===== */
+import HomePage from "./pages/Home";
+import ProductDetailPage from "./pages/ProductDetailPage";
+
 /* ===== Lazy Loaded Pages ===== */
-const HomePage = lazy(() => import("./pages/Home"));
-const ProductDetailPage = lazy(() => import("./pages/ProductDetailPage"));
 const CustomerSupportCenter = lazy(() => import("./pages/CustomerService"));
 const RewardPage = lazy(() => import("./pages/RewardPage"));
 const OffersPage = lazy(() => import("./pages/OffersPage"));
