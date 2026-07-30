@@ -118,9 +118,9 @@
 /* Right Content - Products & Chips */
 .products-main-area {
   flex: 1;
-  background-color: #f0f8ff;
-  /* Matches main layout */
-  padding: 15px;
+  background: linear-gradient(135deg, #FFF6E9 0%, #F4F7FF 30%, #EAF8FF 65%, #F3EEFF 100%);
+  border-radius: 24px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   overflow: hidden; /* Keeps filters at top */
@@ -184,21 +184,21 @@
 }
 
 .browse-prod-card {
-  background-color: #fff;
-  border-radius: 12px;
+  background-color: #FFFFFF;
+  border-radius: 24px;
   overflow: hidden;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
   cursor: pointer;
-  padding-bottom: 10px;
-  transition: transform 0.2s;
+  padding-bottom: 12px;
+  transition: all 0.3s ease;
   height: max-content;
 }
 
 .browse-prod-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-6px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
 }
 
 .prod-img-box {
@@ -352,8 +352,7 @@
   }
 
   .products-main-area {
-    background-color: #fff;
-    padding: 25px;
+    padding: 30px;
   }
 
   .browse-products-grid {
@@ -415,7 +414,7 @@
 }
 
 .dark-theme .products-main-area {
-  background-color: #1a1a2e !important;
+  background: #1a1a2e !important;
 }
 
 .dark-theme .subcat-chip {

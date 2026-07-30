@@ -1,8 +1,9 @@
 .brands-section {
-  padding: 15px 20px;
-  background: var(--section-bg);
-  margin: 10px 0;
-  box-shadow: var(--shadow-soft);
+  padding: 24px;
+  background: linear-gradient(135deg, #FFF6E9 0%, #F4F7FF 30%, #EAF8FF 65%, #F3EEFF 100%);
+  margin: 24px 0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  border-radius: 24px;
 }
 
 .brands-container {

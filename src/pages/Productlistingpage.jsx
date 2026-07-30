@@ -525,7 +525,8 @@ const ProductListingPage = () => {
 
                 {/* Right Product Grid & Sorting Section */}
                 <Col lg={9} xs={12}>
-                    <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                    <div className="product-list-main-area p-3 p-lg-4" style={{ background: 'linear-gradient(135deg, #FFF6E9 0%, #F4F7FF 30%, #EAF8FF 65%, #F3EEFF 100%)', borderRadius: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
+                        <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                         <div>
                             <h2 className="fw-bold text-dark mb-1">{categoryName}</h2>
                             <p className="text-muted small mb-0">
@@ -603,7 +604,7 @@ const ProductListingPage = () => {
 
                                     return (
                                         <div key={p.id}>
-                                            <Card className="h-100 border shadow-sm p-2 product-card-hover" style={{ borderRadius: '16px', overflow: 'hidden' }}>
+                                            <Card className="h-100 border-0 p-2 product-card-hover" style={{ borderRadius: '24px', overflow: 'hidden', backgroundColor: '#FFFFFF', boxShadow: '0 12px 30px rgba(0, 0, 0, 0.08)' }}>
                                                 {/* Image Container with Badges */}
                                                 <div className="d-flex justify-content-center align-items-center p-3 position-relative rounded-3 product-img-wrapper" style={{ height: "200px" }}>
                                                     {/* Discount Badge */}
@@ -718,16 +719,17 @@ const ProductListingPage = () => {
                             )}
                         </>
                     )}
+                    </div>
                 </Col>
             </Row>
 
             <style>{`
                 .product-card-hover {
-                    transition: transform 0.2s ease, box-shadow 0.2s ease;
+                    transition: transform 0.3s ease, box-shadow 0.3s ease;
                 }
                 .product-card-hover:hover {
-                    transform: translateY(-5px);
-                    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1) !important;
+                    transform: translateY(-6px);
+                    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12) !important;
                 }
                 .cursor-pointer {
                     cursor: pointer;

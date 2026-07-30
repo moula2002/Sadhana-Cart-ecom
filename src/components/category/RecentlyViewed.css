@@ -5,9 +5,9 @@
 .recently-viewed-container {
   margin: 32px 0;
   padding: 24px;
-  background: #ffffff;
-  border-radius: 20px;
-  border: 1px solid #e2e8f0;
+  background: linear-gradient(135deg, #FFF6E9 0%, #F4F7FF 30%, #EAF8FF 65%, #F3EEFF 100%);
+  border-radius: 24px;
+  border: none;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
 }
 
@@ -16,6 +16,8 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .recently-viewed-title {
@@ -71,21 +73,21 @@
   min-width: 210px;
   max-width: 210px;
   background: #ffffff;
-  border: 1px solid #f1f5f9;
-  border-radius: 14px;
+  border: none;
+  border-radius: 24px;
   padding: 12px;
   cursor: pointer;
   position: relative;
-  transition: all 0.2s ease-in-out;
+  transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
 }
 
 .rv-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-  border-color: #cbd5e1;
+  transform: translateY(-6px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
 }
 
 .rv-img-box {
@@ -232,7 +234,7 @@
 [data-bs-theme="dark"] .recently-viewed-container,
 [data-theme="dark"] .recently-viewed-container {
   background: #1e293b !important;
-  border-color: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35) !important;
 }
 
