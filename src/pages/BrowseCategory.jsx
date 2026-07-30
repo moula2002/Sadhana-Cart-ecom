@@ -55,7 +55,7 @@ const BrowseCategory = () => {
       const scrollInterval = setInterval(() => {
         attempts++;
         if (document.documentElement.scrollHeight >= targetY || attempts >= maxAttempts) {
-          window.scrollTo({ top: targetY, behavior: 'instant' });
+          window.scrollTo({ top: targetY, behavior: 'auto' });
           if (document.documentElement.scrollTop >= targetY - 100 || attempts >= maxAttempts) {
             clearInterval(scrollInterval);
           }
