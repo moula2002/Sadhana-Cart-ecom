@@ -21,6 +21,7 @@ import StickyHeader from "./components/StickyHeader";
 import OfflineFallback from "./components/OfflineFallback";
 import Loading from "./pages/Loading";
 import ScrollToTop from "./components/ScrollToTop";
+import GlobalPopup from "./components/GlobalPopup";
 
 /* ===== Eagerly Loaded Core Pages ===== */
 import HomePage from "./pages/Home";
@@ -87,6 +88,7 @@ const AppContent = () => {
 
   return (
     <>
+      <GlobalPopup />
       <OfflineFallback />
 
       <ScrollToTop />

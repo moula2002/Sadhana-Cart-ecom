@@ -123,7 +123,8 @@
   padding: 20px;
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* Keeps filters at top */
+  overflow: hidden;
+  /* Keeps filters at top */
 }
 
 /* Subcategory Chips */
@@ -178,6 +179,7 @@
   overflow-y: auto;
   padding-bottom: 30px;
 }
+
 /* Hide scrollbar for products grid for a cleaner look */
 .browse-products-grid::-webkit-scrollbar {
   width: 0px;
@@ -211,7 +213,8 @@
   justify-content: center;
   align-items: center;
   overflow: hidden;
-  position: relative; /* For wishlist button */
+  position: relative;
+  /* For wishlist button */
 }
 
 .prod-img-box img {
@@ -300,7 +303,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   color: #ccc;
   cursor: pointer;
   transition: all 0.2s;

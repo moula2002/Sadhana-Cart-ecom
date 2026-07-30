@@ -23,9 +23,9 @@ function Loading({ inline = false, small = false, message = "", minHeight }) {
         padding: "20px",
       };
 
-  const orbitScale = small ? 0.55 : 1;
-  const orbitWidth = small ? 48 : 80;
-  const orbitHeight = small ? 48 : 80;
+  const orbitScale = small ? 0.4 : 0.75;
+  const orbitWidth = small ? 36 : 60;
+  const orbitHeight = small ? 36 : 60;
 
   return (
     <div className="loading-container" style={containerStyle}>

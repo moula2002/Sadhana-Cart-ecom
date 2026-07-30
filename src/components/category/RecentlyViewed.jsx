@@ -203,7 +203,7 @@ const scrollBtnStyle = (side) => ({
   position: "absolute",
   top: "55%",
   transform: "translateY(-50%)",
-  [side === "left" ? "left" : "right"]: "-14px",
+  [side === "left" ? "left" : "right"]: "8px",
   zIndex: 10,
   width: "28px",
   height: "60px",

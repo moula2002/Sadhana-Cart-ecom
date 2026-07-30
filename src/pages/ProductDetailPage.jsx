@@ -25,6 +25,10 @@ import FrequentlyBoughtTogether from "../components/category/FrequentlyBoughtTog
 import RecentlyViewed from "../components/category/RecentlyViewed";
 import { recordRecentlyViewed } from "../services/recentlyViewedService";
 import { useTheme } from "../context/ThemeContext";
+import { useWishlist } from "../hooks/useWishlist";
+import { useRatings } from "../hooks/useRatings";
+import { Heart, ShoppingCart, Star } from "lucide-react";
+import "../components/category/RecentlyViewed.css";
 
 
 const EXCHANGE_RATE = 1;
@@ -37,6 +41,8 @@ function ProductDetailPage() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const location = useLocation();
+    const { wishlisted, toggleWishlist: globalToggleWishlist } = useWishlist();
+    const ratings = useRatings();
 
     // Auth
     const [currentUser, setCurrentUser] = useState(null);
@@ -797,7 +803,7 @@ function ProductDetailPage() {
         const fetchProductAndReviews = async () => {
             try {
                 let data = location.state?.product;
-                
+
                 if (data) {
                     setProduct(data);
                 } else {
@@ -1378,7 +1384,7 @@ function ProductDetailPage() {
     return (
         <Container className="py-4">
 
-            
+
             {showLogin && (
                 <LoginPage onClose={() => setShowLogin(false)} />
             )}
@@ -1785,18 +1791,18 @@ function ProductDetailPage() {
                 </div>
 
                 {/* Badges Section: {t("productDetail.lowestPrice", "Lowest Price")}, COD, {t("productDetail.sevenDayReturns", "7-day Returns")} */}
-                <div 
-                    className="d-flex justify-content-between align-items-center px-4 py-3 mb-4 w-100" 
-                    style={{ 
-                        backgroundColor: isDark ? '#1e293b' : '#f1f5f9', 
+                <div
+                    className="d-flex justify-content-between align-items-center px-4 py-3 mb-4 w-100"
+                    style={{
+                        backgroundColor: isDark ? '#1e293b' : '#f1f5f9',
                         borderRadius: '12px',
                         border: isDark ? '1px solid #334155' : '1px solid #e2e8f0'
                     }}
                 >
                     {/* {t("productDetail.lowestPrice", "Lowest Price")} */}
                     <div className="d-flex flex-column align-items-center flex-fill position-relative">
-                        <div 
-                            className="rounded-circle d-flex align-items-center justify-content-center mb-2 shadow-sm bg-white" 
+                        <div
+                            className="rounded-circle d-flex align-items-center justify-content-center mb-2 shadow-sm bg-white"
                             style={{ width: '56px', height: '56px' }}
                         >
                             <FaTag style={{ color: '#10b981', fontSize: '24px' }} />
@@ -1811,8 +1817,8 @@ function ProductDetailPage() {
 
                     {/* Cash on Delivery */}
                     <div className="d-flex flex-column align-items-center flex-fill position-relative">
-                        <div 
-                            className="rounded-circle d-flex align-items-center justify-content-center mb-2 shadow-sm bg-white" 
+                        <div
+                            className="rounded-circle d-flex align-items-center justify-content-center mb-2 shadow-sm bg-white"
                             style={{ width: '56px', height: '56px' }}
                         >
                             <FaHandHoldingUsd style={{ color: '#10b981', fontSize: '28px' }} />
@@ -1825,8 +1831,8 @@ function ProductDetailPage() {
 
                     {/* {t("productDetail.sevenDayReturns", "7-day Returns")} */}
                     <div className="d-flex flex-column align-items-center flex-fill position-relative">
-                        <div 
-                            className="rounded-circle d-flex align-items-center justify-content-center mb-2 shadow-sm bg-white" 
+                        <div
+                            className="rounded-circle d-flex align-items-center justify-content-center mb-2 shadow-sm bg-white"
                             style={{ width: '56px', height: '56px' }}
                         >
                             <FaBoxOpen style={{ color: '#f59e0b', fontSize: '26px' }} />
@@ -2058,6 +2064,7 @@ function ProductDetailPage() {
                             const finalPrice = Number(p.offerprice || p.price || 0);
                             const originalPrice = p.price && p.offerprice ? Number(p.price) : Math.round(finalPrice * 1.5);
                             const discountPercent = Math.round(((originalPrice - finalPrice) / originalPrice) * 100);
+                            const ratingData = ratings[p.id];
 
                             const getExploreImage = (item) => {
                                 if (!item) return "https://via.placeholder.com/200";
@@ -2068,66 +2075,70 @@ function ProductDetailPage() {
 
                             return (
                                 <div key={p.id} className="col">
-                                    <Card className="h-100 border shadow-sm" style={{ borderRadius: '16px', overflow: 'hidden', backgroundColor: isDark ? '#1e293b' : '#ffffff', borderColor: isDark ? 'rgba(255,255,255,0.08)' : '#e5e7eb' }}>
-                                        <Link to={`/product/${p.id}`} className="text-decoration-none" onClick={() => window.scrollTo(0, 0)}>
-                                            {/* Image container */}
-                                            <div className="d-flex justify-content-center align-items-center p-3" style={{ height: "180px", backgroundColor: '#ffffff', borderRadius: '12px 12px 0 0' }}>
-                                                <Card.Img
-                                                    src={getExploreImage(p)}
-                                                    style={{ height: "140px", width: 'auto', objectFit: "contain" }}
-                                                />
+                                    <div
+                                        className="rv-card w-100 h-100"
+                                        style={{ maxWidth: 'none', minWidth: '0' }}
+                                        onClick={() => { window.scrollTo(0, 0); navigate(`/product/${p.id}`); }}
+                                    >
+                                        {discountPercent > 0 && <span className="rv-discount-tag">{discountPercent}% OFF</span>}
+
+                                        <button
+                                            className="rv-wishlist-btn"
+                                            onClick={(e) => globalToggleWishlist(e, { id: p.id, ...p })}
+                                            aria-label="Wishlist"
+                                        >
+                                            {wishlisted[p.id] ? (
+                                                <Heart size={16} fill="#ff4081" color="#ff4081" />
+                                            ) : (
+                                                <Heart size={16} color="#64748b" />
+                                            )}
+                                        </button>
+
+                                        <div className="rv-img-box" style={{ aspectRatio: "1 / 1", height: "auto" }}>
+                                            <img
+                                                src={getExploreImage(p)}
+                                                alt={p.name || p.title || "Product"}
+                                                style={{ width: "100%", height: '100%', objectFit: "contain" }}
+                                            />
+                                        </div>
+
+                                        <div className="rv-name">{p.name || p.title}</div>
+
+                                        {ratingData && ratingData.count > 0 && (
+                                            <div className="rv-rating-row">
+                                                <Star size={13} fill="#d97706" color="#d97706" />
+                                                <span>{ratingData.average}</span>
+                                                <span className="text-muted ms-1" style={{ fontSize: "0.72rem" }}>({ratingData.count})</span>
                                             </div>
+                                        )}
 
-                                            {/* Card body */}
-                                            <Card.Body className="p-3 d-flex flex-column justify-content-between" style={{ backgroundColor: isDark ? '#1e293b' : '#ffffff' }}>
-                                                <div>
-                                                    <Card.Title className="fw-bold mb-1" style={{ fontSize: '0.88rem', color: isDark ? '#f8fafc' : '#0f172a', fontWeight: '800', lineHeight: '1.35', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', height: '2.4em' }}>
-                                                        {p.name || p.title}
-                                                    </Card.Title>
+                                        <div className="rv-price-row">
+                                            <span className="rv-offer-price">₹{finalPrice.toLocaleString()}</span>
+                                            {originalPrice > finalPrice && (
+                                                <span className="rv-original-price">₹{originalPrice.toLocaleString()}</span>
+                                            )}
+                                            {discountPercent > 0 && (
+                                                <span className="rv-discount-off" style={{ fontSize: "0.78rem", color: "#059669", fontWeight: 700 }}>{discountPercent}% off</span>
+                                            )}
+                                        </div>
 
-                                                    <div className="d-flex align-items-baseline gap-2 mt-2">
-                                                        {/* Bold final price */}
-                                                        <span className="fw-bold" style={{ fontSize: '1rem', fontWeight: '800', color: isDark ? '#ffffff' : '#0f172a' }}>
-                                                            ₹{finalPrice.toLocaleString()}
-                                                        </span>
-
-                                                        {/* Original struck price */}
-                                                        {originalPrice > finalPrice && (
-                                                            <span className="text-decoration-line-through" style={{ fontSize: '0.78rem', color: isDark ? '#94a3b8' : '#64748b' }}>
-                                                                ₹{originalPrice.toLocaleString()}
-                                                            </span>
-                                                        )}
-
-                                                        {/* Down arrow icon and discount percentage */}
-                                                        {discountPercent > 0 && (
-                                                            <span className="fw-bold" style={{ fontSize: '0.75rem', color: isDark ? '#34d399' : '#059669' }}>
-                                                                ↓{discountPercent}%
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                </div>
-
-                                                <button
-                                                    className="sc-add-btn mt-2 w-100"
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        e.stopPropagation();
-                                                        dispatch(addToCart({
-                                                            id: p.id,
-                                                            title: p.name || p.title,
-                                                            price: finalPrice,
-                                                            image: getExploreImage(p),
-                                                            quantity: 1,
-                                                        }));
-                                                        toast.success(`Added ${p.name || p.title} to cart!`, { position: "bottom-right", autoClose: 3000 });
-                                                    }}
-
-                                                >
-                                                    <i className="fas fa-shopping-cart me-1"></i> {t("addToCart", "Add to Cart")}
-                                                </button>
-                                            </Card.Body>
-                                        </Link>
-                                    </Card>
+                                        <button
+                                            className="rv-add-btn mt-auto"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                dispatch(addToCart({
+                                                    id: p.id,
+                                                    title: p.name || p.title,
+                                                    price: finalPrice,
+                                                    image: getExploreImage(p),
+                                                    quantity: 1,
+                                                }));
+                                                toast.success(`Added ${p.name || p.title} to cart!`, { position: "bottom-right", autoClose: 3000 });
+                                            }}
+                                        >
+                                            <ShoppingCart size={14} /> {t("addToCart", "Add to Cart")}
+                                        </button>
+                                    </div>
                                 </div>
                             );
                         })}

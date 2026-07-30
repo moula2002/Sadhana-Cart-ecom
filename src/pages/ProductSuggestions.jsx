@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { Row, Col, Card, Spinner, Alert, Badge, Form, Button } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaStar, FaShoppingCart, FaEye, FaRupeeSign, FaEdit } from "react-icons/fa";
+import { Heart, ShoppingCart, Star } from "lucide-react";
 import { db } from "../firebase";
 import { collection, query, where, limit, getDocs } from "firebase/firestore";
 import { toast } from "react-toastify";
@@ -9,9 +10,12 @@ import { useDispatch } from "react-redux";
 import { addToCart } from "../redux/cartSlice";
 import { useTheme } from "../context/ThemeContext";
 import { useTranslation } from "react-i18next";
+import { useWishlist } from "../hooks/useWishlist";
+import { useRatings } from "../hooks/useRatings";
 import Loading from "./Loading";
 import SkeletonGrid from "../components/SkeletonGrid";
 import HoverImageCarousel from "../components/HoverImageCarousel";
+import "../components/category/RecentlyViewed.css";
 
 // Helper to get the first valid image URL (consistent with CategoryProducts.jsx)
 const getFirstImage = (product) => {
@@ -64,7 +68,10 @@ const getFirstImage = (product) => {
 function ProductSuggestions({ currentProductId, category, subcategory }) {
     const { t } = useTranslation();
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const { isDark } = useTheme();
+    const { wishlisted, toggleWishlist } = useWishlist();
+    const ratings = useRatings();
     const sliderRef = useRef(null);
 
     const scrollLeft = () => {
@@ -192,36 +199,58 @@ function ProductSuggestions({ currentProductId, category, subcategory }) {
                     <button
                         onClick={scrollLeft}
                         type="button"
-                        className="btn rounded-circle shadow-sm border position-absolute start-0 top-50 translate-middle-y d-flex align-items-center justify-content-center"
                         style={{
-                            width: '40px',
-                            height: '40px',
+                            position: "absolute",
+                            top: "55%",
+                            transform: "translateY(-50%)",
+                            left: "-12px",
                             zIndex: 10,
-                            left: '-20px',
-                            backgroundColor: isDark ? '#1e293b' : '#ffffff',
-                            borderColor: isDark ? '#334155' : '#e2e8f0',
-                            color: isDark ? '#f8fafc' : '#333'
+                            width: "28px",
+                            height: "60px",
+                            background: isDark ? "#1e293b" : "rgba(255,255,255,0.95)",
+                            border: isDark ? "1px solid #334155" : "1px solid #e0e0e0",
+                            borderRadius: "4px",
+                            cursor: "pointer",
+                            fontSize: "1.2rem",
+                            color: isDark ? "#f8fafc" : "#555",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                            transition: "background 0.2s",
                         }}
+                        aria-label="Scroll left"
                     >
-                        <i className="fas fa-chevron-left" style={{ fontSize: '14px' }}></i>
+                        ‹
                     </button>
 
                     {/* Right Scroll Arrow */}
                     <button
                         onClick={scrollRight}
                         type="button"
-                        className="btn rounded-circle shadow-sm border position-absolute end-0 top-50 translate-middle-y d-flex align-items-center justify-content-center"
                         style={{
-                            width: '40px',
-                            height: '40px',
+                            position: "absolute",
+                            top: "55%",
+                            transform: "translateY(-50%)",
+                            right: "-12px",
                             zIndex: 10,
-                            right: '-20px',
-                            backgroundColor: isDark ? '#1e293b' : '#ffffff',
-                            borderColor: isDark ? '#334155' : '#e2e8f0',
-                            color: isDark ? '#f8fafc' : '#333'
+                            width: "28px",
+                            height: "60px",
+                            background: isDark ? "#1e293b" : "rgba(255,255,255,0.95)",
+                            border: isDark ? "1px solid #334155" : "1px solid #e0e0e0",
+                            borderRadius: "4px",
+                            cursor: "pointer",
+                            fontSize: "1.2rem",
+                            color: isDark ? "#f8fafc" : "#555",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                            transition: "background 0.2s",
                         }}
+                        aria-label="Scroll right"
                     >
-                        <i className="fas fa-chevron-right" style={{ fontSize: '14px' }}></i>
+                        ›
                     </button>
 
                     <div
@@ -238,84 +267,79 @@ function ProductSuggestions({ currentProductId, category, subcategory }) {
                             const finalPrice = Number(p.offerprice || p.price || 0);
                             const originalPrice = p.price && p.offerprice ? Number(p.price) : Math.round(finalPrice * 1.5);
                             const discountPercent = Math.round(((originalPrice - finalPrice) / originalPrice) * 100);
+                            const ratingData = ratings[p.id];
 
                             return (
                                 <div
                                     key={p.id}
-                                    className="similar-product-card-wrapper"
+                                    className="rv-card"
                                     style={{
                                         minWidth: '240px',
                                         maxWidth: '240px',
                                         flex: '0 0 auto',
                                         scrollSnapAlign: 'start'
                                     }}
+                                    onClick={() => navigate(`/product/${p.id}`)}
                                 >
-                                    <Card className="h-100 border shadow-sm" style={{ borderRadius: '16px', overflow: 'hidden', backgroundColor: isDark ? '#1e293b' : '#ffffff', borderColor: isDark ? 'rgba(255,255,255,0.08)' : '#e5e7eb' }}>
-                                        <Link to={`/product/${p.id}`} className="text-decoration-none" onClick={() => window.scrollTo(0, 0)}>
-                                            {/* Image Container with Badges */}
-                                            <div className="d-flex justify-content-center align-items-center p-3 position-relative" style={{ height: "200px", backgroundColor: '#ffffff', borderRadius: '12px 12px 0 0' }}>
-                                                {/* Bestseller Badge */}
-                                                {p.rating?.rate >= 4.0 && (
-                                                    <Badge bg="primary" className="position-absolute top-0 start-0 m-2 px-2 py-1 rounded" style={{ fontSize: '0.65rem', fontWeight: '800', zIndex: 10 }}>
-                                                        {t("bestseller", "Bestseller")}
-                                                    </Badge>
-                                                )}
-                                                {/* Circular/Square Rating Badge at bottom-left */}
-                                                <div className="position-absolute bottom-0 start-0 m-2 px-2 py-0.5 rounded border d-flex align-items-center gap-1 shadow-sm" style={{ fontSize: '0.75rem', fontWeight: 'bold', backgroundColor: isDark ? '#0f172a' : '#ffffff', borderColor: isDark ? '#334155' : '#dee2e6', color: isDark ? '#f8fafc' : '#212529', zIndex: 10 }}>
-                                                    <span>{(p.rating?.rate || 4.1).toFixed(1)}</span>
-                                                    <FaStar className="text-success" size={10} />
-                                                </div>
-                                                <HoverImageCarousel
-                                                    images={p.images}
-                                                    fallbackImage={getFirstImage(p)}
-                                                    alt={p.name || p.title || "Product"}
-                                                    style={{ height: "160px", width: 'auto', objectFit: "contain" }}
-                                                />
-                                            </div>
+                                    {discountPercent > 0 && <span className="rv-discount-tag">{discountPercent}% OFF</span>}
 
-                                            {/* Card Details */}
-                                            <Card.Body className="p-3 d-flex flex-column justify-content-between" style={{ backgroundColor: isDark ? '#1e293b' : '#ffffff' }}>
-                                                <Card.Title className="fw-bold mb-1" style={{ fontSize: '0.92rem', color: isDark ? '#f8fafc' : '#0f172a', fontWeight: '800', lineHeight: '1.35', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', height: '2.5em' }}>
-                                                    {p.name || p.title}
-                                                </Card.Title>
+                                    <button
+                                        className="rv-wishlist-btn"
+                                        onClick={(e) => toggleWishlist(e, { id: p.id, ...p })}
+                                        aria-label="Wishlist"
+                                    >
+                                        {wishlisted[p.id] ? (
+                                            <Heart size={16} fill="#ff4081" color="#ff4081" />
+                                        ) : (
+                                            <Heart size={16} color="#64748b" />
+                                        )}
+                                    </button>
 
-                                                {/* Pricing row */}
-                                                <div className="d-flex align-items-baseline gap-2 mb-2">
-                                                    <span className="fw-bold" style={{ fontSize: '1.1rem', fontWeight: '800', color: isDark ? '#ffffff' : '#0f172a' }}>
-                                                        ₹{finalPrice.toLocaleString()}
-                                                    </span>
-                                                    {originalPrice > finalPrice && (
-                                                        <span className="text-decoration-line-through" style={{ fontSize: '0.8rem', color: isDark ? '#94a3b8' : '#64748b' }}>
-                                                            ₹{originalPrice.toLocaleString()}
-                                                        </span>
-                                                    )}
-                                                    {discountPercent > 0 && (
-                                                        <span className="fw-bold" style={{ fontSize: '0.78rem', color: isDark ? '#34d399' : '#059669' }}>
-                                                            {discountPercent}% {t("off", "off")}
-                                                        </span>
-                                                    )}
-                                                </div>
+                                    <div className="rv-img-box" style={{ aspectRatio: "1 / 1", height: "auto" }}>
+                                        <HoverImageCarousel
+                                            images={p.images}
+                                            fallbackImage={getFirstImage(p)}
+                                            alt={p.name || p.title || "Product"}
+                                            style={{ width: "100%", height: '100%', objectFit: "contain" }}
+                                        />
+                                    </div>
 
-                                                <button
-                                                    className="sc-add-btn mt-2"
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        e.stopPropagation();
-                                                        dispatch(addToCart({
-                                                            id: p.id,
-                                                            title: p.name || p.title,
-                                                            price: finalPrice,
-                                                            image: getFirstImage(p),
-                                                            quantity: 1,
-                                                        }));
-                                                        toast.success(t("addedToCartMsg", "Added {{name}} to cart!", { name: p.name || p.title }).replace("{{name}}", p.name || p.title), { position: "bottom-right", autoClose: 2000 });
-                                                    }}
-                                                >
-                                                    <i className="fas fa-shopping-cart me-1"></i> {t("addToCart", "Add to Cart")}
-                                                </button>
-                                            </Card.Body>
-                                        </Link>
-                                    </Card>
+                                    <div className="rv-name">{p.name || p.title}</div>
+
+                                    {ratingData && ratingData.count > 0 && (
+                                        <div className="rv-rating-row">
+                                            <Star size={13} fill="#d97706" color="#d97706" />
+                                            <span>{ratingData.average}</span>
+                                            <span className="text-muted ms-1" style={{ fontSize: "0.72rem" }}>({ratingData.count})</span>
+                                        </div>
+                                    )}
+
+                                    <div className="rv-price-row">
+                                        <span className="rv-offer-price">₹{finalPrice.toLocaleString()}</span>
+                                        {originalPrice > finalPrice && (
+                                            <span className="rv-original-price">₹{originalPrice.toLocaleString()}</span>
+                                        )}
+                                        {discountPercent > 0 && (
+                                            <span className="rv-discount-off" style={{ fontSize: "0.78rem", color: "#059669", fontWeight: 700 }}>{discountPercent}% off</span>
+                                        )}
+                                    </div>
+
+                                    <button
+                                        className="rv-add-btn"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            dispatch(addToCart({
+                                                id: p.id,
+                                                title: p.name || p.title,
+                                                price: finalPrice,
+                                                image: getFirstImage(p),
+                                                quantity: 1,
+                                            }));
+                                            toast.success(t("addedToCartMsg", "Added {{name}} to cart!", { name: p.name || p.title }).replace("{{name}}", p.name || p.title), { position: "bottom-right", autoClose: 2000 });
+                                        }}
+                                    >
+                                        <ShoppingCart size={14} /> {t("addToCart", "Add to Cart")}
+                                    </button>
                                 </div>
                             );
                         })}
