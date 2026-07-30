@@ -13,7 +13,7 @@ import HoverImageCarousel from "../components/HoverImageCarousel";
 import { useTranslation } from "react-i18next";
 
 const getCachedListing = (key) => { try { return JSON.parse(sessionStorage.getItem("sc_list_" + key)); } catch { return null; } };
-const setCachedListing = (key, data) => { try { sessionStorage.setItem("sc_list_" + key, JSON.stringify(data)); } catch {} };
+const setCachedListing = (key, data) => { try { sessionStorage.setItem("sc_list_" + key, JSON.stringify(data)); } catch { } };
 
 const ProductListingPage = () => {
     const { t } = useTranslation();
@@ -128,9 +128,9 @@ const ProductListingPage = () => {
 
             // Get subcategories
             const uniqueSub = [...new Set(formattedList.map(p => p.subcategory || p.subCategory).filter(Boolean))];
-            
+
             setCachedListing(categoryId || "all", { products: formattedList, subcategories: uniqueSub });
-            
+
             setSubcategories(uniqueSub);
 
         } catch (err) {
@@ -168,7 +168,7 @@ const ProductListingPage = () => {
             const targetY = parseInt(savedScrollPos, 10);
             const maxAttempts = 20;
             let attempts = 0;
-            
+
             const scrollInterval = setInterval(() => {
                 attempts++;
                 if (document.documentElement.scrollHeight >= targetY || attempts >= maxAttempts) {
@@ -178,7 +178,7 @@ const ProductListingPage = () => {
                     }
                 }
             }, 100);
-            
+
             return () => clearInterval(scrollInterval);
         }
     }, [categoryId]);
@@ -187,11 +187,11 @@ const ProductListingPage = () => {
         const handleScroll = () => {
             sessionStorage.setItem('categoryScrollPosition', window.scrollY.toString());
         };
-        
+
         const timeoutId = setTimeout(() => {
             window.addEventListener('scroll', handleScroll, { passive: true });
         }, 500);
-        
+
         return () => {
             clearTimeout(timeoutId);
             window.removeEventListener('scroll', handleScroll);
@@ -527,198 +527,198 @@ const ProductListingPage = () => {
                 <Col lg={9} xs={12}>
                     <div className="product-list-main-area p-3 p-lg-4" style={{ background: 'linear-gradient(135deg, #FFF6E9 0%, #F4F7FF 30%, #EAF8FF 65%, #F3EEFF 100%)', borderRadius: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
                         <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-                        <div>
-                            <h2 className="fw-bold text-dark mb-1">{categoryName}</h2>
-                            <p className="text-muted small mb-0">
-                                {t("showingProducts", "Showing {{start}}-{{end}} of {{total}} products", {
-                                    start: filteredAndSortedProducts.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0,
-                                    end: Math.min(currentPage * itemsPerPage, filteredAndSortedProducts.length),
-                                    total: filteredAndSortedProducts.length
-                                }).replace("{{start}}", filteredAndSortedProducts.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0)
-                                    .replace("{{end}}", Math.min(currentPage * itemsPerPage, filteredAndSortedProducts.length))
-                                    .replace("{{total}}", filteredAndSortedProducts.length)}
-                            </p>
-                        </div>
+                            <div>
+                                <h2 className="fw-bold text-dark mb-1">{categoryName}</h2>
+                                <p className="text-muted small mb-0">
+                                    {t("showingProducts", "Showing {{start}}-{{end}} of {{total}} products", {
+                                        start: filteredAndSortedProducts.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0,
+                                        end: Math.min(currentPage * itemsPerPage, filteredAndSortedProducts.length),
+                                        total: filteredAndSortedProducts.length
+                                    }).replace("{{start}}", filteredAndSortedProducts.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0)
+                                        .replace("{{end}}", Math.min(currentPage * itemsPerPage, filteredAndSortedProducts.length))
+                                        .replace("{{total}}", filteredAndSortedProducts.length)}
+                                </p>
+                            </div>
 
-                        {/* Mobile Filter Button & Sort Dropdown */}
-                        <div className="d-flex align-items-center gap-3 w-100-mobile justify-content-between">
-                            <Button
-                                variant="outline-primary"
-                                className="d-lg-none d-flex align-items-center gap-2 rounded-3 fw-bold"
-                                onClick={() => setShowMobileFilter(true)}
-                                size="sm"
-                            >
-                                <FaFilter /> {t("filters", "Filters")}
-                            </Button>
+                            {/* Mobile Filter Button & Sort Dropdown */}
+                            <div className="d-flex align-items-center gap-3 w-100-mobile justify-content-between">
+                                <Button
+                                    variant="outline-primary"
+                                    className="d-lg-none d-flex align-items-center gap-2 rounded-3 fw-bold"
+                                    onClick={() => setShowMobileFilter(true)}
+                                    size="sm"
+                                >
+                                    <FaFilter /> {t("filters", "Filters")}
+                                </Button>
 
-                            <div className="d-flex align-items-center gap-2 ms-auto">
-                                <span className="text-muted small no-wrap d-none d-sm-inline">{t("sortBy", "Sort by:")}</span>
-                                <Dropdown align="end">
-                                    <Dropdown.Toggle
-                                        variant="white"
-                                        size="sm"
-                                        className="rounded-3 border shadow-sm px-3 d-flex align-items-center justify-content-between"
-                                        style={{ minWidth: '140px', fontWeight: '500' }}
-                                    >
-                                        {sortBy === "popularity" ? t("popularity", "Popularity") :
-                                            sortBy === "price_low_high" ? t("priceLowToHigh", "Price: Low to High") :
-                                                sortBy === "price_high_low" ? t("priceHighToLow", "Price: High to Low") :
-                                                    t("customerRating", "Customer Rating")}
-                                    </Dropdown.Toggle>
+                                <div className="d-flex align-items-center gap-2 ms-auto">
+                                    <span className="text-muted small no-wrap d-none d-sm-inline">{t("sortBy", "Sort by:")}</span>
+                                    <Dropdown align="end">
+                                        <Dropdown.Toggle
+                                            variant="white"
+                                            size="sm"
+                                            className="rounded-3 border shadow-sm px-3 d-flex align-items-center justify-content-between"
+                                            style={{ minWidth: '140px', fontWeight: '500' }}
+                                        >
+                                            {sortBy === "popularity" ? t("popularity", "Popularity") :
+                                                sortBy === "price_low_high" ? t("priceLowToHigh", "Price: Low to High") :
+                                                    sortBy === "price_high_low" ? t("priceHighToLow", "Price: High to Low") :
+                                                        t("customerRating", "Customer Rating")}
+                                        </Dropdown.Toggle>
 
-                                    <Dropdown.Menu className="border-0 shadow-lg rounded-3" style={{ minWidth: '160px' }}>
-                                        <Dropdown.Item onClick={() => setSortBy("popularity")} className={sortBy === "popularity" ? "fw-bold text-primary" : ""}>
-                                            {t("popularity", "Popularity")}
-                                        </Dropdown.Item>
-                                        <Dropdown.Item onClick={() => setSortBy("price_low_high")} className={sortBy === "price_low_high" ? "fw-bold text-primary" : ""}>
-                                            {t("priceLowToHigh", "Price: Low to High")}
-                                        </Dropdown.Item>
-                                        <Dropdown.Item onClick={() => setSortBy("price_high_low")} className={sortBy === "price_high_low" ? "fw-bold text-primary" : ""}>
-                                            {t("priceHighToLow", "Price: High to Low")}
-                                        </Dropdown.Item>
-                                        <Dropdown.Item onClick={() => setSortBy("customer_rating")} className={sortBy === "customer_rating" ? "fw-bold text-primary" : ""}>
-                                            {t("customerRating", "Customer Rating")}
-                                        </Dropdown.Item>
-                                    </Dropdown.Menu>
-                                </Dropdown>
+                                        <Dropdown.Menu className="border-0 shadow-lg rounded-3" style={{ minWidth: '160px' }}>
+                                            <Dropdown.Item onClick={() => setSortBy("popularity")} className={sortBy === "popularity" ? "fw-bold text-primary" : ""}>
+                                                {t("popularity", "Popularity")}
+                                            </Dropdown.Item>
+                                            <Dropdown.Item onClick={() => setSortBy("price_low_high")} className={sortBy === "price_low_high" ? "fw-bold text-primary" : ""}>
+                                                {t("priceLowToHigh", "Price: Low to High")}
+                                            </Dropdown.Item>
+                                            <Dropdown.Item onClick={() => setSortBy("price_high_low")} className={sortBy === "price_high_low" ? "fw-bold text-primary" : ""}>
+                                                {t("priceHighToLow", "Price: High to Low")}
+                                            </Dropdown.Item>
+                                            <Dropdown.Item onClick={() => setSortBy("customer_rating")} className={sortBy === "customer_rating" ? "fw-bold text-primary" : ""}>
+                                                {t("customerRating", "Customer Rating")}
+                                            </Dropdown.Item>
+                                        </Dropdown.Menu>
+                                    </Dropdown>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    {loading ? (
-                        <div className="py-2 w-100">
-                            <SkeletonGrid count={8} />
-                        </div>
-                    ) : filteredAndSortedProducts.length === 0 ? (
-                        <Alert variant="info" className="rounded-3 border-0 shadow-sm p-4 text-center">
-                            {t("noProductsMatchFilters", "No products match your selected filters. Please try clearing some filters.")}
-                        </Alert>
-                    ) : (
-                        <>
-                            {/* Product Grid - Responsive via CSS */}
-                            <div className="product-listing-grid">
-                                {paginatedProducts.map((p) => {
-                                    const finalPrice = Number(p.offerprice || p.price || 0);
-                                    const originalPrice = p.price && p.offerprice ? Number(p.price) : Math.round(finalPrice * 1.5);
-                                    const discountPercent = Math.round(((originalPrice - finalPrice) / originalPrice) * 100);
+                        {loading ? (
+                            <div className="py-2 w-100">
+                                <SkeletonGrid count={8} />
+                            </div>
+                        ) : filteredAndSortedProducts.length === 0 ? (
+                            <Alert variant="info" className="rounded-3 border-0 shadow-sm p-4 text-center">
+                                {t("noProductsMatchFilters", "No products match your selected filters. Please try clearing some filters.")}
+                            </Alert>
+                        ) : (
+                            <>
+                                {/* Product Grid - Responsive via CSS */}
+                                <div className="product-listing-grid">
+                                    {paginatedProducts.map((p) => {
+                                        const finalPrice = Number(p.offerprice || p.price || 0);
+                                        const originalPrice = p.price && p.offerprice ? Number(p.price) : Math.round(finalPrice * 1.5);
+                                        const discountPercent = Math.round(((originalPrice - finalPrice) / originalPrice) * 100);
 
-                                    return (
-                                        <div key={p.id}>
-                                            <Card className="h-100 border-0 p-2 product-card-hover" style={{ borderRadius: '24px', overflow: 'hidden', backgroundColor: '#FFFFFF', boxShadow: '0 12px 30px rgba(0, 0, 0, 0.08)' }}>
-                                                {/* Image Container with Badges */}
-                                                <div className="d-flex justify-content-center align-items-center p-3 position-relative rounded-3 product-img-wrapper" style={{ height: "200px" }}>
-                                                    {/* Discount Badge */}
-                                                    {discountPercent > 0 && (
-                                                        <Badge bg="danger" className="position-absolute top-0 start-0 m-2 px-2.5 py-1 rounded" style={{ fontSize: '0.7rem', fontWeight: '700', zIndex: 10 }}>
-                                                            {discountPercent}% {t("off", "OFF")}
-                                                        </Badge>
-                                                    )}
-                                                    {/* Heart/Wishlist Button */}
-                                                    <button
-                                                        onClick={() => toggleWishlist(p)}
-                                                        className="btn bg-white rounded-circle shadow-sm position-absolute top-0 end-0 m-2 d-flex align-items-center justify-content-center border-0"
-                                                        style={{ width: '32px', height: '32px', zIndex: 10 }}
-                                                    >
-                                                        {wishlist[p.id] ? <FaHeart className="text-danger" size={14} /> : <FaRegHeart className="text-secondary" size={14} />}
-                                                    </button>
-
-                                                    <HoverImageCarousel
-                                                        images={p.images}
-                                                        fallbackImage={getProductImage(p)}
-                                                        alt={p.name || p.title || "Product"}
-                                                        style={{ height: "160px", width: 'auto', objectFit: "contain" }}
-                                                        onClick={() => navigate(`/product/${p.id}`, { state: { product: p } })}
-                                                    />
-                                                </div>
-
-                                                {/* Details */}
-                                                <Card.Body className="d-flex flex-column p-2 p-md-3">
-                                                    <Card.Title className="fw-bold mb-2 product-title" style={{ fontSize: '0.95rem', minHeight: '2.8rem' }} onClick={() => navigate(`/product/${p.id}`, { state: { product: p } })}>
-                                                        {p.name || p.title || t("productNameFallback", "Product Name")}
-                                                    </Card.Title>
-
-                                                    <div className="d-flex align-items-center flex-wrap mb-3">
-                                                        <span className="fw-bold product-price fs-5 me-2">₹{finalPrice.toLocaleString()}</span>
+                                        return (
+                                            <div key={p.id}>
+                                                <Card className="h-100 border-0 p-2 product-card-hover" style={{ borderRadius: '24px', overflow: 'hidden', backgroundColor: '#FFFFFF', boxShadow: '0 12px 30px rgba(0, 0, 0, 0.08)' }}>
+                                                    {/* Image Container with Badges */}
+                                                    <div className="d-flex justify-content-center align-items-center p-3 position-relative rounded-3 product-img-wrapper" style={{ height: "200px" }}>
+                                                        {/* Discount Badge */}
                                                         {discountPercent > 0 && (
-                                                            <>
-                                                                <span className="text-muted text-decoration-line-through small me-2">₹{originalPrice.toLocaleString()}</span>
-                                                                <span className="fw-bold" style={{ color: '#059669', fontSize: '0.85rem' }}>{discountPercent}% off</span>
-                                                            </>
+                                                            <Badge bg="danger" className="position-absolute top-0 start-0 m-2 px-2.5 py-1 rounded" style={{ fontSize: '0.7rem', fontWeight: '700', zIndex: 10 }}>
+                                                                {discountPercent}% {t("off", "OFF")}
+                                                            </Badge>
                                                         )}
+                                                        {/* Heart/Wishlist Button */}
+                                                        <button
+                                                            onClick={() => toggleWishlist(p)}
+                                                            className="btn bg-white rounded-circle shadow-sm position-absolute top-0 end-0 m-2 d-flex align-items-center justify-content-center border-0"
+                                                            style={{ width: '32px', height: '32px', zIndex: 10 }}
+                                                        >
+                                                            {wishlist[p.id] ? <FaHeart className="text-danger" size={14} /> : <FaRegHeart className="text-secondary" size={14} />}
+                                                        </button>
+
+                                                        <HoverImageCarousel
+                                                            images={p.images}
+                                                            fallbackImage={getProductImage(p)}
+                                                            alt={p.name || p.title || "Product"}
+                                                            style={{ height: "160px", width: 'auto', objectFit: "contain" }}
+                                                            onClick={() => navigate(`/product/${p.id}`, { state: { product: p } })}
+                                                        />
                                                     </div>
 
-                                                    <button
-                                                        className="bs-add-btn w-100 mt-auto"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            dispatch(addToCart({
-                                                                id: p.id,
-                                                                title: p.name || p.title,
-                                                                price: finalPrice,
-                                                                image: getProductImage(p),
-                                                                quantity: 1,
-                                                            }));
-                                                            toast.success(t("addedToCartMsg", "Added {{name}} to cart!", { name: p.name || p.title }).replace("{{name}}", p.name || p.title));
-                                                        }}
-                                                    >
-                                                        <FaShoppingCart className="me-2" size={14} /> <span className="d-none d-sm-inline">{t("addToCart", "Add to Cart")}</span><span className="d-sm-none">{t("add", "Add")}</span>
-                                                    </button>
-                                                </Card.Body>
-                                            </Card>
-                                        </div>
-                                    );
-                                })}
-                            </div>
+                                                    {/* Details */}
+                                                    <Card.Body className="d-flex flex-column p-2 p-md-3">
+                                                        <Card.Title className="fw-bold mb-2 product-title" style={{ fontSize: '0.95rem', minHeight: '2.8rem' }} onClick={() => navigate(`/product/${p.id}`, { state: { product: p } })}>
+                                                            {p.name || p.title || t("productNameFallback", "Product Name")}
+                                                        </Card.Title>
 
-                            {/* Pagination Row */}
-                            {totalPages > 1 && (
-                                <div className="d-flex justify-content-center mt-5 mb-4">
-                                    <nav>
-                                        <ul className="pagination gap-1 gap-md-2 border-0 flex-wrap justify-content-center">
-                                            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                                                <button className="page-link rounded-circle border d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px' }} onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}>
-                                                    &lt;
-                                                </button>
-                                            </li>
-                                            {getVisiblePages().map((p, i) => {
-                                                if (p === "...") {
+                                                        <div className="d-flex align-items-center flex-wrap mb-3">
+                                                            <span className="fw-bold product-price fs-5 me-2">₹{finalPrice.toLocaleString()}</span>
+                                                            {discountPercent > 0 && (
+                                                                <>
+                                                                    <span className="text-muted text-decoration-line-through small me-2">₹{originalPrice.toLocaleString()}</span>
+                                                                    <span className="fw-bold" style={{ color: '#059669', fontSize: '0.85rem' }}>{discountPercent}% off</span>
+                                                                </>
+                                                            )}
+                                                        </div>
+
+                                                        <button
+                                                            className="bs-add-btn w-100 mt-auto"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                dispatch(addToCart({
+                                                                    id: p.id,
+                                                                    title: p.name || p.title,
+                                                                    price: finalPrice,
+                                                                    image: getProductImage(p),
+                                                                    quantity: 1,
+                                                                }));
+                                                                toast.success(t("addedToCartMsg", "Added {{name}} to cart!", { name: p.name || p.title }).replace("{{name}}", p.name || p.title));
+                                                            }}
+                                                        >
+                                                            <FaShoppingCart className="me-2" size={14} /> <span className="d-none d-sm-inline">{t("addToCart", "Add to Cart")}</span><span className="d-sm-none">{t("add", "Add")}</span>
+                                                        </button>
+                                                    </Card.Body>
+                                                </Card>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+
+                                {/* Pagination Row */}
+                                {totalPages > 1 && (
+                                    <div className="d-flex justify-content-center mt-5 mb-4">
+                                        <nav>
+                                            <ul className="pagination gap-1 gap-md-2 border-0 flex-wrap justify-content-center">
+                                                <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                                                    <button className="page-link rounded-circle border d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px' }} onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}>
+                                                        &lt;
+                                                    </button>
+                                                </li>
+                                                {getVisiblePages().map((p, i) => {
+                                                    if (p === "...") {
+                                                        return (
+                                                            <li key={`ellipsis-${i}`} className="page-item disabled">
+                                                                <span className="page-link rounded-circle border-0 d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px', backgroundColor: 'transparent', color: '#6b7280' }}>
+                                                                    ...
+                                                                </span>
+                                                            </li>
+                                                        );
+                                                    }
                                                     return (
-                                                        <li key={`ellipsis-${i}`} className="page-item disabled">
-                                                            <span className="page-link rounded-circle border-0 d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px', backgroundColor: 'transparent', color: '#6b7280' }}>
-                                                                ...
-                                                            </span>
+                                                        <li key={p} className={`page-item ${currentPage === p ? 'active' : ''}`}>
+                                                            <button
+                                                                className="page-link rounded-circle border d-flex align-items-center justify-content-center"
+                                                                style={{
+                                                                    width: '40px',
+                                                                    height: '40px',
+                                                                    backgroundColor: currentPage === p ? '#2563eb' : '#fff',
+                                                                    color: currentPage === p ? '#fff' : '#4b5563',
+                                                                    borderColor: currentPage === p ? '#2563eb' : '#e5e7eb'
+                                                                }}
+                                                                onClick={() => setCurrentPage(p)}
+                                                            >
+                                                                {p}
+                                                            </button>
                                                         </li>
                                                     );
-                                                }
-                                                return (
-                                                    <li key={p} className={`page-item ${currentPage === p ? 'active' : ''}`}>
-                                                        <button
-                                                            className="page-link rounded-circle border d-flex align-items-center justify-content-center"
-                                                            style={{
-                                                                width: '40px',
-                                                                height: '40px',
-                                                                backgroundColor: currentPage === p ? '#2563eb' : '#fff',
-                                                                color: currentPage === p ? '#fff' : '#4b5563',
-                                                                borderColor: currentPage === p ? '#2563eb' : '#e5e7eb'
-                                                            }}
-                                                            onClick={() => setCurrentPage(p)}
-                                                        >
-                                                            {p}
-                                                        </button>
-                                                    </li>
-                                                );
-                                            })}
-                                            <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                                                <button className="page-link rounded-circle border d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px' }} onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}>
-                                                    &gt;
-                                                </button>
-                                            </li>
-                                        </ul>
-                                    </nav>
-                                </div>
-                            )}
-                        </>
-                    )}
+                                                })}
+                                                <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                                                    <button className="page-link rounded-circle border d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px' }} onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}>
+                                                        &gt;
+                                                    </button>
+                                                </li>
+                                            </ul>
+                                        </nav>
+                                    </div>
+                                )}
+                            </>
+                        )}
                     </div>
                 </Col>
             </Row>

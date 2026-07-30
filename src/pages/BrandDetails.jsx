@@ -31,22 +31,22 @@ function BrandDetails() {
         // Fetch brand details
         const brandDocRef = doc(db, "brands", id);
         const brandSnap = await getDoc(brandDocRef);
-        
+
         if (brandSnap.exists()) {
           const brandData = { id: brandSnap.id, ...brandSnap.data() };
           setBrand(brandData);
-          
+
           // Fetch products for this brand
           const productsRef = collection(db, "products");
           // Assuming products have a 'brand' field that matches the brand name
           const q = query(productsRef, where("brand", "==", brandData.name));
           const querySnapshot = await getDocs(q);
-          
+
           const productsList = querySnapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
           }));
-          
+
           setProducts(productsList);
         } else {
           console.error("No such brand!");
@@ -57,7 +57,7 @@ function BrandDetails() {
         setLoading(false);
       }
     };
-    
+
     if (id) {
       fetchBrandAndProducts();
     }
@@ -71,8 +71,8 @@ function BrandDetails() {
     return Math.round(((oldPrice - price) / oldPrice) * 100);
   };
 
-  const filteredProducts = selectedCategory === "All" 
-    ? products 
+  const filteredProducts = selectedCategory === "All"
+    ? products
     : products.filter(p => p.category === selectedCategory || p.subcategory === selectedCategory);
 
 
@@ -95,15 +95,15 @@ function BrandDetails() {
           <div className="brand-subcategories">
             <h3 className="subcats-title">{t("categories", "Categories")}</h3>
             <div className="subcats-chips">
-              <span 
+              <span
                 className={`subcat-chip ${selectedCategory === "All" ? "active" : ""}`}
                 onClick={() => setSelectedCategory("All")}
               >
                 {t("all", "All")}
               </span>
               {brand.subCategories.map((subcat, idx) => (
-                <span 
-                  key={idx} 
+                <span
+                  key={idx}
                   className={`subcat-chip ${selectedCategory === subcat ? "active" : ""}`}
                   onClick={() => setSelectedCategory(subcat)}
                 >
@@ -117,7 +117,7 @@ function BrandDetails() {
         {/* Brand Products */}
         <div className="brand-products-section">
           <h2 className="brand-section-title">{t("productsBy", "Products by {{name}}", { name: brand.name }).replace("{{name}}", brand.name)}</h2>
-          
+
           {filteredProducts.length === 0 ? (
             <div className="no-products-msg">
               <p>{t("noProductsFoundForCategory", "No products found for this category.")}</p>
@@ -133,8 +133,8 @@ function BrandDetails() {
                 const image = product.images?.[0] || null;
 
                 return (
-                  <div 
-                    key={product.id} 
+                  <div
+                    key={product.id}
                     className="sc-product-card"
                     onClick={() => navigate(`/product/${product.id}`)}
                   >

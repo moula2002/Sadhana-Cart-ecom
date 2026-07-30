@@ -2609,13 +2609,13 @@ body {
     }
 
     .logo-img {
-        width: 36px !important;
-        height: 36px !important;
+        width: 64px !important;
+        height: 64px !important;
     }
 
     .brand-name-gold,
     .brand-name-navy {
-        font-size: 0.95rem !important;
+        font-size: 1.4rem !important;
     }
 
     .sub-navbar-inner {
@@ -2663,6 +2663,23 @@ body {
 @media (max-width: 576px) {
     .navbar-main-row {
         padding: 6px 10px;
+    }
+
+    .logo-img {
+        width: 50px !important;
+        height: 50px !important;
+    }
+
+    .brand-name-gold,
+    .brand-name-navy {
+        font-size: 1.2rem !important;
+        line-height: 1.1 !important;
+    }
+
+    .brand-text-wrap {
+        gap: 0px !important;
+        line-height: 1 !important;
+        margin-left: 4px;
     }
 
     .search-icon-left {

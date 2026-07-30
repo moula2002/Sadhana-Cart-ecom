@@ -1086,7 +1086,7 @@ export default function Header() {
             <div className="navbar-right-group d-flex align-items-center gap-3 gap-md-4">
 
               {/* Language Switcher */}
-              <div className="ref-deliver-wrap d-flex align-items-center">
+              <div className="ref-deliver-wrap d-none d-md-flex align-items-center">
                 <LanguageSwitcher />
               </div>
 

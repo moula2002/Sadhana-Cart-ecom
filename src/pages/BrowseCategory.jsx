@@ -51,7 +51,7 @@ const BrowseCategory = () => {
       const targetY = parseInt(savedScrollPos, 10);
       const maxAttempts = 20;
       let attempts = 0;
-      
+
       const scrollInterval = setInterval(() => {
         attempts++;
         if (document.documentElement.scrollHeight >= targetY || attempts >= maxAttempts) {
@@ -61,7 +61,7 @@ const BrowseCategory = () => {
           }
         }
       }, 100);
-      
+
       return () => clearInterval(scrollInterval);
     }
   }, []);
@@ -70,11 +70,11 @@ const BrowseCategory = () => {
     const handleScroll = () => {
       sessionStorage.setItem('browseScrollPosition', window.scrollY.toString());
     };
-    
+
     const timeoutId = setTimeout(() => {
       window.addEventListener('scroll', handleScroll, { passive: true });
     }, 500);
-    
+
     return () => {
       clearTimeout(timeoutId);
       window.removeEventListener('scroll', handleScroll);
@@ -110,7 +110,7 @@ const BrowseCategory = () => {
         catList.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
 
         // Cache it
-        try { sessionStorage.setItem("sc_browse_cats", JSON.stringify(catList)); } catch (e) {}
+        try { sessionStorage.setItem("sc_browse_cats", JSON.stringify(catList)); } catch (e) { }
         setCategories(catList);
         if (catList.length > 0) {
           if (selectedCatFromState) {
@@ -151,7 +151,7 @@ const BrowseCategory = () => {
         // Fetch Subcategories and Products in parallel for faster loading
         const subCatRef = collection(db, "subcategory");
         const subQ = query(subCatRef, where("category", "==", activeCategory.name));
-        
+
         const prodRef = collection(db, "products");
         const prodQ = query(prodRef, where("category", "==", activeCategory.name));
 
@@ -161,7 +161,7 @@ const BrowseCategory = () => {
         ]);
 
         const subList = subSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        
+
         let prodList = prodSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         // Filter out inactive products
         prodList = prodList.filter((p) => p.isActive !== false);
@@ -169,7 +169,7 @@ const BrowseCategory = () => {
         // Update Cache
         try {
           sessionStorage.setItem("sc_browse_data_" + activeCategory.name, JSON.stringify({ subcategories: subList, products: prodList }));
-        } catch (e) {}
+        } catch (e) { }
 
         setSubcategories(subList);
         setProducts(prodList);
@@ -256,7 +256,7 @@ const BrowseCategory = () => {
 
   return (
     <div className="browse-category-page-wrapper">
-      
+
       {/* Mobile Header (Hidden on Desktop) */}
       <div className="mobile-browse-header d-lg-none">
         <button className="back-button" onClick={() => navigate(-1)}>
@@ -356,10 +356,10 @@ const BrowseCategory = () => {
                     {discount > 0 && <span className="sc-discount-tag">{discount}% {t("off", "OFF")}</span>}
                     <div className="prod-img-box">
                       <HoverImageCarousel
-                          images={prod.images}
-                          fallbackImage={getProductImage(prod)}
-                          alt={prod.name || "Product"}
-                          style={{ height: "100%", width: '100%', objectFit: "contain" }}
+                        images={prod.images}
+                        fallbackImage={getProductImage(prod)}
+                        alt={prod.name || "Product"}
+                        style={{ height: "100%", width: '100%', objectFit: "contain" }}
                       />
                       <button
                         className="browse-wishlist-btn"
