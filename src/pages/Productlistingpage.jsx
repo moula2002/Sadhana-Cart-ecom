@@ -11,6 +11,8 @@ import Loading from "./Loading";
 import SkeletonGrid from "../components/SkeletonGrid";
 import HoverImageCarousel from "../components/HoverImageCarousel";
 import { useTranslation } from "react-i18next";
+import DynamicRating from "../components/DynamicRating";
+import { useRatings } from "../hooks/useRatings";
 
 const getCachedListing = (key) => { try { return JSON.parse(sessionStorage.getItem("sc_list_" + key)); } catch { return null; } };
 const setCachedListing = (key, data) => { try { sessionStorage.setItem("sc_list_" + key, JSON.stringify(data)); } catch { } };
@@ -119,8 +121,7 @@ const ProductListingPage = () => {
                     id: doc.id,
                     ...doc,
                     priceINR: priceValue.toFixed(0),
-                    priceValue,
-                    rating: doc.rating || { rate: 4.5, count: 128 }
+                    priceValue
                 };
             }).filter(p => p.isActive !== false);
 
@@ -160,6 +161,8 @@ const ProductListingPage = () => {
         });
         return () => unsubscribe();
     }, []);
+
+    const ratings = useRatings();
 
     // Scroll Position Restoration Logic
     useEffect(() => {
@@ -272,17 +275,17 @@ const ProductListingPage = () => {
 
         // Sorting
         if (sortBy === "popularity") {
-            result.sort((a, b) => (b.rating?.count || 0) - (a.rating?.count || 0));
+            result.sort((a, b) => (ratings[b.id]?.count || 0) - (ratings[a.id]?.count || 0));
         } else if (sortBy === "price_low_high") {
             result.sort((a, b) => Number(a.offerprice || a.price || 0) - Number(b.offerprice || b.price || 0));
         } else if (sortBy === "price_high_low") {
             result.sort((a, b) => Number(b.offerprice || b.price || 0) - Number(a.offerprice || a.price || 0));
         } else if (sortBy === "customer_rating") {
-            result.sort((a, b) => (b.rating?.rate || 0) - (a.rating?.rate || 0));
+            result.sort((a, b) => (ratings[b.id]?.average || 0) - (ratings[a.id]?.average || 0));
         }
 
         return result;
-    }, [products, selectedSubcategories, selectedAgeGroups, appliedPriceRange, selectedBrands, sortBy]);
+    }, [products, selectedSubcategories, selectedAgeGroups, appliedPriceRange, selectedBrands, sortBy, ratings]);
 
     // Pagination logic
     const totalPages = Math.ceil(filteredAndSortedProducts.length / itemsPerPage);
@@ -636,6 +639,12 @@ const ProductListingPage = () => {
                                                         <Card.Title className="fw-bold mb-2 product-title" style={{ fontSize: '0.95rem', minHeight: '2.8rem' }} onClick={() => navigate(`/product/${p.id}`, { state: { product: p } })}>
                                                             {p.name || p.title || t("productNameFallback", "Product Name")}
                                                         </Card.Title>
+                                                        
+                                                        <DynamicRating 
+                                                            productId={p.id} 
+                                                            initialRating={ratings[p.id]?.average} 
+                                                            initialReviews={ratings[p.id]?.count} 
+                                                        />
 
                                                         <div className="d-flex align-items-center flex-wrap mb-3">
                                                             <span className="fw-bold product-price fs-5 me-2">₹{finalPrice.toLocaleString()}</span>

@@ -181,7 +181,8 @@
 }
 
 /* Hide scrollbar for products grid for a cleaner look */
-.browse-products-grid::-webkit-scrollbar {
+.browse-products-grid::-webkit-scrollbar,
+.products-scroll-area::-webkit-scrollbar {
   width: 0px;
 }
 

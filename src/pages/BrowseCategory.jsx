@@ -11,7 +11,9 @@ import { Heart, ShoppingCart } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import "./BrowseCategory.css";
 import HoverImageCarousel from "../components/HoverImageCarousel";
+import DynamicRating from "../components/DynamicRating";
 import Loading from "./Loading";
+import { useRatings } from "../hooks/useRatings";
 
 // Use sessionStorage cache to make Browse Categories lightning fast across hard reloads
 const getCachedCats = () => { try { return JSON.parse(sessionStorage.getItem("sc_browse_cats")); } catch { return null; } };
@@ -31,10 +33,15 @@ const BrowseCategory = () => {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
   const [selectedSubCat, setSelectedSubCat] = useState("All");
+  
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
 
   const [loadingCats, setLoadingCats] = useState(true);
   const [loadingProds, setLoadingProds] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+
+  const ratings = useRatings();
 
   useEffect(() => {
     const auth = getAuth();
@@ -137,6 +144,7 @@ const BrowseCategory = () => {
     const fetchCategoryData = async () => {
       setLoadingProds(true);
       setSelectedSubCat("All");
+      setCurrentPage(1);
       try {
         const cached = getCachedData(activeCategory.name);
         // Use cached data if available
@@ -187,6 +195,7 @@ const BrowseCategory = () => {
   // Handle Subcategory Filter
   const handleSubCatClick = (subName) => {
     setSelectedSubCat(subName);
+    setCurrentPage(1);
     if (subName === "All") {
       setFilteredProducts(products);
     } else {
@@ -254,6 +263,37 @@ const BrowseCategory = () => {
     return <Loading />;
   }
 
+  // Pagination Logic
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const getVisiblePages = () => {
+    const pages = [];
+    const maxPagesToShow = 5;
+
+    if (totalPages <= maxPagesToShow + 2) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      pages.push(1);
+      let start = Math.max(2, currentPage - 1);
+      let end = Math.min(totalPages - 1, currentPage + 1);
+
+      if (currentPage <= 3) end = 4;
+      if (currentPage >= totalPages - 2) start = totalPages - 3;
+
+      if (start > 2) pages.push("...");
+      for (let i = start; i <= end; i++) pages.push(i);
+      if (end < totalPages - 1) pages.push("...");
+      pages.push(totalPages);
+    }
+    return pages;
+  };
+
   return (
     <div className="browse-category-page-wrapper">
 
@@ -320,14 +360,16 @@ const BrowseCategory = () => {
             </div>
           )}
 
-          {/* Products Grid */}
-          <div className="browse-products-grid">
+          {/* Scrollable Area for Products & Pagination */}
+          <div className="products-scroll-area" style={{ overflowY: 'auto', flex: 1, paddingBottom: '20px' }}>
+            {/* Products Grid */}
+            <div className="browse-products-grid" style={{ overflowY: 'visible', paddingBottom: '0', display: 'grid' }}>
             {loadingProds ? (
               Array.from({ length: 6 }).map((_, index) => (
                 <div key={`skeleton-${index}`} className="skeleton-card"></div>
               ))
-            ) : filteredProducts.length > 0 ? (
-              filteredProducts.map((prod) => {
+            ) : paginatedProducts.length > 0 ? (
+              paginatedProducts.map((prod) => {
                 const price = Number(prod.price || 0);
                 const offerPrice = Number(prod.offerprice || price);
                 const discount = (price > offerPrice && price > 0) ? Math.round(((price - offerPrice) / price) * 100) : 0;
@@ -370,6 +412,11 @@ const BrowseCategory = () => {
                     </div>
                     <div className="prod-info-box">
                       <h4 className="prod-title">{prod.name}</h4>
+                      <DynamicRating 
+                        productId={prod.id} 
+                        initialRating={ratings[prod.id]?.average} 
+                        initialReviews={ratings[prod.id]?.count} 
+                      />
                       <div className="prod-price-row">
                         <span className="prod-offer-price">₹{offerPrice.toLocaleString()}</span>
                         {price > offerPrice && (
@@ -395,6 +442,57 @@ const BrowseCategory = () => {
               </div>
             )}
           </div>
+
+          {/* Pagination Row */}
+          {!loadingProds && totalPages > 1 && (
+            <div className="d-flex justify-content-center mt-4 mb-2 w-100">
+              <nav>
+                <ul className="pagination gap-1 gap-md-2 border-0 flex-wrap justify-content-center m-0">
+                  <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                    <button className="page-link rounded-circle border d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px' }} onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}>
+                      &lt;
+                    </button>
+                  </li>
+                  {getVisiblePages().map((p, i) => {
+                    if (p === "...") {
+                      return (
+                        <li key={`ellipsis-${i}`} className="page-item disabled">
+                          <span className="page-link rounded-circle border-0 d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px', backgroundColor: 'transparent', color: '#6b7280' }}>
+                            ...
+                          </span>
+                        </li>
+                      );
+                    }
+                    return (
+                      <li key={p} className={`page-item ${currentPage === p ? 'active' : ''}`}>
+                        <button
+                          className="page-link rounded-circle border d-flex align-items-center justify-content-center"
+                          style={{
+                            width: '40px',
+                            height: '40px',
+                            backgroundColor: currentPage === p ? '#2563eb' : '#fff',
+                            color: currentPage === p ? '#fff' : '#4b5563',
+                            borderColor: currentPage === p ? '#2563eb' : '#e5e7eb'
+                          }}
+                          onClick={() => setCurrentPage(p)}
+                        >
+                          {p}
+                        </button>
+                      </li>
+                    );
+                  })}
+                  <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                    <button className="page-link rounded-circle border d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px' }} onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}>
+                      &gt;
+                    </button>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+          )}
+
+          </div> {/* End of products-scroll-area */}
+
         </div>
       </div>
     </div>
