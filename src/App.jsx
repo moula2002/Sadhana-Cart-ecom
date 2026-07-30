@@ -18,9 +18,9 @@ import { useTheme } from "./context/ThemeContext";
 import Header from "./components/Navbar";
 import Footer from "./features/footer/Footer";
 import StickyHeader from "./components/StickyHeader";
-import SplashScreen from "./components/SplashScreen";
 import OfflineFallback from "./components/OfflineFallback";
 import Loading from "./pages/Loading";
+import ScrollToTop from "./components/ScrollToTop";
 
 /* ===== Lazy Loaded Pages ===== */
 const HomePage = lazy(() => import("./pages/Home"));
@@ -77,9 +77,6 @@ const RecentlyViewed = lazy(() => import("./pages/RecentlyViewed"));
 const AppContent = () => {
   const location = useLocation();
   const { theme } = useTheme();
-  const [splashDone, setSplashDone] = React.useState(
-    () => !!sessionStorage.getItem("sc_splash_shown")
-  );
 
   // Hide Header & Footer only on Login and Search pages
   const hideLayout = location.pathname === "/login" || location.pathname === "/search";
@@ -88,8 +85,8 @@ const AppContent = () => {
   return (
     <>
       <OfflineFallback />
-      {/* First-visit splash screen */}
-      {!splashDone && <SplashScreen onDone={() => setSplashDone(true)} />}
+
+      <ScrollToTop />
 
       {isHomePage && <StickyHeader />}
       {!hideLayout && <Header />}
