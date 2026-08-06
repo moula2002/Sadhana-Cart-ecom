@@ -14,6 +14,7 @@ import Loading from "../../pages/Loading";
 import SkeletonGrid from "../SkeletonGrid";
 import { useTranslation } from "react-i18next";
 import HoverImageCarousel from "../HoverImageCarousel";
+import { showProductToast } from "../../utils/toastUtils";
 
 function BestProducts() {
   const { t } = useTranslation();
@@ -113,10 +114,7 @@ function BestProducts() {
       image: product.images?.[0] || "",
       quantity: 1,
     }));
-    toast.success(`${product.name || "Product"} added to cart!`, {
-      position: "bottom-right",
-      autoClose: 3000
-    });
+    showProductToast(product.name || "Product", product.images?.[0] || product.image, "Added to Cart!");
   };
 
 

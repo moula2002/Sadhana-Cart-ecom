@@ -4,6 +4,7 @@ import { Container, Row, Col, Spinner, Alert, Card, Button, Form, InputGroup, Mo
 import { useDispatch } from "react-redux";
 import { addToCart } from "../redux/cartSlice";
 import { toast } from "react-toastify";
+import { showProductToast } from "../utils/toastUtils";
 import "react-toastify/dist/ReactToastify.css";
 import Loading from "../pages/Loading";
 import {
@@ -1045,10 +1046,7 @@ function ProductDetailPage() {
             })
         );
 
-        toast.success(`Added ${quantity} x "${itemTitle}" to cart!`, {
-            position: "bottom-right",
-            autoClose: 3000
-        });
+        showProductToast(`${quantity} x "${itemTitle}"`, mainImage || product.image, "Added to Cart!");
     };
 
     const handleBuyNow = () => {
@@ -2133,7 +2131,7 @@ function ProductDetailPage() {
                                                     image: getExploreImage(p),
                                                     quantity: 1,
                                                 }));
-                                                toast.success(`Added ${p.name || p.title} to cart!`, { position: "bottom-right", autoClose: 3000 });
+                                                showProductToast(p.name || p.title, p.images?.[0] || p.image, "Added to Cart!");
                                             }}
                                         >
                                             <ShoppingCart size={14} /> {t("addToCart", "Add to Cart")}
