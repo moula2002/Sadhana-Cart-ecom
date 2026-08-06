@@ -290,9 +290,20 @@ function TrackOrder() {
               overflow: "hidden"
             }}
           >
-            {/* Decorative top accent */}
-            <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "6px", background: "linear-gradient(90deg, #10b981, #3b82f6)" }} />
-
+            {/* Decorative top accent with moving animation */}
+            <motion.div 
+              animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
+              transition={{ duration: 3, ease: "linear", repeat: Infinity }}
+              style={{ 
+                position: "absolute", 
+                top: 0, 
+                left: 0, 
+                right: 0, 
+                height: "6px", 
+                background: "linear-gradient(90deg, #10b981, #3b82f6, #10b981)",
+                backgroundSize: "200% 200%"
+              }} 
+            />
             <div style={{ 
               width: "80px", 
               height: "80px", 
@@ -451,7 +462,7 @@ function TrackOrder() {
           <hr style={{ borderColor: '#f3f4f6', margin: '30px 0' }} />
 
           {/* ================= PROGRESS STEPPER ================= */}
-          <Stepper status={rawStatus} tracking={tracking} orderDate={orderDate} />
+          <Stepper status={rawStatus} tracking={tracking} orderDate={orderDate} courier={courier} awb={awb} />
 
         </div>
 
@@ -522,100 +533,133 @@ const Header = ({ navigate, isDark }) => {
 };
 
 /* ===============================
-    Stepper (Horizontal)
+    Stepper (Vertical)
 ================================ */
 
-const Stepper = ({ status, tracking, orderDate }) => {
+const Stepper = ({ status, tracking, orderDate, courier = "Ekart Logistics", awb = "FMPC5286893975" }) => {
   const { t } = useTranslation();
+  
   const steps = [
-    { title: t("orderConfirmed", "Order Confirmed"), icon: <FaCheck />, date: orderDate },
-    { title: t("packed", "Packed"), icon: <FaBox />, date: "" },
-    { title: t("shipped", "Shipped"), icon: <FaTruckLoading />, date: "" },
-    { title: t("inTransit", "In Transit"), icon: <FaTruck />, date: "" },
-    { title: t("delivered", "Delivered"), icon: <FaMapMarkerAlt />, date: "" },
+    { 
+      title: t("orderConfirmed", "Order Confirmed"), 
+      date: orderDate,
+      subItems: [
+        { desc: t("orderPlacedDesc", "Your Order has been placed."), date: orderDate },
+        { desc: t("sellerProcessedDesc", "Seller has processed your order."), date: "" },
+        { desc: t("itemPickedDesc", "Your item has been picked up by delivery partner."), date: "" }
+      ]
+    },
+    { 
+      title: t("shipped", "Shipped"), 
+      date: "",
+      subItems: [
+        { desc: `${courier} - ${awb}`, date: "" },
+        { desc: t("itemShippedDesc", "Your item has been shipped."), date: "" },
+        { desc: t("itemHubDesc", "Your item has been received in the hub nearest to you"), date: "" }
+      ]
+    },
+    { 
+      title: t("outForDelivery", "Out For Delivery"), 
+      date: "",
+      subItems: [
+        { desc: t("outForDeliveryDesc", "Your item is out for delivery"), date: "" }
+      ]
+    },
+    { 
+      title: t("delivered", "Delivered"), 
+      date: "",
+      subItems: [
+        { desc: t("itemDeliveredDesc", "Your item has been delivered"), date: "" }
+      ]
+    },
   ];
 
   const getCurrentStep = () => {
     const s = (status || "").toUpperCase();
-    if (s.includes("DELIVERED")) return 4;
-    if (s.includes("OUT")) return 3;
-    if (s.includes("TRANSIT")) return 3; // using 3 to show truck active
-    if (s.includes("SHIP")) return 2;
-    if (s.includes("PACK")) return 1;
+    if (s.includes("DELIVERED")) return 3;
+    if (s.includes("OUT")) return 2;
+    if (s.includes("TRANSIT")) return 2;
+    if (s.includes("SHIP")) return 1;
+    if (s.includes("PACK")) return 0;
     return 0; // Confirmed
   };
 
   const current = getCurrentStep();
 
   return (
-    <div style={{ padding: '10px 0 20px', position: 'relative' }}>
-      <div style={{ display: 'flex', justifycontent: 'space-between', position: 'relative', zIndex: 2 }}>
-        {steps.map((step, i) => {
-          const isCompleted = i < current;
-          const isActive = i === current;
+    <div style={{ padding: '10px 10px', position: 'relative' }}>
+      {steps.map((step, i) => {
+        const isCompleted = i <= current;
+        const isLast = i === steps.length - 1;
 
-          let bgColor = '#f3f4f6'; // default grey
-          let iconColor = '#9ca3af';
-          let textColor = '#9ca3af';
-
-          if (isCompleted) {
-            bgColor = '#10b981'; // Green
-            iconColor = 'white';
-            textColor = '#111827';
-          } else if (isActive) {
-            bgColor = '#1a56db'; // Blue
-            iconColor = 'white';
-            textColor = '#1a56db';
-          }
-
-          return (
-            <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '20%', position: 'relative' }}>
-
-              {/* Line connector */}
-              {i !== steps.length - 1 && (
-                <div style={{
-                  position: 'absolute',
-                  top: '20px',
-                  left: '50%',
-                  width: '100%',
-                  height: '3px',
-                  backgroundColor: isCompleted ? '#10b981' : (isActive ? '#1a56db' : '#f3f4f6'),
-                  zIndex: -1
-                }}></div>
-              )}
-
-              <div style={{
-                width: '42px',
-                height: '42px',
-                borderRadius: '50%',
-                backgroundColor: bgColor,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: iconColor,
-                marginBottom: '12px',
-                fontSize: '1.1rem'
-              }}>
-                {step.icon}
-              </div>
-              <div style={{
-                fontSize: '0.8rem',
-                fontWeight: isActive ? '700' : '600',
-                color: textColor,
-                textAlign: 'center'
-              }}>
-                {step.title}
-              </div>
-              {/* Date below text for completed steps */}
-              {(isCompleted || isActive) && step.date && (
-                <div style={{ fontSize: '0.75rem', color: '#1a56db', marginTop: '4px', fontWeight: '600' }}>
-                  {step.date}
-                </div>
+        return (
+          <div key={i} style={{ display: 'flex', position: 'relative', paddingBottom: isLast ? '0' : '20px' }}>
+            {/* Left side: line and dot */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginRight: '20px' }}>
+              <motion.div 
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 0.3, delay: i * 0.1 }}
+                style={{
+                  width: '14px',
+                  height: '14px',
+                  borderRadius: '50%',
+                  backgroundColor: isCompleted ? '#10b981' : 'transparent',
+                  border: isCompleted ? '2px solid #10b981' : '2px solid #d1d5db',
+                  zIndex: 2,
+                  marginTop: '4px'
+                }}
+              />
+              {!isLast && (
+                <motion.div 
+                  initial={{ height: 0 }}
+                  animate={{ height: '100%' }}
+                  transition={{ duration: 0.5, delay: i * 0.1 }}
+                  style={{
+                    position: 'absolute',
+                    top: '18px',
+                    bottom: 0,
+                    width: '2px',
+                    backgroundColor: isCompleted && i < current ? '#10b981' : 'transparent',
+                    borderLeft: (!isCompleted || i >= current) ? '2px solid #e5e7eb' : 'none',
+                    zIndex: 1
+                  }}
+                />
               )}
             </div>
-          );
-        })}
-      </div>
+
+            {/* Right side: content */}
+            <motion.div 
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, delay: i * 0.1 }}
+              style={{ flex: 1 }}
+            >
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', flexWrap: 'wrap', marginBottom: '12px' }}>
+                <span style={{ fontSize: '1.05rem', fontWeight: isCompleted ? '500' : '400', color: isCompleted ? '#111827' : '#6b7280' }}>
+                  {step.title}
+                </span>
+              </div>
+              
+              {/* Sub-items */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {step.subItems.map((sub, j) => (
+                  <div key={j}>
+                    <div style={{ fontSize: '0.95rem', color: isCompleted ? '#374151' : '#9ca3af' }}>
+                      {sub.desc}
+                    </div>
+                    {sub.date && (
+                      <div style={{ fontSize: '0.85rem', color: '#9ca3af', marginTop: '2px' }}>
+                        {sub.date}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        );
+      })}
     </div>
   );
 };
