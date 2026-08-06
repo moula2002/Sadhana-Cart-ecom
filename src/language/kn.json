@@ -645,7 +645,8 @@
     "returnPolicy": "ಮರುಪಾವತಿ ನೀತಿ",
     "shippingPolicy": "ಶಿಪ್ಪಿಂಗ್ ನೀತಿ",
     "termsConditions": "ನಿಯಮಗಳು ಮತ್ತು ಷರತ್ತುಗಳು",
-    "workingSchedule": "ಸೋಮ – ಶನಿ, ಬೆಳಿಗ್ಗೆ 9 – ಸಂಜೆ 6"
+    "workingSchedule": "ಸೋಮ – ಶನಿ, ಬೆಳಿಗ್ಗೆ 9 – ಸಂಜೆ 6",
+    "backToTop": "ಮೇಲಕ್ಕೆ ಹೋಗಿ"
   },
   "return-Policy;": "ರಿಟರ್ನ್ ನೀತಿ",
   "confirmLogoutTitle": "ಲಾಗ್ ಔಟ್ ದೃಢೀಕರಿಸಿ",

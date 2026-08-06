@@ -243,6 +243,17 @@ const Footer = () => {
               <span className="sc-sep">|</span>
               <Link to="/sitemap">{t("footer.sitemap", "Sitemap")}</Link>
             </div>
+            
+            {/* Back to top button */}
+            <button 
+              className="sc-back-top mt-3 mt-md-0" 
+              onClick={scrollToTop} 
+              aria-label="Back to top"
+              title="Back to top"
+            >
+              <FaArrowUp />
+              <span>{t("footer.backToTop", "Back to top")}</span>
+            </button>
           </div>
 
         </div>

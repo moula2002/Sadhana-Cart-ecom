@@ -114,7 +114,7 @@ function TrackOrder() {
   }
 
   const rawStatus = shipment.current_status || "Order Placed";
-  
+
   // Localize order status badge if we have translations
   const getLocalizedStatus = (statusStr) => {
     const s = statusStr.toUpperCase();
@@ -133,7 +133,7 @@ function TrackOrder() {
 
   // Order Details
   const orderDate = order?.orderDate ? formatDate(order.orderDate) : formatDate(new Date());
-  
+
   // Address info
   const address = order?.shippingAddress || order?.address || {};
   const name = address.fullName || address.name || order?.userName || "John Doe";
@@ -148,7 +148,7 @@ function TrackOrder() {
       {/* Top Banner */}
       <div style={{ backgroundColor: '#1a56db', padding: '15px 20px', color: 'white', display: 'flex', alignItems: 'center', gap: '15px' }}>
         <div style={{ cursor: "pointer" }} onClick={() => navigate(-1)}>
-            <FaArrowLeft />
+          <FaArrowLeft />
         </div>
 
         <h5 style={{ margin: 0, fontWeight: '600', fontSize: '1.15rem' }}>{t("orderTrackingPage", "Order Tracking Page")}</h5>
@@ -190,7 +190,7 @@ function TrackOrder() {
           <Col md={6}>
             <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '24px', height: '100%', boxShadow: '0 4px 15px rgba(0,0,0,0.03)' }}>
               <h6 style={{ fontWeight: '700', color: '#111827', marginBottom: '24px', fontSize: '1rem' }}>{t("deliveryDetails", "Delivery Details")}</h6>
-              
+
               <div style={{ marginBottom: '20px' }}>
                 <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: 0, marginBottom: '4px' }}>{t("deliveryPartner", "Delivery Partner")}</p>
                 <p style={{ fontWeight: '700', color: '#111827', margin: 0, fontSize: '0.95rem' }}>{courier}</p>
@@ -210,7 +210,7 @@ function TrackOrder() {
           <Col md={6}>
             <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '24px', height: '100%', boxShadow: '0 4px 15px rgba(0,0,0,0.03)' }}>
               <h6 style={{ fontWeight: '700', color: '#111827', marginBottom: '24px', fontSize: '1rem' }}>{t("shippingAddress", "Shipping Address")}</h6>
-              
+
               <p style={{ fontWeight: '600', color: '#111827', margin: 0, marginBottom: '10px', fontSize: '0.95rem' }}>{name}</p>
               <p style={{ fontSize: '0.85rem', color: '#4b5563', margin: 0, lineHeight: '1.7' }}>
                 {line1},<br />
@@ -283,7 +283,7 @@ const Stepper = ({ status, tracking, orderDate }) => {
         {steps.map((step, i) => {
           const isCompleted = i < current;
           const isActive = i === current;
-          
+
           let bgColor = '#f3f4f6'; // default grey
           let iconColor = '#9ca3af';
           let textColor = '#9ca3af';
@@ -300,7 +300,7 @@ const Stepper = ({ status, tracking, orderDate }) => {
 
           return (
             <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '20%', position: 'relative' }}>
-              
+
               {/* Line connector */}
               {i !== steps.length - 1 && (
                 <div style={{
@@ -338,9 +338,9 @@ const Stepper = ({ status, tracking, orderDate }) => {
               </div>
               {/* Date below text for completed steps */}
               {(isCompleted || isActive) && step.date && (
-                 <div style={{ fontSize: '0.75rem', color: '#1a56db', marginTop: '4px', fontWeight: '600' }}>
-                   {step.date}
-                 </div>
+                <div style={{ fontSize: '0.75rem', color: '#1a56db', marginTop: '4px', fontWeight: '600' }}>
+                  {step.date}
+                </div>
               )}
             </div>
           );

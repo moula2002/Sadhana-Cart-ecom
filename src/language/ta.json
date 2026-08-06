@@ -644,7 +644,8 @@
     "returnPolicy": "திரும்பப்பெறும் கொள்கை",
     "shippingPolicy": "ஷிப்பிங் கொள்கை",
     "termsConditions": "விதிமுறைகள் மற்றும் நிபந்தனைகள்",
-    "workingSchedule": "திங்கள் – சனி, காலை 9 – மாலை 6"
+    "workingSchedule": "திங்கள் – சனி, காலை 9 – மாலை 6",
+    "backToTop": "மேலே செல்லவும்"
   },
   "return-Policy;": "திரும்பப் பெறும் கொள்கை",
   "confirmLogoutTitle": "வெளியேறுதலை உறுதிப்படுத்தவும்",

@@ -645,7 +645,8 @@
     "returnPolicy": "రిటర్న్ పాలసీ",
     "shippingPolicy": "షిప్పింగ్ విధానం",
     "termsConditions": "నిబంధనలు & షరతులు",
-    "workingSchedule": "సోమ – శని, ఉ. 9 – సా. 6"
+    "workingSchedule": "సోమ – శని, ఉ. 9 – సా. 6",
+    "backToTop": "పైకి వెళ్ళండి"
   },
   "return-Policy;": "వాపసు విధానం",
   "confirmLogoutTitle": "లాగ్ అవుట్‌ని నిర్ధారించండి",

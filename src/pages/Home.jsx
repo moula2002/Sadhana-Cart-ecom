@@ -91,7 +91,7 @@ function Home() {
 
       {/* ── PROMOTE APP AFTER FLASH DEALS ── */}
       <div className="promote-app-banner" style={{ margin: "20px -16px", width: "calc(100% + 32px)", position: "relative" }}>
-        <img src={promotingApp} alt="Promote App" style={{ width: "100%", maxHeight: "400px", display: "block", objectFit: "fill" }} />
+        <img src={promotingApp} alt="Promote App" style={{ width: "100%", height: "auto", display: "block" }} />
         {/* Invisible click zone — Google Play button in image */}
         <a
           href="https://play.google.com/store/apps/details?id=com.innomatrics.sadhana_cart"

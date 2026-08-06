@@ -638,7 +638,8 @@
     "returnPolicy": "Return Policy",
     "shippingPolicy": "Shipping Policy",
     "termsConditions": "Terms & Conditions",
-    "workingSchedule": "Mon – Sat, 9:00 AM – 6:00 PM"
+    "workingSchedule": "Mon – Sat, 9:00 AM – 6:00 PM",
+    "backToTop": "Back to top"
   },
   "confirmLogoutTitle": "Confirm Log Out",
   "confirmLogoutMessage": "Are you sure you want to log out?",

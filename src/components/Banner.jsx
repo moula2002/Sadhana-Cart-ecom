@@ -3,12 +3,14 @@ import { collection, getDocs, query, where, limit } from "firebase/firestore";
 import { db } from "../firebase";
 import "./Banner.css";
 import Loading from "../pages/Loading";
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { FaChevronLeft, FaChevronRight, FaArrowRight, FaDownload } from "react-icons/fa";
+import appPromoImg from "../Images/promoting1.png";
+import rewardsImg from "../Images/promoting2.png";
 
 const Banner = () => {
   const [banners, setBanners] = useState(() => {
     try {
-      const cached = sessionStorage.getItem("sc_cached_banners");
+      const cached = localStorage.getItem("sc_cached_banners");
       return cached ? JSON.parse(cached) : [];
     } catch (e) {
       return [];
@@ -17,7 +19,7 @@ const Banner = () => {
   const [index, setIndex] = useState(0);
   const [loading, setLoading] = useState(() => {
     try {
-      return !sessionStorage.getItem("sc_cached_banners");
+      return !localStorage.getItem("sc_cached_banners");
     } catch (e) {
       return true;
     }
@@ -46,8 +48,8 @@ const Banner = () => {
         if (list.length > 0) {
           setBanners(list);
           try {
-            sessionStorage.setItem("sc_cached_banners", JSON.stringify(list));
-          } catch (e) {}
+            localStorage.setItem("sc_cached_banners", JSON.stringify(list));
+          } catch (e) { }
         }
         setLoading(false);
       } catch (error) {
@@ -60,151 +62,133 @@ const Banner = () => {
   }, []);
 
   /* ==========================
-     AUTO SLIDE (Disabled per request)
-  ========================== */
-
-  /* ==========================
      NEXT
   ========================== */
 
-  const nextSlide=useCallback(()=>{
-
-    if(banners.length===0)return;
-
-    setIndex(prev=>(prev+1)%banners.length);
-
-  },[banners.length]);
+  const nextSlide = useCallback(() => {
+    if (banners.length === 0) return;
+    setIndex(prev => (prev + 1) % banners.length);
+  }, [banners.length]);
 
   /* ==========================
      PREV
   ========================== */
 
-  const prevSlide=useCallback(()=>{
-
-    if(banners.length===0)return;
-
-    setIndex(prev=>(prev-1+banners.length)%banners.length);
-
-  },[banners.length]);
+  const prevSlide = useCallback(() => {
+    if (banners.length === 0) return;
+    setIndex(prev => (prev - 1 + banners.length) % banners.length);
+  }, [banners.length]);
 
   /* ==========================
      Visible slides
   ========================== */
 
-  const getVisibleIndices=()=>{
-
-    const len=banners.length;
-
-    const prev=(index-1+len)%len;
-    const curr=index;
-    const next=(index+1)%len;
-
-    return {prev,curr,next};
-
+  const getVisibleIndices = () => {
+    const len = banners.length;
+    const prev = (index - 1 + len) % len;
+    const curr = index;
+    const next = (index + 1) % len;
+    return { prev, curr, next };
   };
 
-if (loading) {
-  return <Loading minHeight="280px" message="Loading Banners..." />;
-}
+  if (loading) {
+    return <Loading minHeight="280px" message="Loading Banners..." />;
+  }
 
-if (banners.length < 1) {
+  if (banners.length < 1) {
+    return (
+      <div className="banner-empty">
+        <div className="empty-icon">🎬</div>
+        <h3>No banners available</h3>
+      </div>
+    );
+  }
+
+  const { prev, curr, next } = getVisibleIndices();
+
   return (
-    <div className="banner-empty">
-      <div className="empty-icon">🎬</div>
-      <h3>No banners available</h3>
-    </div>
+    <section className="bento-banner-container">
+
+      {/* 1. Main Carousel */}
+      <div className="banner-wrapper">
+        <div className="banner-bg">
+          <img
+            src={banners[curr]?.image}
+            alt="bg"
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+          />
+          <div className="overlay"></div>
+        </div>
+
+        <div className="slides-container">
+          {banners.map((b, i) => {
+            let slideClass = "banner-slide";
+            if (i === curr) slideClass += " center";
+            else if (i === prev) slideClass += " left";
+            else if (i === next) slideClass += " right";
+            else slideClass += " hidden";
+
+            return (
+              <div key={b.id} className={slideClass}>
+                <img
+                  src={b.image}
+                  alt="Banner"
+                  loading={i === curr ? "eager" : "lazy"}
+                  decoding="async"
+                />
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="banner-nav">
+          <button onClick={prevSlide} className="nav-btn left">
+            <FaChevronLeft />
+          </button>
+          <button onClick={nextSlide} className="nav-btn right">
+            <FaChevronRight />
+          </button>
+        </div>
+
+        <div className="banner-dots">
+          {banners.map((_, i) => (
+            <span
+              key={i}
+              className={index === i ? "dot active" : "dot"}
+              onClick={() => setIndex(i)}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* 2. Side Bento Cards */}
+      <div className="bento-side-cards">
+        
+        {/* App Promo Card */}
+        <div
+          className="bento-card bento-app-card"
+          onClick={() => window.open("https://play.google.com/store/apps/details?id=com.innomatrics.sadhana_cart", "_blank")}
+        >
+          <div className="bento-card-img-wrapper" style={{ width: '100%', height: '100%', right: '0', bottom: '0' }}>
+            <img src={appPromoImg} alt="App" className="bento-full-image" style={{ objectFit: 'fill', transform: 'none', filter: 'none', height: '100%' }} />
+          </div>
+        </div>
+
+        {/* Coins Promo Card */}
+        <div
+          className="bento-card bento-coin-card"
+          onClick={() => window.location.href = '/rewards'}
+        >
+          <div className="bento-card-img-wrapper" style={{ width: '100%', height: '100%', right: '0', bottom: '0' }}>
+            <img src={rewardsImg} alt="Coins" className="bento-full-image" style={{ objectFit: 'fill', transform: 'none', filter: 'none', height: '100%' }} />
+          </div>
+        </div>
+
+      </div>
+    </section>
   );
 }
-
-  const {prev,curr,next}=getVisibleIndices();
-
-  return(
-
-<section className="banner-wrapper">
-
-{/* background */}
-
-<div className="banner-bg">
-
-<img
-src={banners[curr]?.image}
-alt="bg"
-loading="eager"
-fetchPriority="high"
-decoding="async"
-/>
-
-<div className="overlay"></div>
-
-</div>
-
-{/* slides */}
-
-<div className="slides-container">
-
-{banners.map((b,i)=>{
-
-let slideClass="banner-slide";
-
-if(i===curr)slideClass+=" center";
-else if(i===prev)slideClass+=" left";
-else if(i===next)slideClass+=" right";
-else slideClass+=" hidden";
-
-return(
-
-<div key={b.id} className={slideClass}>
-
-<img
-src={b.image}
-alt="Banner"
-loading={i===curr?"eager":"lazy"}
-decoding="async"
-/>
-
-</div>
-
-);
-
-})}
-
-</div>
-
-{/* navigation */}
-
-<div className="banner-nav">
-
-<button onClick={prevSlide} className="nav-btn left">
-<FaChevronLeft/>
-</button>
-
-<button onClick={nextSlide} className="nav-btn right">
-<FaChevronRight/>
-</button>
-
-</div>
-
-{/* dots */}
-
-<div className="banner-dots">
-
-{banners.map((_,i)=>(
-
-<span
-key={i}
-className={index===i?"dot active":"dot"}
-onClick={()=>setIndex(i)}
-/>
-
-))}
-
-</div>
-
-</section>
-
-  );
-}
-
-
 
 export default Banner;

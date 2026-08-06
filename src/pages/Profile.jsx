@@ -994,7 +994,7 @@ function Profile() {
                     <input 
                       type="email" 
                       value={email} 
-                      disabled 
+                      onChange={(e) => setEmail(e.target.value)}
                       required 
                     />
                   </div>

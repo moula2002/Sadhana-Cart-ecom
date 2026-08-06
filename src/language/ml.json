@@ -645,7 +645,8 @@
     "returnPolicy": "തിരിച്ചയക്കല്‍ നയം",
     "shippingPolicy": "ഷിപ്പിംഗ് നയം",
     "termsConditions": "നിബന്ധനകളും വ്യവസ്ഥഫും",
-    "workingSchedule": "തിങ്കള്‍ – ശനി, രാ. 9 – വൈ. 6"
+    "workingSchedule": "തിങ്കള്‍ – ശനി, രാ. 9 – വൈ. 6",
+    "backToTop": "മുകളിലേക്ക് പോകുക"
   },
   "return-Policy;": "മടക്കിനൽകൽ നയം",
   "confirmLogoutTitle": "ലോഗ് ഔട്ട് സ്ഥിരീകരിക്കുക",

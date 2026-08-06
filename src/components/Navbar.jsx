@@ -563,6 +563,7 @@ const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal, se
   const [savedAddresses, setSavedAddresses] = useState([]);
   const [profileImage, setProfileImage] = useState(null);
   const [userName, setUserName] = useState("");
+  const [userEmail, setUserEmail] = useState("");
 
   // Listen to user data in real-time
   useEffect(() => {
@@ -576,11 +577,14 @@ const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal, se
           setWalletCoins(userData.walletCoins || 0);
           setProfileImage(userData.profileImage || null);
           setUserName(userData.name || "");
+          setUserEmail(userData.email || currentUser.email || "");
 
           // Fetch saved addresses
           if (userData.addresses) {
             setSavedAddresses(userData.addresses);
           }
+        } else {
+          setUserEmail(currentUser.email || "");
         }
       },
       (error) => {
@@ -670,7 +674,7 @@ const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal, se
           {currentUser ? (
             <>
               <span style={{ fontSize: '0.8rem', color: '#888', lineHeight: '1.2' }}>
-                {userName || currentUser.displayName || currentUser.email?.split("@")[0] || "User"}
+                {userName || currentUser.displayName || userEmail?.split("@")[0] || "User"}
               </span>
               <div className="d-flex align-items-center">
                 <span style={{ fontSize: '0.9rem', fontWeight: '700', color: '#212121', lineHeight: '1.2' }}>
@@ -750,8 +754,8 @@ const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal, se
                   </motion.div>
                 )}
                 <div>
-                  <h6 className="mb-0 fw-bold text-dark">{userName || currentUser.displayName || currentUser.email?.split("@")[0] || "User"}</h6>
-                  <small className="text-muted">{currentUser.email}</small>
+                  <h6 className="mb-0 fw-bold text-dark">{userName || currentUser.displayName || userEmail?.split("@")[0] || "User"}</h6>
+                  <small className="text-muted">{userEmail}</small>
                 </div>
               </div>
             </div>
