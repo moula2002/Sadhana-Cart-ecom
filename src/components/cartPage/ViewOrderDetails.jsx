@@ -12,6 +12,7 @@ import {
   Col,
   Image
 } from "react-bootstrap";
+import { toast } from "react-toastify";
 import {
   FaArrowLeft,
   FaTruck,
@@ -28,13 +29,15 @@ import {
   FaGift,
   FaCreditCard,
   FaCog,
-  FaSignOutAlt
+  FaSignOutAlt,
+  FaCopy
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db } from "../../firebase";
 import "../../pages/Profile.css";
 import { collection, query, orderBy, getDocs } from "firebase/firestore";
+import { useTheme } from "../../context/ThemeContext";
 
 const formatCurrency = (val) =>
   new Intl.NumberFormat("en-IN", {
@@ -233,6 +236,7 @@ else if (returnedProduct?.returnStatus) {
 
 function ViewOrderDetails() { 
   const { t } = useTranslation();
+  const { isDark } = useTheme();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState(null);
@@ -405,12 +409,39 @@ function ViewOrderDetails() {
                   <Card.Body className="p-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                     {/* Left Column: ID and Images */}
                     <div style={{ flex: "1" }}>
-                      <div className="order-num-id fw-bold mb-3" style={{ fontSize: "14px" }}>
-                        {t("orderId", "Order ID:")} <span className="order-num-id">#{order.orderId}</span>
+                      <div className="order-num-id fw-bold mb-3 d-flex align-items-center gap-2 flex-wrap" style={{ fontSize: "14px" }}>
+                        <span>{t("orderId", "Order ID:")} <span className="order-num-id">#{order.orderId}</span></span>
+                        <div 
+                          className="d-flex align-items-center gap-1"
+                          title="Click to copy Order ID"
+                          style={{ 
+                            cursor: "pointer", 
+                            color: isDark ? "#60a5fa" : "#0a45bd", 
+                            backgroundColor: isDark ? "rgba(59, 130, 246, 0.15)" : "#eef2ff", 
+                            padding: "4px 8px", 
+                            borderRadius: "6px", 
+                            fontSize: "12px",
+                            fontWeight: "600",
+                            transition: "background-color 0.2s ease"
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = isDark ? "rgba(59, 130, 246, 0.25)" : "#e0e7ff"}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = isDark ? "rgba(59, 130, 246, 0.15)" : "#eef2ff"}
+                          onClick={() => {
+                            navigator.clipboard.writeText(order.orderId);
+                            toast.success("Order ID copied to clipboard!", {
+                              position: "bottom-center",
+                              autoClose: 2000,
+                              hideProgressBar: true,
+                            });
+                          }}
+                        >
+                          <FaCopy style={{ fontSize: "14px" }} />
+                          <span>{t("copy", "Copy ID")}</span>
+                        </div>
                       </div>
                       <div className="d-flex flex-wrap gap-2">
                         {order.products.map((product, index) => (
-                          <div key={index} style={{ width: "65px", height: "85px", overflow: "hidden", borderRadius: "6px", backgroundColor: "#f8f9fa", border: "1px solid #eee" }}>
+                          <div key={index} style={{ width: "65px", height: "85px", overflow: "hidden", borderRadius: "6px", backgroundColor: isDark ? "#374151" : "#f8f9fa", border: isDark ? "1px solid #4b5563" : "1px solid #eee" }}>
                             <Image
                               src={product.image}
                               style={{ width: "100%", height: "100%", objectFit: "cover" }}

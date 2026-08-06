@@ -8,12 +8,20 @@ import {
   FaTruckLoading,
   FaMapMarkerAlt,
   FaExclamationTriangle,
+  FaCheckCircle,
+  FaHashtag,
+  FaCreditCard,
+  FaCopy,
 } from "react-icons/fa";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { useTranslation } from "react-i18next";
+import { useTheme } from "../../context/ThemeContext";
 import Loading from "../../pages/Loading";
-import { app } from "../../firebase";
+import { app, db, auth } from "../../firebase";
+import { collection, query, where, getDocs, doc, getDoc, collectionGroup } from "firebase/firestore";
+import { toast } from "react-toastify";
+import { motion } from "framer-motion";
 
 /* ===============================
     Helpers
@@ -38,13 +46,90 @@ const formatDate = (date) => {
 
 function TrackOrder() {
   const { t } = useTranslation();
+  const { isDark } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
-  const order = location.state?.order;
+  const [order, setOrder] = useState(location.state?.order);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [trackingData, setTrackingData] = useState(null);
+
+  // Manual tracking form states
+  const [searchType, setSearchType] = useState("orderId");
+  const [searchValue, setSearchValue] = useState("");
+
+  const handleManualSearch = async () => {
+    if (!searchValue.trim()) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+      let foundOrder = null;
+      const val = searchValue.trim();
+
+      const user = auth.currentUser;
+
+      // If user is logged in, try the direct doc reference first for efficiency
+      if (user) {
+        const docRef = doc(db, "users", user.uid, "orders", val);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          foundOrder = { id: docSnap.id, ...docSnap.data() };
+        }
+      }
+
+      if (!foundOrder) {
+        try {
+          const ordersGroupRef = collectionGroup(db, "orders");
+          const q1 = query(ordersGroupRef, where("orderId", "==", val));
+          const snap1 = await getDocs(q1);
+
+          if (!snap1.empty) {
+            foundOrder = { id: snap1.docs[0].id, ...snap1.docs[0].data() };
+          } else {
+            const q2 = query(ordersGroupRef, where("shiprocketOrderId", "==", val));
+            const snap2 = await getDocs(q2);
+            if (!snap2.empty) {
+              foundOrder = { id: snap2.docs[0].id, ...snap2.docs[0].data() };
+            }
+          }
+        } catch (groupErr) {
+          console.warn("collectionGroup failed (likely missing index). Falling back to manual search.");
+          // FOOLPROOF FALLBACK: Iterate through all users since the index is missing
+          const usersSnap = await getDocs(collection(db, "users"));
+          for (let uDoc of usersSnap.docs) {
+            const userOrdersSnap = await getDocs(collection(db, "users", uDoc.id, "orders"));
+            const match = userOrdersSnap.docs.find(
+              d => d.data().orderId === val || d.data().shiprocketOrderId === val
+            );
+            if (match) {
+              foundOrder = { id: match.id, ...match.data() };
+              break;
+            }
+          }
+        }
+      }
+
+      if (foundOrder) {
+        setOrder(foundOrder);
+        // Loading is kept true since useEffect will re-run and fetch tracking info
+      } else {
+        toast.error("Order not found. Please check your Order ID.");
+        setLoading(false);
+      }
+    } catch (err) {
+      console.error("Search error:", err);
+      if (err.message && err.message.toLowerCase().includes("permission")) {
+        toast.error("Firebase Security Block! You must update your Firestore Rules in the Firebase Console to allow guest reads.", { autoClose: false });
+      } else if (err.message && err.message.toLowerCase().includes("index")) {
+        toast.error("Firebase Index Missing! Please check the console (F12) for the link to create it.", { autoClose: false });
+      } else {
+        toast.error("Failed to search for order: " + (err.message || "Unknown error"));
+      }
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const fetchTracking = async () => {
@@ -96,18 +181,203 @@ function TrackOrder() {
     );
   }
 
+  if (!order) {
+    return (
+      <div className={isDark ? "bg-dark text-light" : "bg-light"} style={{ minHeight: "100vh" }}>
+        <Header navigate={navigate} isDark={isDark} />
+        <Container className="py-5 d-flex justify-content-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            style={{
+              backgroundColor: isDark ? "#1f2937" : "white",
+              padding: "40px",
+              borderRadius: "16px",
+              boxShadow: isDark ? "0 8px 30px rgba(0,0,0,0.5)" : "0 8px 30px rgba(0,0,0,0.06)",
+              width: "100%",
+              maxWidth: "500px",
+              borderTop: isDark ? "4px solid #3b82f6" : "4px solid #1a56db",
+            }}
+          >
+            <div className="d-flex align-items-center mb-4">
+              <div style={{
+                backgroundColor: isDark ? "#374151" : "#e0e7ff",
+                color: isDark ? "#60a5fa" : "#1a56db",
+                padding: "12px",
+                borderRadius: "10px",
+                marginRight: "15px",
+                boxShadow: isDark ? "0 4px 10px rgba(0,0,0,0.2)" : "none"
+              }}>
+                <FaBox size={24} />
+              </div>
+              <h5 className="mb-0" style={{ fontWeight: "700", color: isDark ? "#f3f4f6" : "#1f2937", fontSize: "1.25rem" }}>
+                {t("trackShipmentStatus", "Track status of your shipment")}
+              </h5>
+            </div>
+
+            <div className="mb-4">
+              <input
+                type="text"
+                className="form-control"
+                placeholder={t("enterOrderId", "Enter Order ID to search (e.g. KhDCl...)")}
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+                style={{
+                  padding: "14px 18px",
+                  fontSize: "15px",
+                  borderRadius: "10px",
+                  border: isDark ? "1px solid #4b5563" : "1px solid #d1d5db",
+                  backgroundColor: isDark ? "#374151" : "white",
+                  color: isDark ? "white" : "black",
+                  boxShadow: "inset 0 1px 2px rgba(0, 0, 0, 0.05)",
+                  transition: "all 0.2s ease-in-out"
+                }}
+                onFocus={(e) => { e.target.style.borderColor = isDark ? "#3b82f6" : "#1a56db"; e.target.style.boxShadow = isDark ? "0 0 0 3px rgba(59, 130, 246, 0.2)" : "0 0 0 3px rgba(26, 86, 219, 0.1)"; }}
+                onBlur={(e) => { e.target.style.borderColor = isDark ? "#4b5563" : "#d1d5db"; e.target.style.boxShadow = "inset 0 1px 2px rgba(0, 0, 0, 0.05)"; }}
+              />
+            </div>
+
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="btn w-100"
+              style={{
+                padding: "14px",
+                fontWeight: "700",
+                borderRadius: "10px",
+                backgroundColor: "#10b981",
+                color: "white",
+                border: "none",
+                fontSize: "16px",
+                boxShadow: "0 4px 12px rgba(16, 185, 129, 0.3)"
+              }}
+              onClick={handleManualSearch}
+            >
+              {t("submit", "Submit")}
+            </motion.button>
+          </motion.div>
+        </Container>
+      </div>
+    );
+  }
+
   const tracking = trackingData?.tracking_data;
   const shipment = tracking?.shipment_track?.[0];
 
   if (!shipment) {
+    const displayOrderId = order?.shiprocketOrderId || order?.orderId || "N/A";
+    const displayPaymentMethod = order?.paymentMethod || order?.paymentMode || "N/A";
+    const displayAmount = order?.payableAmount || order?.totalAmount || 0;
+
     return (
-      <div className="bg-light" style={{ minHeight: "100vh" }}>
-        <Header navigate={navigate} />
-        <Container className="text-center py-5">
-          <FaTruck size={60} className="text-secondary" />
-          <h5 className="mt-3 text-body">
-            {t("trackingAvailableSoon", "Tracking will be available soon")}
-          </h5>
+      <div className={isDark ? "bg-dark text-light" : "bg-light"} style={{ minHeight: "100vh", fontFamily: "'Inter', sans-serif" }}>
+        <Header navigate={navigate} isDark={isDark} />
+        <Container className="d-flex flex-column align-items-center py-5">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            style={{
+              backgroundColor: isDark ? "#1f2937" : "white",
+              borderRadius: "16px",
+              padding: "40px 30px",
+              width: "100%",
+              maxWidth: "500px",
+              boxShadow: isDark ? "0 10px 40px rgba(0,0,0,0.5)" : "0 10px 40px rgba(0,0,0,0.06)",
+              textAlign: "center",
+              position: "relative",
+              overflow: "hidden"
+            }}
+          >
+            {/* Decorative top accent */}
+            <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "6px", background: "linear-gradient(90deg, #10b981, #3b82f6)" }} />
+
+            <div style={{ 
+              width: "80px", 
+              height: "80px", 
+              backgroundColor: isDark ? "rgba(16, 185, 129, 0.1)" : "#ecfdf5", 
+              borderRadius: "50%", 
+              display: "flex", 
+              alignItems: "center", 
+              justifyContent: "center", 
+              margin: "0 auto 24px auto",
+              boxShadow: isDark ? "0 4px 14px rgba(16,185,129,0.3)" : "0 4px 14px rgba(16,185,129,0.15)"
+            }}>
+              <FaCheckCircle size={40} color="#10b981" />
+            </div>
+
+            <h4 style={{ fontWeight: "800", color: isDark ? "#f9fafb" : "#111827", marginBottom: "12px", fontSize: "1.5rem" }}>
+              {t("orderConfirmedStatus", "Order Confirmed!")}
+            </h4>
+            <p style={{ color: isDark ? "#9ca3af" : "#6b7280", margin: "0 auto 30px auto", fontSize: "0.95rem", lineHeight: "1.6", maxWidth: "350px" }}>
+              {t("trackingInfoAvailableSoonText", "Your order has been successfully placed. Tracking information will appear here once the courier picks it up.")}
+            </p>
+
+            <div style={{
+              backgroundColor: isDark ? "#374151" : "#f9fafb",
+              border: isDark ? "1px dashed #4b5563" : "1px dashed #d1d5db",
+              borderRadius: "12px",
+              padding: "24px",
+              textAlign: "left"
+            }}>
+              <h6 style={{ fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "1px", color: isDark ? "#9ca3af" : "#9ca3af", marginBottom: "20px", fontWeight: "700" }}>
+                {t("orderSummary", "ORDER SUMMARY")}
+              </h6>
+
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <span style={{ color: isDark ? "#d1d5db" : "#4b5563", fontWeight: "500", fontSize: "0.95rem", display: "flex", alignContent: "center", alignItems: "center", gap: "8px" }}>
+                  <FaHashtag size={14} color={isDark ? "#6b7280" : "#9ca3af"}/> {t("shiprocketOrderId", "Order ID")}
+                </span>
+                <div className="d-flex align-items-center gap-2">
+                  <span style={{ color: isDark ? "#f9fafb" : "#111827", fontWeight: "700", fontSize: "0.95rem" }}>{displayOrderId}</span>
+                  <div 
+                    className="d-flex align-items-center justify-content-center"
+                    title={t("copyOrderId", "Click to copy Order ID")}
+                    style={{ 
+                      cursor: "pointer", 
+                      color: isDark ? "#60a5fa" : "#3b82f6", 
+                      backgroundColor: isDark ? "rgba(59, 130, 246, 0.15)" : "#eff6ff", 
+                      padding: "6px", 
+                      borderRadius: "6px", 
+                      transition: "background-color 0.2s ease"
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = isDark ? "rgba(59, 130, 246, 0.25)" : "#dbeafe"}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = isDark ? "rgba(59, 130, 246, 0.15)" : "#eff6ff"}
+                    onClick={() => {
+                      navigator.clipboard.writeText(displayOrderId);
+                      toast.success(t("orderIdCopied", "Order ID copied!"), { autoClose: 1500, hideProgressBar: true, position: "bottom-center" });
+                    }}
+                  >
+                    <FaCopy size={14} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <span style={{ color: isDark ? "#d1d5db" : "#4b5563", fontWeight: "500", fontSize: "0.95rem", display: "flex", alignContent: "center", alignItems: "center", gap: "8px" }}>
+                  <FaCreditCard size={14} color={isDark ? "#6b7280" : "#9ca3af"}/> {t("paymentMethod", "Payment")}
+                </span>
+                <span style={{ color: isDark ? "#f9fafb" : "#111827", fontWeight: "600", fontSize: "0.95rem", textTransform: "capitalize" }}>{displayPaymentMethod}</span>
+              </div>
+
+              <div style={{ height: "1px", backgroundColor: isDark ? "#4b5563" : "#e5e7eb", margin: "16px 0" }} />
+
+              <div className="d-flex justify-content-between align-items-center">
+                <span style={{ color: isDark ? "#f9fafb" : "#111827", fontWeight: "700", fontSize: "1.05rem" }}>{t("totalAmount", "Total")}</span>
+                <span style={{ color: "#10b981", fontWeight: "800", fontSize: "1.1rem" }}>₹{Number(displayAmount).toFixed(2)}</span>
+              </div>
+            </div>
+
+            <Button 
+              className="mt-4 w-100" 
+              variant={isDark ? "outline-light" : "outline-primary"}
+              style={{ fontWeight: "600", padding: "12px", borderRadius: "8px", borderWidth: "2px" }}
+              onClick={() => navigate("/")}
+            >
+              {t("continueShopping", "Continue Shopping")}
+            </Button>
+          </motion.div>
         </Container>
       </div>
     );
@@ -229,7 +499,7 @@ function TrackOrder() {
     Header Component (Fallback)
 ================================ */
 
-const Header = ({ navigate }) => {
+const Header = ({ navigate, isDark }) => {
   const { t } = useTranslation();
   return (
     <div
@@ -238,7 +508,7 @@ const Header = ({ navigate }) => {
         display: "flex",
         alignItems: "center",
         gap: "10px",
-        backgroundColor: "#1a56db",
+        backgroundColor: isDark ? "#111827" : "#1a56db",
         color: "white"
       }}
     >
