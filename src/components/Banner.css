@@ -353,6 +353,16 @@
   .bento-side-cards {
     flex-direction: column;
   }
+
+  .bento-image-card {
+    min-height: auto;
+    aspect-ratio: auto;
+  }
+
+  .bento-full-image {
+    height: auto;
+    object-fit: contain;
+  }
 }
 
 @media (max-width: 480px) {

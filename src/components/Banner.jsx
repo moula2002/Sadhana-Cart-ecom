@@ -168,22 +168,18 @@ const Banner = () => {
         
         {/* App Promo Card */}
         <div
-          className="bento-card bento-app-card"
+          className="bento-image-card"
           onClick={() => window.open("https://play.google.com/store/apps/details?id=com.innomatrics.sadhana_cart", "_blank")}
         >
-          <div className="bento-card-img-wrapper" style={{ width: '100%', height: '100%', right: '0', bottom: '0' }}>
-            <img src={appPromoImg} alt="App" className="bento-full-image" style={{ objectFit: 'fill', transform: 'none', filter: 'none', height: '100%' }} />
-          </div>
+          <img src={appPromoImg} alt="App" className="bento-full-image" />
         </div>
 
         {/* Coins Promo Card */}
         <div
-          className="bento-card bento-coin-card"
+          className="bento-image-card"
           onClick={() => window.location.href = '/rewards'}
         >
-          <div className="bento-card-img-wrapper" style={{ width: '100%', height: '100%', right: '0', bottom: '0' }}>
-            <img src={rewardsImg} alt="Coins" className="bento-full-image" style={{ objectFit: 'fill', transform: 'none', filter: 'none', height: '100%' }} />
-          </div>
+          <img src={rewardsImg} alt="Coins" className="bento-full-image" />
         </div>
 
       </div>
