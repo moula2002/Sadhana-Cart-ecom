@@ -82,7 +82,11 @@ const RecentlyViewed = ({ currentProductId }) => {
       })
     );
 
-    toast.success(`${product.name || "Product"} added to cart!`, {
+    toast.success(
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <img src={product.image || "https://via.placeholder.com/40"} alt={product.name || "Product"} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} />
+        <span>{`${product.name || "Product"} added to cart!`}</span>
+      </div>, {
       position: "bottom-right",
       autoClose: 2000,
     });

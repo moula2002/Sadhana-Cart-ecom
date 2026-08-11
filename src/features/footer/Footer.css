@@ -451,24 +451,32 @@
 
 .sc-back-top {
   width: auto;
-  padding: 0 16px;
+  padding: 0 20px;
   height: 40px;
   border-radius: 20px;
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #fff;
+  background: #ffffff;
+  border: 2px solid #ff8c00;
+  box-shadow: 0 3px 0 #d97706;
+  color: #000000;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 14px;
+  transition: all 0.2s ease;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.sc-back-top svg {
+  color: #ff8c00;
+  font-size: 16px;
+  stroke-width: 1px;
 }
 
 .sc-back-top:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.45);
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #d97706;
 }
 
 /* ── Top Row spacing ── */
@@ -492,14 +500,33 @@
 }
 
 @media (max-width: 767px) {
+  .sc-footer-dark {
+    padding: 30px 0 0;
+  }
+  
+  .sc-col-heading {
+    margin-bottom: 12px;
+  }
+  
+  .sc-link-list li, .sc-contact-list li {
+    margin-bottom: 8px;
+  }
+
   .sc-bottom {
     flex-direction: column;
     gap: 12px;
     text-align: center;
+    padding: 10px 0 15px;
   }
 
   .sc-bottom-links {
     justify-content: center;
+  }
+  
+  .sc-contact-list a {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-all;
   }
 
   .sc-back-top {
@@ -598,4 +625,12 @@
 [data-bs-theme="dark"] .sc-paytm span:last-child,
 [data-theme="dark"] .sc-paytm span:last-child {
   color: #002970 !important;
+}
+
+/* ── Dark Mode Overrides for Back to Top Button ── */
+.dark-theme .sc-back-top,
+[data-bs-theme="dark"] .sc-back-top,
+[data-theme="dark"] .sc-back-top {
+  background: #1e293b !important;
+  color: #ffffff !important;
 }

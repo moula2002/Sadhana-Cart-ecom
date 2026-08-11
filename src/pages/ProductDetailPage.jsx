@@ -549,8 +549,6 @@ function ProductDetailPage() {
             await deleteDoc(doc(db, "users", currentUser.uid, "favorites", wishlistId));
             setWishlistId(null);
             setIsInWishlist(false);
-            const productName = product?.name || product?.title || "Product";
-            toast.success(`${productName} removed from wishlist`);
         } catch (error) {
             console.error("Error removing from wishlist:", error);
             toast.error("Failed to remove from wishlist");

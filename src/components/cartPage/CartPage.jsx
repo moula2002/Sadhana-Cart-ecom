@@ -140,15 +140,12 @@ const CartPage = () => {
 
   const handleRemove = (item) => {
     dispatch(removeFromCart({ id: item.id, size: item.size }));
-    const productName = item.title || item.name || "Product";
-    toast.success(`${productName} removed from cart!`);
   };
 
   /* ---------------- Clear cart ---------------- */
 
   const handleClear = () => {
     dispatch(clearCart());
-    toast.success("Shopping cart cleared!");
   };
 
   /* ---------------- Total price ---------------- */

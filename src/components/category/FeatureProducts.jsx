@@ -59,7 +59,11 @@ function FeatureProducts({ showCart = false }) {
         quantity: 1,
       })
     );
-    toast.success(`${name} added to cart!`, {
+    toast.success(
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <img src={image || "https://via.placeholder.com/40"} alt={name} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} />
+        <span>{`${name} added to cart!`}</span>
+      </div>, {
       position: "bottom-right",
       autoClose: 2000,
     });

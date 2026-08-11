@@ -127,9 +127,28 @@ function BrandDetails() {
               {filteredProducts.map((product) => {
                 const info = product.featuredProductInfo || {};
                 const name = info.title || product.name || "Product";
-                const price = product.price || 0;
-                const oldPrice = product.oldPrice || 0;
-                const discount = calculateDiscount(price, oldPrice);
+                const rawPrice = Number(product.price || 0);
+                const rawOffer = Number(product.offerprice || product.offerPrice || product.discountPrice || 0);
+                const rawOld = Number(product.oldPrice || product.mrp || product.originalPrice || 0);
+
+                let offerprice = 0;
+                let oldPrice = 0;
+
+                if (rawOffer > 0 && rawOffer < rawPrice) {
+                  offerprice = rawOffer;
+                  oldPrice = rawPrice;
+                } else if (rawOffer > 0) {
+                  offerprice = rawOffer;
+                  oldPrice = rawOld > rawOffer ? rawOld : Math.round(rawOffer * 1.2);
+                } else if (rawOld > rawPrice && rawPrice > 0) {
+                  offerprice = rawPrice;
+                  oldPrice = rawOld;
+                } else if (rawPrice > 0) {
+                  offerprice = rawPrice;
+                  oldPrice = Math.round(rawPrice * 1.2);
+                }
+
+                const discount = calculateDiscount(offerprice, oldPrice);
                 const image = product.images?.[0] || null;
 
                 return (
@@ -168,8 +187,8 @@ function BrandDetails() {
                     )}
 
                     <div className="sc-price-row">
-                      <span className="sc-offer">₹{price.toLocaleString()}</span>
-                      {oldPrice > price && <span className="sc-mrp">₹{oldPrice.toLocaleString()}</span>}
+                      <span className="sc-offer">₹{offerprice.toLocaleString()}</span>
+                      {oldPrice > offerprice && <span className="sc-mrp">₹{oldPrice.toLocaleString()}</span>}
                       {discount > 0 && <span className="sc-off">{discount}% {t("off", "off")}</span>}
                     </div>
 
@@ -180,11 +199,17 @@ function BrandDetails() {
                         dispatch(addToCart({
                           id: product.id,
                           title: name,
-                          price: price,
+                          price: offerprice,
                           image: image,
                           quantity: 1,
                         }));
-                        toast.success(t("addedToCartMsg", "{{name}} added to cart!", { name }).replace("{{name}}", name), { position: "bottom-right", autoClose: 2000 });
+                        toast.success(
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <img src={image || "https://via.placeholder.com/40"} alt={name} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} />
+                            <span>{t("addedToCartMsg", "{{name}} added to cart!", { name }).replace("{{name}}", name)}</span>
+                          </div>, 
+                          { position: "bottom-right", autoClose: 2000 }
+                        );
                       }}
                     >
                       <ShoppingCart size={14} /> {t("addToCart", "Add to Cart")}

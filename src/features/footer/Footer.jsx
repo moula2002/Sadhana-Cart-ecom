@@ -81,7 +81,7 @@ const Footer = () => {
           <div className="row sc-top-row pb-4">
 
             {/* Col 1: Brand */}
-            <div className="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-5">
+            <div className="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-4 mb-lg-5">
               <div className="sc-brand">
                 <img src={logo} alt="SadhanaCart" className="sc-logo-img" />
                 <div>
@@ -97,7 +97,7 @@ const Footer = () => {
             </div>
 
             {/* Col 2: Customer Service */}
-            <div className="col-xl-2 col-lg-2 col-md-3 col-sm-6 col-6 mb-5">
+            <div className="col-xl-2 col-lg-2 col-md-3 col-sm-6 col-6 mb-4 mb-lg-5">
               <h6 className="sc-col-heading">{t("footer.customerService", "CUSTOMER SERVICE")}</h6>
               <ul className="sc-link-list">
                 <li><Link to="/support">{t("footer.helpCenter", "Help Center")}</Link></li>
@@ -108,7 +108,7 @@ const Footer = () => {
             </div>
 
             {/* Col 3: Policies */}
-            <div className="col-xl-2 col-lg-2 col-md-3 col-sm-6 col-6 mb-5">
+            <div className="col-xl-2 col-lg-2 col-md-3 col-sm-6 col-6 mb-4 mb-lg-5">
               <h6 className="sc-col-heading">{t("footer.policiesHeading", "POLICIES")}</h6>
               <ul className="sc-link-list">
                 <li><Link to="/return-policy">{t("return-Policy;", "Return Policy")}</Link></li>
@@ -119,7 +119,7 @@ const Footer = () => {
             </div>
 
             {/* Col 4: Company */}
-            <div className="col-xl-1 col-lg-1 col-md-3 col-sm-6 col-6 mb-5">
+            <div className="col-xl-1 col-lg-1 col-md-3 col-sm-6 col-6 mb-4 mb-lg-5">
               <h6 className="sc-col-heading">{t("footer.company", "COMPANY")}</h6>
               <ul className="sc-link-list">
                 <li><Link to="/about-us">{t("aboutUs", "About Us")}</Link></li>
@@ -130,7 +130,7 @@ const Footer = () => {
             </div>
 
             {/* Col 5: Contact Us */}
-            <div className="col-xl-2 col-lg-2 col-md-3 col-sm-6 col-6 mb-5">
+            <div className="col-xl-2 col-lg-2 col-md-3 col-sm-6 col-6 mb-4 mb-lg-5">
               <h6 className="sc-col-heading">{t("footer.contactUsHeading", "CONTACT US")}</h6>
               <ul className="sc-contact-list">
                 <li>
@@ -149,7 +149,7 @@ const Footer = () => {
             </div>
 
             {/* Col 6: Registered Office */}
-            <div className="col-xl-2 col-lg-2 col-md-6 col-sm-12 mb-5">
+            <div className="col-xl-2 col-lg-2 col-md-6 col-sm-12 mb-4 mb-lg-5">
               <h6 className="sc-col-heading">{t("registeredOffice", "REGISTERED OFFICE")}</h6>
               <ul className="sc-contact-list">
                 <li>

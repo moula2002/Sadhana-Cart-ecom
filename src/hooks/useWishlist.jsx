@@ -81,7 +81,6 @@ export const useWishlist = () => {
             
             if (isWishlisted) {
                 await deleteDoc(favRef);
-                toast.success(<ToastContent title={productName} img={image} action="Removed from Wishlist" />, { hideProgressBar: true });
             } else {
                 const newFav = {
                     productId: id,

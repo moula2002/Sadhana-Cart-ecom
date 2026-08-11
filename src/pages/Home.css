@@ -1127,11 +1127,7 @@
 }
 
 @media (max-width: 400px) {
-
-  .features-bar-4,
-  .stats-bar-4 {
-    grid-template-columns: 1fr;
-  }
+  /* Removed the 1fr grid template so it stays 2x2 on very small screens, or we can leave it 2x2 */
 
   .sc-product-card,
   .bs-card {
@@ -1366,8 +1362,20 @@
 
   .features-bar-4,
   .stats-bar-4 {
-    flex-direction: column;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
     align-items: flex-start;
-    gap: 16px;
+    gap: 20px 10px;
+  }
+  
+  .features-bar-4 .feature-item,
+  .stats-bar-4 .stat-item-4 {
+    width: calc(50% - 10px);
+  }
+  
+  .feature-divider {
+    display: none;
   }
 }

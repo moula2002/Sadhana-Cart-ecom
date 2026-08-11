@@ -457,7 +457,11 @@ const CategoryProducts = () => {
                         image: getFirstImage(product),
                         quantity: 1,
                       }));
-                      toast.success(`${product.name || "Product"} added to cart!`, {
+                      toast.success(
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <img src={getFirstImage(product)} alt={product.name || "Product"} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} />
+                          <span>{`${product.name || "Product"} added to cart!`}</span>
+                        </div>, {
                         position: "bottom-right",
                         autoClose: 2000,
                       });

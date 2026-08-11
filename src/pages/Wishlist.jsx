@@ -108,7 +108,6 @@ function Wishlist() {
         try {
             await deleteDoc(doc(db, "users", currentUser.uid, "favorites", favId));
             setFavorites(favorites.filter((item) => item.id !== favId));
-            toast.success(t("removedFromWishlist", "Removed '{{name}}' from wishlist", { name: productName }).replace("{{name}}", productName));
         } catch (error) {
             console.error("Error removing from wishlist:", error);
             toast.error(t("failedToRemoveItem", "Failed to remove item"));
@@ -157,7 +156,13 @@ function Wishlist() {
                 sellerId: item.sellerId || "default_seller"
             })
         );
-        toast.success(t("addedToCartMsg", "Added {{name}} to cart!", { name: item.name || item.title }).replace("{{name}}", item.name || item.title), { position: "bottom-right", autoClose: 2000 });
+        toast.success(
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <img src={item.image || (item.images && item.images[0]) || "https://via.placeholder.com/40"} alt={item.name || item.title} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} />
+                <span>{t("addedToCartMsg", "Added {{name}} to cart!", { name: item.name || item.title }).replace("{{name}}", item.name || item.title)}</span>
+            </div>,
+            { position: "bottom-right", autoClose: 2000 }
+        );
     };
 
     const handleMoveAllToCart = () => {
@@ -185,7 +190,6 @@ function Wishlist() {
                 await deleteDoc(doc(db, "users", currentUser.uid, "favorites", item.id));
             }
             setFavorites([]);
-            toast.success(t("wishlistCleared", "Wishlist cleared successfully"));
         } catch (error) {
             console.error("Error clearing wishlist:", error);
             toast.error(t("failedToClearWishlist", "Failed to clear wishlist"));

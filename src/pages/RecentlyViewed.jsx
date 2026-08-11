@@ -64,7 +64,12 @@ function RecentlyViewed() {
       image: product.images?.[0] || product.image || "",
       quantity: 1,
     }));
-    setToastMsg(t("addedToCartMsg", "Added {{name}} to cart!", { name: product.name || product.title || "Product" }).replace("{{name}}", product.name || product.title || "Product"));
+    setToastMsg(
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <img src={product.images?.[0] || product.image || "https://via.placeholder.com/40"} alt={product.name || product.title || "Product"} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} />
+        <span>{t("addedToCartMsg", "Added {{name}} to cart!", { name: product.name || product.title || "Product" }).replace("{{name}}", product.name || product.title || "Product")}</span>
+      </div>
+    );
     setShowToast(true);
   };
 

@@ -294,6 +294,15 @@ const BrowseCategory = () => {
     return pages;
   };
 
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const scrollArea = document.querySelector('.products-scroll-area');
+    if (scrollArea) scrollArea.scrollTo({ top: 0, behavior: 'smooth' });
+    const grid = document.querySelector('.browse-products-grid');
+    if (grid) grid.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="browse-category-page-wrapper">
 
@@ -383,10 +392,16 @@ const BrowseCategory = () => {
                     image: getProductImage(prod),
                     quantity: 1,
                   }));
-                  toast.success(`${prod.name || "Product"} ${t("addedToCart", "added to cart!")}`, {
-                    position: "bottom-right",
-                    autoClose: 2000,
-                  });
+                  toast.success(
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <img src={getProductImage(prod)} alt={prod.name || "Product"} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} />
+                      <span>{`${prod.name || "Product"} ${t("addedToCart", "added to cart!")}`}</span>
+                    </div>, 
+                    {
+                      position: "bottom-right",
+                      autoClose: 2000,
+                    }
+                  );
                 };
 
                 return (
@@ -449,7 +464,7 @@ const BrowseCategory = () => {
               <nav>
                 <ul className="pagination gap-1 gap-md-2 border-0 flex-wrap justify-content-center m-0">
                   <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                    <button className="page-link rounded-circle border d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px' }} onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}>
+                    <button className="page-link rounded-circle border d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px' }} onClick={() => handlePageChange(Math.max(1, currentPage - 1))}>
                       &lt;
                     </button>
                   </li>
@@ -474,7 +489,7 @@ const BrowseCategory = () => {
                             color: currentPage === p ? '#fff' : '#4b5563',
                             borderColor: currentPage === p ? '#2563eb' : '#e5e7eb'
                           }}
-                          onClick={() => setCurrentPage(p)}
+                          onClick={() => handlePageChange(p)}
                         >
                           {p}
                         </button>
@@ -482,7 +497,7 @@ const BrowseCategory = () => {
                     );
                   })}
                   <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                    <button className="page-link rounded-circle border d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px' }} onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}>
+                    <button className="page-link rounded-circle border d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px' }} onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}>
                       &gt;
                     </button>
                   </li>

@@ -264,17 +264,17 @@ const SearchBar = ({ onFilterClick }) => {
     setLoading(true);
     setLoading(true);
     const searchTerms = value.toLowerCase().split(/\s+/).filter(w => w.length > 0);
-    
+
     if (searchTerms.length === 0) {
       setLoading(false);
       return;
     }
-    
+
     const firstWord = searchTerms[0];
 
     try {
       const productsRef = collection(db, "products");
-      
+
       // 1. Prefix query by name_lower
       const qName = query(
         productsRef,
@@ -286,9 +286,9 @@ const SearchBar = ({ onFilterClick }) => {
       // 2. Query by searchkeywords
       const keywordTerms = [firstWord];
       if (firstWord.endsWith('s') && firstWord.length > 3) {
-          keywordTerms.push(firstWord.substring(0, firstWord.length - 1));
+        keywordTerms.push(firstWord.substring(0, firstWord.length - 1));
       } else if (!firstWord.endsWith('s') && firstWord.length > 3) {
-          keywordTerms.push(`${firstWord}s`);
+        keywordTerms.push(`${firstWord}s`);
       }
       const qKeywords = query(
         productsRef,
@@ -1068,8 +1068,8 @@ export default function Header() {
           <div className="d-flex align-items-center justify-content-between w-100 flex-xl-nowrap gap-2">
             {/* LOGO */}
             <div className="navbar-left-group">
-              <a 
-                href="/" 
+              <a
+                href="/"
                 className="navbar-brand-link"
                 onClick={() => sessionStorage.removeItem('homeScrollPosition')}
               >
@@ -1166,11 +1166,11 @@ export default function Header() {
                   {/* Bottom sheet header for mobile */}
                   <div className="all-categories-dropdown-header d-md-none">
                     <span>{t("allCategories", "All Categories")}</span>
-                    <button 
-                      className="close-btn" 
-                      onClick={(e) => { 
-                        e.stopPropagation(); 
-                        setShowCategoryDropdown(false); 
+                    <button
+                      className="close-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowCategoryDropdown(false);
                       }}
                     >
                       &times;

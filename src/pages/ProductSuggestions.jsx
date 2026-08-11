@@ -335,7 +335,13 @@ function ProductSuggestions({ currentProductId, category, subcategory }) {
                                                 image: getFirstImage(p),
                                                 quantity: 1,
                                             }));
-                                            toast.success(t("addedToCartMsg", "Added {{name}} to cart!", { name: p.name || p.title }).replace("{{name}}", p.name || p.title), { position: "bottom-right", autoClose: 2000 });
+                                            toast.success(
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                    <img src={p.image || "https://via.placeholder.com/40"} alt={p.name || p.title} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} />
+                                                    <span>{t("addedToCartMsg", "Added {{name}} to cart!", { name: p.name || p.title }).replace("{{name}}", p.name || p.title)}</span>
+                                                </div>, 
+                                                { position: "bottom-right", autoClose: 2000 }
+                                            );
                                         }}
                                     >
                                         <ShoppingCart size={14} /> {t("addToCart", "Add to Cart")}

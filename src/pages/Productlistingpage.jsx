@@ -363,7 +363,6 @@ const ProductListingPage = () => {
                     delete copy[pid];
                     return copy;
                 });
-                toast.success(t("removedFromWishlist", "Removed '{{name}}' from wishlist", { name: p.name || p.title }).replace("{{name}}", p.name || p.title));
             } catch (error) {
                 console.error("Error removing from wishlist:", error);
                 toast.error(t("failedToRemoveFromWishlist", "Failed to remove from wishlist"));
@@ -667,7 +666,12 @@ const ProductListingPage = () => {
                                                                     image: getProductImage(p),
                                                                     quantity: 1,
                                                                 }));
-                                                                toast.success(t("addedToCartMsg", "Added {{name}} to cart!", { name: p.name || p.title }).replace("{{name}}", p.name || p.title));
+                                                                toast.success(
+                                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                                        <img src={getProductImage(p)} alt={p.name || p.title} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} />
+                                                                        <span>{t("addedToCartMsg", "Added {{name}} to cart!", { name: p.name || p.title }).replace("{{name}}", p.name || p.title)}</span>
+                                                                    </div>
+                                                                );
                                                             }}
                                                         >
                                                             <FaShoppingCart className="me-2" size={14} /> <span className="d-none d-sm-inline">{t("addToCart", "Add to Cart")}</span><span className="d-sm-none">{t("add", "Add")}</span>
