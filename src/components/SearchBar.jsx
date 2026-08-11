@@ -241,9 +241,11 @@ const SearchBar = () => {
 
   const handleSubmit = () => {
     if (!searchTerm.trim()) return;
-    saveRecentSearch(searchTerm);
+    const query = searchTerm;
+    saveRecentSearch(query);
     setShowDropdown(false);
-    navigate(`/search-results?q=${encodeURIComponent(searchTerm)}`);
+    setSearchTerm("");
+    navigate(`/search-results?q=${encodeURIComponent(query)}`);
   };
 
   /* ---------------- DELETE SINGLE RECENT SEARCH ---------------- */
