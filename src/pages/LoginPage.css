@@ -407,6 +407,70 @@
   background-color: rgba(0, 0, 0, 0.9) !important;
 }
 
+/* Professional OTP UI Styles */
+.otp-verification-section {
+  padding: 10px 0;
+}
+
+.otp-sent-text {
+  font-size: 0.85rem;
+  color: var(--auth-text-muted);
+  margin-bottom: 6px;
+}
+
+.otp-phone-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--auth-text);
+  background: var(--auth-input-bg);
+  padding: 12px 15px;
+  border-radius: 8px;
+  border: 1px solid var(--auth-border);
+  margin-bottom: 20px;
+}
+
+.change-number-link {
+  font-size: 0.85rem;
+  color: var(--auth-primary);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.change-number-link:hover {
+  text-decoration: underline;
+}
+
+.otp-input-large {
+  font-size: 1.5rem !important;
+  letter-spacing: 14px;
+  text-align: center;
+  font-weight: 700;
+  padding: 15px !important;
+  border: 1px solid var(--auth-border) !important;
+  border-radius: 8px !important;
+}
+
+.otp-input-large:focus {
+  border-color: var(--auth-primary) !important;
+  box-shadow: 0 0 0 1px var(--auth-primary) !important;
+}
+
+.otp-timer-text {
+  font-size: 0.85rem;
+  color: var(--auth-text-secondary);
+}
+
+.otp-resend-btn {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--auth-primary) !important;
+  text-decoration: none !important;
+  padding: 0 !important;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .flipkart-auth-wrapper {

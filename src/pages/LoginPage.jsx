@@ -370,7 +370,7 @@ export default function LoginPage({ onClose, initialMode = "login" }) {
       if (result.success) {
         setConfirmation(true); // just flag
         showToast("OTP sent 📲");
-        setTimer(30);        // 30 sec start
+        setTimer(60);        // 60 sec start
         setCanResend(false); // resend disable
       } else {
         setError(result.message);
@@ -695,77 +695,82 @@ export default function LoginPage({ onClose, initialMode = "login" }) {
 
                 {/* PHONE OTP */}
                 <div className="mb-3">
-                  <Form.Control
-                    placeholder="Mobile Number"
-                    className="custom-input mb-2"
-                    value={phone}
-                    maxLength={10}
-                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
-                  />
-
-                  {!isLogin && (
-                    <Form.Control
-                      placeholder="Referral Code (Optional)"
-                      className="custom-input mb-2"
-                      value={referralCode}
-                      onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
-                    />
-                  )}
-
                   {!confirmation ? (
-                    <Button
-                      className="w-100 otp-btn"
-                      onClick={sendOtp}
-                      disabled={!phone || phone.length !== 10}
-                    >
-                      Request OTP
-                    </Button>
-                  ) : (
                     <>
                       <Form.Control
-                        placeholder="Enter 6-digit OTP"
+                        placeholder="Mobile Number"
                         className="custom-input mb-2"
-                        value={otp}
-                        maxLength={6}
-                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                        value={phone}
+                        maxLength={10}
+                        onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
                       />
 
-                      {/* 🔥 TIMER */}
-                      {!canResend ? (
-                        <div className="text-center mb-2">
-                          ⏳ Resend OTP in {timer}s
-                        </div>
-                      ) : (
-                        <Button
-                          variant="link"
-                          className="w-100 text-primary"
-                          onClick={sendOtp}
-                        >
-                          🔁 Resend OTP
-                        </Button>
+                      {!isLogin && (
+                        <Form.Control
+                          placeholder="Referral Code (Optional)"
+                          className="custom-input mb-2"
+                          value={referralCode}
+                          onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                        />
                       )}
 
-                      <div className="d-flex gap-2">
-                        <Button
-                          variant="outline-secondary"
+                      <Button
+                        className="w-100 otp-btn"
+                        onClick={sendOtp}
+                        disabled={!phone || phone.length !== 10}
+                      >
+                        Request OTP
+                      </Button>
+                    </>
+                  ) : (
+                    <div className="otp-verification-section">
+                      <div className="otp-sent-text">{t("auth.otpSentTo", "OTP sent to")}</div>
+                      <div className="otp-phone-display">
+                        <span>+91 {phone}</span>
+                        <span 
+                          className="change-number-link"
                           onClick={() => {
                             setConfirmation(null);
                             setOtp("");
                             setTimer(0);
                           }}
                         >
-                          Change Number
-                        </Button>
-
-                        <Button
-                          className="auth-btn"
-                          onClick={verifyOtp}
-                          disabled={!otp || otp.length !== 6}
-                        >
-                          Verify OTP
-                        </Button>
+                          Change
+                        </span>
                       </div>
-                    </>
+
+                      <Form.Control
+                        placeholder="• • • • • •"
+                        className="custom-input mb-3 otp-input-large"
+                        value={otp}
+                        maxLength={6}
+                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                        autoFocus
+                      />
+
+                      <Button
+                        className="auth-btn w-100 mb-3"
+                        onClick={verifyOtp}
+                        disabled={!otp || otp.length !== 6}
+                      >
+                        Verify OTP
+                      </Button>
+
+                      {/* 🔥 TIMER */}
+                      <div className="text-center otp-timer-text">
+                        {!canResend ? (
+                          <span>Resend OTP in <strong>{timer}s</strong></span>
+                        ) : (
+                          <Button
+                            variant="link"
+                            className="otp-resend-btn"
+                            onClick={sendOtp}
+                          >
+                            Resend OTP
+                          </Button>
+                        )}
+                      </div>
+                    </div>
                   )}
                 </div>
 
