@@ -171,6 +171,19 @@ const Footer = () => {
           {/* ── MIDDLE ROW: App | Payments | Follow ── */}
           <div className="row sc-mid-row align-items-center py-3">
 
+            {/* Back to Top (Mobile Only - positioned at top) */}
+            <div className="col-12 d-lg-none mb-4 d-flex justify-content-center">
+              <button
+                className="sc-back-top"
+                onClick={scrollToTop}
+                aria-label="Back to top"
+                title="Back to top"
+              >
+                <FaArrowUp />
+                <span>{t("footer.backToTop", "Back to top")}</span>
+              </button>
+            </div>
+
             {/* Download App */}
             <div className="col-lg-4 col-md-12 mb-5 mb-lg-0 text-center text-lg-start">
               <p className="sc-section-label">{t("home.downloadApp", "DOWNLOAD OUR APP").toUpperCase()}</p>
@@ -203,7 +216,7 @@ const Footer = () => {
             {/* We Accept & Back to Top */}
             <div className="col-lg-4 col-md-12 mb-5 mb-lg-0 text-center d-flex flex-column align-items-center">
               <button
-                className="sc-back-top mb-4"
+                className="sc-back-top mb-4 d-none d-lg-flex"
                 onClick={scrollToTop}
                 aria-label="Back to top"
                 title="Back to top"
