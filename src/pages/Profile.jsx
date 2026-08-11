@@ -678,7 +678,7 @@ function Profile() {
                 <FaMapMarkerAlt className="menu-icon" />
                 <span>{t("myAddresses", "My Addresses")}</span>
               </li>
-              <li className="sidebar-menu-item" onClick={() => toast.info("Rewards section clicked")}>
+              <li className="sidebar-menu-item" onClick={() => navigate("/rewards")}>
                 <FaGift className="menu-icon" />
                 <span>{t("home.sadhanaRewardsPromo", "Sadhana Rewards")}</span>
               </li>
@@ -791,7 +791,7 @@ function Profile() {
                   <FaChevronRight className="chevron-right-icon" />
                 </div>
 
-                <div className="overview-card" onClick={() => toast.info("Rewards clicked")}>
+                <div className="overview-card" onClick={() => navigate("/rewards")}>
                   <div className="card-left">
                     <div className="card-icon-container yellow-bg">
                       <FaGift />
@@ -870,7 +870,7 @@ function Profile() {
                     <FaGift className="reward-icon-svg" />
                     <span>{t("home.sadhanaRewardsPromo", "Sadhana Rewards")}</span>
                   </div>
-                  <FaChevronRight className="rewards-chevron" onClick={() => toast.info("View Rewards History")} />
+                  <FaChevronRight className="rewards-chevron" onClick={() => navigate("/rewards")} />
                 </div>
                 
                 <div className="rewards-card-body">
@@ -888,7 +888,7 @@ function Profile() {
                   </div>
                 </div>
 
-                <div className="rewards-card-footer" onClick={() => toast.info("Rewards History details")}>
+                <div className="rewards-card-footer" onClick={() => navigate("/rewards")}>
                   <span>{t("viewRewardsHistory", "View Rewards History")}</span>
                   <FaChevronRight />
                 </div>

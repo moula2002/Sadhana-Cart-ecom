@@ -184,9 +184,12 @@ function ProductSuggestions({ currentProductId, category, subcategory }) {
     }
 
     return (
-        <div className="mt-5 mb-5 similar-products-container p-4 rounded-4" style={{ background: isDark ? '#1e293b' : 'linear-gradient(135deg, #FFF6E9 0%, #F4F7FF 30%, #EAF8FF 65%, #F3EEFF 100%)' }}>
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <h3 className="fw-bold mb-0" style={{ color: isDark ? '#f8fafc' : '#111' }}>{t("similarProducts", "Similar Products")}</h3>
+        <div className="recently-viewed-container position-relative mt-5 mb-5">
+            <div className="recently-viewed-header">
+                <h3 className="recently-viewed-title">
+                    <Star size={22} className="text-primary" />
+                    {t("similarProducts", "Similar Products")}
+                </h3>
             </div>
 
             {filteredAndSorted.length === 0 ? (
@@ -194,75 +197,70 @@ function ProductSuggestions({ currentProductId, category, subcategory }) {
                     {t("noProductsFoundMatchingFilters", "No products found matching your current filters in this category.")}
                 </Alert>
             ) : (
-                <div className="position-relative">
-                    {/* Left Scroll Arrow */}
-                    <button
-                        onClick={scrollLeft}
-                        type="button"
-                        style={{
-                            position: "absolute",
-                            top: "55%",
-                            transform: "translateY(-50%)",
-                            left: "-12px",
-                            zIndex: 10,
-                            width: "28px",
-                            height: "60px",
-                            background: isDark ? "#1e293b" : "rgba(255,255,255,0.95)",
-                            border: isDark ? "1px solid #334155" : "1px solid #e0e0e0",
-                            borderRadius: "4px",
-                            cursor: "pointer",
-                            fontSize: "1.2rem",
-                            color: isDark ? "#f8fafc" : "#555",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                            transition: "background 0.2s",
-                        }}
-                        aria-label="Scroll left"
-                    >
-                        ‹
-                    </button>
+                <>
+                    {filteredAndSorted.length > 3 && (
+                        <>
+                            {/* Left Scroll Arrow */}
+                            <button
+                                onClick={scrollLeft}
+                                type="button"
+                                style={{
+                                    position: "absolute",
+                                    top: "55%",
+                                    transform: "translateY(-50%)",
+                                    left: "8px",
+                                    zIndex: 10,
+                                    width: "28px",
+                                    height: "60px",
+                                    background: isDark ? "#1e293b" : "rgba(255,255,255,0.95)",
+                                    border: isDark ? "1px solid #334155" : "1px solid #e0e0e0",
+                                    borderRadius: "4px",
+                                    cursor: "pointer",
+                                    fontSize: "1.2rem",
+                                    color: isDark ? "#f8fafc" : "#555",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                                    transition: "background 0.2s",
+                                }}
+                                aria-label="Scroll left"
+                            >
+                                ‹
+                            </button>
 
-                    {/* Right Scroll Arrow */}
-                    <button
-                        onClick={scrollRight}
-                        type="button"
-                        style={{
-                            position: "absolute",
-                            top: "55%",
-                            transform: "translateY(-50%)",
-                            right: "-12px",
-                            zIndex: 10,
-                            width: "28px",
-                            height: "60px",
-                            background: isDark ? "#1e293b" : "rgba(255,255,255,0.95)",
-                            border: isDark ? "1px solid #334155" : "1px solid #e0e0e0",
-                            borderRadius: "4px",
-                            cursor: "pointer",
-                            fontSize: "1.2rem",
-                            color: isDark ? "#f8fafc" : "#555",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                            transition: "background 0.2s",
-                        }}
-                        aria-label="Scroll right"
-                    >
-                        ›
-                    </button>
+                            {/* Right Scroll Arrow */}
+                            <button
+                                onClick={scrollRight}
+                                type="button"
+                                style={{
+                                    position: "absolute",
+                                    top: "55%",
+                                    transform: "translateY(-50%)",
+                                    right: "8px",
+                                    zIndex: 10,
+                                    width: "28px",
+                                    height: "60px",
+                                    background: isDark ? "#1e293b" : "rgba(255,255,255,0.95)",
+                                    border: isDark ? "1px solid #334155" : "1px solid #e0e0e0",
+                                    borderRadius: "4px",
+                                    cursor: "pointer",
+                                    fontSize: "1.2rem",
+                                    color: isDark ? "#f8fafc" : "#555",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                                    transition: "background 0.2s",
+                                }}
+                                aria-label="Scroll right"
+                            >
+                                ›
+                            </button>
+                        </>
+                    )}
 
-                    <div
-                        ref={sliderRef}
-                        className="d-flex overflow-auto pb-4 gap-4 custom-horizontal-scroller"
-                        style={{
-                            scrollSnapType: 'x mandatory',
-                            WebkitOverflowScrolling: 'touch',
-                            paddingLeft: '5px',
-                            paddingRight: '5px'
-                        }}
-                    >
+                    <div className="rv-products-grid" ref={sliderRef}>
                         {filteredAndSorted.map((p, idx) => {
                             const finalPrice = Number(p.offerprice || p.price || 0);
                             const originalPrice = p.price && p.offerprice ? Number(p.price) : Math.round(finalPrice * 1.5);
@@ -273,12 +271,6 @@ function ProductSuggestions({ currentProductId, category, subcategory }) {
                                 <div
                                     key={p.id}
                                     className="rv-card"
-                                    style={{
-                                        minWidth: '240px',
-                                        maxWidth: '240px',
-                                        flex: '0 0 auto',
-                                        scrollSnapAlign: 'start'
-                                    }}
                                     onClick={() => navigate(`/product/${p.id}`)}
                                 >
                                     {discountPercent > 0 && <span className="rv-discount-tag">{discountPercent}% OFF</span>}
@@ -350,7 +342,7 @@ function ProductSuggestions({ currentProductId, category, subcategory }) {
                             );
                         })}
                     </div>
-                </div>
+                </>
             )}
 
             <style>{`

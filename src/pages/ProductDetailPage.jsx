@@ -1378,7 +1378,7 @@ function ProductDetailPage() {
         (!productVariants.length && isOutOfStock);
 
     return (
-        <Container className="py-4">
+        <Container className="py-4" style={{ maxWidth: '1440px' }}>
 
 
             {showLogin && (
