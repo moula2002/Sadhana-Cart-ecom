@@ -78,10 +78,10 @@ const Footer = () => {
         <div className="container-xl px-4">
 
           {/* ── TOP ROW: 6 columns ── */}
-          <div className="row sc-top-row pb-4">
+          <div className="row sc-top-row pb-2">
 
             {/* Col 1: Brand */}
-            <div className="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-4 mb-lg-5">
+            <div className="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-3 mb-lg-4">
               <div className="sc-brand">
                 <img src={logo} alt="SadhanaCart" className="sc-logo-img" />
                 <div>
@@ -97,7 +97,7 @@ const Footer = () => {
             </div>
 
             {/* Col 2: Customer Service */}
-            <div className="col-xl-2 col-lg-2 col-md-3 col-sm-6 col-6 mb-4 mb-lg-5">
+            <div className="col-xl-2 col-lg-2 col-md-3 col-sm-6 col-6 mb-3 mb-lg-4">
               <h6 className="sc-col-heading">{t("footer.customerService", "CUSTOMER SERVICE")}</h6>
               <ul className="sc-link-list">
                 <li><Link to="/support">{t("footer.helpCenter", "Help Center")}</Link></li>
@@ -108,7 +108,7 @@ const Footer = () => {
             </div>
 
             {/* Col 3: Policies */}
-            <div className="col-xl-2 col-lg-2 col-md-3 col-sm-6 col-6 mb-4 mb-lg-5">
+            <div className="col-xl-2 col-lg-2 col-md-3 col-sm-6 col-6 mb-3 mb-lg-4">
               <h6 className="sc-col-heading">{t("footer.policiesHeading", "POLICIES")}</h6>
               <ul className="sc-link-list">
                 <li><Link to="/return-policy">{t("return-Policy;", "Return Policy")}</Link></li>
@@ -119,7 +119,7 @@ const Footer = () => {
             </div>
 
             {/* Col 4: Company */}
-            <div className="col-xl-1 col-lg-1 col-md-3 col-sm-6 col-6 mb-4 mb-lg-5">
+            <div className="col-xl-1 col-lg-1 col-md-3 col-sm-6 col-6 mb-3 mb-lg-4">
               <h6 className="sc-col-heading">{t("footer.company", "COMPANY")}</h6>
               <ul className="sc-link-list">
                 <li><Link to="/about-us">{t("aboutUs", "About Us")}</Link></li>
@@ -130,7 +130,7 @@ const Footer = () => {
             </div>
 
             {/* Col 5: Contact Us */}
-            <div className="col-xl-2 col-lg-2 col-md-3 col-sm-6 col-6 mb-4 mb-lg-5">
+            <div className="col-xl-2 col-lg-2 col-md-3 col-sm-6 col-6 mb-3 mb-lg-4">
               <h6 className="sc-col-heading">{t("footer.contactUsHeading", "CONTACT US")}</h6>
               <ul className="sc-contact-list">
                 <li>
@@ -149,7 +149,7 @@ const Footer = () => {
             </div>
 
             {/* Col 6: Registered Office */}
-            <div className="col-xl-2 col-lg-2 col-md-6 col-sm-12 mb-4 mb-lg-5">
+            <div className="col-xl-2 col-lg-2 col-md-6 col-sm-12 mb-3 mb-lg-4">
               <h6 className="sc-col-heading">{t("registeredOffice", "REGISTERED OFFICE")}</h6>
               <ul className="sc-contact-list">
                 <li>
@@ -172,9 +172,9 @@ const Footer = () => {
           <div className="row sc-mid-row align-items-center py-3">
 
             {/* Download App */}
-            <div className="col-lg-5 col-md-12 mb-4 mb-lg-0">
+            <div className="col-lg-4 col-md-12 mb-5 mb-lg-0 text-center text-lg-start">
               <p className="sc-section-label">{t("home.downloadApp", "DOWNLOAD OUR APP").toUpperCase()}</p>
-              <div className="sc-app-row">
+              <div className="sc-app-row justify-content-center justify-content-lg-start">
                 {/* Google Play Badge */}
                 <a
                   href="https://play.google.com/store/apps/details?id=com.innomatrics.sadhana_cart"
@@ -200,8 +200,17 @@ const Footer = () => {
               </div>
             </div>
 
-            {/* We Accept */}
-            <div className="col-lg-4 col-md-12 mb-4 mb-lg-0 text-center">
+            {/* We Accept & Back to Top */}
+            <div className="col-lg-4 col-md-12 mb-5 mb-lg-0 text-center d-flex flex-column align-items-center">
+              <button
+                className="sc-back-top mb-4"
+                onClick={scrollToTop}
+                aria-label="Back to top"
+                title="Back to top"
+              >
+                <FaArrowUp />
+                <span>{t("footer.backToTop", "Back to top")}</span>
+              </button>
               <p className="sc-section-label">{t("footer.weAccept", "WE ACCEPT")}</p>
               <div className="sc-payments">
                 <div className="sc-pay-card sc-visa">VISA</div>
@@ -218,9 +227,9 @@ const Footer = () => {
             </div>
 
             {/* Follow Us */}
-            <div className="col-lg-3 col-md-12 text-lg-end text-center">
-              <p className="sc-section-label text-lg-end">{t("footer.followUs", "FOLLOW US")}</p>
-              <div className="sc-socials justify-content-lg-end justify-content-center">
+            <div className="col-lg-4 col-md-12 text-center">
+              <p className="sc-section-label text-center">{t("footer.followUs", "FOLLOW US")}</p>
+              <div className="sc-socials justify-content-center">
                 <a href="https://www.instagram.com/sadhanacart?igsh=NHdzb3B0Zjcxcmlj" target="_blank" rel="noreferrer" className="sc-social sc-insta"><FaInstagram /></a>
                 <a href="https://www.facebook.com/profile.php?id=61575347044374" target="_blank" rel="noreferrer" className="sc-social sc-fb"><FaFacebookF /></a>
                 <a href="https://youtube.com/@sadhanacart?si=SfO1TlqNyNFYd5mM" target="_blank" rel="noreferrer" className="sc-social sc-yt"><FaYoutube /></a>
@@ -232,28 +241,17 @@ const Footer = () => {
           <hr className="sc-divider" />
 
           {/* ── BOTTOM BAR ── */}
-          <div className="sc-bottom d-flex flex-column flex-md-row justify-content-between align-items-center">
-            <p className="sc-copyright mb-2 mb-md-0">
-              © 2025 SadhanaCart. {t("allRights", "All Rights Reserved.")}
+          <div className="sc-bottom d-flex flex-column align-items-center text-center pt-3 pb-4 mt-3">
+            <p className="sc-copyright mb-3">
+              © 2025 SadhanaCart. {t("allRights", "All Rights Reserved")}
             </p>
-            <div className="sc-bottom-links">
+            <div className="sc-bottom-links d-flex justify-content-center flex-wrap align-items-center">
               <Link to="/privacy-policy">{t("footer.privacyPolicy", "Privacy Policy")}</Link>
-              <span className="sc-sep">|</span>
+              <span className="sc-sep mx-3">|</span>
               <Link to="/terms-and-conditions">{t("term's", "Terms & Conditions")}</Link>
-              <span className="sc-sep">|</span>
+              <span className="sc-sep mx-3">|</span>
               <Link to="/sitemap">{t("footer.sitemap", "Sitemap")}</Link>
             </div>
-            
-            {/* Back to top button */}
-            <button 
-              className="sc-back-top mt-3 mt-md-0" 
-              onClick={scrollToTop} 
-              aria-label="Back to top"
-              title="Back to top"
-            >
-              <FaArrowUp />
-              <span>{t("footer.backToTop", "Back to top")}</span>
-            </button>
           </div>
 
         </div>
