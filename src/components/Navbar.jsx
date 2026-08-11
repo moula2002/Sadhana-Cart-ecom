@@ -680,7 +680,6 @@ const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal, se
                 <span style={{ fontSize: '0.9rem', fontWeight: '700', color: '#212121', lineHeight: '1.2' }}>
                   {t("myAccount", "My Account")}
                 </span>
-                <i className="fas fa-chevron-down ms-2" style={{ fontSize: '0.7rem', color: '#888' }}></i>
               </div>
             </>
           ) : (
@@ -690,7 +689,6 @@ const FlipkartLoginDropdown = ({ currentUser, handleLogout, setShowAuthModal, se
                 <span style={{ fontSize: '0.9rem', fontWeight: '700', color: '#212121', lineHeight: '1.2' }}>
                   {t("myAccount", "My Account")}
                 </span>
-                <i className="fas fa-chevron-down ms-2" style={{ fontSize: '0.7rem', color: '#888' }}></i>
               </div>
             </>
           )}
